@@ -20,7 +20,10 @@
     "types": "./lib/module.d.ts",
     "scripts": {
         "start": "ts-node-dev --respawn module.ts",
-        "build": "rm -rf ./lib && tsc"
+        "build": "rm -rf ./lib && tsc",
+        "preversion": "git checkout develop",
+        "postversion": "",
+        "version": "git flow release start v$npm_package_version"
     },
     "dependencies": {
         "lzma-native": "^6.0.1"

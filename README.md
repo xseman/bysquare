@@ -6,17 +6,20 @@ Simple library to generate `PAY by square` QR string from simple object literal.
 `PAY by square` is standard for encoding of payment information into QR codes in
 Slovakia.
 
-Usage
------
+Install
+-------
 
-```sh
+```bash
 npm i bysquare
 ```
 
-```javascript
-const bySquare = require("bysquare");
+Usage
+-----
 
-bySquare.generate(
+```javascript
+const generate = require('bysquare').generate;
+
+generate(
     {
         IBAN: "SK9611000000002918599669",
         Amount: 100.0,

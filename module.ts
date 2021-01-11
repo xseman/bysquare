@@ -1,5 +1,3 @@
-import { strictEqual } from "assert";
-
 /**
  * Consider native JS or WASM version for web compatibility
  * Types out of date (DefinitelyTyped)
@@ -102,10 +100,10 @@ export interface Model {
 }
 
 /**
- * Data model atributes must follow the order, "Apendix D - data model overview"
- * @returns index of data model keys
+ * "Apendix D - data model overview"
+ * Data model atributes must follow the order
  * */
-enum ModelAttributeIndexes {
+enum MODEL_INDEX {
     InvoiceID,
     Payments,
     PaymentOptions,
@@ -141,16 +139,14 @@ enum ModelAttributeIndexes {
     BeneficiaryAddressLine2,
 };
 
-export function generate(model: Model, cbResult: (result: string) => void) {
+function generate(model: Model, cbResult: (qrString: string) => void): void {
     /**
      * Map object litteral to ordered array
      * then join to tabbedString by specification
      */
-    const data = Object.keys(model)
-        .reduce((acc, curr) => {
-            acc[ModelAttributeIndexes[curr as keyof Model]] = String(
-                model[curr as keyof Model]
-            );
+    const data = (Object.keys(model) as (keyof Model)[])
+        .reduce<string[]>((acc, curr) => {
+            acc[MODEL_INDEX[curr]] = String(model[curr]);
             return acc;
         }, Array<string>(33).fill(""))
         .join("\t");
@@ -217,23 +213,6 @@ export function generate(model: Model, cbResult: (result: string) => void) {
     rawEncoderStream.end(dataBufferWithChecksum);
 }
 
-const model: Model = {
-    IBAN: "SK9611000000002918599669",
-    Amount: 100.0,
-    CurrencyCode: "EUR",
-    VariableSymbol: "123",
-    Payments: 1,
-    PaymentOptions: 1,
-    BankAccounts: 1,
-};
-
-const modelOutput = '0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000'
-
-/**
- * Should generate valid QR string from data model
- */
-generate(model, (result) => {
-    strictEqual(result, modelOutput);
-});
-
 // generate(model, console.log);
+
+export { generate };

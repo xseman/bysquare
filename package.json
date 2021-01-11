@@ -19,6 +19,7 @@
     "main": "./lib/module.js",
     "types": "./lib/module.d.ts",
     "scripts": {
+        "test": "ts-node-dev module.test.ts",
         "start": "ts-node-dev --respawn module.ts",
         "build": "rm -rf ./lib && tsc",
         "preversion": "git checkout develop",

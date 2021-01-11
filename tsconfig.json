@@ -8,6 +8,7 @@
         "noImplicitAny": true,
         "outDir": "lib"
     },
+    "include": ["module.ts"],
     "exclude": [
         "node_modules",
         "lib"

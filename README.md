@@ -1,20 +1,29 @@
 bysquare
 ========
 
-Simple library to generate `PAY by square` QR string from simple object literal.
+Simple Node.js library to generate `QR` string
+"_PAY by square – platby QR kódom_".
 
-`PAY by square` is standard for encoding of payment information into QR codes in
-Slovakia.
+💰 **What is `PAY by square`?**
 
-Install
--------
+It's standard for encoding of payment information into `QR` codes for Slovak
+banks.
 
-```bash
-npm i bysquare
-```
+🖨️ **Can I generate an image?**
+
+This module is independent of the image generator, it's up to you how you create
+an image from the generated string.
 
 Usage
 -----
+
+📦 **Install**
+
+```bash
+npm install bysquare
+```
+
+**Code**
 
 ```javascript
 const generate = require('bysquare').generate;
@@ -35,7 +44,7 @@ generate(
 );
 ```
 
-Model
+**Input Model** (first argument)
 
 ```typescript
 interface Model {
@@ -137,10 +146,14 @@ Distributed under the MIT License. See `LICENSE` for more information.
 Contact
 -------
 
+If you have any questions, do not hesitate to contact me.
+
 Filip Seman - seman.filip@gmail.com
 
 References
 ----------
 
 - <https://bysquare.com/>
+- <https://github.com/matusf/pay-by-square>
+- <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
 - <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>

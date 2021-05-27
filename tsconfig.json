@@ -1,13 +1,16 @@
 {
     "compilerOptions": {
-        "target": "ES6",
+        "target": "ESNext",
         "module": "CommonJS",
         "moduleResolution": "Node",
         "strict": true,
         "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
         "noImplicitAny": true,
         "outDir": "lib"
     },
+    "include": ["module.ts"],
     "exclude": [
         "node_modules",
         "lib"

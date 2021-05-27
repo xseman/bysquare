@@ -17,7 +17,8 @@ const model: Model = {
 };
 
 generate(model, (result) => {
-    // console.log(result);
+    console.info(result);
+
     strictEqual(
         result,
         "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000"

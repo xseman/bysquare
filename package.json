@@ -9,7 +9,10 @@
     },
     "keywords": [
         "bysquare",
+        "bysquare",
+        "paybysquare",
         "payments",
+        "qr-string",
         "qr"
     ],
     "repository": {
@@ -19,12 +22,12 @@
     "main": "./lib/module.js",
     "types": "./lib/module.d.ts",
     "scripts": {
-        "test": "ts-node-dev module.test.ts",
         "start": "ts-node-dev --respawn module.ts",
+        "test": "ts-node-dev module.test.ts",
         "build": "rm -rf ./lib && tsc",
         "preversion": "git checkout develop",
-        "postversion": "",
-        "version": "git flow release start v$npm_package_version"
+        "version": "git flow release start v$npm_package_version",
+        "postversion": ""
     },
     "dependencies": {
         "lzma-native": "^6.0.1"

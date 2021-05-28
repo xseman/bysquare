@@ -160,6 +160,7 @@ function generate(model: Model, cbResult: (qrString: string) => void): void {
         Buffer.from(checksumHexString, "hex").reverse(),
         Buffer.from(data, "utf-8"),
     ]);
+    // console.log("RAW HEX DATA:", dataBufferWithChecksum.toString("hex"));
 
     const rawEncoderStream = lzma.createStream("rawEncoder", {
         filters: [
@@ -173,28 +174,32 @@ function generate(model: Model, cbResult: (qrString: string) => void): void {
         ],
     } as any);
 
-    const compressedChunks: Buffer[] = [];
-    rawEncoderStream.on("data", (chunk) => {
-        compressedChunks.push(chunk);
+    /** Start stream */
+    rawEncoderStream.write(dataBufferWithChecksum, undefined, (): void => {
+        rawEncoderStream.end();
     });
 
-    rawEncoderStream.on("end", () => {
+    const dataChunks: Buffer[] = [];
+    rawEncoderStream.on("data", (data: Buffer): void => {
+        dataChunks.push(data);
+    });
+
+    rawEncoderStream.on("end", (): void => {
         const checksumLength = Buffer.alloc(2);
         checksumLength.writeInt8(dataBufferWithChecksum.byteLength);
 
         const compressedWithLength = Buffer.concat([
-            Buffer.alloc(2), // square header
+            Buffer.alloc(2), /** bysquare header */
             checksumLength,
-            Buffer.concat(compressedChunks),
+            Buffer.concat(dataChunks),
         ]);
-
-        let paddedBinString = compressedWithLength.reduce((acc, byte) => {
-            return (acc += byte.toString(2).padStart(8, "0"));
-        }, "");
+        let paddedBinString = compressedWithLength.reduce<string>(
+            (acc, byte) => (acc += byte.toString(2).padStart(8, "0")),
+            ""
+        );
 
         let paddedBinLength = paddedBinString.length;
         const remainder = paddedBinLength % 5;
-
         if (remainder) {
             paddedBinString += Array(5 - remainder).join("0");
             paddedBinLength += 5 - remainder;
@@ -206,13 +211,8 @@ function generate(model: Model, cbResult: (qrString: string) => void): void {
             const key = parseInt(paddedBinString.slice(5 * i, 5 * i + 5), 2);
             result += subst[key];
         }
-
         cbResult(result);
     });
-
-    rawEncoderStream.end(dataBufferWithChecksum);
 }
-
-// generate(model, console.log);
 
 export { generate };

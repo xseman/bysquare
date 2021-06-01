@@ -91,6 +91,17 @@ export interface Model {
     /** Max length 70 */
     BeneficiaryAddressLine2?: string;
 }
+/**
+ * Returns generated qr-string
+ * @param model
+ * @returns {Promise<string>}
+ */
+declare function generate(model: Model): Promise<string>;
+/**
+ * Returns generated qr-string as callback
+ * @param model
+ * @param cbResult
+ */
 declare function generate(model: Model, cbResult: (qrString: string) => void): void;
 export { generate };
 //# sourceMappingURL=module.d.ts.map

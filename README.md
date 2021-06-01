@@ -23,28 +23,10 @@ Usage
 npm install bysquare
 ```
 
-**Code**
+**Available functions**
 
-```javascript
-const generate = require('bysquare').generate;
-
-generate(
-    {
-        IBAN: "SK9611000000002918599669",
-        Amount: 100.0,
-        CurrencyCode: "EUR",
-        VariableSymbol: "123",
-        Payments: 1,
-        PaymentOptions: 1,
-        BankAccounts: 1,
-    },
-    (result) => {
-        // Your logic...
-    }
-);
-```
-
-**Input Model** (first argument)
+<details>
+    <summary>Model</summary>
 
 ```typescript
 interface Model {
@@ -137,6 +119,65 @@ interface Model {
     BeneficiaryAddressLine2?: string,
 }
 ```
+
+</details>
+
+```typescript
+function generate(model: Model): Promise<string>;
+function generate(model: Model, cbResult: (qrString: string) => void): void;
+```
+
+Examples
+--------
+
+**Promise**
+
+```javascript
+const generate = require("bysquare").generate;
+
+async () => {
+    const result = await generate({
+        IBAN: "SK9611000000002918599669",
+        Amount: 100.0,
+        CurrencyCode: "EUR",
+        VariableSymbol: "123",
+        Payments: 1,
+        PaymentOptions: 1,
+        BankAccounts: 1,
+    });
+    // Your logic...
+};
+```
+
+**Callback**
+
+```javascript
+const generate = require('bysquare').generate;
+
+generate(
+    {
+        IBAN: "SK9611000000002918599669",
+        Amount: 100.0,
+        CurrencyCode: "EUR",
+        VariableSymbol: "123",
+        Payments: 1,
+        PaymentOptions: 1,
+        BankAccounts: 1,
+    },
+    (result) => {
+        // Your logic...
+    }
+);
+```
+
+Versioning
+----------
+
+- Run the `preversion` script.
+- Bump version in `package.json` as requested (patch, minor, major, etc).
+- Run the `version` script.
+- Commit and tag.
+- Run the `postversion` script.
 
 License
 -------

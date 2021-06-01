@@ -11,92 +11,92 @@ type CurrencyCodes = "AED" | "AFN" | "ALL" | "AMD" | "ANG" | "AOA" | "ARS" | "AU
  */
 export interface Model {
     /** Max length 10 */
-    InvoiceID?: string,
+    InvoiceID?: string;
     /** count */
-    Payments: number,
+    Payments: number;
     /** Max length 1 */
-    PaymentOptions: number,
+    PaymentOptions: number;
     /**
      * Max length 15
      * Format #.########
      * */
-    Amount: number,
+    Amount: number;
     /**
      * Max length 3
      * Representation ISO 4217
      *  */
-    CurrencyCode: CurrencyCodes,
+    CurrencyCode: CurrencyCodes;
     /**
      * Max length 8
      * Format YYYYMMDD
      * */
-    PaymentDueDate?: string,
+    PaymentDueDate?: string;
     /** Max length 10 */
-    VariableSymbol?: string,
+    VariableSymbol?: string;
     /** Max length 4 */
-    ConstantSymbol?: string,
+    ConstantSymbol?: string;
     /** Max length 10 */
-    SpecificSymbol?: string,
+    SpecificSymbol?: string;
     /** Max length 35 */
-    OriginatorsReferenceInformation?: string,
+    OriginatorsReferenceInformation?: string;
     /** Max length 140 */
-    PaymentNote?: string,
+    PaymentNote?: string;
     /** count */
-    BankAccounts: number,
+    BankAccounts: number;
     /** Max length 34 */
-    IBAN: string,
+    IBAN: string;
     /**
      * Max length 11
      * Format ISO 9362, 8 or 11 characters long
      * */
-    BIC?: string,
+    BIC?: string;
     /** Max length 1 */
-    StandingOrderExt?: number,
+    StandingOrderExt?: number;
     /** Max length 2 */
-    Day?: number,
+    Day?: number;
     /** Max length 4 */
-    Month?: number,
+    Month?: number;
     /** Max length 1 */
-    Periodicity?: string,
+    Periodicity?: string;
     /**
      * Max length 8
      * Format YYYYMMDD
      * */
-    LastDate?: string,
+    LastDate?: string;
     /** Max length 1 */
-    DirectDebitExt?: number,
+    DirectDebitExt?: number;
     /** Max length 1 */
-    DirectDebitScheme?: number,
+    DirectDebitScheme?: number;
     /** Max length 1 */
-    DirectDebitType?: number,
+    DirectDebitType?: number;
     /** Max length 10 */
-    VariableSymbol_?: string,
+    VariableSymbol_?: string;
     /** Max length 10 */
-    SpecificSymbol_?: string,
+    SpecificSymbol_?: string;
     /** Max length 35 */
-    OriginatorsReferenceInformation_?: string,
+    OriginatorsReferenceInformation_?: string;
     /** Max length 35 */
-    MandateID?: string,
+    MandateID?: string;
     /** Max length 35 */
-    CreditorID?: string,
+    CreditorID?: string;
     /** Max length 35 */
-    ContractID?: string,
+    ContractID?: string;
     /**
      * Max length 15
      * Format #.########
      * */
-    MaxAmount?: number,
+    MaxAmount?: number;
     /**
      * Max length 8
      * Format YYYYMMDD
      */
-    ValidTillDate?: string,
+    ValidTillDate?: string;
     /** Max length 70 */
-    BeneficiaryName?: string,
+    BeneficiaryName?: string;
     /** Max length 70 */
-    BeneficiaryAddressLine1?: string,
+    BeneficiaryAddressLine1?: string;
     /** Max length 70 */
-    BeneficiaryAddressLine2?: string,
+    BeneficiaryAddressLine2?: string;
 }
 
 /**
@@ -137,9 +137,26 @@ enum MODEL_INDEX {
     BeneficiaryName,
     BeneficiaryAddressLine1,
     BeneficiaryAddressLine2,
-};
+}
 
-function generate(model: Model, cbResult: (qrString: string) => void): void {
+/**
+ * Returns generated qr-string
+ * @param model
+ * @returns {Promise<string>}
+ */
+function generate(model: Model): Promise<string>;
+
+/**
+ * Returns generated qr-string as callback
+ * @param model
+ * @param cbResult
+ */
+function generate(model: Model, cbResult: (qrString: string) => void): void;
+
+function generate(
+    model: Model,
+    cbResult?: (qrString: string) => void
+): Promise<string> | void {
     /**
      * Map object litteral to ordered array
      * then join to tabbedString by specification
@@ -151,68 +168,78 @@ function generate(model: Model, cbResult: (qrString: string) => void): void {
         }, Array<string>(33).fill(""))
         .join("\t");
 
-    const checksumHexString = ((lzma.crc32(
-        data,
-        "utf-8"
-    ) as unknown) as number).toString(16);
+    const checksumHexString = (
+        lzma.crc32(data, "utf-8") as unknown as number
+    ).toString(16);
 
     const dataBufferWithChecksum = Buffer.concat([
         Buffer.from(checksumHexString, "hex").reverse(),
         Buffer.from(data, "utf-8"),
     ]);
 
-    const rawEncoderStream = lzma.createStream("rawEncoder", {
-        filters: [
-            {
-                id: (lzma as any).FILTER_LZMA1,
-                lc: 3,
-                lp: 0,
-                pb: 2,
-                dict_size: 2 ** 17, // 128 kilobytes
-            },
-        ],
-    } as any);
+    if (cbResult === undefined) {
+        return new Promise<string>(compress);
+    }
 
-    const compressedChunks: Buffer[] = [];
-    rawEncoderStream.on("data", (chunk) => {
-        compressedChunks.push(chunk);
-    });
+    if (cbResult !== undefined) {
+        compress(cbResult);
+    }
 
-    rawEncoderStream.on("end", () => {
-        const checksumLength = Buffer.alloc(2);
-        checksumLength.writeInt8(dataBufferWithChecksum.byteLength);
+    function compress(cbResult: (qrString: string) => void): void {
+        const rawEncoderStream = lzma.createStream("rawEncoder", {
+            filters: [
+                {
+                    id: (lzma as any).FILTER_LZMA1,
+                    lc: 3,
+                    lp: 0,
+                    pb: 2,
+                    dict_size: 2 ** 17, // 128 kilobytes
+                },
+            ],
+        } as any);
 
-        const compressedWithLength = Buffer.concat([
-            Buffer.alloc(2), // square header
-            checksumLength,
-            Buffer.concat(compressedChunks),
-        ]);
+        rawEncoderStream.write(dataBufferWithChecksum, undefined, (): void => {
+            rawEncoderStream.end();
+        });
 
-        let paddedBinString = compressedWithLength.reduce((acc, byte) => {
-            return (acc += byte.toString(2).padStart(8, "0"));
-        }, "");
+        const dataChunks: Buffer[] = [];
+        rawEncoderStream.on("data", (data: Buffer): void => {
+            dataChunks.push(data);
+        });
 
-        let paddedBinLength = paddedBinString.length;
-        const remainder = paddedBinLength % 5;
+        rawEncoderStream.on("end", (): void => {
+            const bySquareHeader = Buffer.alloc(2);
+            const checksum = Buffer.alloc(2);
+            checksum.writeInt8(dataBufferWithChecksum.byteLength);
 
-        if (remainder) {
-            paddedBinString += Array(5 - remainder).join("0");
-            paddedBinLength += 5 - remainder;
-        }
+            const result = Buffer.concat([
+                bySquareHeader,
+                checksum,
+                Buffer.concat(dataChunks),
+            ]);
+            let paddedBinString = result.reduce<string>(
+                (acc, byte) => (acc += byte.toString(2).padStart(8, "0")),
+                ""
+            );
+            let paddedBinLength = paddedBinString.length;
+            const remainder = paddedBinLength % 5;
+            if (remainder) {
+                paddedBinString += Array(5 - remainder).join("0");
+                paddedBinLength += 5 - remainder;
+            }
 
-        const subst = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
-        let result = "";
-        for (let i = 0; i < paddedBinLength / 5; i++) {
-            const key = parseInt(paddedBinString.slice(5 * i, 5 * i + 5), 2);
-            result += subst[key];
-        }
-
-        cbResult(result);
-    });
-
-    rawEncoderStream.end(dataBufferWithChecksum);
+            const subst = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
+            let output = "";
+            for (let i = 0; i < paddedBinLength / 5; i++) {
+                const key = parseInt(
+                    paddedBinString.slice(5 * i, 5 * i + 5),
+                    2
+                );
+                output += subst[key];
+            }
+            cbResult(output);
+        });
+    }
 }
-
-// generate(model, console.log);
 
 export { generate };

@@ -177,15 +177,16 @@ function generate(
         Buffer.from(data, "utf-8"),
     ]);
 
-    if (cbResult === undefined) {
+    if (cbResult) {
+        compress(cbResult);
+    } else {
         return new Promise<string>(compress);
     }
 
-    if (cbResult !== undefined) {
-        compress(cbResult);
-    }
-
-    function compress(cbResult: (qrString: string) => void): void {
+    function compress(
+        resolve: (value: string) => void,
+        _reject?: (reason?: any) => void
+    ): void {
         const rawEncoderStream = lzma.createStream("rawEncoder", {
             filters: [
                 {
@@ -237,7 +238,7 @@ function generate(
                 );
                 output += subst[key];
             }
-            cbResult(output);
+            resolve(output);
         });
     }
 }

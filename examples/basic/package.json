@@ -1,0 +1,10 @@
+{
+    "license": "MIT",
+    "author": "Filip Seman",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "bysquare": "^1.0.2"
+    }
+}

@@ -127,15 +127,15 @@ function generate(model: Model): Promise<string>;
 function generate(model: Model, cbResult: (qrString: string) => void): void;
 ```
 
-Examples
---------
+[Examples](examples)
+----------------------------------
 
 **Promise**
 
 ```javascript
-const generate = require("bysquare").generate;
+const { generate } = require('bysquare');
 
-async () => {
+(async () => {
     const result = await generate({
         IBAN: "SK9611000000002918599669",
         Amount: 100.0,
@@ -146,13 +146,13 @@ async () => {
         BankAccounts: 1,
     });
     // Your logic...
-};
+})();
 ```
 
 **Callback**
 
 ```javascript
-const generate = require('bysquare').generate;
+const { generate } = require('bysquare');
 
 generate(
     {
@@ -170,6 +170,82 @@ generate(
 );
 ```
 
+**Express**
+
+- Backend [Express](https://expressjs.com/)
+- Client [qrcodejs](https://github.com/davidshimjs/qrcodejs)
+
+`server.js`
+
+```javascript
+const { generate } = require("bysquare");
+const express = require("express");
+const app = express();
+
+const model = {
+    IBAN: "SK9611000000002918599669",
+    Amount: 100.0,
+    CurrencyCode: "EUR",
+    VariableSymbol: "123",
+    Payments: 1,
+    PaymentOptions: 1,
+    BankAccounts: 1,
+};
+
+app.use("/", express.static("./public"));
+app.get("/qr", async (_req, res) => {
+    const qrString = await generate(model);
+    res.send(qrString);
+});
+
+const port = 3_000;
+app.listen(3_000, () => {
+    console.log(`Example app listening at http://localhost:${port}`);
+});
+```
+
+```bash
+curl http://localhost:3000/qr
+0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
+```
+
+`index.html`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>bysquare example</title>
+    </head>
+
+    <body>
+        <h1>byquare clinet qr-image example</h1>
+        <div id="qrcode"></div>
+    </body>
+
+    <script src="qrcodejs.min.js"></script>
+    <script type="text/javascript">
+        const url = "http://localhost:3000/qr";
+        fetch(url)
+            .then((response) => response.text())
+            .then((data) => {
+                console.log(data);
+                new QRCode(
+                    document.getElementById("qrcode"),
+                    data
+                );
+            });
+    </script>
+</html>
+```
+
+![generated-image](examples/express/output.png)
+
+<!--
+
 Versioning
 ----------
 
@@ -178,18 +254,19 @@ Versioning
 - Run the `version` script.
 - Commit and tag.
 - Run the `postversion` script.
+- Push tag, changes, npm publish
+
+-->
 
 License
 -------
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 Contact
 -------
 
-If you have any questions, do not hesitate to contact me.
-
-Filip Seman - seman.filip@gmail.com
+If you have any questions do not hesitate to contact me at seman.filip@gmail.com
 
 References
 ----------

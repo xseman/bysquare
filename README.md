@@ -128,32 +128,15 @@ function generate(model: Model, cbResult: (qrString: string) => void): void;
 ```
 
 [Examples](examples)
-----------------------------------
+--------------------
 
-**Promise**
-
-```javascript
-const { generate } = require('bysquare');
-
-(async () => {
-    const result = await generate({
-        IBAN: "SK9611000000002918599669",
-        Amount: 100.0,
-        CurrencyCode: "EUR",
-        VariableSymbol: "123",
-        Payments: 1,
-        PaymentOptions: 1,
-        BankAccounts: 1,
-    });
-    // Your logic...
-})();
-```
-
-**Callback**
+<details>
+    <summary>Basic</summary>
 
 ```javascript
 const { generate } = require('bysquare');
 
+/** Callback */
 generate(
     {
         IBAN: "SK9611000000002918599669",
@@ -168,14 +151,26 @@ generate(
         // Your logic...
     }
 );
+
+/** Promise */
+(async () => {
+    const result = await generate({
+        IBAN: "SK9611000000002918599669",
+        Amount: 100.0,
+        CurrencyCode: "EUR",
+        VariableSymbol: "123",
+        Payments: 1,
+        PaymentOptions: 1,
+        BankAccounts: 1,
+    });
+    // Your logic...
+})();
 ```
 
-**Express**
+</details>
 
-- Backend [Express](https://expressjs.com/)
-- Client [qrcodejs](https://github.com/davidshimjs/qrcodejs)
-
-`server.js`
+<details>
+    <summary>Express + qrcodejs</summary>
 
 ```javascript
 const { generate } = require("bysquare");
@@ -209,8 +204,6 @@ curl http://localhost:3000/qr
 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
 ```
 
-`index.html`
-
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -243,6 +236,8 @@ curl http://localhost:3000/qr
 ```
 
 ![generated-image](examples/express/output.png)
+
+</details>
 
 <!--
 

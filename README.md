@@ -172,6 +172,8 @@ generate(
 <details>
     <summary>Express + qrcodejs</summary>
 
+`server`
+
 ```javascript
 const { generate } = require("bysquare");
 const express = require("express");
@@ -199,26 +201,22 @@ app.listen(3_000, () => {
 });
 ```
 
+`curl test`
+
 ```bash
 curl http://localhost:3000/qr
 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
 ```
 
+`client`
+
 ```html
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>bysquare example</title>
-    </head>
-
+<html>
     <body>
-        <h1>byquare clinet qr-image example</h1>
+        <h1>byquare simple example</h1>
         <div id="qrcode"></div>
     </body>
-
     <script src="qrcodejs.min.js"></script>
     <script type="text/javascript">
         const url = "http://localhost:3000/qr";
@@ -235,7 +233,7 @@ curl http://localhost:3000/qr
 </html>
 ```
 
-![generated-image](examples/express/output.png)
+![clien-qr-image-generated](./examples/express/output.png)
 
 </details>
 

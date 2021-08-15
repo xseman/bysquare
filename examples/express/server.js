@@ -1,5 +1,6 @@
 const { generate } = require("bysquare");
 const express = require("express");
+
 const app = express();
 
 const model = {
@@ -19,6 +20,6 @@ app.get("/qr", async (_req, res) => {
 });
 
 const port = 3_000;
-app.listen(3_000, () => {
+app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
 });

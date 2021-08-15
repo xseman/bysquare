@@ -1,10 +1,175 @@
 /**
- * Consider native JS or WASM version for web compatibility
- * Types out of date (DefinitelyTyped)
+ * TODO:
+ * - Native JS or WASM version for web compatibility
+ * - lzma types out of date (DefinitelyTyped)
  */
 import * as lzma from "lzma-native";
 
-type CurrencyCodes = "AED" | "AFN" | "ALL" | "AMD" | "ANG" | "AOA" | "ARS" | "AUD" | "AWG" | "AZN" | "BAM" | "BBD" | "BDT" | "BGN" | "BHD" | "BIF" | "BMD" | "BND" | "BOB" | "BOV" | "BRL" | "BSD" | "BTN" | "BWP" | "BYR" | "BZD" | "CAD" | "CDF" | "CHE" | "CHF" | "CHW" | "CLF" | "CLP" | "CNY" | "COP" | "COU" | "CRC" | "CUC" | "CUP" | "CVE" | "CZK" | "DJF" | "DKK" | "DOP" | "DZD" | "EGP" | "ERN" | "ETB" | "EUR" | "FJD" | "FKP" | "GBP" | "GEL" | "GHS" | "GIP" | "GMD" | "GNF" | "GTQ" | "GYD" | "HKD" | "HNL" | "HRK" | "HTG" | "HUF" | "IDR" | "ILS" | "INR" | "IQD" | "IRR" | "ISK" | "JMD" | "JOD" | "JPY" | "KES" | "KGS" | "KHR" | "KMF" | "KPW" | "KRW" | "KWD" | "KYD" | "KZT" | "LAK" | "LBP" | "LKR" | "LRD" | "LSL" | "LTL" | "LVL" | "LYD" | "MAD" | "MDL" | "MGA" | "MKD" | "MMK" | "MNT" | "MOP" | "MRO" | "MUR" | "MVR" | "MWK" | "MXN" | "MXV" | "MYR" | "MZN" | "NAD" | "NGN" | "NIO" | "NOK" | "NPR" | "NZD" | "OMR" | "PAB" | "PEN" | "PGK" | "PHP" | "PKR" | "PLN" | "PYG" | "QAR" | "RON" | "RSD" | "RUB" | "RWF" | "SAR" | "SBD" | "SCR" | "SDG" | "SEK" | "SGD" | "SHP" | "SLL" | "SOS" | "SRD" | "SSP" | "STD" | "SYP" | "SZL" | "THB" | "TJS" | "TMT" | "TND" | "TOP" | "TRY" | "TTD" | "TWD" | "TZS" | "UAH" | "UGX" | "USD" | "USN" | "USS" | "UYI" | "UYU" | "UZS" | "VEF" | "VND" | "VUV" | "WST" | "XAF" | "XAG" | "XAU" | "XBA" | "XBB" | "XBC" | "XBD" | "XCD" | "XDR" | "XFU" | "XOF" | "XPD" | "XPF" | "XPT" | "XTS" | "XXX" | "YER" | "ZAR" | "ZMW";
+/* Active ISO 4217 */
+enum CurrencyCode {
+    AED = "United Arab Emirates Dirham",
+    AFN = "Afghanistan Afghani",
+    ALL = "Albania Lek",
+    AMD = "Armenia Dram",
+    ANG = "Netherlands Antilles Guilder",
+    AOA = "Angola Kwanza",
+    ARS = "Argentina Peso",
+    AUD = "Australia Dollar",
+    AWG = "Aruba Guilder",
+    AZN = "Azerbaijan New Manat",
+    BAM = "Bosnia and Herzegovina Convertible Marka",
+    BBD = "Barbados Dollar",
+    BDT = "Bangladesh Taka",
+    BGN = "Bulgaria Lev",
+    BHD = "Bahrain Dinar",
+    BIF = "Burundi Franc",
+    BMD = "Bermuda Dollar",
+    BND = "Brunei Darussalam Dollar",
+    BOB = "Bolivia Bolíviano",
+    BRL = "Brazil Real",
+    BSD = "Bahamas Dollar",
+    BTN = "Bhutan Ngultrum",
+    BWP = "Botswana Pula",
+    BYR = "Belarus Ruble",
+    BZD = "Belize Dollar",
+    CAD = "Canada Dollar",
+    CDF = "Congo/Kinshasa Franc",
+    CHF = "Switzerland Franc",
+    CLP = "Chile Peso",
+    CNY = "China Yuan Renminbi",
+    COP = "Colombia Peso",
+    CRC = "Costa Rica Colon",
+    CUC = "Cuba Convertible Peso",
+    CUP = "Cuba Peso",
+    CVE = "Cape Verde Escudo",
+    CZK = "Czech Republic Koruna",
+    DJF = "Djibouti Franc",
+    DKK = "Denmark Krone",
+    DOP = "Dominican Republic Peso",
+    DZD = "Algeria Dinar",
+    EGP = "Egypt Pound",
+    ERN = "Eritrea Nakfa",
+    ETB = "Ethiopia Birr",
+    EUR = "Euro Member Countries",
+    FJD = "Fiji Dollar",
+    FKP = "Falkland Islands  = Malvinas Pound",
+    GBP = "United Kingdom Pound",
+    GEL = "Georgia Lari",
+    GGP = "Guernsey Pound",
+    GHS = "Ghana Cedi",
+    GIP = "Gibraltar Pound",
+    GMD = "Gambia Dalasi",
+    GNF = "Guinea Franc",
+    GTQ = "Guatemala Quetzal",
+    GYD = "Guyana Dollar",
+    HKD = "Hong Kong Dollar",
+    HNL = "Honduras Lempira",
+    HRK = "Croatia Kuna",
+    HTG = "Haiti Gourde",
+    HUF = "Hungary Forint",
+    IDR = "Indonesia Rupiah",
+    ILS = "Israel Shekel",
+    IMP = "Isle of Man Pound",
+    INR = "India Rupee",
+    IQD = "Iraq Dinar",
+    IRR = "Iran Rial",
+    ISK = "Iceland Krona",
+    JEP = "Jersey Pound",
+    JMD = "Jamaica Dollar",
+    JOD = "Jordan Dinar",
+    JPY = "Japan Yen",
+    KES = "Kenya Shilling",
+    KGS = "Kyrgyzstan Som",
+    KHR = "Cambodia Riel",
+    KMF = "Comoros Franc",
+    KPW = "Korea  = North Won",
+    KRW = "Korea  = South Won",
+    KWD = "Kuwait Dinar",
+    KYD = "Cayman Islands Dollar",
+    KZT = "Kazakhstan Tenge",
+    LAK = "Laos Kip",
+    LBP = "Lebanon Pound",
+    LKR = "Sri Lanka Rupee",
+    LRD = "Liberia Dollar",
+    LSL = "Lesotho Loti",
+    LYD = "Libya Dinar",
+    MAD = "Morocco Dirham",
+    MDL = "Moldova Leu",
+    MGA = "Madagascar Ariary",
+    MKD = "Macedonia Denar",
+    MMK = "Myanmar  = Burma Kyat",
+    MNT = "Mongolia Tughrik",
+    MOP = "Macau Pataca",
+    MRO = "Mauritania Ouguiya",
+    MUR = "Mauritius Rupee",
+    MVR = "Maldives  = Maldive Islands Rufiyaa",
+    MWK = "Malawi Kwacha",
+    MXN = "Mexico Peso",
+    MYR = "Malaysia Ringgit",
+    MZN = "Mozambique Metical",
+    NAD = "Namibia Dollar",
+    NGN = "Nigeria Naira",
+    NIO = "Nicaragua Cordoba",
+    NOK = "Norway Krone",
+    NPR = "Nepal Rupee",
+    NZD = "New Zealand Dollar",
+    OMR = "Oman Rial",
+    PAB = "Panama Balboa",
+    PEN = "Peru Sol",
+    PGK = "Papua New Guinea Kina",
+    PHP = "Philippines Peso",
+    PKR = "Pakistan Rupee",
+    PLN = "Poland Zloty",
+    PYG = "Paraguay Guarani",
+    QAR = "Qatar Riyal",
+    RON = "Romania New Leu",
+    RSD = "Serbia Dinar",
+    RUB = "Russia Ruble",
+    RWF = "Rwanda Franc",
+    SAR = "Saudi Arabia Riyal",
+    SBD = "Solomon Islands Dollar",
+    SCR = "Seychelles Rupee",
+    SDG = "Sudan Pound",
+    SEK = "Sweden Krona",
+    SGD = "Singapore Dollar",
+    SHP = "Saint Helena Pound",
+    SLL = "Sierra Leone Leone",
+    SOS = "Somalia Shilling",
+    SPL = "Seborga Luigino",
+    SRD = "Suriname Dollar",
+    STD = "São Tomé and Príncipe Dobra",
+    SVC = "El Salvador Colon",
+    SYP = "Syria Pound",
+    SZL = "Swaziland Lilangeni",
+    THB = "Thailand Baht",
+    TJS = "Tajikistan Somoni",
+    TMT = "Turkmenistan Manat",
+    TND = "Tunisia Dinar",
+    TOP = "Tonga Pa'anga",
+    TRY = "Turkey Lira",
+    TTD = "Trinidad and Tobago Dollar",
+    TVD = "Tuvalu Dollar",
+    TWD = "Taiwan New Dollar",
+    TZS = "Tanzania Shilling",
+    UAH = "Ukraine Hryvnia",
+    UGX = "Uganda Shilling",
+    USD = "United States Dollar",
+    UYU = "Uruguay Peso",
+    UZS = "Uzbekistan Som",
+    VEF = "Venezuela Bolivar",
+    VND = "Viet Nam Dong",
+    VUV = "Vanuatu Vatu",
+    WST = "Samoa Tala",
+    XAF = "Communauté Financière Africaine  = BEAC CFA Franc BEAC",
+    XCD = "East Caribbean Dollar",
+    XDR = "International Monetary Fund  = IMF Special Drawing Rights",
+    XOF = "Communauté Financière Africaine  = BCEAO Franc",
+    XPF = "Comptoirs Français du Pacifique  = CFP Franc",
+    YER = "Yemen Rial",
+    ZAR = "South Africa Rand",
+    ZMW = "Zambia Kwacha",
+    ZWD = "Zimbabwe Dollar",
+}
 
 /**
  * Data model by "Appendix D" table
@@ -19,17 +184,17 @@ export interface Model {
     /**
      * Max length 15
      * Format #.########
-     * */
+     */
     Amount: number;
     /**
      * Max length 3
      * Representation ISO 4217
-     *  */
-    CurrencyCode: CurrencyCodes;
+     */
+    CurrencyCode: keyof typeof CurrencyCode;
     /**
      * Max length 8
      * Format YYYYMMDD
-     * */
+     */
     PaymentDueDate?: string;
     /** Max length 10 */
     VariableSymbol?: string;
@@ -48,7 +213,7 @@ export interface Model {
     /**
      * Max length 11
      * Format ISO 9362, 8 or 11 characters long
-     * */
+     */
     BIC?: string;
     /** Max length 1 */
     StandingOrderExt?: number;
@@ -61,7 +226,7 @@ export interface Model {
     /**
      * Max length 8
      * Format YYYYMMDD
-     * */
+     */
     LastDate?: string;
     /** Max length 1 */
     DirectDebitExt?: number;
@@ -84,7 +249,7 @@ export interface Model {
     /**
      * Max length 15
      * Format #.########
-     * */
+     */
     MaxAmount?: number;
     /**
      * Max length 8
@@ -102,7 +267,7 @@ export interface Model {
 /**
  * "Apendix D - data model overview"
  * Data model atributes must follow the order
- * */
+ */
 enum MODEL_INDEX {
     InvoiceID,
     Payments,
@@ -140,30 +305,28 @@ enum MODEL_INDEX {
 }
 
 /**
- * Returns generated qr-string
- * @param model
- * @returns {Promise<string>}
+ * @param model - Input model
+ * @returns {Promise<string>} - Generated QR string reqult
  */
 function generate(model: Model): Promise<string>;
 
 /**
- * Returns generated qr-string as callback
- * @param model
- * @param cbResult
+ * @param model - Input model
+ * @param {(string) => void} callback - Callback for QR string result
  */
-function generate(model: Model, cbResult: (qrString: string) => void): void;
+function generate(model: Model, callback: (result: string) => void): void;
 
 function generate(
     model: Model,
-    cbResult?: (qrString: string) => void
+    callback?: (result: string) => void
 ): Promise<string> | void {
     /**
-     * Map object litteral to ordered array
-     * then join to tabbedString by specification
+     * Map object litteral to ordered Array size at 33
+     * Join entries to tabbed-string by specification
      */
     const data = (Object.keys(model) as (keyof Model)[])
         .reduce<string[]>((acc, curr) => {
-            acc[MODEL_INDEX[curr]] = String(model[curr]);
+            acc[MODEL_INDEX[curr]] = String(model[curr] ?? "");
             return acc;
         }, Array<string>(33).fill(""))
         .join("\t");
@@ -177,16 +340,17 @@ function generate(
         Buffer.from(data, "utf-8"),
     ]);
 
-    if (cbResult === undefined) {
+    if (callback) {
+        compress(callback, console.error);
+    } else {
         return new Promise<string>(compress);
     }
 
-    if (cbResult !== undefined) {
-        compress(cbResult);
-    }
-
-    function compress(cbResult: (qrString: string) => void): void {
-        const rawEncoderStream = lzma.createStream("rawEncoder", {
+    function compress(
+        resolve: (value: string) => void,
+        reject: (reason?: any) => void
+    ): void {
+        const stream = lzma.createStream("rawEncoder", {
             filters: [
                 {
                     id: (lzma as any).FILTER_LZMA1,
@@ -198,16 +362,20 @@ function generate(
             ],
         } as any);
 
-        rawEncoderStream.write(dataBufferWithChecksum, undefined, (): void => {
-            rawEncoderStream.end();
+        stream.write(dataBufferWithChecksum, undefined, (): void => {
+            stream.end();
         });
 
         const dataChunks: Buffer[] = [];
-        rawEncoderStream.on("data", (data: Buffer): void => {
+        stream.on("data", (data: Buffer): void => {
             dataChunks.push(data);
         });
 
-        rawEncoderStream.on("end", (): void => {
+        stream.on("error", (err) => {
+            throw err;
+        });
+
+        stream.on("end", (): void => {
             const bySquareHeader = Buffer.alloc(2);
             const checksum = Buffer.alloc(2);
             checksum.writeInt8(dataBufferWithChecksum.byteLength);
@@ -217,6 +385,7 @@ function generate(
                 checksum,
                 Buffer.concat(dataChunks),
             ]);
+
             let paddedBinString = result.reduce<string>(
                 (acc, byte) => (acc += byte.toString(2).padStart(8, "0")),
                 ""
@@ -228,16 +397,20 @@ function generate(
                 paddedBinLength += 5 - remainder;
             }
 
+            /**
+             * We map a binary number of 5 bits to a string representation 2^5
+             * "0123456789ABCDEFGHIJKLMNOPQRSTUV"[<0-32>] represents char
+             */
             const subst = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
             let output = "";
             for (let i = 0; i < paddedBinLength / 5; i++) {
-                const key = parseInt(
-                    paddedBinString.slice(5 * i, 5 * i + 5),
-                    2
-                );
+                const binStart = 5 * i;
+                const binEnd = 5 * i + 5;
+                const slice = paddedBinString.slice(binStart, binEnd);
+                const key = parseInt(slice, 2);
                 output += subst[key];
             }
-            cbResult(output);
+            resolve(output);
         });
     }
 }

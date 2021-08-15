@@ -14,146 +14,140 @@ banks.
 This module is independent of the image generator, it's up to you how you create
 an image from the generated string.
 
-Usage
------
+Getting Started
+---------------
 
 📦 **Install**
 
-```bash
+```sh
 npm install bysquare
 ```
 
+You can also use CLI module.
+
+```sh
+npm -i g bysquare
+# without instalation
+npx bysquare
+```
+
 **Available functions**
+
+```typescript
+function generate(model: Model): Promise<string>;
+function generate(model: Model, cbResult: (qrString: string)): void;
+```
+
+**Model**
 
 <details>
     <summary>Model</summary>
 
 ```typescript
-interface Model {
+export interface Model {
     /** Max length 10 */
-    InvoiceID?: string,
+    InvoiceID?: string;
     /** count */
-    Payments: number,
+    Payments: number;
     /** Max length 1 */
-    PaymentOptions: number,
+    PaymentOptions: number;
     /**
      * Max length 15
      * Format #.########
-     * */
-    Amount: number,
+     */
+    Amount: number;
     /**
      * Max length 3
      * Representation ISO 4217
-     *  */
-    CurrencyCode: CurrencyCodes,
-    /**
-     * Max length 8
-     * Format YYYYMMDD
-     * */
-    PaymentDueDate?: string,
-    /** Max length 10 */
-    VariableSymbol?: string,
-    /** Max length 4 */
-    ConstantSymbol?: string,
-    /** Max length 10 */
-    SpecificSymbol?: string,
-    /** Max length 35 */
-    OriginatorsReferenceInformation?: string,
-    /** Max length 140 */
-    PaymentNote?: string,
-    /** count */
-    BankAccounts: number,
-    /** Max length 34 */
-    IBAN: string,
-    /**
-     * Max length 11
-     * Format ISO 9362, 8 or 11 characters long
-     * */
-    BIC?: string,
-    /** Max length 1 */
-    StandingOrderExt?: number,
-    /** Max length 2 */
-    Day?: number,
-    /** Max length 4 */
-    Month?: number,
-    /** Max length 1 */
-    Periodicity?: string,
-    /**
-     * Max length 8
-     * Format YYYYMMDD
-     * */
-    LastDate?: string,
-    /** Max length 1 */
-    DirectDebitExt?: number,
-    /** Max length 1 */
-    DirectDebitScheme?: number,
-    /** Max length 1 */
-    DirectDebitType?: number,
-    /** Max length 10 */
-    VariableSymbol_?: string,
-    /** Max length 10 */
-    SpecificSymbol_?: string,
-    /** Max length 35 */
-    OriginatorsReferenceInformation_?: string,
-    /** Max length 35 */
-    MandateID?: string,
-    /** Max length 35 */
-    CreditorID?: string,
-    /** Max length 35 */
-    ContractID?: string,
-    /**
-     * Max length 15
-     * Format #.########
-     * */
-    MaxAmount?: number,
+     */
+    CurrencyCode: keyof typeof CurrencyCode;
     /**
      * Max length 8
      * Format YYYYMMDD
      */
-    ValidTillDate?: string,
+    PaymentDueDate?: string;
+    /** Max length 10 */
+    VariableSymbol?: string;
+    /** Max length 4 */
+    ConstantSymbol?: string;
+    /** Max length 10 */
+    SpecificSymbol?: string;
+    /** Max length 35 */
+    OriginatorsReferenceInformation?: string;
+    /** Max length 140 */
+    PaymentNote?: string;
+    /** count */
+    BankAccounts: number;
+    /** Max length 34 */
+    IBAN: string;
+    /**
+     * Max length 11
+     * Format ISO 9362, 8 or 11 characters long
+     */
+    BIC?: string;
+    /** Max length 1 */
+    StandingOrderExt?: number;
+    /** Max length 2 */
+    Day?: number;
+    /** Max length 4 */
+    Month?: number;
+    /** Max length 1 */
+    Periodicity?: string;
+    /**
+     * Max length 8
+     * Format YYYYMMDD
+     */
+    LastDate?: string;
+    /** Max length 1 */
+    DirectDebitExt?: number;
+    /** Max length 1 */
+    DirectDebitScheme?: number;
+    /** Max length 1 */
+    DirectDebitType?: number;
+    /** Max length 10 */
+    VariableSymbol_?: string;
+    /** Max length 10 */
+    SpecificSymbol_?: string;
+    /** Max length 35 */
+    OriginatorsReferenceInformation_?: string;
+    /** Max length 35 */
+    MandateID?: string;
+    /** Max length 35 */
+    CreditorID?: string;
+    /** Max length 35 */
+    ContractID?: string;
+    /**
+     * Max length 15
+     * Format #.########
+     */
+    MaxAmount?: number;
+    /**
+     * Max length 8
+     * Format YYYYMMDD
+     */
+    ValidTillDate?: string;
     /** Max length 70 */
-    BeneficiaryName?: string,
+    BeneficiaryName?: string;
     /** Max length 70 */
-    BeneficiaryAddressLine1?: string,
+    BeneficiaryAddressLine1?: string;
     /** Max length 70 */
-    BeneficiaryAddressLine2?: string,
+    BeneficiaryAddressLine2?: string;
 }
 ```
 
 </details>
 
-```typescript
-function generate(model: Model): Promise<string>;
-function generate(model: Model, cbResult: (qrString: string) => void): void;
-```
 
-[Examples](examples)
+Node.js usage, [examples](examples)
 ----------------------------------
 
-**Promise**
+<details>
+    <summary>Basic</summary>
 
 ```javascript
 const { generate } = require('bysquare');
 
-(async () => {
-    const result = await generate({
-        IBAN: "SK9611000000002918599669",
-        Amount: 100.0,
-        CurrencyCode: "EUR",
-        VariableSymbol: "123",
-        Payments: 1,
-        PaymentOptions: 1,
-        BankAccounts: 1,
-    });
-    // Your logic...
-})();
-```
-
-**Callback**
-
-```javascript
-const { generate } = require('bysquare');
-
+/** Callback */
 generate(
     {
         IBAN: "SK9611000000002918599669",
@@ -168,14 +162,28 @@ generate(
         // Your logic...
     }
 );
+
+/** Promise */
+(async () => {
+    const result = await generate({
+        IBAN: "SK9611000000002918599669",
+        Amount: 100.0,
+        CurrencyCode: "EUR",
+        VariableSymbol: "123",
+        Payments: 1,
+        PaymentOptions: 1,
+        BankAccounts: 1,
+    });
+    // Your logic...
+})();
 ```
 
-**Express**
+</details>
 
-- Backend [Express](https://expressjs.com/)
-- Client [qrcodejs](https://github.com/davidshimjs/qrcodejs)
+<details>
+    <summary>Express + qrcodejs</summary>
 
-`server.js`
+`server`
 
 ```javascript
 const { generate } = require("bysquare");
@@ -204,28 +212,22 @@ app.listen(3_000, () => {
 });
 ```
 
+`curl test`
+
 ```bash
 curl http://localhost:3000/qr
 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
 ```
 
-`index.html`
+`client`
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>bysquare example</title>
-    </head>
-
+<html>
     <body>
-        <h1>byquare clinet qr-image example</h1>
+        <h1>byquare simple example</h1>
         <div id="qrcode"></div>
     </body>
-
     <script src="qrcodejs.min.js"></script>
     <script type="text/javascript">
         const url = "http://localhost:3000/qr";
@@ -242,7 +244,63 @@ curl http://localhost:3000/qr
 </html>
 ```
 
-![generated-image](examples/express/output.png)
+![clien-qr-image-generated]
+
+</details>
+
+CLI usage
+---------
+
+```plain
+Simple Node.js library to generate 'PAY by square' QR string.
+
+Usage:
+   bysquare file
+
+File:
+   Valid json file
+
+Flags:
+   -h, --help      display this help and exit
+   -v, --version   display actual version
+```
+
+**file**
+
+```sh
+bysquare example.json
+```
+
+**standard input**
+
+```sh
+echo '
+    {
+        "IBAN": "SK9611000000002918599669",
+        "Amount": 100.0,
+        "CurrencyCode": "EUR",
+        "VariableSymbol": "123",
+        "Payments": 1,
+        "PaymentOptions": 1,
+        "BankAccounts": 1
+    }' \
+| bysquare
+```
+
+**qrcode-terminal**
+
+The scannable qr-code will be generated as ascii art to the terminal.
+
+```sh
+bysquare example.json | npx qrcode-terminal
+```
+
+<details>
+    <summary>image</summary>
+
+![qr-code-terminal-image]
+
+</details>
 
 <!--
 
@@ -275,3 +333,6 @@ References
 - <https://github.com/matusf/pay-by-square>
 - <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
 - <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>
+
+[qr-code-terminal-image]: ./qrcode-terminal.png
+[clien-qr-image-generated]: ./examples/express/output.png

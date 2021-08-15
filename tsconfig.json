@@ -8,9 +8,15 @@
         "declarationMap": true,
         "sourceMap": true,
         "noImplicitAny": true,
-        "outDir": "lib"
+        "outDir": "lib",
+        "lib": ["ESNext"],
+        "resolveJsonModule": true,
+        "esModuleInterop": true
     },
-    "include": ["module.ts"],
+    "include": [
+        "module.ts",
+        "cli.ts"
+    ],
     "exclude": [
         "node_modules",
         "lib"

@@ -12,15 +12,17 @@ const model: Model = {
     BankAccounts: 1,
 };
 
-const expectedResult = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000";
+const expected = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000";
 
 /** Callback */
 generate(model, (result) => {
-    strictEqual(result, expectedResult);
+    console.info("callback:\t", result);
+    strictEqual(result, expected);
 });
 
 /** Promise */
 (async () => {
     const result = await generate(model);
-    strictEqual(result, expectedResult);
+    console.info("promise:\t", result);
+    strictEqual(result, expected);
 })();

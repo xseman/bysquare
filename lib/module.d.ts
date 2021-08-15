@@ -264,7 +264,5 @@ declare function generate(model: Model): Promise<string>;
  * @param {(string) => void} callback - Callback for QR string result
  */
 declare function generate(model: Model, callback: (result: string) => void): void;
-declare function parse(qrString: string): Promise<Model>;
-declare function parse(qrString: string, callback: (model: Model) => void): void;
-export { generate, parse };
+export { generate };
 //# sourceMappingURL=module.d.ts.map

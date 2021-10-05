@@ -3,22 +3,20 @@
         "target": "ESNext",
         "module": "CommonJS",
         "moduleResolution": "Node",
+        "lib": ["ESNext"],
         "strict": true,
         "declaration": true,
-        "declarationMap": true,
-        "sourceMap": true,
         "noImplicitAny": true,
-        "outDir": "lib",
-        "lib": ["ESNext"],
         "resolveJsonModule": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "outDir": "./lib",
     },
     "include": [
-        "module.ts",
+        "main.ts",
+        "main.test.ts",
         "cli.ts"
     ],
     "exclude": [
-        "node_modules",
-        "lib"
+        "node_modules"
     ]
 }

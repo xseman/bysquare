@@ -1,11 +1,16 @@
 {
     "name": "bysquare",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "license": "MIT",
-    "description": "Encoding payment data into QR string. Accepted by Slovak Banking Association",
+    "description": "It's a national standard for payment QR codes adopted by Slovak Banking Association (SBA)",
     "author": {
         "name": "Filip Seman",
-        "email": "seman.filip@gmail.com"
+        "email": "filip.seman@protonmail.com"
+    },
+    "funding": "https://github.com/sponsors/xseman",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/xseman/bysquare"
     },
     "keywords": [
         "bysquare",
@@ -13,31 +18,35 @@
         "paybysquare",
         "payments",
         "qr-string",
-        "qr"
+        "qr",
+        "cli"
     ],
-    "repository": {
-        "type": "git",
-        "url": "https://gitlab.com/xseman/bysquare"
-    },
     "bin": "./lib/cli.js",
-    "main": "./lib/module.js",
-    "types": "./lib/module.d.ts",
+    "main": "./lib/main.js",
+    "types": "./lib/main.d.ts",
     "scripts": {
-        "start": "ts-node-dev --respawn module.ts",
-        "test": "ts-node-dev --respawn module.test.ts",
-        "build": "rm -rf ./lib && tsc && npm link",
+        "build": "rm -rf ./lib && tsc",
+        "test": "npm run build && xv lib",
+        "cli:local": "npm link",
+        "prepare": "",
+        "prepublishOnly": "npm run build",
         "preversion": "git checkout develop",
         "version": "git flow release start v$npm_package_version",
-        "postversion": ""
+        "postversion": "git push && git push --tags && npm publish"
     },
+    "files": [
+        "lib",
+        "!lib/**/*.d.ts",
+        "lib/main.d.ts",
+        "!lib/**/*.test.js"
+    ],
     "dependencies": {
         "lzma-native": "8.0.1"
     },
     "devDependencies": {
-        "@types/lzma-native": "^4.0.0",
         "@types/node": "^14.14.20",
-        "ts-node-dev": "^1.1.1",
-        "typescript": "^4.1.3"
+        "typescript": "^4.3.5",
+        "xv": "^1.0.2"
     },
     "engines": {
         "node": ">=10.0.0"

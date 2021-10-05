@@ -1,0 +1,2 @@
+* remove lzma-native dependency
+* add web compatible compression (webassembly maybe)

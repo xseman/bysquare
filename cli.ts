@@ -79,7 +79,7 @@ async function handleStdin(): Promise<string> {
 }
 
 function version(): string {
-    const version = "1.0.4";
+    const version = "1.0.5";
     return `bysquare v${version}`;
 }
 

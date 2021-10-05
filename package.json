@@ -1,6 +1,6 @@
 {
     "name": "bysquare",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "license": "MIT",
     "description": "It's a national standard for payment QR codes adopted by Slovak Banking Association (SBA)",
     "author": {

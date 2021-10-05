@@ -78,9 +78,9 @@ async function handleStdin(): Promise<string> {
     });
 }
 
-async function version(): Promise<string> {
-    const pkg = await import("./package.json");
-    return `bysquare v${pkg.version}`;
+function version(): string {
+    const version = "1.0.4";
+    return `bysquare v${version}`;
 }
 
 function help(): string {

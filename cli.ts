@@ -3,10 +3,26 @@
 import { existsSync, readFileSync } from 'fs';
 import * as rl from 'readline';
 
-import { generate, Model } from './module';
+import { generate, Model } from './main';
 
-async function handleInput(input: string): Promise<void> {
-    if (!input || input === "-h" || input === "--help") {
+if (process.stdin.isTTY) {
+    // bysquare "file"
+    handleInput(process.argv[2]);
+} else {
+    // echo "data" | bysquare
+    (async () => {
+        const stdin: string = await handleStdin();
+        const qrString = await jsonStringToQrString(stdin).catch((e) => {
+            console.error(e);
+            process.exit(1);
+        });
+        console.log(qrString);
+        process.exit(0);
+    })();
+}
+
+async function handleInput(input?: string): Promise<void> {
+    if (input === undefined || input === "-h" || input === "--help") {
         console.log(help());
         process.exit(0);
     }
@@ -63,8 +79,8 @@ async function handleStdin(): Promise<string> {
 }
 
 async function version(): Promise<string> {
-    const data = await import("./package.json");
-    return data.version;
+    const pkg = await import("./package.json");
+    return `bysquare v${pkg.version}`;
 }
 
 function help(): string {
@@ -80,21 +96,7 @@ function help(): string {
         "Flags:",
         "   -h, --help    display this help and exit",
         "   -v, --version display actual version",
+        "",
+        "If <file> is omitted, reads from stdin."
     ].join("\n");
-}
-
-if (process.stdin.isTTY) {
-    // bysquare "file"
-    handleInput(process.argv[2]);
-} else {
-    // echo "data" | bysquare
-    (async () => {
-        const stdin: string = await handleStdin();
-        const qrString = await jsonStringToQrString(stdin).catch((e) => {
-            console.error(e);
-            process.exit(1);
-        });
-        console.log(qrString);
-        process.exit(0);
-    })();
 }

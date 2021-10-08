@@ -352,7 +352,7 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 - <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
 - <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>
 
-[build]: https://img.shields.io/github/workflow/status/xseman/bysquare/Node.js%20CI
+[build]: https://img.shields.io/github/workflow/status/xseman/bysquare/tests
 [version]: https://img.shields.io/npm/v/bysquare
 [license]: https://img.shields.io/github/license/xseman/bysquare
 [clien-qr-image-generated]: ./examples/express/output.png

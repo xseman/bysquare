@@ -97,6 +97,21 @@ function help(): string {
         "   -h, --help    display this help and exit",
         "   -v, --version display actual version",
         "",
-        "If <file> is omitted, reads from stdin."
+        "If <file> is omitted, reads from stdin.",
+        "",
+        "Examples:",
+        "   bysquare ./example.json",
+        "",
+        "   echo ",
+        '       {',
+        '           "IBAN": "SK9611000000002918599669"',
+        '           "Amount": 100.0',
+        '           "CurrencyCode": "EUR"',
+        '           "VariableSymbol": "123"',
+        '           "Payments": 1',
+        '           "PaymentOptions": 1',
+        '           "BankAccounts": 1',
+        "       }'",
+        "   | bysquare",
     ].join("\n");
 }

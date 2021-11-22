@@ -1,17 +1,9 @@
 {
     "name": "bysquare",
     "version": "1.0.5",
-    "license": "MIT",
     "description": "It's a national standard for payment QR codes adopted by Slovak Banking Association (SBA)",
-    "author": {
-        "name": "Filip Seman",
-        "email": "filip.seman@protonmail.com"
-    },
-    "funding": "https://github.com/sponsors/xseman",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/xseman/bysquare"
-    },
+    "license": "Apache-2.0",
+    "author": "Filip Seman <filip.seman@protonmail.com>",
     "keywords": [
         "bysquare",
         "bysquare",
@@ -21,18 +13,18 @@
         "qr",
         "cli"
     ],
-    "bin": "./lib/cli.js",
-    "main": "./lib/main.js",
-    "types": "./lib/main.d.ts",
-    "scripts": {
-        "build": "rm -rf ./lib && tsc",
-        "test": "npm run build && xv lib",
-        "cli:local": "npm link",
-        "prepare": "",
-        "prepublishOnly": "npm run build",
-        "preversion": "git checkout develop",
-        "version": "git flow release start v$npm_package_version",
-        "postversion": "git push && git push --tags && npm publish"
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/xseman/bysquare.git"
+    },
+    "bugs": {
+        "url": "https://github.com/xseman/bysquare/issues",
+        "email": "filip.seman@protonmail.com"
+    },
+    "homepage": "https://github.com/xseman/bysquare#readme",
+    "funding": "https://github.com/sponsors/xseman",
+    "engines": {
+        "node": ">=12.0.0"
     },
     "files": [
         "lib",
@@ -40,6 +32,19 @@
         "lib/main.d.ts",
         "!lib/**/*.test.js"
     ],
+    "bin": "./lib/cli.js",
+    "main": "./lib/main.js",
+    "types": "./lib/main.d.ts",
+    "scripts": {
+        "build": "rm -rf ./lib && tsc",
+        "test": "npm run build && xv lib",
+        "cli:local": "npm link",
+        "version": "git flow release start v$npm_package_version",
+        "prepare": "",
+        "prepublishOnly": "npm run build",
+        "preversion": "git checkout develop",
+        "postversion": ""
+    },
     "dependencies": {
         "lzma-native": "8.0.1"
     },
@@ -47,8 +52,5 @@
         "@types/node": "^14.14.20",
         "typescript": "^4.3.5",
         "xv": "^1.0.2"
-    },
-    "engines": {
-        "node": ">=10.0.0"
     }
 }

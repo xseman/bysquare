@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { existsSync, readFileSync } from 'fs';
-import * as rl from 'readline';
+import { createInterface } from 'readline';
 
 import { generate, Model } from './main';
 
@@ -21,6 +21,11 @@ if (process.stdin.isTTY) {
     })();
 }
 
+function version(): string {
+    const version = "1.0.5";
+    return `bysquare v${version}`;
+}
+
 async function handleInput(input?: string): Promise<void> {
     if (input === undefined || input === "-h" || input === "--help") {
         console.log(help());
@@ -28,7 +33,7 @@ async function handleInput(input?: string): Promise<void> {
     }
 
     if (input === "-v" || input === "--version") {
-        const v = await version();
+        const v = version();
         console.log(v);
         process.exit(0);
     }
@@ -60,7 +65,7 @@ async function jsonStringToQrString(stdin: string): Promise<string> {
 }
 
 async function handleStdin(): Promise<string> {
-    const readline = rl.createInterface({
+    const readline = createInterface({
         input: process.stdin,
         output: process.stdout,
         terminal: false,
@@ -76,11 +81,6 @@ async function handleStdin(): Promise<string> {
         });
         readline.on("SIGINT" /* CTRL+C */, reject);
     });
-}
-
-function version(): string {
-    const version = "1.0.5";
-    return `bysquare v${version}`;
 }
 
 function help(): string {

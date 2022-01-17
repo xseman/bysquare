@@ -22,16 +22,23 @@ export function generate(model: Model): Promise<string> {
     ): void {
         encoder.on('error', reject);
         encoder.on('end', (): void => {
-            const header = createBysquareHeader();
-            const checksum = Buffer.from(
-                checksumFromTabbedString(tabbedString),
-                'hex'
-            ).reverse();
+            /** (spec 3.5) */
+            const bySquareHeader = createHeader();
 
-            /** Merged binary data (specification 3.15.) */
+            /**
+             * The header of compressed data is 2 bytes long and contains only
+             * one 16­bit unsigned integer (word, little­endian), which is the
+             * size of the decompressed data (spec 3.11)
+             */
+            const decompressedSize = Buffer.alloc(2);
+            decompressedSize.writeInt16LE(dataWithChecksum.byteLength);
+
+            /**
+             * Merged binary data (spec 3.15.)
+              */
             const merged = Buffer.concat([
-                header,
-                checksum,
+                bySquareHeader,
+                decompressedSize,
                 Buffer.concat(data),
             ]);
 
@@ -82,7 +89,7 @@ export function generate(model: Model): Promise<string> {
  * Reserved     | 4              | 0-15            | bits reserved for future needs
  * ```
  */
-export function createBysquareHeader(
+export function createHeader(
     header: [
         BySquareType: number,
         Version: number,
@@ -106,7 +113,7 @@ export function createBysquareHeader(
 export function createDataBuffer(tabbedString: string): Buffer {
     const checksum = checksumFromTabbedString(tabbedString);
     const buffer = Buffer.concat([
-        /** Little-endian, reverse */
+        /** little-endian, reverse */
         Buffer.from(checksum, 'hex').reverse(),
         Buffer.from(tabbedString, 'utf-8'),
     ]);
@@ -195,9 +202,9 @@ export function parse(qrString: string): Promise<Model> {
         bytes[count] = byte;
     }
     const binaryData = Buffer.from(bytes.join(''), 'hex');
-    const header = binaryData.slice(0, 2);
-    const checksum = binaryData.slice(2, 6);
-    const data = binaryData.slice(6, binaryData.length);
+    const _header = binaryData.slice(0, 2);
+    const _decompressSize = binaryData.slice(2, 4);
+    const data = binaryData.slice(4, binaryData.length);
 
     const decoder = lzma.createStream('rawDecoder', {
         synchronous: true,
@@ -213,11 +220,13 @@ export function parse(qrString: string): Promise<Model> {
         reject: (reason?: any) => void
     ): void {
         decoder.on('error', reject);
-        decoder.on('data', (res: Buffer): void => {
-            const checksumFromData = res.slice(0, 4);
-            const data = res.slice(4, res.length);
+        decoder.on('data', (decompressed: Buffer): void => {
+            const checksum = decompressed.slice(0, 4);
+            const data = decompressed.slice(4, decompressed.length);
 
-            if (checksum.equals(checksumFromData) === false) {
+            const crc32 = Buffer.alloc(4);
+            crc32.writeInt32LE(lzma.crc32(data));
+            if (!crc32.equals(checksum)) {
                 reject('Checksum conflict');
             }
 

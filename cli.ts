@@ -3,7 +3,8 @@
 import { existsSync, readFileSync } from 'fs';
 import { createInterface } from 'readline';
 
-import { generate, Model } from './main';
+import { generate } from './main';
+import { Model } from './model';
 
 if (process.stdin.isTTY) {
     // bysquare "file"
@@ -21,8 +22,8 @@ if (process.stdin.isTTY) {
     })();
 }
 
-function version(): string {
-    const version = "1.0.5";
+async function version(): Promise<string> {
+    const { version } = await import("./package.json");
     return `bysquare v${version}`;
 }
 
@@ -33,7 +34,7 @@ async function handleInput(input?: string): Promise<void> {
     }
 
     if (input === "-v" || input === "--version") {
-        const v = version();
+        const v = await version();
         console.log(v);
         process.exit(0);
     }

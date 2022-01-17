@@ -43,7 +43,7 @@
     },
     "files": [
         "lib",
-        "!lib/*.test.js"
+        "!lib/*.test.*"
     ],
     "bin": "lib/cli.js",
     "main": "lib/index.js",

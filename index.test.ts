@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 
 import {
-    createBysquareHeader,
+    createHeader,
     checksumFromTabbedString,
     createModelFromTabbedString,
     createTabbedString,
@@ -45,19 +45,18 @@ export function createModelFromTabbedString_basic(): void {
     assert.deepStrictEqual(model, expected);
 }
 
-export function createBysquareHeader_empty(): void {
-    const created = createBysquareHeader();
+export function createHeader_empty(): void {
+    const created = createHeader();
     const expected = Buffer.from([0x0, 0x0]);
-
     assert.deepEqual(created, expected);
 }
 
-export function createBysquareHeader_arg(): void {
-    const created = createBysquareHeader([
+export function createHeader_arg(): void {
+    const created: Buffer = createHeader([
         0b0000_0001, 0b0000_0010,
         0b0000_0011, 0b0000_0100,
     ]);
-    const expected = Buffer.from([
+    const expected: Buffer = Buffer.from([
         0b0001_0010,
         0b0011_0100
     ]);
@@ -66,26 +65,22 @@ export function createBysquareHeader_arg(): void {
 }
 
 export function checksumFromTabbedString_basic(): void {
-    const expected = '34bfe057';
-    const created = checksumFromTabbedString(tabbedString);
+    const expected: string = '34bfe057';
+    const created: string = checksumFromTabbedString(tabbedString);
 
     assert.equal(created, expected);
 }
 
-export function generate_callback(): void {
-    generate(model).then((qrString) => {
-        assert(qrString, expectedQrString);
-    });
-}
-
-export async function generate_promise(): Promise<void> {
+export async function generate_basic(): Promise<void> {
     const qrString = await generate(model);
-    assert(qrString, expectedQrString);
+
+    assert.equal(qrString, expectedQrString);
 }
 
 export async function generate_parse(): Promise<void> {
     const qrString = await generate(model);
     const parsed = await parse(qrString);
+
     assert.deepEqual(parsed, model);
 }
 
@@ -120,7 +115,7 @@ export function lzma_compress_decompress(): void {
 
         decoder.on('data', (res: Buffer): void => {
             const decoded = res.toString('utf-8');
-            assert(decoded, message);
+            assert.equal(decoded, message);
         });
     });
 }

@@ -69,23 +69,22 @@ parse(qrString).then((model) => {
 Local executable install
 
 ```sh
-npm install --global bysquare
-bysquare ./example.json
+$ npm install --global bysquare
+$ bysquare ./example.json
+$ 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
 ```
 
 Executable without installation
 
 ```sh
-npx bysquare ./example.json
+$ npx bysquare ./example.json
+$ 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
 ```
 
 **file**
 
 ```sh
-bysquare ./example.json
-```
-
-```sh
+$ bysquare ./example.json
 $ 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
 ```
 
@@ -103,9 +102,6 @@ $ echo '
         "BankAccounts": 1
     }' \
 | bysquare
-```
-
-```sh
 $ 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
 ```
 

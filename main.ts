@@ -81,21 +81,22 @@ export function generate(model: Model): Promise<string> {
 
 /**
  * ```
- * Attribute    | Number of bits | Possible values | Note
+ * | Attribute    | Number of bits | Possible values | Note
  * --------------------------------------------------------------------------------------------
- * BySquareType | 4              | 0-15            | by square type
- * Version      | 4              | 0-15            | version 4 0­15 version of the by sq
- * DocumentType | 4              | 0-15            | document type within given by square type
- * Reserved     | 4              | 0-15            | bits reserved for future needs
+ * | BySquareType | 4              | 0-15            | by square type
+ * | Version      | 4              | 0-15            | version 4 0­15 version of the by sq
+ * | DocumentType | 4              | 0-15            | document type within given by square type
+ * | Reserved     | 4              | 0-15            | bits reserved for future needs
  * ```
  */
 export function createHeader(
     header: [
-        BySquareType: number,
-        Version: number,
-        DocumentType: number,
-        Reserved: number
-    ] = [0b0000_0000, 0b0000_0000, 0b0000_0000, 0b0000_0000]
+        BySquareType: number, Version: number,
+        DocumentType: number, Reserved: number
+    ] = [
+        0b0000_0000, 0b0000_0000,
+        0b0000_0000, 0b0000_0000
+    ]
 ): Buffer {
     const isValid = header.every((nibble) => 0 <= nibble && nibble <= 15);
     if (!isValid) throw new Error();
@@ -112,19 +113,19 @@ export function createHeader(
 
 export function createDataBuffer(tabbedString: string): Buffer {
     const checksum = checksumFromTabbedString(tabbedString);
-    const buffer = Buffer.concat([
-        /** little-endian, reverse */
-        Buffer.from(checksum, 'hex').reverse(),
+    const data = Buffer.concat([
+        checksum,
         Buffer.from(tabbedString, 'utf-8'),
     ]);
 
-    return buffer;
+    return data;
 }
 
-export function checksumFromTabbedString(tabbedString: string): string {
-    const checksum = lzma.crc32(tabbedString, 'utf-8') as number;
-    const hexString = checksum.toString(16);
-    return hexString;
+export function checksumFromTabbedString(tabbedString: string): Buffer {
+    const crc32 = Buffer.alloc(4);
+    crc32.writeInt32LE(lzma.crc32(tabbedString));
+
+    return crc32;
 }
 
 export function createTabbedString(model: Model): string {
@@ -202,6 +203,7 @@ export function parse(qrString: string): Promise<Model> {
         bytes[count] = byte;
     }
     const binaryData = Buffer.from(bytes.join(''), 'hex');
+
     const _header = binaryData.slice(0, 2);
     const _decompressSize = binaryData.slice(2, 4);
     const data = binaryData.slice(4, binaryData.length);

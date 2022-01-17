@@ -65,10 +65,10 @@ export function createHeader_arg(): void {
 }
 
 export function checksumFromTabbedString_basic(): void {
-    const expected: string = '34bfe057';
-    const created: string = checksumFromTabbedString(tabbedString);
+    const expected: Buffer = Buffer.from([0x57, 0xe0, 0xbf, 0x34]);
+    const created: Buffer = checksumFromTabbedString(tabbedString);
 
-    assert.equal(created, expected);
+    assert.deepEqual(created, expected);
 }
 
 export async function generate_basic(): Promise<void> {

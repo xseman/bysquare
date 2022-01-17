@@ -5,6 +5,6 @@
         "start": "node server.js"
     },
     "dependencies": {
-        "bysquare": "latest"
+        "bysquare": "1.0.6"
     }
 }

@@ -1,19 +1,21 @@
 {
     "compilerOptions": {
-        "target": "ESNext",
+        "target": "es5",
         "module": "CommonJS",
         "moduleResolution": "Node",
-        "lib": ["ESNext"],
+        "downlevelIteration": true,
         "strict": true,
         "declaration": true,
         "noImplicitAny": true,
-        "resolveJsonModule": true,
+        "noImplicitThis": true,
+        "noImplicitReturns": true,
         "esModuleInterop": true,
-        "outDir": "./lib",
+        "resolveJsonModule": true,
+        "outDir": "lib"
     },
     "include": [
-        "main.ts",
-        "main.test.ts",
+        "index.ts",
+        "index.test.ts",
         "cli.ts"
     ],
     "exclude": [

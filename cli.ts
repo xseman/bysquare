@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 import { existsSync, readFileSync } from 'fs';
-import * as rl from 'readline';
+import { createInterface } from 'readline';
 
-import { generate, Model } from './main';
+import { generate } from './main';
+import { Model } from './model';
 
 if (process.stdin.isTTY) {
     // bysquare "file"
@@ -19,6 +20,11 @@ if (process.stdin.isTTY) {
         console.log(qrString);
         process.exit(0);
     })();
+}
+
+async function version(): Promise<string> {
+    const { version } = await import("./package.json");
+    return `bysquare v${version}`;
 }
 
 async function handleInput(input?: string): Promise<void> {
@@ -60,7 +66,7 @@ async function jsonStringToQrString(stdin: string): Promise<string> {
 }
 
 async function handleStdin(): Promise<string> {
-    const readline = rl.createInterface({
+    const readline = createInterface({
         input: process.stdin,
         output: process.stdout,
         terminal: false,
@@ -78,11 +84,6 @@ async function handleStdin(): Promise<string> {
     });
 }
 
-function version(): string {
-    const version = "1.0.5";
-    return `bysquare v${version}`;
-}
-
 function help(): string {
     return [
         "Simple Node.js library to generate 'PAY by square' QR string.",
@@ -97,6 +98,21 @@ function help(): string {
         "   -h, --help    display this help and exit",
         "   -v, --version display actual version",
         "",
-        "If <file> is omitted, reads from stdin."
+        "If <file> is omitted, reads from stdin.",
+        "",
+        "Examples:",
+        "   bysquare ./example.json",
+        "",
+        "   echo ",
+        '       {',
+        '           "IBAN": "SK9611000000002918599669"',
+        '           "Amount": 100.0',
+        '           "CurrencyCode": "EUR"',
+        '           "VariableSymbol": "123"',
+        '           "Payments": 1',
+        '           "PaymentOptions": 1',
+        '           "BankAccounts": 1',
+        "       }'",
+        "   | bysquare",
     ].join("\n");
 }

@@ -8,6 +8,7 @@ on:
             - "**.ts"
             - "package.json"
             - "tsconfig.json"
+            - ".github/workflows/**.yml"
 
 jobs:
     build:

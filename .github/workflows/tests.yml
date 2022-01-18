@@ -29,6 +29,7 @@ jobs:
               with:
                 name: build
                 path: lib
+                retention-days: 0
 
             - run: ls -lah .
 

@@ -26,8 +26,9 @@ jobs:
                 name: build
                 path: lib
 
-            - run: npm ci
-            - run: npm run build
+            - run: |
+                npm ci
+                npm run build
 
     test:
         runs-on: ubuntu-latest
@@ -44,10 +45,12 @@ jobs:
                   node-version: ${{ matrix.node-version }}
 
             - name: Build artifacts
-              uses: actions/upload-artifact@v2
+              uses: actions/download-artifact@v2
               with:
                name: build
                path: lib
 
             - run: ls -lah .
-            - run: npm test
+            - run: |
+                npm ci
+                npm test

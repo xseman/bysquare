@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - "develop"
+    paths:
+      - "**.ts"
+      - "package.json"
+      - "tsconfig.json"
 
 jobs:
   build:

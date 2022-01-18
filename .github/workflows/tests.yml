@@ -23,7 +23,7 @@ jobs:
               uses: actions/upload-artifact@v2
               with:
                 name: build
-                path: /lib
+                path: lib
 
             - run: npm ci
             - run: npm run build
@@ -46,7 +46,7 @@ jobs:
               uses: actions/upload-artifact@v2
               with:
                name: build
-               path: /lib
+               path: lib
 
             - run: ls -lah .
             - run: npm test

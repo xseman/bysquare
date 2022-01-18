@@ -22,7 +22,7 @@
     "funding": "https://github.com/sponsors/xseman",
     "scripts": {
         "build": "rm -rf ./lib; tsc",
-        "test": "npm run build && xv ./lib",
+        "test": "xv ./lib",
         "cli:local": "npm link",
         "version": "git flow release start v$npm_package_version",
         "prepare": "",

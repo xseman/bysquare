@@ -30,13 +30,15 @@ jobs:
                 name: build
                 path: lib
 
+            - run: ls -lah .
+
     test:
         needs: build
         runs-on: ubuntu-latest
 
         strategy:
             matrix:
-                node-version: [8.x, 10.x, 12.x, 14.x, 15.x, 16.x, 17.x]
+                node-version: [12.x, 14.x, 16.x, 17.x]
 
         steps:
             - uses: actions/checkout@v2
@@ -45,7 +47,7 @@ jobs:
               with:
                   node-version: ${{ matrix.node-version }}
 
-            - name: Build artifacts
+            - name: Download artifacts
               uses: actions/download-artifact@v2
               with:
                name: build

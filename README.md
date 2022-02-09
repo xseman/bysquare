@@ -35,11 +35,7 @@ npm install --global bysquare
 
 ### `function generate(model: Model): Promise<string>`
 
-### `function parse(qrString: string): Promise<Model>`
-
-## Usage
-
-TypeScript, generator
+**Example**
 
 ```typescript
 import { generate, Model } from "bysquare";
@@ -59,7 +55,9 @@ generate(model).then((qrString) => {
 });
 ```
 
-TypeScript, parser
+### `function parse(qrString: string): Promise<Model>`
+
+**Example**
 
 ```typescript
 import { parse } from "bysquare";
@@ -79,7 +77,11 @@ parse(qrString).then((model) => {
 });
 ```
 
-CLI, local executable
+### CLI
+
+You can use json file with valid model to generate qr-string.
+
+**Example**
 
 ```sh
 # example.json
@@ -97,7 +99,9 @@ CLI, local executable
 > 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
 ```
 
-CLI, standard input
+You can also use stdin.
+
+**Example**
 
 ```sh
 > echo '

@@ -35,7 +35,7 @@ npm install --global bysquare
 
 ### `function generate(model: Model): Promise<string>`
 
-**Example**
+**Example (TypeScript)**
 
 ```typescript
 import { generate, Model } from "bysquare";
@@ -57,13 +57,14 @@ generate(model).then((qrString) => {
 
 ### `function parse(qrString: string): Promise<Model>`
 
-**Example**
+**Example (TypeScript)**
 
 ```typescript
 import { parse } from "bysquare";
 
-const qr: string = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000";
-parse(qrString).then((model) => {
+const generated = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000";
+
+parse(generated).then((model) => {
     console.log(model);
     // {
     //     IBAN: 'SK9611000000002918599669',
@@ -160,7 +161,6 @@ You can also use stdin.
 ## How it works
 
 ![diagram](./uml/logic.png)
-
 
 ## Resources
 

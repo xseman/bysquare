@@ -5,7 +5,7 @@ on:
         branches:
             - "develop"
         paths:
-            - "**.ts"
+            - "src/**.ts"
             - "package.json"
             - "tsconfig.json"
             - ".github/workflows/**.yml"

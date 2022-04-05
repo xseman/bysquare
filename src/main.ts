@@ -234,5 +234,3 @@ export function parse(qrString: string): Promise<Model> {
 
     return paymentPromise;
 }
-
-}

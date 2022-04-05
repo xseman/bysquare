@@ -7,8 +7,9 @@ import {
     createTabbedString,
     generate,
     parse,
+    tabbedStringWithChecksumBuffer,
 } from './main';
-import { Model } from './model';
+import { Model } from './types';
 
 const model: Model = {
     IBAN: 'SK9611000000002918599669',
@@ -40,6 +41,12 @@ export function createTabbedString_basic(): void {
     assert.equal(tabbedString, expected);
 }
 
+export function tabbedStringWithChecksumBuffer_basic(): void {
+    const expected = Buffer.from('57e0bf34093109310931303009455552090931323309090909093109534b393631313030303030303030323931383539393636390909090909090909090909090909090909090909', 'hex')
+    const created = tabbedStringWithChecksumBuffer(model)
+    assert.deepEqual(created, expected);
+}
+
 export function createModelFromTabbedString_basic(): void {
     const expected = createModelFromTabbedString(tabbedString);
     assert.deepStrictEqual(model, expected);
@@ -65,10 +72,10 @@ export function createHeader_arg(): void {
 }
 
 export function checksumFromTabbedString_basic(): void {
-    const expected: string = '34bfe057';
-    const created: string = checksumFromTabbedString(tabbedString);
+    const expected: Buffer = Buffer.from([0x57, 0xe0, 0xbf, 0x34]);
+    const created: Buffer = checksumFromTabbedString(tabbedString);
 
-    assert.equal(created, expected);
+    assert.deepEqual(created, expected);
 }
 
 export async function generate_basic(): Promise<void> {

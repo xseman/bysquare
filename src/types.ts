@@ -119,7 +119,7 @@ export interface Model {
     DirectDebitExt?: number
 
     /**
-     * Tthis field can have “SEPA” value, if direct debit is using SEPA direct
+     * This field can have “SEPA” value, if direct debit is using SEPA direct
      * debit scheme or “other” when an ordinary direct debit is defined
      *
      * Max length 1
@@ -183,7 +183,7 @@ export interface Model {
  * Atributes must follow specific order
  * (Apendix D - data model overview)
  */
-export enum MODEL_INDEXED {
+export enum ModelOrdered {
     InvoiceID,
     Payments,
     PaymentOptions,

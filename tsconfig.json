@@ -14,9 +14,9 @@
         "outDir": "lib"
     },
     "include": [
-        "index.ts",
-        "index.test.ts",
-        "cli.ts"
+        "src/index.ts",
+        "src/main.test.ts",
+        "src/cli.ts"
     ],
     "exclude": [
         "node_modules"

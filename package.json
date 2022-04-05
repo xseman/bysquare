@@ -1,7 +1,7 @@
 {
     "name": "bysquare",
     "description": "It's a national standard for payment QR codes adopted by Slovak Banking Association (SBA)",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "license": "Apache-2.0",
     "author": "Filip Seman <filip.seman@protonmail.com>",
     "keywords": [
@@ -21,9 +21,9 @@
     "homepage": "https://github.com/xseman/bysquare#readme",
     "funding": "https://github.com/sponsors/xseman",
     "scripts": {
-        "build": "rm -rf ./lib; tsc",
+        "build": "rm -rf ./lib; tsc && chmod +x ./lib/cli.js",
         "test": "npm run build && xv ./lib",
-        "cli:local": "npm link",
+        "cli:local": "npm link bysquare",
         "version": "git flow release start v$npm_package_version",
         "prepare": "",
         "prepublishOnly": "npm run build",
@@ -31,15 +31,16 @@
         "postversion": ""
     },
     "dependencies": {
-        "lzma-native": "8.0.5"
+        "lzma-native": "8.0.6"
     },
     "devDependencies": {
         "@types/node": "14.14.20",
-        "typescript": "4.5.4",
+        "typescript": "4.5.5",
         "xv": "1.1.1"
     },
     "engines": {
-        "node": ">=12.0.0"
+        "node": ">=14.14.x",
+        "npm": ">= 7.0"
     },
     "files": [
         "lib",

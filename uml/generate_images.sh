@@ -11,5 +11,5 @@ cd "$(dirname "${0}")" || exit 1
 
 for uml in *.drawio; do
     NAME=${uml%%.*}
-    drawio -x -f png -o "${NAME}.png" "${uml}"
+    drawio -x -f svg -o "${NAME}.svg" "${uml}"
 done

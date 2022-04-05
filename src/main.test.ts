@@ -7,8 +7,9 @@ import {
     createTabbedString,
     generate,
     parse,
+    tabbedStringWithChecksumBuffer,
 } from './main';
-import { Model } from './model';
+import { Model } from './types';
 
 const model: Model = {
     IBAN: 'SK9611000000002918599669',
@@ -38,6 +39,12 @@ const expectedQrString = '0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NB
 export function createTabbedString_basic(): void {
     const expected: string = createTabbedString(model);
     assert.equal(tabbedString, expected);
+}
+
+export function tabbedStringWithChecksumBuffer_basic(): void {
+    const expected = Buffer.from('57e0bf34093109310931303009455552090931323309090909093109534b393631313030303030303030323931383539393636390909090909090909090909090909090909090909', 'hex')
+    const created = tabbedStringWithChecksumBuffer(model)
+    assert.deepEqual(created, expected);
 }
 
 export function createModelFromTabbedString_basic(): void {

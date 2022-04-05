@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from 'fs';
 import { createInterface } from 'readline';
 
 import { generate } from './main';
-import { Model } from './model';
+import { Model } from './types';
 
 if (process.stdin.isTTY) {
     // bysquare "file"
@@ -23,7 +23,7 @@ if (process.stdin.isTTY) {
 }
 
 async function version(): Promise<string> {
-    const { version } = await import("./package.json");
+    const { version } = await import("../package.json");
     return `bysquare v${version}`;
 }
 

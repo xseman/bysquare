@@ -1,11 +1,9 @@
-import { Model, MODEL_INDEXED } from './model';
+import { Model, ModelOrdered } from './types';
 
 const lzma = require('lzma-native');
 
 export function generate(model: Model): Promise<string> {
-    const tabbedString: string = createTabbedString(model);
-    const dataWithChecksum = createDataBuffer(tabbedString);
-
+    const dataBufferWithChecksum = tabbedStringWithChecksumBuffer(model);
     const encoder = lzma.createStream('rawEncoder', {
         synchronous: true,
         filters: [{ id: lzma.FILTER_LZMA1 }],
@@ -16,10 +14,10 @@ export function generate(model: Model): Promise<string> {
         data.push(chunk);
     });
 
-    function compress(
-        resolve: (value: string) => void,
-        reject: (reason?: any) => void
-    ): void {
+    const compressPromise = new Promise<string>((resolve, reject): void => {
+        encoder.write(dataBufferWithChecksum, (): void => {
+            encoder.end();
+        });
         encoder.on('error', reject);
         encoder.on('end', (): void => {
             /** (spec 3.5) */
@@ -31,11 +29,11 @@ export function generate(model: Model): Promise<string> {
              * size of the decompressed data (spec 3.11)
              */
             const decompressedSize = Buffer.alloc(2);
-            decompressedSize.writeInt16LE(dataWithChecksum.byteLength);
+            decompressedSize.writeInt16LE(dataBufferWithChecksum.byteLength, 0);
 
             /**
              * Merged binary data (spec 3.15.)
-              */
+             */
             const merged = Buffer.concat([
                 bySquareHeader,
                 decompressedSize,
@@ -50,7 +48,9 @@ export function generate(model: Model): Promise<string> {
             let paddedBinLength = paddedBinString.length;
             const remainder = paddedBinLength % 5;
             if (remainder) {
-                paddedBinString += Array(5 - remainder).fill('0').join('');
+                paddedBinString += Array(5 - remainder)
+                    .fill('0')
+                    .join('');
                 paddedBinLength += 5 - remainder;
             }
 
@@ -60,7 +60,7 @@ export function generate(model: Model): Promise<string> {
              */
             const subst = '0123456789ABCDEFGHIJKLMNOPQRSTUV';
             let output = '';
-            for (let i = 0; i < (paddedBinLength / 5); i++) {
+            for (let i = 0; i < paddedBinLength / 5; i++) {
                 const binStart = 5 * i;
                 const binEnd = 5 * i + 5;
                 const slice = paddedBinString.slice(binStart, binEnd);
@@ -70,13 +70,9 @@ export function generate(model: Model): Promise<string> {
 
             resolve(output);
         });
+    });
 
-        encoder.write(dataWithChecksum, (): void => {
-            encoder.end();
-        });
-    }
-
-    return new Promise<string>(compress);
+    return compressPromise;
 }
 
 /**
@@ -94,9 +90,9 @@ export function createHeader(
         BySquareType: number, Version: number,
         DocumentType: number, Reserved: number
     ] = [
-        0b0000_0000, 0b0000_0000,
-        0b0000_0000, 0b0000_0000
-    ]
+            0b0000_0000, 0b0000_0000,
+            0b0000_0000, 0b0000_0000
+        ]
 ): Buffer {
     const isValid = header.every((nibble) => 0 <= nibble && nibble <= 15);
     if (!isValid) throw new Error();
@@ -104,14 +100,15 @@ export function createHeader(
     const [BySquareType, Version, DocumentType, Reserved] = header;
     /** Combine 4-nibbles to 2-bytes */
     const headerBuffer = Buffer.from([
-        (BySquareType << 4) | Version,
-        (DocumentType << 4) | Reserved,
+        (BySquareType << 4) | (Version << 0),
+        (DocumentType << 4) | (Reserved << 0),
     ]);
 
     return headerBuffer;
 }
 
-export function createDataBuffer(tabbedString: string): Buffer {
+export function tabbedStringWithChecksumBuffer(model: Model): Buffer {
+    const tabbedString = createTabbedString(model);
     const checksum = checksumFromTabbedString(tabbedString);
     const data = Buffer.concat([
         checksum,
@@ -123,20 +120,20 @@ export function createDataBuffer(tabbedString: string): Buffer {
 
 export function checksumFromTabbedString(tabbedString: string): Buffer {
     const crc32 = Buffer.alloc(4);
-    crc32.writeInt32LE(lzma.crc32(tabbedString));
+    crc32.writeInt32LE(lzma.crc32(tabbedString), 0);
 
     return crc32;
 }
 
 export function createTabbedString(model: Model): string {
     /**
-     * - Order keys by specification
-     * - Fill empty values
-     * - Create tabbed string
+     * Order keys by specification
+     * Fill empty values
+     * Transform to tabbed string
      */
-    const tabbedModel = (Object.keys(model) as (keyof Model)[])
+    const tabbedModel: string = (Object.keys(model) as (keyof Model)[])
         .reduce<string[]>((acc, key) => {
-            acc[MODEL_INDEXED[key]] = String(model[key] ?? '');
+            acc[ModelOrdered[key]] = String(model[key] ?? '');
             return acc;
         }, Array<string>(33).fill(''))
         .join('\t');
@@ -148,27 +145,27 @@ export function createModelFromTabbedString(tabbedModel: string): Model {
     const model: Model = tabbedModel
         .split('\t')
         .reduce((acc, value, i) => {
-            const key = MODEL_INDEXED[i] as keyof Model;
+            const key = ModelOrdered[i] as keyof Model;
 
-            /** empty value, continue */
             if (value === '') {
                 return acc;
             }
 
-            if (
-                !!Number(value) &&
-                key === 'Payments' ||
-                key === 'PaymentOptions' ||
-                key === 'Amount' ||
-                key === 'BankAccounts' ||
-                key === 'StandingOrderExt' ||
-                key === 'Day' ||
-                key === 'Month' ||
-                key === 'DirectDebitExt' ||
-                key === 'DirectDebitScheme' ||
-                key === 'DirectDebitType' ||
-                key === 'MaxAmount'
-            ) {
+            const numberKeys: (keyof Model)[] = [
+                'Payments',
+                'PaymentOptions',
+                'Amount',
+                'BankAccounts',
+                'StandingOrderExt',
+                'Day',
+                'Month',
+                'DirectDebitExt',
+                'DirectDebitScheme',
+                'DirectDebitType',
+                'MaxAmount',
+            ];
+
+            if (!!Number(value) && numberKeys.includes(key)) {
                 acc[key] = Number(value);
                 return acc;
             }
@@ -217,17 +214,14 @@ export function parse(qrString: string): Promise<Model> {
         decoder.end();
     });
 
-    function compress(
-        resolve: (value: Model) => void,
-        reject: (reason?: any) => void
-    ): void {
+    const paymentPromise = new Promise<Model>((resolve, reject) => {
         decoder.on('error', reject);
         decoder.on('data', (decompressed: Buffer): void => {
             const checksum = decompressed.slice(0, 4);
             const data = decompressed.slice(4, decompressed.length);
 
             const crc32 = Buffer.alloc(4);
-            crc32.writeInt32LE(lzma.crc32(data));
+            crc32.writeInt32LE(lzma.crc32(data), 0);
             if (!crc32.equals(checksum)) {
                 reject('Checksum conflict');
             }
@@ -236,7 +230,9 @@ export function parse(qrString: string): Promise<Model> {
             const model = createModelFromTabbedString(decoded);
             resolve(model);
         });
-    };
+    });
 
-    return new Promise<Model>(compress);
+    return paymentPromise;
+}
+
 }

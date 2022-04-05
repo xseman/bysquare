@@ -160,13 +160,14 @@ You can also use stdin.
 
 ## How it works
 
-![diagram](./uml/logic.png)
+![diagram](./uml/logic.svg)
 
 ## Resources
 
 - <https://bysquare.com/>
 - <https://devel.cz/otazka/qr-kod-pay-by-square>
 - <https://github.com/matusf/pay-by-square>
+- <https://www.bsqr.co/schema/>
 - <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>
 - <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
 

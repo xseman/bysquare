@@ -35,7 +35,7 @@ npm install --global bysquare
 
 ### `function generate(model: Model): Promise<string>`
 
-**Example (TypeScript)**
+**Example**
 
 ```typescript
 import { generate, Model } from "bysquare";
@@ -57,7 +57,7 @@ generate(model).then((qrString) => {
 
 ### `function parse(qrString: string): Promise<Model>`
 
-**Example (TypeScript)**
+**Example**
 
 ```typescript
 import { parse } from "bysquare";
@@ -119,6 +119,10 @@ You can also use stdin.
 > 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
 ```
 
+## How it works
+
+![diagram](./uml/logic.svg)
+
 ## Model
 
 | Option                           | Type     | Required |
@@ -157,10 +161,6 @@ You can also use stdin.
 | BeneficiaryName                  | `string` | no       |
 | BeneficiaryAddressLine1          | `string` | no       |
 | BeneficiaryAddressLine2          | `string` | no       |
-
-## How it works
-
-![diagram](./uml/logic.svg)
 
 ## Resources
 

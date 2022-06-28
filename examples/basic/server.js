@@ -1,5 +1,6 @@
-const { generate } = require('bysquare');
+const { generate } = require("bysquare");
 
+/** @type {import("bysquare").Model} */
 const model = {
     IBAN: "SK9611000000002918599669",
     Amount: 100.0,
@@ -10,7 +11,6 @@ const model = {
     BankAccounts: 1,
 };
 
-generate(model, (result) => {
-    console.log(result);
-    // Your logic...
+generate(model).then((qrString) => {
+    console.log(qrString);
 });

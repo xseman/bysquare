@@ -5,7 +5,7 @@
         "start": "node server.js"
     },
     "dependencies": {
-        "bysquare": "1.0.7",
+        "bysquare": "1.0.8",
         "express": "^4.17.1"
     }
 }

@@ -3,6 +3,7 @@ const express = require("express");
 
 const app = express();
 
+/** @type {import("bysquare").Model} */
 const model = {
     IBAN: "SK9611000000002918599669",
     Amount: 100.0,

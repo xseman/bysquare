@@ -37,7 +37,7 @@ npm install --global bysquare
 
 ## API
 
-### **generate(model: Model): Promise<string>**
+### **generate(model: Model): Promise\<string>**
 
 ```typescript
 import { generate, parse, Model } from "bysquare";
@@ -58,7 +58,7 @@ generate(model).then((qrString: string) => {
 });
 ```
 
-### **parse(qrString: string): Promise<Model>**
+### **parse(qrString: string): Promise\<Model>**
 
 ```typescript
 import { parse, Model } from "bysquare";
@@ -166,9 +166,9 @@ Versioning
 ----------
 
 - Stash unfinished work
+- Run tests and build app
 - Run the `preversion` script
 - Bump version in `package.json` as requested (patch, minor, major, etc)
-- Build app
 - Run the `version` script
 - Commit and tag
 - Run the `postversion` script

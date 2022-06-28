@@ -17,6 +17,10 @@ other payment regulations.
 This library is un-opinionated. Image generation from qr-code string depends on
 your implementation. See [examples](examples).
 
+## How it works
+
+![diagram](./uml/logic.svg)
+
 ## Install
 
 Node.js
@@ -33,12 +37,10 @@ npm install --global bysquare
 
 ## API
 
-### `function generate(model: Model): Promise<string>`
-
-**Example**
+### **generate(model: Model): Promise<string>**
 
 ```typescript
-import { generate, Model } from "bysquare";
+import { generate, parse, Model } from "bysquare";
 
 const model: Model = {
     IBAN: "SK9611000000002918599669",
@@ -50,39 +52,27 @@ const model: Model = {
     BankAccounts: 1,
 };
 
-generate(model).then((qrString) => {
+generate(model).then((qrString: string) => {
+    // "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000"
     // your logic...
 });
 ```
 
-### `function parse(qrString: string): Promise<Model>`
-
-**Example**
+### **parse(qrString: string): Promise<Model>**
 
 ```typescript
-import { parse } from "bysquare";
+import { parse, Model } from "bysquare";
 
-const generated = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000";
+const qrString = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000"
 
-parse(generated).then((model) => {
-    console.log(model);
-    // {
-    //     IBAN: 'SK9611000000002918599669',
-    //     Amount: 100.0,
-    //     CurrencyCode: "EUR",
-    //     VariableSymbol: "123",
-    //     Payments: 1,
-    //     PaymentOptions: 1,
-    //     BankAccounts: 1,
-    // };
+parse(qrString).then((model: Model) => {
+    // your logic...
 });
 ```
 
-### CLI
+## CLI
 
 You can use json file with valid model to generate qr-string.
-
-**Example**
 
 ```sh
 # example.json
@@ -102,8 +92,6 @@ You can use json file with valid model to generate qr-string.
 
 You can also use stdin.
 
-**Example**
-
 ```sh
 > echo '
     {
@@ -118,10 +106,6 @@ You can also use stdin.
 | bysquare
 > 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
 ```
-
-## How it works
-
-![diagram](./uml/logic.svg)
 
 ## Model
 

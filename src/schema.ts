@@ -1,4 +1,6 @@
 /**
+ * TODO: yup schema, infer interface
+ *
  * Data model
  * (Appendix D, table)
  */

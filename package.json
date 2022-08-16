@@ -23,6 +23,7 @@
 	"scripts": {
 		"build": "rm -rf ./lib; tsc && chmod +x ./lib/cli.js",
 		"test": "npm run build && xv ./lib",
+		"format": "npx prettier --write ./*/**.ts --ignore-path ./.gitignore",
 		"cli:local": "npm link bysquare",
 		"version": "git flow release start v$npm_package_version",
 		"prepare": "",

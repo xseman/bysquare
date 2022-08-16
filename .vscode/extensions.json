@@ -1,6 +1,4 @@
 {
 	"unwantedRecommendations": [],
-	"recommendations": [
-		"EditorConfig.EditorConfig"
-	]
+	"recommendations": ["editorconfig.editorconfig"]
 }

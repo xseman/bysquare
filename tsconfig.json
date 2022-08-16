@@ -1,22 +1,18 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "module": "CommonJS",
-        "moduleResolution": "Node",
-        "downlevelIteration": true,
-        "strict": true,
-        "declaration": true,
-        "noImplicitAny": true,
-        "noImplicitThis": true,
-        "noImplicitReturns": true,
-        "esModuleInterop": true,
-        "resolveJsonModule": true,
-        "outDir": "lib"
-    },
-    "include": [
-        "src/**/*",
-    ],
-    "exclude": [
-        "node_modules"
-    ]
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "CommonJS",
+		"moduleResolution": "Node",
+		"downlevelIteration": true,
+		"strict": true,
+		"declaration": true,
+		"noImplicitAny": true,
+		"noImplicitThis": true,
+		"noImplicitReturns": true,
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"outDir": "lib"
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules"]
 }

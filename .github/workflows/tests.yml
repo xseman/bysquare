@@ -18,19 +18,19 @@ jobs:
             - uses: actions/checkout@v2
             - uses: actions/setup-node@v2
               with:
-                  node-verison: '12'
-                  cache: 'npm'
+                  node-verison: "12"
+                  cache: "npm"
 
             - run: |
-                npm ci
-                npm run build
+                  npm ci
+                  npm run build
 
             - name: Upload build artifacts
               uses: actions/upload-artifact@v2
               with:
-                name: build
-                path: lib
-                retention-days: 0
+                  name: build
+                  path: lib
+                  retention-days: 0
 
             - run: ls -lah .
 
@@ -48,15 +48,15 @@ jobs:
               uses: actions/setup-node@v2
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: 'npm'
+                  cache: "npm"
 
             - name: Download artifacts
               uses: actions/download-artifact@v2
               with:
-               name: build
-               path: lib
+                  name: build
+                  path: lib
 
             - run: ls -lah .
             - run: |
-                npm ci
-                npm test
+                  npm ci
+                  npm test

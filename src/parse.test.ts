@@ -1,7 +1,6 @@
 import { expect, test } from "vitest"
 
-import parse from "./parse"
-import { Model } from "./types"
+import { Model, parse } from "."
 
 test("Parse model from qr-string", async () => {
 	const expectedModel: Model = {

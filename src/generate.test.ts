@@ -1,7 +1,6 @@
 import { expect, test } from "vitest"
 
-import generate from "./generate"
-import { Model } from "./types"
+import { generate, Model } from "."
 
 test("Generate query-string from model", async () => {
 	const model: Model = {

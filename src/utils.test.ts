@@ -1,7 +1,7 @@
 import lzma from "lzma-native"
-
 import { expect, test } from "vitest"
 
+import { Model } from "."
 import {
 	createChecksum,
 	createHeader,
@@ -9,7 +9,6 @@ import {
 	createTabbedString,
 	dataWithChecksum
 } from "./utils"
-import { Model } from "./types"
 
 const model: Model = {
 	IBAN: "SK9611000000002918599669",

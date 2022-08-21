@@ -4,6 +4,7 @@ on:
     push:
         branches:
             - "develop"
+            - "develop/*"
         paths:
             - "src/**.ts"
             - "package.json"
@@ -11,52 +12,25 @@ on:
             - ".github/workflows/**.yml"
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-node@v2
-              with:
-                  node-verison: "12"
-                  cache: "npm"
-
-            - run: |
-                  npm ci
-                  npm run build
-
-            - name: Upload build artifacts
-              uses: actions/upload-artifact@v2
-              with:
-                  name: build
-                  path: lib
-                  retention-days: 0
-
-            - run: ls -lah .
-
     test:
-        needs: build
-        runs-on: ubuntu-latest
+        runs-on: ${{ matrix.os }}
 
         strategy:
             matrix:
-                node-version: [12.x, 14.x, 16.x, 17.x]
+                os: [ubuntu-latest, windows-latest, macos-latest]
+                node-version: [12.x, 14.x, 16.x, 18.x]
 
         steps:
             - uses: actions/checkout@v2
             - name: Use Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v2
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "npm"
 
-            - name: Download artifacts
-              uses: actions/download-artifact@v2
-              with:
-                  name: build
-                  path: lib
-
-            - run: ls -lah .
-            - run: |
+            - name: Build
+              run: |
                   npm ci
+                  npm run build
+                  ls -l ./
+
+            - name: Testing
+              run: |
                   npm test

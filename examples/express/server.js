@@ -1,6 +1,9 @@
-const { generate } = require("bysquare")
+const { generate } = require('bysquare')
+// const { generate } = require('./../../lib')
+
 const express = require("express")
 
+const public = express.static("./public")
 const app = express()
 
 /** @type {import("bysquare").Model} */
@@ -14,7 +17,7 @@ const model = {
 	BankAccounts: 1
 }
 
-app.use("/", express.static("./public"))
+app.use("/", public)
 app.get("/qr", async (_req, res) => {
 	const qrString = await generate(model)
 	res.send(qrString)

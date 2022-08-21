@@ -1,2 +1,3 @@
-export * from './main'
-export * from './schema'
+export * from "./parse"
+export * from "./generate"
+export * from "./types"

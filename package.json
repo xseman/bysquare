@@ -22,9 +22,10 @@
 	"funding": "https://github.com/sponsors/xseman",
 	"scripts": {
 		"build": "tsc && chmod +x ./lib/cli.js",
-		"test": "npm run build && xv ./lib",
+		"test": "vitest",
+		"test:watch": "vitest --watch",
+		"cli:local": "npm run build && npm link bysquare",
 		"format": "npx prettier --write ./*/**.ts --ignore-path ./.gitignore",
-		"cli:local": "npm link bysquare",
 		"version": "git flow release start v$npm_package_version",
 		"prepare": "",
 		"prepublishOnly": "npm run build",
@@ -38,7 +39,7 @@
 		"@types/lzma-native": "^4.0.1",
 		"@types/node": ">= 14.x.x",
 		"typescript": "4.5.5",
-		"xv": "1.1.1"
+		"vitest": "0.22.0"
 	},
 	"files": [
 		"lib",
@@ -48,7 +49,7 @@
 	"main": "lib/index.js",
 	"types": "lib/index.d.ts",
 	"engines": {
-		"node": ">=14.14.x",
+		"node": ">=14.x.x",
 		"npm": ">= 7.0"
 	},
 	"os": [

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-
 import { existsSync, readFileSync } from "fs"
-import { createInterface } from "readline"
+import path from "path"
+import { createInterface, ReadLine } from "readline"
 
-import { generate } from "./main"
-import { Model } from "./schema"
+import generate from "./generate"
+import { Model } from "./types"
 
 if (process.stdin.isTTY) {
 	/** bysquare "file" */
@@ -45,7 +45,7 @@ async function jsonStringToQrString(stdin: string): Promise<string> {
 	return new Promise<string>((resolve, reject) => {
 		try {
 			const data = JSON.parse(stdin) as Model
-			const qrString = generate(data)
+			const qrString: Promise<string> = generate(data)
 			resolve(qrString)
 		} catch (e) {
 			reject(e)
@@ -54,7 +54,7 @@ async function jsonStringToQrString(stdin: string): Promise<string> {
 }
 
 async function handleStdin(): Promise<string> {
-	const readline = createInterface({
+	const readline: ReadLine = createInterface({
 		input: process.stdin,
 		output: process.stdout,
 		terminal: false
@@ -62,22 +62,24 @@ async function handleStdin(): Promise<string> {
 
 	const lines: string[] = []
 	return new Promise<string>((resolve, reject) => {
-		readline.on("line", (line) => {
-			lines.push(line)
-		})
-		readline.on("close", () => {
-			resolve(lines.join(""))
-		})
-		readline.on("SIGINT" /* CTRL+C */, reject)
+		readline
+			.on("line", (line) => {
+				lines.push(line)
+			})
+			.on("close", () => {
+				resolve(lines.join(""))
+			})
+			.on("SIGINT" /* CTRL+C */, reject)
 	})
 }
 
 function help(): string {
+	const exe = path.basename(process.argv[1])
 	return [
 		"Simple Node.js library to generate 'PAY by square' QR string.",
 		"",
 		"Usage:",
-		"   bysquare file",
+		`   ${exe} file`,
 		"",
 		"File:",
 		"   Valid json file",

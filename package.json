@@ -28,7 +28,7 @@
 		"format": "npx prettier --write ./*/**.ts --ignore-path ./.gitignore",
 		"version": "git flow release start v$npm_package_version",
 		"prepare": "",
-		"prepublishOnly": "npm run build",
+		"prepublishOnly": "rm -rf ./lib && npm run build",
 		"preversion": "git checkout develop",
 		"postversion": ""
 	},

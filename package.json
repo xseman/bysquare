@@ -21,7 +21,7 @@
 	"homepage": "https://github.com/xseman/bysquare#readme",
 	"funding": "https://github.com/sponsors/xseman",
 	"scripts": {
-		"prebuild": "rm -rf ./lib 2>/dev/null",
+		"prebuild": "rm -rf ./lib || :",
 		"build": "tsc && chmod +x ./lib/cli.js",
 		"test": "vitest",
 		"test:watch": "vitest --watch",

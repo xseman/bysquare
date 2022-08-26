@@ -21,6 +21,7 @@
 	"homepage": "https://github.com/xseman/bysquare#readme",
 	"funding": "https://github.com/sponsors/xseman",
 	"scripts": {
+		"prebuild": "rm -rf ./lib 2>/dev/null",
 		"build": "tsc && chmod +x ./lib/cli.js",
 		"test": "vitest",
 		"test:watch": "vitest --watch",
@@ -28,7 +29,7 @@
 		"format": "npx prettier --write ./*/**.ts --ignore-path ./.gitignore",
 		"version": "git flow release start v$npm_package_version",
 		"prepare": "",
-		"prepublishOnly": "rm -rf ./lib && npm run build",
+		"prepublishOnly": "npm run build",
 		"preversion": "git checkout develop",
 		"postversion": ""
 	},

@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from "fs"
 import path from "path"
 import { createInterface, ReadLine } from "readline"
 
-import generate from "./generate"
+import { generate } from "./generate"
 import { Model } from "./types"
 
 if (process.stdin.isTTY) {

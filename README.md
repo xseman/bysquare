@@ -39,7 +39,7 @@ npm install --global bysquare
 
 ### **generate(model: Model): Promise\<string>**
 
-```typescript
+```ts
 import { generate, Model, parse } from "bysquare"
 
 const model: Model = {
@@ -58,9 +58,9 @@ generate(model).then((qrString: string) => {
 })
 ```
 
-### **parse(qrString: string): Promise\<Model>**
+### **parse(qr: string): Promise\<Model>**
 
-```typescript
+```ts
 import { Model, parse } from "bysquare"
 
 const qrString = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000"
@@ -68,6 +68,17 @@ const qrString = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUF
 parse(qrString).then((model: Model) => {
 	// your logic...
 })
+```
+
+### **detect(qr: string): Boolean**
+
+```ts
+import { detect } from "bysquare"
+
+const qrString = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000"
+const isBysquare = detect(qrString)
+
+// your logic...
 ```
 
 ## CLI
@@ -86,25 +97,23 @@ You can use json file with valid model to generate qr-string.
 #     "BankAccounts": 1
 # }
 
-> npx bysquare ./example.json
-> 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
+$ npx bysquare ./example.json
+$ 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
 ```
 
 You can also use stdin.
 
 ```sh
-> echo '
-    {
-        "IBAN": "SK9611000000002918599669",
-        "Amount": 100.0,
-        "CurrencyCode": "EUR",
-        "VariableSymbol": "123",
-        "Payments": 1,
-        "PaymentOptions": 1,
-        "BankAccounts": 1
-    }' \
-| bysquare
-> 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
+$ bysquare <<< '{
+	"IBAN": "SK9611000000002918599669",
+	"Amount": 100.0,
+	"CurrencyCode": "EUR",
+	"VariableSymbol": "123",
+	"Payments": 1,
+	"PaymentOptions": 1,
+	"BankAccounts": 1
+}'
+$ 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
 ```
 
 ## Model

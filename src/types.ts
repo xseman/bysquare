@@ -1,6 +1,5 @@
 /**
  * Table 15. PAY by square sequence data model (page 30.)
- * @see{./docs/specification_v1.1.0.pdf}
  */
 export interface Model {
 	/**
@@ -14,8 +13,6 @@ export interface Model {
 	Payments: number
 
 	/**
-	 * Needs to be filled in with “paymentorder” option
-	 *
 	 * Max length 1
 	 */
 	PaymentOptions: number
@@ -84,8 +81,9 @@ export interface Model {
 	IBAN: string
 
 	/**
-	 * Max length 11
 	 * Format ISO 9362, 8 or 11 characters long
+	 *
+	 * Max length 11
 	 */
 	BIC?: string
 

@@ -1,4 +1,7 @@
 {
-	"unwantedRecommendations": [],
-	"recommendations": ["editorconfig.editorconfig"]
+    "recommendations": [
+        "editorconfig.editorconfig",
+        "hediet.vscode-drawio"
+    ],
+	"unwantedRecommendations": []
 }

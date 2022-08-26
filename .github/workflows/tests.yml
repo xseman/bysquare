@@ -27,7 +27,7 @@ jobs:
 
             - name: Build
               run: |
-                  npm ci
+                  npm install --silent
                   npm run build
                   ls -l ./
 

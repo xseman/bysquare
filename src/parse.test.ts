@@ -1,6 +1,9 @@
-import { expect, test } from "vitest"
+import { describe, expect, test } from "vitest"
 
-import { Model, parse } from "."
+import { Model, parse, detect } from "."
+
+// prettier-ignore
+const qrString = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000"
 
 test("Parse model from qr-string", async () => {
 	const expectedModel: Model = {
@@ -14,8 +17,20 @@ test("Parse model from qr-string", async () => {
 	}
 
 	// prettier-ignore
-	const qrString = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000"
 	const parsedModel = await parse(qrString)
 
 	expect(parsedModel).toStrictEqual(expectedModel)
+})
+
+
+describe("QR detector", () => {
+	test("Detect valid QR", () => {
+		const isBysquare = detect(qrString)
+		expect(isBysquare).toBeTruthy()
+	})
+
+	test("Empty string, should be invalid", () => {
+		const isBysquare = detect("")
+		expect(isBysquare).toBeFalsy()
+	})
 })

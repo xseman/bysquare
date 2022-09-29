@@ -1,6 +1,7 @@
 {
 	"license": "MIT",
 	"author": "Filip Seman",
+	"type": "module",
 	"scripts": {
 		"start": "node server.js"
 	},

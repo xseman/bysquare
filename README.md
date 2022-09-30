@@ -21,6 +21,10 @@ your implementation. See [examples](examples).
 
 ![diagram](./docs/uml/logic.svg)
 
+[build]: https://img.shields.io/github/workflow/status/xseman/bysquare/tests
+[version]: https://img.shields.io/npm/v/bysquare
+[license]: https://img.shields.io/github/license/xseman/bysquare
+
 ## Install
 
 Node.js
@@ -37,7 +41,13 @@ npm install --global bysquare
 
 ## API
 
-### **generate(model: Model): Promise\<string>**
+```ts
+generate(model: Model): Promise<string>
+parse(qr: string): Promise<Model>
+detect(qr: string): Boolean
+```
+
+**generate(model: Model): Promise\<string>**
 
 ```ts
 import { generate, Model, parse } from "bysquare"
@@ -52,31 +62,29 @@ const model: Model = {
 	BankAccounts: 1
 }
 
-generate(model).then((qrString: string) => {
-	// "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000"
+generate(model).then((qr: string) => {
 	// your logic...
 })
 ```
 
-### **parse(qr: string): Promise\<Model>**
+**parse(qr: string): Promise\<Model>**
 
 ```ts
 import { Model, parse } from "bysquare"
 
-const qrString = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000"
-
-parse(qrString).then((model: Model) => {
+const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
+parse(qr).then((model: Model) => {
 	// your logic...
 })
 ```
 
-### **detect(qr: string): Boolean**
+**detect(qr: string): Boolean**
 
 ```ts
 import { detect } from "bysquare"
 
-const qrString = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000"
-const isBysquare = detect(qrString)
+const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
+const isBysquare = detect(qr)
 
 // your logic...
 ```
@@ -88,6 +96,7 @@ You can use json file with valid model to generate qr-string.
 ```sh
 # example.json
 # {
+#     "InvoiceID: "random-id",
 #     "IBAN": "SK9611000000002918599669",
 #     "Amount": 100.0,
 #     "CurrencyCode": "EUR",
@@ -98,13 +107,14 @@ You can use json file with valid model to generate qr-string.
 # }
 
 $ npx bysquare ./example.json
-$ 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
+$ 0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0
 ```
 
 You can also use stdin.
 
 ```sh
 $ bysquare <<< '{
+	"InvoiceID": "random-id",
 	"IBAN": "SK9611000000002918599669",
 	"Amount": 100.0,
 	"CurrencyCode": "EUR",
@@ -113,7 +123,7 @@ $ bysquare <<< '{
 	"PaymentOptions": 1,
 	"BankAccounts": 1
 }'
-$ 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000
+$ 0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0
 ```
 
 ## Model
@@ -155,7 +165,7 @@ $ 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKS
 | BeneficiaryAddressLine1           | `string` | no       |
 | BeneficiaryAddressLine2           | `string` | no       |
 
-## Resources
+## Related
 
 - <https://bysquare.com/>
 - <https://devel.cz/otazka/qr-kod-pay-by-square>
@@ -164,15 +174,11 @@ $ 0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKS
 - <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>
 - <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
 
-<!-- Links -->
-
-[build]: https://img.shields.io/github/workflow/status/xseman/bysquare/tests
-[version]: https://img.shields.io/npm/v/bysquare
-[license]: https://img.shields.io/github/license/xseman/bysquare
-
 <!--
 Versioning
 ----------
+
+https://github.com/dherges/npm-version-git-flow
 
 - Stash unfinished work
 - Run tests and build app
@@ -182,6 +188,7 @@ Versioning
 - Commit and tag
 - Run the `postversion` script
 - Checkout to master
-- Push commits and tag, git push, git push --tags
+- Push commits and tag, git push && git push --tags
+- npm publish --dry-run
 - Publish to npm, npm publish
 -->

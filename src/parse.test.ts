@@ -2,30 +2,29 @@ import { describe, expect, test } from "vitest"
 
 import { Model, parse, detect } from "."
 
-// prettier-ignore
-const qrString = "0004G0005ES17OQ09C98Q7ME34TCR3V71LVKD2AE6EGHKR82DKS5NBJ3331VUFQIV0JGMR743UJCKSAKEM9QGVVVOIVH000"
+const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
 
 test("Parse model from qr-string", async () => {
-	const expectedModel: Model = {
+	const parsed = await parse(qr)
+	const base: Model = {
+		InvoiceID: 'random-id',
 		IBAN: "SK9611000000002918599669",
 		Amount: 100.0,
 		CurrencyCode: "EUR",
 		VariableSymbol: "123",
 		Payments: 1,
 		PaymentOptions: 1,
-		BankAccounts: 1
+		BankAccounts: 1,
+		StandingOrderExt: 0,
+		DirectDebitExt: 0
 	}
 
-	// prettier-ignore
-	const parsedModel = await parse(qrString)
-
-	expect(parsedModel).toStrictEqual(expectedModel)
+	expect(parsed).toStrictEqual(base)
 })
-
 
 describe("QR detector", () => {
 	test("Detect valid QR", () => {
-		const isBysquare = detect(qrString)
+		const isBysquare = detect(qr)
 		expect(isBysquare).toBeTruthy()
 	})
 

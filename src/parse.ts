@@ -1,7 +1,93 @@
 import * as lzma from "lzma-native"
 
-import { Model, ModelOrdered } from "."
+import { Model } from "."
 import { SUBST } from "./generate"
+
+enum DecodeSequenceMain {
+	InvoiceID,
+	Payments,
+	PaymentOptions,
+	Amount,
+	CurrencyCode,
+	PaymentDueDate,
+	VariableSymbol,
+	ConstantSymbol,
+	SpecificSymbol,
+	OriginatorsReferenceInformation,
+	PaymentNote,
+	BankAccounts,
+	IBAN,
+	BIC,
+	StandingOrderExt,
+	DirectDebitExt,
+	BeneficiaryName,
+	BeneficiaryAddressLine1,
+	BeneficiaryAddressLine2
+}
+
+enum DecodeSequenceStandingOrder {
+	InvoiceID,
+	Payments,
+	PaymentOptions,
+	Amount,
+	CurrencyCode,
+	PaymentDueDate,
+	VariableSymbol,
+	ConstantSymbol,
+	SpecificSymbol,
+	OriginatorsReferenceInformation,
+	PaymentNote,
+	BankAccounts,
+	IBAN,
+	BIC,
+	StandingOrderExt,
+	Day,
+	Month,
+	Periodicity,
+	LastDate,
+	DirectDebitExt,
+	BeneficiaryName,
+	BeneficiaryAddressLine1,
+	BeneficiaryAddressLine2
+}
+
+enum DecodeOrderSequenceDirectDebit {
+	InvoiceID,
+	Payments,
+	PaymentOptions,
+	Amount,
+	CurrencyCode,
+	PaymentDueDate,
+	VariableSymbol,
+	ConstantSymbol,
+	SpecificSymbol,
+	OriginatorsReferenceInformation,
+	PaymentNote,
+	BankAccounts,
+	IBAN,
+	BIC,
+	StandingOrderExt,
+	DirectDebitExt,
+	DirectDebitScheme,
+	DirectDebitType,
+	VariableSymbol_,
+	SpecificSymbol_,
+	OriginatorsReferenceInformation_,
+	MandateID,
+	CreditorID,
+	ContractID,
+	MaxAmount,
+	ValidTillDate,
+	BeneficiaryName,
+	BeneficiaryAddressLine1,
+	BeneficiaryAddressLine2
+}
+
+type PickByType<T, Value> = {
+	[P in keyof T as T[P] extends Value | undefined ? P : never]: T[P]
+}
+
+type NumericKeys = keyof PickByType<Model, number>
 
 /**
  * Generating by square Code
@@ -9,38 +95,64 @@ import { SUBST } from "./generate"
  * @see {spec 3.14.}
  */
 export function createModel(tabbedString: string): Model {
-	const model: Model = tabbedString
+	const splitted = tabbedString
 		.split("\t")
-		.filter((ch) => !(ch === "\x00"))
-		.reduce((acc, value, i) => {
-			const key = ModelOrdered[i] as keyof Model
+		/** The end of the qr-string might contain a NULL-terminated string */
+		.map((entry) => entry.replace("\x00", ""))
 
-			if (value === "") {
-				return acc
-			}
+	/** The model should contain information if it is extended */
+	const isStandingOrder = splitted[14] === "1"
+	const istDirectDebit = splitted[19] === "1"
 
-			const numericKeys: (keyof Model)[] = [
-				"Payments",
-				"PaymentOptions",
-				"Amount",
-				"BankAccounts",
-				"StandingOrderExt",
-				"Day",
-				"Month",
-				"DirectDebitExt",
-				"DirectDebitScheme",
-				"DirectDebitType",
-				"MaxAmount"
-			]
+	const numericKeys: Array<NumericKeys> = [
+		"Payments",
+		"PaymentOptions",
+		"Amount",
+		"BankAccounts",
+		"StandingOrderExt",
+		"Day",
+		"Month",
+		"DirectDebitExt",
+		"DirectDebitScheme",
+		"DirectDebitType",
+		"MaxAmount"
+	]
 
+	const model = splitted.reduce((acc, value, i) => {
+		if (value === "") {
+			return acc
+		}
+
+		if (!isStandingOrder && !istDirectDebit) {
+			const key = DecodeSequenceMain[i] as NumericKeys
 			if (numericKeys.includes(key)) {
 				acc[key] = Number(value)
 				return acc
 			}
-
 			acc[key] = value
 			return acc
-		}, {} as any)
+		}
+
+		if (isStandingOrder) {
+			const key = DecodeSequenceStandingOrder[i] as NumericKeys
+			if (numericKeys.includes(key)) {
+				acc[key] = Number(value)
+				return acc
+			}
+			acc[key] = value
+			return acc
+		}
+
+		if (istDirectDebit) {
+			const key = DecodeOrderSequenceDirectDebit[i] as NumericKeys
+			if (numericKeys.includes(key)) {
+				acc[key] = Number(value)
+				return acc
+			}
+			acc[key] = value
+			return acc
+		}
+	}, {} as any)
 
 	return model
 }
@@ -52,9 +164,8 @@ export function createModel(tabbedString: string): Model {
  */
 export function parse(qr: string): Promise<Model> {
 	const inversed: Buffer = inverseAlphanumericConversion(qr)
-
-	const headerBysquare = inversed.slice(0, 2)
-	const headerCompression = inversed.slice(2, 4)
+	const _headerBysquare = inversed.slice(0, 2)
+	const _headerCompression = inversed.slice(2, 4)
 	const compressedData = inversed.slice(4)
 
 	// @ts-ignore: Missing decored types
@@ -103,6 +214,17 @@ export function inverseAlphanumericConversion(qr: string): Buffer {
 	return Buffer.from(bytes)
 }
 
+enum Version {
+	/**
+	 * Created this document from original by square specifications
+	 */
+	'2013-02-22' = 0,
+	/**
+	 * Added fields for beneficiary name and address
+	 */
+	'2015-06-24' = 1
+}
+
 /**
  * Simple binary header detector
  *
@@ -119,9 +241,8 @@ export function detect(qr: string): boolean {
 	return [...headerBysquare.toString("hex")]
 		.map((nibble) => parseInt(nibble, 16))
 		.every((nibble, index) => {
-			// check version, actual v1.x.x
-			if (index === 1) {
-				return nibble <= 2
+			if (index === 1 /** version */) {
+				return 0 >= nibble && nibble <= 1
 			}
 
 			return 0 <= nibble && nibble <= 15

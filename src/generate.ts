@@ -1,6 +1,6 @@
 import * as lzma from "lzma-native"
 
-import { Model, ModelOrdered } from "./index"
+import { Model, SequenceOrder } from "./index"
 
 // echo "Hello" | xz --format=raw --lzma1=lc=3,lp=0,pb=2,dict=32KiB --stdout | hexdump -C
 
@@ -69,30 +69,48 @@ export function createChecksum(tabbedInput: string): Buffer {
 export function dataWithChecksum(model: Model): Buffer {
 	const tabbedString = createTabbedString(model)
 	const checksum = createChecksum(tabbedString)
-	const merged = Buffer.concat([
-		checksum,
-		Buffer.from(tabbedString, "utf-8")
-	])
 
-	return merged
+	return Buffer.concat([checksum, Buffer.from(tabbedString, "utf-8")])
 }
 
 /**
- * Order keys by specification
- * Fill empty values
- * Transform to tabbed string
+ * Logic
+ * - Order keys by specification
+ * - Fill empty values
+ * - Transform to tabbed string
  */
 export function createTabbedString(model: Model): string {
-	const tabbedModel: string = (Object.keys(model) as (keyof Model)[])
-		.reduce<string[]>((acc, key) => {
-			acc[ModelOrdered[key]] = String(model[key] ?? "")
+	const tabbed = (Object.keys(model) as (keyof Model)[]).reduce(
+		(acc, key) => {
+			const index = SequenceOrder[key]
+			acc[index] = String(model[key])
 			return acc
-		}, Array<string>(33).fill(""))
-		.join("\t")
+		},
+		Array<string | undefined>(33).fill(undefined)
+	)
 
-	return tabbedModel
+	const notStandingOrder = tabbed[14] === undefined
+	const notDirectDebit = tabbed[19] === undefined
+
+	if (notStandingOrder) {
+		tabbed[14] = String(0)
+		tabbed.splice(15, 4)
+
+		if (notDirectDebit) {
+			tabbed[19 - 4] = String(0)
+			tabbed.splice(20 - 4, 10)
+		}
+
+		return tabbed.join("\t")
+	}
+
+	if (notDirectDebit) {
+		tabbed[19] = String(0)
+		tabbed.splice(20, 10)
+	}
+
+	return tabbed.join("\t")
 }
-
 
 /**
  * The bit sequence is split into 5 bit chunks which are mapped onto the
@@ -100,7 +118,7 @@ export function createTabbedString(model: Model): string {
  *
  * @see {spec 3.13. Table 9 – Encoding table}
  */
- export const SUBST = "0123456789ABCDEFGHIJKLMNOPQRSTUV"
+export const SUBST = "0123456789ABCDEFGHIJKLMNOPQRSTUV"
 
 /**
  * Alphanumeric conversion using Base32hex

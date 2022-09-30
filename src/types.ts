@@ -216,9 +216,10 @@ export interface Model {
 /**
  * Atributes must follow specific order
  * Based on Table 15. PAY by square sequence data model (page 30.)
+ *
  * @see{./docs/specification_v1.1.0.pdf}
  */
-export enum ModelOrdered {
+export enum SequenceOrder {
 	InvoiceID,
 	Payments,
 	PaymentOptions,

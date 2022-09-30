@@ -7,13 +7,16 @@ const app = express()
 
 /** @type {import("bysquare").Model} */
 const model = {
+	InvoiceID: "random-string",
 	IBAN: "SK9611000000002918599669",
 	Amount: 100.0,
 	CurrencyCode: "EUR",
 	VariableSymbol: "123",
 	Payments: 1,
 	PaymentOptions: 1,
-	BankAccounts: 1
+	BankAccounts: 1,
+	BeneficiaryName: "Filip",
+	BeneficiaryAddressLine1: "address"
 }
 
 app.use("/", publicFolder)

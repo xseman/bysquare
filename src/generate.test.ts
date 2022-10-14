@@ -1,14 +1,13 @@
 import * as lzma from "lzma-native"
 import { expect, test } from "vitest"
 
-import { Model, generate } from "./"
+import { Model, generate, PaymentOptions } from "./"
 import {
 	createBysquareHeader,
 	createChecksum,
 	createTabbedString,
 	dataWithChecksum
 } from "./generate"
-import { createModel } from "./parse"
 
 const model: Model = {
 	InvoiceID: "random-id",
@@ -17,11 +16,11 @@ const model: Model = {
 	CurrencyCode: "EUR",
 	VariableSymbol: "123",
 	Payments: 1,
-	PaymentOptions: 1,
+	PaymentOptions: PaymentOptions.PAYMENTORDER,
 	BankAccounts: 1
 }
 
-const tabbedStringBase = [
+const tabbedString = [
 	"random-id",
 	"\t", "1",
 	"\t", "1",
@@ -49,15 +48,15 @@ test("Generate query-string from model", async () => {
 })
 
 test("Create tabbed string from model", () => {
-	const tabbed = createTabbedString(model)
-	expect(tabbed).toBe(tabbedStringBase)
+	const created = createTabbedString(model)
+	expect(created).toEqual(tabbedString)
 })
 
 test("Create checksum", () => {
 	const base: Buffer = Buffer.from([0x90, 0x94, 0x19, 0x21])
-	const checksum: Buffer = createChecksum(tabbedStringBase)
+	const created: Buffer = createChecksum(tabbedString)
 
-	expect(checksum).toStrictEqual(base)
+	expect(created).toStrictEqual(base)
 })
 
 test("Create data with checksum", () => {
@@ -68,15 +67,6 @@ test("Create data with checksum", () => {
 	)
 
 	expect(checksum).toStrictEqual(base)
-})
-
-test("Create model from tabbed string", () => {
-	const created = createModel(tabbedStringBase)
-	expect(created).toStrictEqual({
-		...model,
-		DirectDebitExt: 0,
-		StandingOrderExt: 0
-	})
 })
 
 test("Create binary header, default", () => {

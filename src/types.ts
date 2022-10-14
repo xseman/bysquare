@@ -1,3 +1,45 @@
+export enum PaymentOptions {
+	PAYMENTORDER = 1,
+	STANDINGORDER = 2,
+	DIRECTDEBIT = 3
+}
+
+export enum MonthClassifier {
+	JANUARY = 1,
+	FEBRUARY = 2,
+	MARCH = 4,
+	APRIL = 8,
+	MAY = 16,
+	JUNE = 32,
+	JULY = 64,
+	AUGUST = 128,
+	SEPTEMBER = 256,
+	OCTOBER = 512,
+	NOVEMBER = 1024,
+	DECEMBER = 2048
+}
+
+export enum PeriodicityClassifier {
+	DAILY = "d",
+	WEEKLY = "w",
+	BIWEEKLY = "b",
+	MONTHLY = "m",
+	BIMONTHLY = "B",
+	QUARTERLY = "q",
+	SEMIANNUALLY = "s",
+	ANNUALLY = "a"
+}
+
+export enum DirectDebitType {
+	ONE_OFF = 0,
+	RECURRENT = 1
+}
+
+export enum DirectDebitScheme {
+	OTHER = 0,
+	SEPA = 1
+}
+
 /**
  * Table 15. PAY by square sequence data model (page 30.)
  */
@@ -8,6 +50,9 @@ export interface Model {
 	InvoiceID?: string
 
 	/**
+	 * Appendix E extended beneficiary fields
+	 * Table 16 PAY by square extended fields for bulk payment order
+	 *
 	 * Number of payments
 	 */
 	Payments: number
@@ -15,28 +60,22 @@ export interface Model {
 	/**
 	 * Max length 1
 	 */
-	PaymentOptions: number
+	PaymentOptions: PaymentOptions
+
 	/**
 	 * Encoded with amount payable. This field is not required and can be left
 	 * blank in cases payment amount is not known ­such as donations.
 	 *
-	 * Max length 15
-	 * Format #.########
+	 * Decimal, max length 15
 	 */
 	Amount?: number
 
 	/**
 	 * 3 letter, payment currency code according to ISO 4217
-	 *
-	 * Max length 3
-	 * Representation ISO 4217
 	 */
 	CurrencyCode: keyof typeof CurrencyCode
 
 	/**
-	 * Optional field
-	 *
-	 * Max length 8
 	 * Format YYYYMMDD
 	 */
 	PaymentDueDate?: string
@@ -90,7 +129,7 @@ export interface Model {
 	/**
 	 * Max length 1
 	 */
-	StandingOrderExt?: number
+	StandingOrderExt?: 0 | 1
 
 	/**
 	 * This is the payment day. It‘s meaning depends on the periodicity, meaning
@@ -108,7 +147,7 @@ export interface Model {
 	 *
 	 * Max length 4
 	 */
-	Month?: number
+	Month?: MonthClassifier
 
 	/**
 	 * Periodicity of the payment. All valid options are „Daily“, „Weekly“,
@@ -118,7 +157,7 @@ export interface Model {
 	 *
 	 * Max length 1
 	 */
-	Periodicity?: string
+	Periodicity?: PeriodicityClassifier
 
 	/**
 	 * Defines the day of the last payment of the standing order. After this
@@ -132,15 +171,27 @@ export interface Model {
 	/**
 	 * Max length 1
 	 */
-	DirectDebitExt?: number
+	DirectDebitExt?: 0 | 1
 
 	/**
-	 * This field can have “SEPA” value, if direct debit is using SEPA direct
-	 * debit scheme or “other” when an ordinary direct debit is defined
+	 * If DirectDebitScheme value is 1, which is „SEPA“ than encoded direct
+	 * debit follows SEPA direct debit scheme which means that fields MandateID,
+	 * CreditorID and optional ContractID are used. If direct debit scheme is 0,
+	 * which is „OTHER“ this means no specific direct debit scheme and following
+	 * rules do apply:
+	 *
+	 * a. Creditor is identified via bank accounts
+	 *
+	 * b. Contract between debtor and creditor is identified using one of the
+	 * following two ways: 1. by two optional fields SpecificSymbol and
+	 * VariableSymbol. 2. by one optional field OriginatorsReferenceInformation.
+	 * If SpecificSymbol and VariableSymbol fields or
+	 * OriginatorsReferenceInformation field is filled in DirectDebitExt then
+	 * these fields do apply for the direct debit.
 	 *
 	 * Max length 1
 	 */
-	DirectDebitScheme?: number
+	DirectDebitScheme?: DirectDebitScheme
 
 	/**
 	 * Can be „one­off“ for one time debit or „recurrent“ for repeated debit
@@ -148,7 +199,7 @@ export interface Model {
 	 *
 	 * Max length 1
 	 */
-	DirectDebitType?: number
+	DirectDebitType?: DirectDebitType
 
 	/**
 	 * Max length 10
@@ -182,10 +233,9 @@ export interface Model {
 
 	/**
 	 * Optional field. As most users prefer to set up some maximum amount for
-	 * the direct debit, this can be pre­filled for them.
+	 * the direct debit, this can be pre­-filled for them.
 	 *
-	 * Max length 15
-	 * Format #.########
+	 * Decimal, max length 15
 	 */
 	MaxAmount?: number
 
@@ -198,16 +248,22 @@ export interface Model {
 	ValidTillDate?: string
 
 	/**
+	 * Belongs to the first payment
+	 *
 	 * Max length 70
 	 */
 	BeneficiaryName?: string
 
 	/**
+	 * Belongs to the first payment
+	 *
 	 * Max length 70
 	 */
 	BeneficiaryAddressLine1?: string
 
 	/**
+	 * Belongs to the first payment
+	 *
 	 * Max length 70
 	 */
 	BeneficiaryAddressLine2?: string

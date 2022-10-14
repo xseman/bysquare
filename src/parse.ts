@@ -1,160 +1,214 @@
 import * as lzma from "lzma-native"
 
-import { Model } from "."
 import { SUBST } from "./generate"
-
-enum DecodeSequenceMain {
-	InvoiceID,
-	Payments,
-	PaymentOptions,
-	Amount,
+import {
 	CurrencyCode,
-	PaymentDueDate,
-	VariableSymbol,
-	ConstantSymbol,
-	SpecificSymbol,
-	OriginatorsReferenceInformation,
-	PaymentNote,
-	BankAccounts,
-	IBAN,
-	BIC,
-	StandingOrderExt,
-	DirectDebitExt,
-	BeneficiaryName,
-	BeneficiaryAddressLine1,
-	BeneficiaryAddressLine2
-}
-
-enum DecodeSequenceStandingOrder {
-	InvoiceID,
-	Payments,
-	PaymentOptions,
-	Amount,
-	CurrencyCode,
-	PaymentDueDate,
-	VariableSymbol,
-	ConstantSymbol,
-	SpecificSymbol,
-	OriginatorsReferenceInformation,
-	PaymentNote,
-	BankAccounts,
-	IBAN,
-	BIC,
-	StandingOrderExt,
-	Day,
-	Month,
-	Periodicity,
-	LastDate,
-	DirectDebitExt,
-	BeneficiaryName,
-	BeneficiaryAddressLine1,
-	BeneficiaryAddressLine2
-}
-
-enum DecodeOrderSequenceDirectDebit {
-	InvoiceID,
-	Payments,
-	PaymentOptions,
-	Amount,
-	CurrencyCode,
-	PaymentDueDate,
-	VariableSymbol,
-	ConstantSymbol,
-	SpecificSymbol,
-	OriginatorsReferenceInformation,
-	PaymentNote,
-	BankAccounts,
-	IBAN,
-	BIC,
-	StandingOrderExt,
-	DirectDebitExt,
+	Model,
 	DirectDebitScheme,
 	DirectDebitType,
-	VariableSymbol_,
-	SpecificSymbol_,
-	OriginatorsReferenceInformation_,
-	MandateID,
-	CreditorID,
-	ContractID,
-	MaxAmount,
-	ValidTillDate,
-	BeneficiaryName,
-	BeneficiaryAddressLine1,
-	BeneficiaryAddressLine2
+	PaymentOptions,
+	PeriodicityClassifier
+} from "./index"
+
+export interface ParsedModel {
+	invoiceID: Model["InvoiceID"]
+	/**
+	 * List of payments for a given invoice
+	 */
+	payments: Array<{
+		amount: Model["Amount"]
+		currencyCode: Model["CurrencyCode"]
+		paymentDueDate?: Model["PaymentDueDate"]
+		variableSymbol?: Model["VariableSymbol"]
+		constantSymbol?: Model["ConstantSymbol"]
+		specificSymbol?: Model["SpecificSymbol"]
+		originatorsReferenceInformation?: Model["OriginatorsReferenceInformation"]
+		paymentNote?: Model["PaymentNote"]
+		/**
+		 * List of accounts to which the payment can be made
+		 */
+		bankAccounts: Array<{
+			iban: Model["IBAN"]
+			bic?: Model["BIC"]
+		}>
+		/**
+		 * Standing order extension
+		 */
+		standingOrder?: {
+			day?: Model["Day"]
+			month?: Model["Month"]
+			periodicity?: Model["Periodicity"]
+			lastDate?: Model["LastDate"]
+		}
+		/**
+		 * Direct debit extension
+		 */
+		directDebit?: {
+			directDebitScheme?: Model["DirectDebitScheme"]
+			directDebitType?: Model["DirectDebitType"]
+			variableSymbol?: Model["VariableSymbol"]
+			specificSymbol?: Model["SpecificSymbol"]
+			originatorsReferenceInformation?: Model["OriginatorsReferenceInformation_"]
+			mandateID?: Model["MandateID"]
+			creditorID?: Model["CreditorID"]
+			contractID?: Model["ContractID"]
+			maxAmount?: Model["MaxAmount"]
+			validTillDate?: Model["ValidTillDate"]
+		}
+		beneficiary?: {
+			name: Model["BeneficiaryName"]
+			addressLine1: Model["BeneficiaryAddressLine1"]
+			addressLine2: Model["BeneficiaryAddressLine2"]
+		}
+	}>
 }
 
-type PickByType<T, Value> = {
-	[P in keyof T as T[P] extends Value | undefined ? P : never]: T[P]
-}
-
-type NumericKeys = keyof PickByType<Model, number>
+const INVOICE_ORDER = 0
+const NUMBER_OF_PAYMENTS_ORDER = 1
 
 /**
  * Generating by square Code
  *
  * @see {spec 3.14.}
  */
-export function createModel(tabbedString: string): Model {
-	const splitted = tabbedString
+export function assemble(tabbed: string): ParsedModel {
+	const fields: string[] = tabbed
 		.split("\t")
 		/** The end of the qr-string might contain a NULL-terminated string */
 		.map((entry) => entry.replace("\x00", ""))
 
-	/** The model should contain information if it is extended */
-	const isStandingOrder = splitted[14] === "1"
-	const istDirectDebit = splitted[19] === "1"
+	const invoiceId = fields[INVOICE_ORDER]
+	const numberOfPayments = Number(fields[NUMBER_OF_PAYMENTS_ORDER])
 
-	const numericKeys: Array<NumericKeys> = [
-		"Payments",
-		"PaymentOptions",
-		"Amount",
-		"BankAccounts",
-		"StandingOrderExt",
-		"Day",
-		"Month",
-		"DirectDebitExt",
-		"DirectDebitScheme",
-		"DirectDebitType",
-		"MaxAmount"
-	]
+	/**
+	 * For the first payment, it always starts at index 2 of the parsed tabbed
+	 * string
+	 */
+	let order = 2
 
-	const model = splitted.reduce((acc, value, i) => {
-		if (value === "") {
-			return acc
+	const output: ParsedModel = {
+		invoiceID: !!invoiceId.length ? invoiceId : undefined,
+		payments: []
+	}
+
+	for (let i = 0; i < numberOfPayments; i++) {
+		const paymentOptions = Number(fields[order++ + i]) as PaymentOptions
+		const ammount = fields[order++ + i]
+
+		const currencyCode = fields[order++ + i]
+		if (currencyCode.length !== 3) {
+			throw new Error("Invalid currency code")
 		}
 
-		if (!isStandingOrder && !istDirectDebit) {
-			const key = DecodeSequenceMain[i] as NumericKeys
-			if (numericKeys.includes(key)) {
-				acc[key] = Number(value)
-				return acc
+		const paymentDueDate = fields[order++ + i]
+		const variableSymbol = fields[order++ + i]
+		const constantSymbol = fields[order++ + i]
+		const specificSymbol = fields[order++ + i]
+		const originatorsReferenceInformation = fields[order++ + i]
+		const paymentNote = fields[order++ + i]
+
+		output.payments.push({
+			amount: !!ammount.length
+				? Number(ammount)
+				: undefined,
+
+			currencyCode: currencyCode as keyof typeof CurrencyCode,
+
+			paymentDueDate: !!paymentDueDate.length
+				? paymentDueDate
+				: undefined,
+
+			variableSymbol: !!variableSymbol.length
+				? variableSymbol
+				: undefined,
+
+			constantSymbol: !!constantSymbol.length
+				? constantSymbol
+				: undefined,
+
+			specificSymbol: !!specificSymbol.length
+				? specificSymbol
+				: undefined,
+
+			originatorsReferenceInformation: !!originatorsReferenceInformation.length
+				? originatorsReferenceInformation
+				: undefined,
+
+			paymentNote: !!paymentNote.length
+				? paymentNote
+				: undefined,
+
+			bankAccounts: []
+		})
+
+		const numberOfBankAccounts = Number(fields[order++ + i])
+		for (let j = 0; j < numberOfBankAccounts; j++) {
+			const iban = fields[order++ + i]
+			if (iban.length === 0) {
+				throw new Error("Missing IBAN")
 			}
-			acc[key] = value
-			return acc
+
+			const bic = fields[order++ + i]
+
+			output.payments[i].bankAccounts.push({
+				iban: iban,
+				bic: bic.length ? bic : undefined
+			})
 		}
 
-		if (isStandingOrder) {
-			const key = DecodeSequenceStandingOrder[i] as NumericKeys
-			if (numericKeys.includes(key)) {
-				acc[key] = Number(value)
-				return acc
-			}
-			acc[key] = value
-			return acc
+		switch (paymentOptions) {
+			case PaymentOptions.PAYMENTORDER:
+				order += 2 /** skip 2 fields */
+				break
+
+			case PaymentOptions.STANDINGORDER:
+				output.payments[i].standingOrder = {
+					day: Number(fields[order++ + i]),
+					month: Number(fields[order++ + i]),
+					periodicity: fields[order++ + i] as PeriodicityClassifier,
+					lastDate: fields[order++ + i]
+				}
+				break
+
+			case PaymentOptions.DIRECTDEBIT:
+				output.payments[i].directDebit = {
+					directDebitScheme: Number(fields[order++ + i]) as DirectDebitScheme,
+					directDebitType: Number(fields[order++ + i]) as DirectDebitType,
+					variableSymbol: fields[order++ + i],
+					specificSymbol: fields[order++ + i],
+					originatorsReferenceInformation: fields[order++ + i],
+					mandateID: fields[order++ + i],
+					creditorID: fields[order++ + i],
+					contractID: fields[order++ + i],
+					maxAmount: Number(fields[order++ + i]),
+					validTillDate: fields[order++ + i]
+				}
+
+			default:
+				throw new Error("Unknown payment option")
+		}
+	}
+
+	/**
+	 * Beneficiary list bysquare v1.1
+	 */
+	for (let i = 0; i < numberOfPayments; i++) {
+		const name = fields[order++ + i]
+		const addressLine1 = fields[order++ + i]
+		const addressLine2 = fields[order++ + i]
+
+		if (!name && !addressLine1 && !addressLine2) {
+			break
 		}
 
-		if (istDirectDebit) {
-			const key = DecodeOrderSequenceDirectDebit[i] as NumericKeys
-			if (numericKeys.includes(key)) {
-				acc[key] = Number(value)
-				return acc
-			}
-			acc[key] = value
-			return acc
+		output.payments[i].beneficiary = {
+			name: name.length ? name : undefined,
+			addressLine1: addressLine1.length ? addressLine1 : undefined,
+			addressLine2: addressLine2.length ? addressLine2 : undefined
 		}
-	}, {} as any)
+	}
 
-	return model
+	return output
 }
 
 /**
@@ -162,7 +216,7 @@ export function createModel(tabbedString: string): Model {
  *
  * @see {spec 3.16.}
  */
-export function parse(qr: string): Promise<Model> {
+export function parse(qr: string): Promise<ParsedModel> {
 	const inversed: Buffer = inverseAlphanumericConversion(qr)
 	const _headerBysquare = inversed.slice(0, 2)
 	const _headerCompression = inversed.slice(2, 4)
@@ -175,13 +229,13 @@ export function parse(qr: string): Promise<Model> {
 		filters: [{ id: lzma.FILTER_LZMA1 }]
 	})
 
-	return new Promise<Model>((resolve, reject) => {
+	return new Promise<ParsedModel>((resolve, reject) => {
 		decoder
 			.on("error", reject)
 			.on("data", (decompress: Buffer): void => {
 				const _crc32: Buffer = decompress.slice(0, 4)
-				const data = decompress.slice(4).toString()
-				const model = createModel(data)
+				const tabbed: string = decompress.slice(4).toString()
+				const model: ParsedModel = assemble(tabbed)
 
 				resolve(model)
 			})
@@ -214,15 +268,23 @@ export function inverseAlphanumericConversion(qr: string): Buffer {
 	return Buffer.from(bytes)
 }
 
+/**
+ * Mapping semantic version to encoded version number, header 4-bits
+ *
+ * It's a bit silly to limit the version number to 4-bit, if they keep
+ * increasing the version number, the latest possible mapped value is 16
+ */
 enum Version {
 	/**
+	 * 2013-02-22
 	 * Created this document from original by square specifications
 	 */
-	'2013-02-22' = 0,
+	"1.0.0" = 0,
 	/**
+	 * 2015-06-24
 	 * Added fields for beneficiary name and address
 	 */
-	'2015-06-24' = 1
+	"1.1.0" = 1
 }
 
 /**

@@ -93,20 +93,22 @@ export function createTabbedString(model: Model): string {
 	const notDirectDebit = tabbed[19] === undefined
 
 	if (notStandingOrder) {
+		const attributesLength = 4
 		tabbed[14] = String(0)
-		tabbed.splice(15, 4)
+		tabbed.splice(15, attributesLength)
 
 		if (notDirectDebit) {
-			tabbed[19 - 4] = String(0)
-			tabbed.splice(20 - 4, 10)
+			tabbed[19 - attributesLength] = String(0)
+			tabbed.splice(20 - attributesLength, 10)
 		}
 
 		return tabbed.join("\t")
 	}
 
 	if (notDirectDebit) {
+		const attributesLength = 10
 		tabbed[19] = String(0)
-		tabbed.splice(20, 10)
+		tabbed.splice(20, attributesLength)
 	}
 
 	return tabbed.join("\t")

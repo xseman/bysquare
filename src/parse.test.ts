@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 
-import { parse, detect } from "."
-import { assemble, ParsedModel } from "./parse"
+import { detect, parse, ParsedModel } from "."
+import { assemble } from "./parse"
 
 const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
 

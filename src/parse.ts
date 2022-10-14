@@ -3,65 +3,12 @@ import * as lzma from "lzma-native"
 import { SUBST } from "./generate"
 import {
 	CurrencyCode,
-	Model,
 	DirectDebitScheme,
 	DirectDebitType,
+	ParsedModel,
 	PaymentOptions,
 	PeriodicityClassifier
 } from "./index"
-
-export interface ParsedModel {
-	invoiceID: Model["InvoiceID"]
-	/**
-	 * List of payments for a given invoice
-	 */
-	payments: Array<{
-		amount: Model["Amount"]
-		currencyCode: Model["CurrencyCode"]
-		paymentDueDate?: Model["PaymentDueDate"]
-		variableSymbol?: Model["VariableSymbol"]
-		constantSymbol?: Model["ConstantSymbol"]
-		specificSymbol?: Model["SpecificSymbol"]
-		originatorsReferenceInformation?: Model["OriginatorsReferenceInformation"]
-		paymentNote?: Model["PaymentNote"]
-		/**
-		 * List of accounts to which the payment can be made
-		 */
-		bankAccounts: Array<{
-			iban: Model["IBAN"]
-			bic?: Model["BIC"]
-		}>
-		/**
-		 * Standing order extension
-		 */
-		standingOrder?: {
-			day?: Model["Day"]
-			month?: Model["Month"]
-			periodicity?: Model["Periodicity"]
-			lastDate?: Model["LastDate"]
-		}
-		/**
-		 * Direct debit extension
-		 */
-		directDebit?: {
-			directDebitScheme?: Model["DirectDebitScheme"]
-			directDebitType?: Model["DirectDebitType"]
-			variableSymbol?: Model["VariableSymbol"]
-			specificSymbol?: Model["SpecificSymbol"]
-			originatorsReferenceInformation?: Model["OriginatorsReferenceInformation_"]
-			mandateID?: Model["MandateID"]
-			creditorID?: Model["CreditorID"]
-			contractID?: Model["ContractID"]
-			maxAmount?: Model["MaxAmount"]
-			validTillDate?: Model["ValidTillDate"]
-		}
-		beneficiary?: {
-			name: Model["BeneficiaryName"]
-			addressLine1: Model["BeneficiaryAddressLine1"]
-			addressLine2: Model["BeneficiaryAddressLine2"]
-		}
-	}>
-}
 
 const INVOICE_ORDER = 0
 const NUMBER_OF_PAYMENTS_ORDER = 1

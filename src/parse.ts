@@ -41,12 +41,10 @@ export function assemble(tabbed: string): ParsedModel {
 	for (let i = 0; i < numberOfPayments; i++) {
 		const paymentOptions = Number(fields[order++ + i]) as PaymentOptions
 		const ammount = fields[order++ + i]
-
 		const currencyCode = fields[order++ + i]
 		if (currencyCode.length !== 3) {
 			throw new Error("Invalid currency code")
 		}
-
 		const paymentDueDate = fields[order++ + i]
 		const variableSymbol = fields[order++ + i]
 		const constantSymbol = fields[order++ + i]
@@ -58,33 +56,25 @@ export function assemble(tabbed: string): ParsedModel {
 			amount: !!ammount.length
 				? Number(ammount)
 				: undefined,
-
 			currencyCode: currencyCode as keyof typeof CurrencyCode,
-
 			paymentDueDate: !!paymentDueDate.length
 				? paymentDueDate
 				: undefined,
-
 			variableSymbol: !!variableSymbol.length
 				? variableSymbol
 				: undefined,
-
 			constantSymbol: !!constantSymbol.length
 				? constantSymbol
 				: undefined,
-
 			specificSymbol: !!specificSymbol.length
 				? specificSymbol
 				: undefined,
-
 			originatorsReferenceInformation: !!originatorsReferenceInformation.length
 				? originatorsReferenceInformation
 				: undefined,
-
 			paymentNote: !!paymentNote.length
 				? paymentNote
 				: undefined,
-
 			bankAccounts: []
 		})
 
@@ -104,11 +94,11 @@ export function assemble(tabbed: string): ParsedModel {
 		}
 
 		switch (paymentOptions) {
-			case PaymentOptions.PAYMENTORDER:
+			case PaymentOptions.PaymentOrder:
 				order += 2 /** skip 2 fields */
 				break
 
-			case PaymentOptions.STANDINGORDER:
+			case PaymentOptions.StandingOrder:
 				output.payments[i].standingOrder = {
 					day: Number(fields[order++ + i]),
 					month: Number(fields[order++ + i]),

@@ -1,43 +1,43 @@
 export enum PaymentOptions {
-	PAYMENTORDER = 1,
-	STANDINGORDER = 2,
+	PaymentOrder = 1,
+	StandingOrder = 2,
 	DIRECTDEBIT = 3
 }
 
 export enum MonthClassifier {
-	JANUARY = 1,
-	FEBRUARY = 2,
-	MARCH = 4,
-	APRIL = 8,
-	MAY = 16,
-	JUNE = 32,
-	JULY = 64,
-	AUGUST = 128,
-	SEPTEMBER = 256,
-	OCTOBER = 512,
-	NOVEMBER = 1024,
-	DECEMBER = 2048
+	January = 1,
+	February = 2,
+	March = 4,
+	April = 8,
+	May = 16,
+	June = 32,
+	July = 64,
+	August = 128,
+	September = 256,
+	October = 512,
+	November = 1024,
+	December = 2048
 }
 
 export enum PeriodicityClassifier {
-	DAILY = "d",
-	WEEKLY = "w",
-	BIWEEKLY = "b",
-	MONTHLY = "m",
-	BIMONTHLY = "B",
-	QUARTERLY = "q",
-	SEMIANNUALLY = "s",
-	ANNUALLY = "a"
+	Daily = "d",
+	Weekly = "w",
+	Biweekly = "b",
+	Monthly = "m",
+	Bimonthly = "B",
+	Quarterly = "q",
+	Semiannually = "s",
+	Annually = "a"
 }
 
 export enum DirectDebitType {
-	ONE_OFF = 0,
-	RECURRENT = 1
+	OneOff = 0,
+	Recurrent = 1
 }
 
 export enum DirectDebitScheme {
-	OTHER = 0,
-	SEPA = 1
+	Other = 0,
+	Sepa = 1
 }
 
 /**

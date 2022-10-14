@@ -16,7 +16,7 @@ const model: Model = {
 	CurrencyCode: "EUR",
 	VariableSymbol: "123",
 	Payments: 1,
-	PaymentOptions: PaymentOptions.PAYMENTORDER,
+	PaymentOptions: PaymentOptions.PaymentOrder,
 	BankAccounts: 1
 }
 

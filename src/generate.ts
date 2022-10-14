@@ -1,6 +1,6 @@
 import * as lzma from "lzma-native"
 
-import { Model, SequenceOrder } from "./index"
+import { Model, SequenceOrder, SUBST } from "./index"
 
 // echo "Hello" | xz --format=raw --lzma1=lc=3,lp=0,pb=2,dict=32KiB --stdout | hexdump -C
 
@@ -113,14 +113,6 @@ export function createTabbedString(model: Model): string {
 
 	return tabbed.join("\t")
 }
-
-/**
- * The bit sequence is split into 5 bit chunks which are mapped onto the
- * characters
- *
- * @see {spec 3.13. Table 9 – Encoding table}
- */
-export const SUBST = "0123456789ABCDEFGHIJKLMNOPQRSTUV"
 
 /**
  * Alphanumeric conversion using Base32hex

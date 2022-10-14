@@ -1,13 +1,13 @@
 import * as lzma from "lzma-native"
 
-import { SUBST } from "./generate"
 import {
 	CurrencyCode,
 	DirectDebitScheme,
 	DirectDebitType,
 	ParsedModel,
 	PaymentOptions,
-	PeriodicityClassifier
+	PeriodicityClassifier,
+	SUBST
 } from "./index"
 
 const INVOICE_ORDER = 0

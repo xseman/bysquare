@@ -1,3 +1,11 @@
+/**
+ * The bit sequence is split into 5 bit chunks which are mapped onto the
+ * characters
+ *
+ * @see {spec 3.13. Table 9 – Encoding table}
+ */
+ export const SUBST = "0123456789ABCDEFGHIJKLMNOPQRSTUV"
+
 export enum PaymentOptions {
 	PaymentOrder = 1,
 	StandingOrder = 2,

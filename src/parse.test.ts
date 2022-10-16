@@ -29,29 +29,8 @@ const tabbedString = [
 
 test("Parse model from qr-string", async () => {
 	const parsed = await parse(qr)
-	const expected: ParsedModel = {
-		invoiceID: "random-id",
-		payments: [
-			{
-				amount: 100,
-				currencyCode: "EUR",
-				variableSymbol: "123",
-				bankAccounts: [
-					{
-						iban: "SK9611000000002918599669",
-					}
-				]
-			}
-		]
-	}
-
-	expect(parsed).toEqual(expected)
-})
-
-test("Create model from tabbed string", () => {
-	const assembed = assemble(tabbedString)
-	expect(assembed).toEqual({
-		invoiceID: "random-id",
+	expect(parsed).toEqual({
+		invoiceId: "random-id",
 		payments: [
 			{
 				amount: 100,
@@ -60,7 +39,22 @@ test("Create model from tabbed string", () => {
 				bankAccounts: [{ iban: "SK9611000000002918599669" }]
 			}
 		]
-	})
+	} as ParsedModel)
+})
+
+test("Create model from tabbed string", () => {
+	const assembed = assemble(tabbedString)
+	expect(assembed).toEqual({
+		invoiceId: "random-id",
+		payments: [
+			{
+				amount: 100,
+				currencyCode: "EUR",
+				variableSymbol: "123",
+				bankAccounts: [{ iban: "SK9611000000002918599669" }]
+			}
+		]
+	} as ParsedModel)
 })
 
 describe("QR detector", () => {

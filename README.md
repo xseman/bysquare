@@ -43,7 +43,7 @@ npm install --global bysquare
 
 ```ts
 generate(model: Model): Promise<string>
-parse(qr: string): Promise<Model>
+parse(qr: string): Promise<ParsedModel>
 detect(qr: string): Boolean
 ```
 

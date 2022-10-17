@@ -1,4 +1,73 @@
 /**
+ * The bit sequence is split into 5 bit chunks which are mapped onto the
+ * characters
+ *
+ * @see {spec 3.13. Table 9 – Encoding table}
+ */
+export const SUBST = "0123456789ABCDEFGHIJKLMNOPQRSTUV"
+
+/**
+ * Mapping semantic version to encoded version number, header 4-bits
+ *
+ * It's a bit silly to limit the version number to 4-bit, if they keep
+ * increasing the version number, the latest possible mapped value is 16
+ */
+enum Version {
+	/**
+	 * 2013-02-22
+	 * Created this document from original by square specifications
+	 */
+	"1.0.0" = 0,
+	/**
+	 * 2015-06-24
+	 * Added fields for beneficiary name and address
+	 */
+	"1.1.0" = 1
+}
+
+export enum PaymentOptions {
+	PaymentOrder = 1,
+	StandingOrder = 2,
+	DirectDebit = 3
+}
+
+export enum MonthClassifier {
+	January = 1,
+	February = 2,
+	March = 4,
+	April = 8,
+	May = 16,
+	June = 32,
+	July = 64,
+	August = 128,
+	September = 256,
+	October = 512,
+	November = 1024,
+	December = 2048
+}
+
+export enum PeriodicityClassifier {
+	Daily = "d",
+	Weekly = "w",
+	Biweekly = "b",
+	Monthly = "m",
+	Bimonthly = "B",
+	Quarterly = "q",
+	Semiannually = "s",
+	Annually = "a"
+}
+
+export enum DirectDebitType {
+	OneOff = 0,
+	Recurrent = 1
+}
+
+export enum DirectDebitScheme {
+	Other = 0,
+	Sepa = 1
+}
+
+/**
  * Table 15. PAY by square sequence data model (page 30.)
  */
 export interface Model {
@@ -8,6 +77,9 @@ export interface Model {
 	InvoiceID?: string
 
 	/**
+	 * Appendix E extended beneficiary fields
+	 * Table 16 PAY by square extended fields for bulk payment order
+	 *
 	 * Number of payments
 	 */
 	Payments: number
@@ -15,28 +87,22 @@ export interface Model {
 	/**
 	 * Max length 1
 	 */
-	PaymentOptions: number
+	PaymentOptions: PaymentOptions
+
 	/**
 	 * Encoded with amount payable. This field is not required and can be left
 	 * blank in cases payment amount is not known ­such as donations.
 	 *
-	 * Max length 15
-	 * Format #.########
+	 * Decimal, max length 15
 	 */
 	Amount?: number
 
 	/**
 	 * 3 letter, payment currency code according to ISO 4217
-	 *
-	 * Max length 3
-	 * Representation ISO 4217
 	 */
 	CurrencyCode: keyof typeof CurrencyCode
 
 	/**
-	 * Optional field
-	 *
-	 * Max length 8
 	 * Format YYYYMMDD
 	 */
 	PaymentDueDate?: string
@@ -90,7 +156,7 @@ export interface Model {
 	/**
 	 * Max length 1
 	 */
-	StandingOrderExt?: number
+	StandingOrderExt?: 0 | 1
 
 	/**
 	 * This is the payment day. It‘s meaning depends on the periodicity, meaning
@@ -108,7 +174,7 @@ export interface Model {
 	 *
 	 * Max length 4
 	 */
-	Month?: number
+	Month?: MonthClassifier
 
 	/**
 	 * Periodicity of the payment. All valid options are „Daily“, „Weekly“,
@@ -118,13 +184,12 @@ export interface Model {
 	 *
 	 * Max length 1
 	 */
-	Periodicity?: string
+	Periodicity?: PeriodicityClassifier
 
 	/**
 	 * Defines the day of the last payment of the standing order. After this
 	 * date, standing order is cancelled.
 	 *
-	 * Max length 8
 	 * Format YYYYMMDD
 	 */
 	LastDate?: string
@@ -132,15 +197,27 @@ export interface Model {
 	/**
 	 * Max length 1
 	 */
-	DirectDebitExt?: number
+	DirectDebitExt?: 0 | 1
 
 	/**
-	 * This field can have “SEPA” value, if direct debit is using SEPA direct
-	 * debit scheme or “other” when an ordinary direct debit is defined
+	 * If DirectDebitScheme value is 1, which is „SEPA“ than encoded direct
+	 * debit follows SEPA direct debit scheme which means that fields MandateID,
+	 * CreditorID and optional ContractID are used. If direct debit scheme is 0,
+	 * which is „OTHER“ this means no specific direct debit scheme and following
+	 * rules do apply:
+	 *
+	 * a. Creditor is identified via bank accounts
+	 *
+	 * b. Contract between debtor and creditor is identified using one of the
+	 * following two ways: 1. by two optional fields SpecificSymbol and
+	 * VariableSymbol. 2. by one optional field OriginatorsReferenceInformation.
+	 * If SpecificSymbol and VariableSymbol fields or
+	 * OriginatorsReferenceInformation field is filled in DirectDebitExt then
+	 * these fields do apply for the direct debit.
 	 *
 	 * Max length 1
 	 */
-	DirectDebitScheme?: number
+	DirectDebitScheme?: DirectDebitScheme
 
 	/**
 	 * Can be „one­off“ for one time debit or „recurrent“ for repeated debit
@@ -148,7 +225,7 @@ export interface Model {
 	 *
 	 * Max length 1
 	 */
-	DirectDebitType?: number
+	DirectDebitType?: DirectDebitType
 
 	/**
 	 * Max length 10
@@ -182,10 +259,9 @@ export interface Model {
 
 	/**
 	 * Optional field. As most users prefer to set up some maximum amount for
-	 * the direct debit, this can be pre­filled for them.
+	 * the direct debit, this can be pre­-filled for them.
 	 *
-	 * Max length 15
-	 * Format #.########
+	 * Decimal, max length 15
 	 */
 	MaxAmount?: number
 
@@ -198,19 +274,66 @@ export interface Model {
 	ValidTillDate?: string
 
 	/**
+	 * Belongs to the first payment
+	 *
 	 * Max length 70
 	 */
 	BeneficiaryName?: string
 
 	/**
+	 * Belongs to the first payment
+	 *
 	 * Max length 70
 	 */
 	BeneficiaryAddressLine1?: string
 
 	/**
+	 * Belongs to the first payment
+	 *
 	 * Max length 70
 	 */
 	BeneficiaryAddressLine2?: string
+}
+
+export interface ParsedModel {
+	invoiceId: Model["InvoiceID"]
+	payments: Array<{
+		amount: Model["Amount"]
+		currencyCode: Model["CurrencyCode"]
+		paymentDueDate?: Model["PaymentDueDate"]
+		variableSymbol?: Model["VariableSymbol"]
+		constantSymbol?: Model["ConstantSymbol"]
+		specificSymbol?: Model["SpecificSymbol"]
+		originatorsReferenceInformation?: Model["OriginatorsReferenceInformation"]
+		paymentNote?: Model["PaymentNote"]
+		bankAccounts: Array<{
+			iban: Model["IBAN"]
+			bic?: Model["BIC"]
+		}>
+		standingOrder?: {
+			day?: Model["Day"]
+			month?: Model["Month"]
+			periodicity?: Model["Periodicity"]
+			lastDate?: Model["LastDate"]
+		}
+		directDebit?: {
+			directDebitScheme?: Model["DirectDebitScheme"]
+			directDebitType?: Model["DirectDebitType"]
+			variableSymbol?: Model["VariableSymbol"]
+			specificSymbol?: Model["SpecificSymbol"]
+			originatorsReferenceInformation?: Model["OriginatorsReferenceInformation_"]
+			mandateId?: Model["MandateID"]
+			creditorId?: Model["CreditorID"]
+			contractId?: Model["ContractID"]
+			maxAmount?: Model["MaxAmount"]
+			validTillDate?: Model["ValidTillDate"]
+		}
+		beneficiary?: {
+			name?: Model["BeneficiaryName"]
+			addressLine1?: Model["BeneficiaryAddressLine1"]
+			addressLine2?: Model["BeneficiaryAddressLine2"]
+		}
+	}>
 }
 
 /**

@@ -43,14 +43,14 @@ npm install --global bysquare
 
 ```ts
 generate(model: Model): Promise<string>
-parse(qr: string): Promise<Model>
+parse(qr: string): Promise<ParsedModel>
 detect(qr: string): Boolean
 ```
 
 **generate(model: Model): Promise\<string>**
 
 ```ts
-import { generate, Model, parse } from "bysquare"
+import { generate, Model, parse, PaymentOptions } from "bysquare"
 
 const model: Model = {
 	IBAN: "SK9611000000002918599669",
@@ -58,7 +58,7 @@ const model: Model = {
 	CurrencyCode: "EUR",
 	VariableSymbol: "123",
 	Payments: 1,
-	PaymentOptions: 1,
+	PaymentOptions: PaymentOptions.PaymentOrder,
 	BankAccounts: 1
 }
 
@@ -67,13 +67,13 @@ generate(model).then((qr: string) => {
 })
 ```
 
-**parse(qr: string): Promise\<Model>**
+**parse(qr: string): Promise\<ParsedModel>**
 
 ```ts
-import { Model, parse } from "bysquare"
+import { ParsedModel, parse } from "bysquare"
 
 const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
-parse(qr).then((model: Model) => {
+parse(qr).then((model: ParsedModel) => {
 	// your logic...
 })
 ```
@@ -125,45 +125,6 @@ $ bysquare <<< '{
 }'
 $ 0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0
 ```
-
-## Model
-
-| Option                            | Type     | Required |
-| --------------------------------- | -------- | -------- |
-| InvoiceID                         | `string` | no       |
-| Payments                          | `number` | yes      |
-| PaymentOptions                    | `number` | yes      |
-| Amount                            | `number` | no       |
-| CurrencyCode                      | `string` | yes      |
-| PaymentDueDate                    | `string` | no       |
-| VariableSymbol                    | `string` | no       |
-| ConstantSymbol                    | `string` | no       |
-| SpecificSymbol                    | `string` | no       |
-| OriginatorsReferenceInformation   | `string` | no       |
-| PaymentNote                       | `string` | no       |
-| BankAccounts                      | `number` | yes      |
-| IBAN                              | `string` | yes      |
-| BIC                               | `string` | no       |
-| StandingOrderExt                  | `number` | no       |
-| Day                               | `number` | no       |
-| Month                             | `number` | no       |
-| Periodicity                       | `string` | no       |
-| LastDate                          | `string` | no       |
-| LastDate                          | `string` | no       |
-| DirectDebitExt                    | `number` | no       |
-| DirectDebitScheme                 | `number` | no       |
-| DirectDebitType                   | `number` | no       |
-| VariableSymbol\_                  | `string` | no       |
-| SpecificSymbol\_                  | `string` | no       |
-| OriginatorsReferenceInformation\_ | `string` | no       |
-| MandateID                         | `string` | no       |
-| CreditorID                        | `string` | no       |
-| ContractID                        | `string` | no       |
-| MaxAmount                         | `number` | no       |
-| ValidTillDate                     | `string` | no       |
-| BeneficiaryName                   | `string` | no       |
-| BeneficiaryAddressLine1           | `string` | no       |
-| BeneficiaryAddressLine2           | `string` | no       |
 
 ## Related
 

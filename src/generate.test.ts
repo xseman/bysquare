@@ -1,14 +1,11 @@
 import * as lzma from "lzma-native"
 import { expect, test } from "vitest"
 
-import { Model, generate } from "./"
+import { generate, Model, PaymentOptions } from "./"
 import {
-	createBysquareHeader,
-	createChecksum,
-	createTabbedString,
-	dataWithChecksum
+	makeChecksum, makeHeaderBysquare, makeTabbed,
+	prepareForCompression
 } from "./generate"
-import { createModel } from "./parse"
 
 const model: Model = {
 	InvoiceID: "random-id",
@@ -17,11 +14,11 @@ const model: Model = {
 	CurrencyCode: "EUR",
 	VariableSymbol: "123",
 	Payments: 1,
-	PaymentOptions: 1,
+	PaymentOptions: PaymentOptions.PaymentOrder,
 	BankAccounts: 1
 }
 
-const tabbedStringBase = [
+const tabbedString = [
 	"random-id",
 	"\t", "1",
 	"\t", "1",
@@ -49,19 +46,18 @@ test("Generate query-string from model", async () => {
 })
 
 test("Create tabbed string from model", () => {
-	const tabbed = createTabbedString(model)
-	expect(tabbed).toBe(tabbedStringBase)
+	const created = makeTabbed(model)
+	expect(created).toEqual(tabbedString)
 })
 
 test("Create checksum", () => {
 	const base: Buffer = Buffer.from([0x90, 0x94, 0x19, 0x21])
-	const checksum: Buffer = createChecksum(tabbedStringBase)
-
-	expect(checksum).toStrictEqual(base)
+	const created: Buffer = makeChecksum(tabbedString)
+	expect(created).toStrictEqual(base)
 })
 
 test("Create data with checksum", () => {
-	const checksum = dataWithChecksum(model)
+	const checksum = prepareForCompression(model)
 	const base = Buffer.from(
 		"9094192172616e646f6d2d6964093109310931303009455552090931323309090909093109534b393631313030303030303030323931383539393636390909300930090909",
 		"hex"
@@ -70,24 +66,15 @@ test("Create data with checksum", () => {
 	expect(checksum).toStrictEqual(base)
 })
 
-test("Create model from tabbed string", () => {
-	const created = createModel(tabbedStringBase)
-	expect(created).toStrictEqual({
-		...model,
-		DirectDebitExt: 0,
-		StandingOrderExt: 0
-	})
-})
-
 test("Create binary header, default", () => {
-	const created = createBysquareHeader()
+	const created = makeHeaderBysquare()
 	const base = Buffer.from([0x0, 0x0])
 
 	expect(created).toStrictEqual(base)
 })
 
 test("Create binary header, args", () => {
-	expect(createBysquareHeader([
+	expect(makeHeaderBysquare([
 		0b0000_0001, 0b0000_0010,
 		0b0000_0011, 0b0000_0100
 	])).toEqual(Buffer.from([

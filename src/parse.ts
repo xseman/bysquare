@@ -1,168 +1,185 @@
 import * as lzma from "lzma-native"
 
-import { Model } from "."
-import { SUBST } from "./generate"
-
-enum DecodeSequenceMain {
-	InvoiceID,
-	Payments,
-	PaymentOptions,
-	Amount,
+import {
 	CurrencyCode,
-	PaymentDueDate,
-	VariableSymbol,
-	ConstantSymbol,
-	SpecificSymbol,
-	OriginatorsReferenceInformation,
-	PaymentNote,
-	BankAccounts,
-	IBAN,
-	BIC,
-	StandingOrderExt,
-	DirectDebitExt,
-	BeneficiaryName,
-	BeneficiaryAddressLine1,
-	BeneficiaryAddressLine2
-}
-
-enum DecodeSequenceStandingOrder {
-	InvoiceID,
-	Payments,
+	ParsedModel,
 	PaymentOptions,
-	Amount,
-	CurrencyCode,
-	PaymentDueDate,
-	VariableSymbol,
-	ConstantSymbol,
-	SpecificSymbol,
-	OriginatorsReferenceInformation,
-	PaymentNote,
-	BankAccounts,
-	IBAN,
-	BIC,
-	StandingOrderExt,
-	Day,
-	Month,
-	Periodicity,
-	LastDate,
-	DirectDebitExt,
-	BeneficiaryName,
-	BeneficiaryAddressLine1,
-	BeneficiaryAddressLine2
-}
+	PeriodicityClassifier,
+	SUBST
+} from "./index"
 
-enum DecodeOrderSequenceDirectDebit {
-	InvoiceID,
-	Payments,
-	PaymentOptions,
-	Amount,
-	CurrencyCode,
-	PaymentDueDate,
-	VariableSymbol,
-	ConstantSymbol,
-	SpecificSymbol,
-	OriginatorsReferenceInformation,
-	PaymentNote,
-	BankAccounts,
-	IBAN,
-	BIC,
-	StandingOrderExt,
-	DirectDebitExt,
-	DirectDebitScheme,
-	DirectDebitType,
-	VariableSymbol_,
-	SpecificSymbol_,
-	OriginatorsReferenceInformation_,
-	MandateID,
-	CreditorID,
-	ContractID,
-	MaxAmount,
-	ValidTillDate,
-	BeneficiaryName,
-	BeneficiaryAddressLine1,
-	BeneficiaryAddressLine2
-}
-
-type PickByType<T, Value> = {
-	[P in keyof T as T[P] extends Value | undefined ? P : never]: T[P]
-}
-
-type NumericKeys = keyof PickByType<Model, number>
+const FIELDS_INVOICE = 0
+const FIELDS_NUMBER_OF_PAYMENTS = 1
+const FIELDS_PAYMENT_OPTIONS = 2
 
 /**
- * Generating by square Code
- *
- * @see {spec 3.14.}
+ * @see 3.14. Generating by square Code
  */
-export function createModel(tabbedString: string): Model {
-	const splitted = tabbedString
+export function assemble(tabbed: string): ParsedModel {
+	const fields: string[] = tabbed
 		.split("\t")
 		/** The end of the qr-string might contain a NULL-terminated string */
 		.map((entry) => entry.replace("\x00", ""))
 
-	/** The model should contain information if it is extended */
-	const isStandingOrder = splitted[14] === "1"
-	const istDirectDebit = splitted[19] === "1"
+	const invoiceId = fields[FIELDS_INVOICE]
+	const output: ParsedModel = {
+		invoiceId: !!invoiceId.length ? invoiceId : undefined,
+		payments: []
+	}
 
-	const numericKeys: Array<NumericKeys> = [
-		"Payments",
-		"PaymentOptions",
-		"Amount",
-		"BankAccounts",
-		"StandingOrderExt",
-		"Day",
-		"Month",
-		"DirectDebitExt",
-		"DirectDebitScheme",
-		"DirectDebitType",
-		"MaxAmount"
-	]
+	const paymentsCount = Number(fields[FIELDS_NUMBER_OF_PAYMENTS])
+	const paymentOptions = Number(fields[FIELDS_PAYMENT_OPTIONS])
 
-	const model = splitted.reduce((acc, value, i) => {
-		if (value === "") {
-			return acc
+	for (let i = 0; i < paymentsCount; i++) {
+		const payment = fields.slice(3 + i, 11 + i)
+		const [
+			ammount,
+			currencyCode,
+			paymentDueDate,
+			variableSymbol,
+			constantSymbol,
+			specificSymbol,
+			originatorsReferenceInformation,
+			paymentNote
+		] = payment
+
+		output.payments.push({
+			amount: ammount.length ? Number(ammount) : undefined,
+			currencyCode: currencyCode as keyof typeof CurrencyCode,
+			paymentDueDate: paymentDueDate?.length ? paymentDueDate : undefined,
+			variableSymbol: variableSymbol?.length ? variableSymbol : undefined,
+			constantSymbol: constantSymbol?.length ? constantSymbol : undefined,
+			specificSymbol: specificSymbol?.length ? specificSymbol : undefined,
+			originatorsReferenceInformation: originatorsReferenceInformation?.length ? originatorsReferenceInformation : undefined,
+			paymentNote: paymentNote?.length ? paymentNote : undefined,
+			bankAccounts: []
+		})
+
+		const bankAccounts = fields.slice(11 + i, 15 + i)
+		const [
+			bankAccountsCount,
+			iban,
+			bic
+		] = bankAccounts
+
+		if (bankAccountsCount?.length === 0) {
+			throw new Error("Missing bank accounts count");
 		}
 
-		if (!isStandingOrder && !istDirectDebit) {
-			const key = DecodeSequenceMain[i] as NumericKeys
-			if (numericKeys.includes(key)) {
-				acc[key] = Number(value)
-				return acc
-			}
-			acc[key] = value
-			return acc
+		if (iban?.length === 0) {
+			throw new Error("Missing IBAN")
 		}
 
-		if (isStandingOrder) {
-			const key = DecodeSequenceStandingOrder[i] as NumericKeys
-			if (numericKeys.includes(key)) {
-				acc[key] = Number(value)
-				return acc
-			}
-			acc[key] = value
-			return acc
+		for (let j = 0; j < Number(bankAccountsCount); j++) {
+			output.payments[i].bankAccounts.push({
+				iban: iban,
+				bic: bic?.length ? bic : undefined
+			})
 		}
 
-		if (istDirectDebit) {
-			const key = DecodeOrderSequenceDirectDebit[i] as NumericKeys
-			if (numericKeys.includes(key)) {
-				acc[key] = Number(value)
-				return acc
-			}
-			acc[key] = value
-			return acc
-		}
-	}, {} as any)
+		switch (paymentOptions) {
+			case PaymentOptions.PaymentOrder:
+				break
 
-	return model
+			case PaymentOptions.StandingOrder:
+				const standingOrder = fields.slice(15 + i, 20 + i)
+				const [
+					day,
+					month,
+					periodicity,
+					lastDate
+				] = standingOrder
+
+				output.payments[i].standingOrder = {
+					day: day?.length ? Number(day) : undefined,
+					month: month?.length ? Number(month) : undefined,
+					periodicity: periodicity?.length ? periodicity as PeriodicityClassifier : undefined,
+					lastDate: lastDate?.length ? lastDate : undefined
+				}
+				break
+
+			case PaymentOptions.DirectDebit:
+				const directDebit = fields.slice(16 + i, 26 + i)
+				const [
+					directDebitScheme,
+					directDebitType,
+					variableSymbol,
+					specificSymbol,
+					originatorsReferenceInformation,
+					mandateId,
+					creditorId,
+					contractId,
+					maxAmount,
+					validTillDate,
+				] = directDebit
+
+				output.payments[i].directDebit = {
+					directDebitScheme: directDebitScheme.length ? Number(directDebitScheme) : undefined,
+					directDebitType: directDebitType.length ? Number(directDebitType) : undefined,
+					variableSymbol: variableSymbol.length ? variableSymbol : undefined,
+					specificSymbol: specificSymbol.length ? specificSymbol : undefined,
+					originatorsReferenceInformation: originatorsReferenceInformation.length ? originatorsReferenceInformation : undefined,
+					mandateId: mandateId.length ? mandateId : undefined,
+					creditorId: creditorId.length ? creditorId : undefined,
+					contractId: contractId.length ? contractId : undefined,
+					maxAmount: maxAmount.length ? Number(maxAmount) : undefined,
+					validTillDate: validTillDate.length ? validTillDate : undefined
+				}
+
+			default:
+				throw new Error("Unknown payment option")
+		}
+	}
+
+	/** Beneficiary list bysquare v1.1 */
+	for (let i = 0; i < paymentsCount; i++) {
+		let beneficiary: string[] = []
+		switch (paymentOptions) {
+			case PaymentOptions.PaymentOrder:
+				beneficiary = fields.slice(16 + i, 20 + i)
+				break;
+
+			case PaymentOptions.StandingOrder:
+				beneficiary = fields.slice(20 + i, 24 + i)
+				break;
+
+			case PaymentOptions.DirectDebit:
+				beneficiary = fields.slice(25 + i, 29 + i)
+				break;
+		}
+
+		if (beneficiary.length === 0) {
+			break
+		}
+
+		const [
+			name,
+			addressLine1,
+			addressLine2
+		] = beneficiary
+
+		/**
+		 * The list of recipients is optional, if we find a missing record, the
+		 * stream ends
+		 */
+		if (!name && !addressLine1 && !addressLine2) {
+			break
+		}
+
+		output.payments[i].beneficiary = {
+			name: name?.length ? name : undefined,
+			addressLine1: addressLine1?.length ? addressLine1 : undefined,
+			addressLine2: addressLine2?.length ? addressLine2 : undefined
+		}
+	}
+
+	return output
 }
 
 /**
- * Decoding client data from QR Code 2005 symbol
- *
- * @see {spec 3.16.}
+ * @see 3.16. Decoding client data from QR Code 2005 symbol
  */
-export function parse(qr: string): Promise<Model> {
+export function parse(qr: string): Promise<ParsedModel> {
 	const inversed: Buffer = inverseAlphanumericConversion(qr)
 	const _headerBysquare = inversed.slice(0, 2)
 	const _headerCompression = inversed.slice(2, 4)
@@ -175,13 +192,13 @@ export function parse(qr: string): Promise<Model> {
 		filters: [{ id: lzma.FILTER_LZMA1 }]
 	})
 
-	return new Promise<Model>((resolve, reject) => {
+	return new Promise<ParsedModel>((resolve, reject) => {
 		decoder
 			.on("error", reject)
 			.on("data", (decompress: Buffer): void => {
 				const _crc32: Buffer = decompress.slice(0, 4)
-				const data = decompress.slice(4).toString()
-				const model = createModel(data)
+				const tabbed: string = decompress.slice(4).toString()
+				const model: ParsedModel = assemble(tabbed)
 
 				resolve(model)
 			})
@@ -193,9 +210,7 @@ export function parse(qr: string): Promise<Model> {
 }
 
 /**
- * Reverse alphanumeric conversion using Base32hex
- *
- * @see {spec 3.13.}
+ * @see 3.13. Alphanumeric conversion using Base32hex
  */
 export function inverseAlphanumericConversion(qr: string): Buffer {
 	const binary: string = [...qr].reduce((acc, char) => {
@@ -212,17 +227,6 @@ export function inverseAlphanumericConversion(qr: string): Buffer {
 	}
 
 	return Buffer.from(bytes)
-}
-
-enum Version {
-	/**
-	 * Created this document from original by square specifications
-	 */
-	'2013-02-22' = 0,
-	/**
-	 * Added fields for beneficiary name and address
-	 */
-	'2015-06-24' = 1
 }
 
 /**

@@ -1,3 +1,4 @@
+import { deburr } from "lodash-es"
 import * as lzma from "lzma-native"
 
 import { Model, SequenceOrder, SUBST } from "./index"
@@ -99,6 +100,13 @@ export function makeTabbed(model: Model): string {
 	const tabbed = (Object.keys(model) as (keyof Model)[]).reduce(
 		(acc, key) => {
 			const index = SequenceOrder[key]
+
+			/** Diacritical marks are not allowed */
+			if (key === "PaymentNote") {
+				acc[index] = deburr(model[key])
+				return acc
+			}
+
 			acc[index] = String(model[key])
 			return acc
 		},
@@ -163,6 +171,9 @@ export function alphanumericConversion(data: Buffer): string {
 	return encoded
 }
 
+/**
+ * Generate QR string ready for encoding into basic QR code
+ */
 export function generate(model: Model): Promise<string> {
 	const data: Buffer = prepareForCompression(model)
 	const compressedData: Buffer[] = []

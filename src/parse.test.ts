@@ -57,13 +57,13 @@ test("Create model from tabbed string", () => {
 	} as ParsedModel)
 })
 
-describe("QR detector", () => {
-	test("Detect valid QR", () => {
+describe("Bysquare header detector", () => {
+	test("Valid QR string", () => {
 		const isBysquare = detect(qr)
 		expect(isBysquare).toBeTruthy()
 	})
 
-	test("Empty string, should be invalid", () => {
+	test("Invalid QR string", () => {
 		const isBysquare = detect("")
 		expect(isBysquare).toBeFalsy()
 	})

@@ -5,6 +5,9 @@ import { Model, SequenceOrder, SUBST } from "./index"
 // echo "Hello" | xz --format=raw --lzma1=lc=3,lp=0,pb=2,dict=32KiB --stdout | hexdump -C
 
 /**
+ * Returns a 2 byte buffer that represents the header of the bysquare
+ * specification
+ *
  * ```
  * | Attribute    | Number of bits | Possible values | Note
  * --------------------------------------------------------------------------------------------
@@ -14,10 +17,9 @@ import { Model, SequenceOrder, SUBST } from "./index"
  * | Reserved     | 4              | 0-15            | bits reserved for future needs
  * ```
  *
- * @see {spec 3.5.}
+ * @see 3.5. by square header
  */
-export function createBysquareHeader(
-	// prettier-ignore
+export function makeHeaderBysquare(
 	header: [
 		bySquareType: number, version: number,
 		documentType: number, reserved: number
@@ -30,29 +32,43 @@ export function createBysquareHeader(
 	if (!isValid) {
 		throw new Error("Header range of values must be <0,15>")
 	}
+	const [
+		bySquareType, version,
+		documentType, reserved
+	] = header
 
-	const [BySquareType, Version, DocumentType, Reserved] = header
 	/** Combine 4-nibbles to 2-bytes */
 	const headerBuffer = Buffer.from([
-		(BySquareType << 4) | (Version << 0),
-		(DocumentType << 4) | (Reserved << 0)
+		(bySquareType << 4) | (version << 0),
+		(documentType << 4) | (reserved << 0)
 	])
 
 	return headerBuffer
 }
 
 /**
- * LZMA Compression header
+ * Allocates a new buffer of a 2 bytes that represents LZMA header which
+ * contains 16-bit unsigned integer (word, little-endian), which is the size of
+ * the decompressed data. Therefore the maximum size of compressed data is
+ * limited to 65535
  *
- * @see {spec 3.11.}
+ * @see 3.11. LZMA Compression
  */
-function createCompresionHeader(byteLength: number): Buffer {
+function makeHeaderLzma(decompressedData: Buffer): Buffer {
+	const bytesCount = decompressedData.length
+	if (bytesCount >= 2 ** 16) {
+		throw new Error("The maximum compressed data size has been reached")
+	}
+
 	const dataSize = Buffer.alloc(2)
-	dataSize.writeInt16LE(byteLength, 0)
+	dataSize.writeInt16LE(bytesCount)
 	return dataSize
 }
 
-export function createChecksum(tabbedInput: string): Buffer {
+/**
+ * @see 3.10 Appending CRC32 checksum
+ */
+export function makeChecksum(tabbedInput: string): Buffer {
 	// @ts-ignore: Wrong return type
 	const data = lzma.crc32(tabbedInput) as number
 	const crc32 = Buffer.alloc(4)
@@ -62,24 +78,24 @@ export function createChecksum(tabbedInput: string): Buffer {
 }
 
 /**
- * Appending CRC32 checksum
+ * Transfer object to a tabbed string and append a CRC32 checksum
  *
- * @see {spec 3.10.}
+ * @see 3.10. Appending CRC32 checksum
  */
-export function dataWithChecksum(model: Model): Buffer {
-	const tabbedString = createTabbedString(model)
-	const checksum = createChecksum(tabbedString)
-
-	return Buffer.concat([checksum, Buffer.from(tabbedString, "utf-8")])
+export function prepareForCompression(model: Model): Buffer {
+	const tabbed: string = makeTabbed(model)
+	return Buffer.concat([
+		makeChecksum(tabbed),
+		Buffer.from(tabbed, "utf-8")
+	])
 }
 
 /**
- * Logic
- * - Order keys by specification
- * - Fill empty values
- * - Transform to tabbed string
+ * Convert object to tab-separated fields according to the sequence specification
+ *
+ * @see Table 15 PAY by square sequence data model
  */
-export function createTabbedString(model: Model): string {
+export function makeTabbed(model: Model): string {
 	const tabbed = (Object.keys(model) as (keyof Model)[]).reduce(
 		(acc, key) => {
 			const index = SequenceOrder[key]
@@ -115,9 +131,7 @@ export function createTabbedString(model: Model): string {
 }
 
 /**
- * Alphanumeric conversion using Base32hex
- *
- * @see {spec 3.13.}
+ * @see 3.13. Alphanumeric conversion using Base32hex
  */
 export function alphanumericConversion(data: Buffer): string {
 	let paddedBinString = data.reduce<string>(
@@ -127,10 +141,7 @@ export function alphanumericConversion(data: Buffer): string {
 	let paddedLength = paddedBinString.length
 	const remainder = paddedLength % 5
 	if (remainder) {
-		paddedBinString += Array(5 - remainder)
-			.fill("0")
-			.join("")
-
+		paddedBinString += Array(5 - remainder).fill("0").join("")
 		paddedLength += 5 - remainder
 	}
 
@@ -153,8 +164,8 @@ export function alphanumericConversion(data: Buffer): string {
 }
 
 export function generate(model: Model): Promise<string> {
-	const dataBuffer: Buffer = dataWithChecksum(model)
-	const dataChunks: Buffer[] = []
+	const data: Buffer = prepareForCompression(model)
+	const compressedData: Buffer[] = []
 
 	return new Promise<string>((resolve, reject) => {
 		const encoder = lzma.createStream("rawEncoder", {
@@ -165,24 +176,20 @@ export function generate(model: Model): Promise<string> {
 
 		encoder
 			.on("data", (chunk: Buffer): void => {
-				dataChunks.push(chunk)
+				compressedData.push(chunk)
 			})
 			.on("error", reject)
 			.on("end", (): void => {
-				const headerBysquare: Buffer = createBysquareHeader()
-				const headerCompression: Buffer = createCompresionHeader(
-					dataBuffer.byteLength
-				)
-				const mergeData = Buffer.concat([
-					headerBysquare,
-					headerCompression,
-					...dataChunks
+				const output = Buffer.concat([
+					makeHeaderBysquare(),
+					makeHeaderLzma(data),
+					...compressedData
 				])
 
-				const output: string = alphanumericConversion(mergeData)
-				resolve(output)
+				const qr: string = alphanumericConversion(output)
+				resolve(qr)
 			})
-			.write(dataBuffer, (error): void => {
+			.write(data, (error): void => {
 				error && reject(error)
 				encoder.end()
 			})

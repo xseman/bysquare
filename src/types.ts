@@ -4,12 +4,31 @@
  *
  * @see {spec 3.13. Table 9 – Encoding table}
  */
- export const SUBST = "0123456789ABCDEFGHIJKLMNOPQRSTUV"
+export const SUBST = "0123456789ABCDEFGHIJKLMNOPQRSTUV"
+
+/**
+ * Mapping semantic version to encoded version number, header 4-bits
+ *
+ * It's a bit silly to limit the version number to 4-bit, if they keep
+ * increasing the version number, the latest possible mapped value is 16
+ */
+enum Version {
+	/**
+	 * 2013-02-22
+	 * Created this document from original by square specifications
+	 */
+	"1.0.0" = 0,
+	/**
+	 * 2015-06-24
+	 * Added fields for beneficiary name and address
+	 */
+	"1.1.0" = 1
+}
 
 export enum PaymentOptions {
 	PaymentOrder = 1,
 	StandingOrder = 2,
-	DIRECTDEBIT = 3
+	DirectDebit = 3
 }
 
 export enum MonthClassifier {
@@ -171,7 +190,6 @@ export interface Model {
 	 * Defines the day of the last payment of the standing order. After this
 	 * date, standing order is cancelled.
 	 *
-	 * Max length 8
 	 * Format YYYYMMDD
 	 */
 	LastDate?: string
@@ -278,10 +296,7 @@ export interface Model {
 }
 
 export interface ParsedModel {
-	invoiceID: Model["InvoiceID"]
-	/**
-	 * List of payments for a given invoice
-	 */
+	invoiceId: Model["InvoiceID"]
 	payments: Array<{
 		amount: Model["Amount"]
 		currencyCode: Model["CurrencyCode"]
@@ -291,41 +306,32 @@ export interface ParsedModel {
 		specificSymbol?: Model["SpecificSymbol"]
 		originatorsReferenceInformation?: Model["OriginatorsReferenceInformation"]
 		paymentNote?: Model["PaymentNote"]
-		/**
-		 * List of accounts to which the payment can be made
-		 */
 		bankAccounts: Array<{
 			iban: Model["IBAN"]
 			bic?: Model["BIC"]
 		}>
-		/**
-		 * Standing order extension
-		 */
 		standingOrder?: {
 			day?: Model["Day"]
 			month?: Model["Month"]
 			periodicity?: Model["Periodicity"]
 			lastDate?: Model["LastDate"]
 		}
-		/**
-		 * Direct debit extension
-		 */
 		directDebit?: {
 			directDebitScheme?: Model["DirectDebitScheme"]
 			directDebitType?: Model["DirectDebitType"]
 			variableSymbol?: Model["VariableSymbol"]
 			specificSymbol?: Model["SpecificSymbol"]
 			originatorsReferenceInformation?: Model["OriginatorsReferenceInformation_"]
-			mandateID?: Model["MandateID"]
-			creditorID?: Model["CreditorID"]
-			contractID?: Model["ContractID"]
+			mandateId?: Model["MandateID"]
+			creditorId?: Model["CreditorID"]
+			contractId?: Model["ContractID"]
 			maxAmount?: Model["MaxAmount"]
 			validTillDate?: Model["ValidTillDate"]
 		}
 		beneficiary?: {
-			name: Model["BeneficiaryName"]
-			addressLine1: Model["BeneficiaryAddressLine1"]
-			addressLine2: Model["BeneficiaryAddressLine2"]
+			name?: Model["BeneficiaryName"]
+			addressLine1?: Model["BeneficiaryAddressLine1"]
+			addressLine2?: Model["BeneficiaryAddressLine2"]
 		}
 	}>
 }

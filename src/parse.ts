@@ -2,21 +2,18 @@ import * as lzma from "lzma-native"
 
 import {
 	CurrencyCode,
-	DirectDebitScheme,
-	DirectDebitType,
 	ParsedModel,
 	PaymentOptions,
 	PeriodicityClassifier,
 	SUBST
 } from "./index"
 
-const INVOICE_ORDER = 0
-const NUMBER_OF_PAYMENTS_ORDER = 1
+const FIELDS_INVOICE = 0
+const FIELDS_NUMBER_OF_PAYMENTS = 1
+const FIELDS_PAYMENT_OPTIONS = 2
 
 /**
- * Generating by square Code
- *
- * @see {spec 3.14.}
+ * @see 3.14. Generating by square Code
  */
 export function assemble(tabbed: string): ParsedModel {
 	const fields: string[] = tabbed
@@ -24,101 +21,109 @@ export function assemble(tabbed: string): ParsedModel {
 		/** The end of the qr-string might contain a NULL-terminated string */
 		.map((entry) => entry.replace("\x00", ""))
 
-	const invoiceId = fields[INVOICE_ORDER]
-	const numberOfPayments = Number(fields[NUMBER_OF_PAYMENTS_ORDER])
-
-	/**
-	 * For the first payment, it always starts at index 2 of the parsed tabbed
-	 * string
-	 */
-	let order = 2
-
+	const invoiceId = fields[FIELDS_INVOICE]
 	const output: ParsedModel = {
-		invoiceID: !!invoiceId.length ? invoiceId : undefined,
+		invoiceId: !!invoiceId.length ? invoiceId : undefined,
 		payments: []
 	}
 
-	for (let i = 0; i < numberOfPayments; i++) {
-		const paymentOptions = Number(fields[order++ + i]) as PaymentOptions
-		const ammount = fields[order++ + i]
-		const currencyCode = fields[order++ + i]
-		if (currencyCode.length !== 3) {
-			throw new Error("Invalid currency code")
-		}
-		const paymentDueDate = fields[order++ + i]
-		const variableSymbol = fields[order++ + i]
-		const constantSymbol = fields[order++ + i]
-		const specificSymbol = fields[order++ + i]
-		const originatorsReferenceInformation = fields[order++ + i]
-		const paymentNote = fields[order++ + i]
+	const paymentsCount = Number(fields[FIELDS_NUMBER_OF_PAYMENTS])
+	const paymentOptions = Number(fields[FIELDS_PAYMENT_OPTIONS])
+
+	for (let i = 0; i < paymentsCount; i++) {
+		const payment = fields.slice(3 + i, 11 + i)
+		const [
+			ammount,
+			currencyCode,
+			paymentDueDate,
+			variableSymbol,
+			constantSymbol,
+			specificSymbol,
+			originatorsReferenceInformation,
+			paymentNote
+		] = payment
 
 		output.payments.push({
-			amount: !!ammount.length
-				? Number(ammount)
-				: undefined,
+			amount: ammount.length ? Number(ammount) : undefined,
 			currencyCode: currencyCode as keyof typeof CurrencyCode,
-			paymentDueDate: !!paymentDueDate.length
-				? paymentDueDate
-				: undefined,
-			variableSymbol: !!variableSymbol.length
-				? variableSymbol
-				: undefined,
-			constantSymbol: !!constantSymbol.length
-				? constantSymbol
-				: undefined,
-			specificSymbol: !!specificSymbol.length
-				? specificSymbol
-				: undefined,
-			originatorsReferenceInformation: !!originatorsReferenceInformation.length
-				? originatorsReferenceInformation
-				: undefined,
-			paymentNote: !!paymentNote.length
-				? paymentNote
-				: undefined,
+			paymentDueDate: paymentDueDate?.length ? paymentDueDate : undefined,
+			variableSymbol: variableSymbol?.length ? variableSymbol : undefined,
+			constantSymbol: constantSymbol?.length ? constantSymbol : undefined,
+			specificSymbol: specificSymbol?.length ? specificSymbol : undefined,
+			originatorsReferenceInformation: originatorsReferenceInformation?.length ? originatorsReferenceInformation : undefined,
+			paymentNote: paymentNote?.length ? paymentNote : undefined,
 			bankAccounts: []
 		})
 
-		const numberOfBankAccounts = Number(fields[order++ + i])
-		for (let j = 0; j < numberOfBankAccounts; j++) {
-			const iban = fields[order++ + i]
-			if (iban.length === 0) {
-				throw new Error("Missing IBAN")
-			}
+		const bankAccounts = fields.slice(11 + i, 15 + i)
+		const [
+			bankAccountsCount,
+			iban,
+			bic
+		] = bankAccounts
 
-			const bic = fields[order++ + i]
+		if (bankAccountsCount?.length === 0) {
+			throw new Error("Missing bank accounts count");
+		}
 
+		if (iban?.length === 0) {
+			throw new Error("Missing IBAN")
+		}
+
+		for (let j = 0; j < Number(bankAccountsCount); j++) {
 			output.payments[i].bankAccounts.push({
 				iban: iban,
-				bic: bic.length ? bic : undefined
+				bic: bic?.length ? bic : undefined
 			})
 		}
 
 		switch (paymentOptions) {
 			case PaymentOptions.PaymentOrder:
-				order += 2 /** skip 2 fields */
 				break
 
 			case PaymentOptions.StandingOrder:
+				const standingOrder = fields.slice(15 + i, 20 + i)
+				const [
+					day,
+					month,
+					periodicity,
+					lastDate
+				] = standingOrder
+
 				output.payments[i].standingOrder = {
-					day: Number(fields[order++ + i]),
-					month: Number(fields[order++ + i]),
-					periodicity: fields[order++ + i] as PeriodicityClassifier,
-					lastDate: fields[order++ + i]
+					day: day?.length ? Number(day) : undefined,
+					month: month?.length ? Number(month) : undefined,
+					periodicity: periodicity?.length ? periodicity as PeriodicityClassifier : undefined,
+					lastDate: lastDate?.length ? lastDate : undefined
 				}
 				break
 
-			case PaymentOptions.DIRECTDEBIT:
+			case PaymentOptions.DirectDebit:
+				const directDebit = fields.slice(16 + i, 26 + i)
+				const [
+					directDebitScheme,
+					directDebitType,
+					variableSymbol,
+					specificSymbol,
+					originatorsReferenceInformation,
+					mandateId,
+					creditorId,
+					contractId,
+					maxAmount,
+					validTillDate,
+				] = directDebit
+
 				output.payments[i].directDebit = {
-					directDebitScheme: Number(fields[order++ + i]) as DirectDebitScheme,
-					directDebitType: Number(fields[order++ + i]) as DirectDebitType,
-					variableSymbol: fields[order++ + i],
-					specificSymbol: fields[order++ + i],
-					originatorsReferenceInformation: fields[order++ + i],
-					mandateID: fields[order++ + i],
-					creditorID: fields[order++ + i],
-					contractID: fields[order++ + i],
-					maxAmount: Number(fields[order++ + i]),
-					validTillDate: fields[order++ + i]
+					directDebitScheme: directDebitScheme.length ? Number(directDebitScheme) : undefined,
+					directDebitType: directDebitType.length ? Number(directDebitType) : undefined,
+					variableSymbol: variableSymbol.length ? variableSymbol : undefined,
+					specificSymbol: specificSymbol.length ? specificSymbol : undefined,
+					originatorsReferenceInformation: originatorsReferenceInformation.length ? originatorsReferenceInformation : undefined,
+					mandateId: mandateId.length ? mandateId : undefined,
+					creditorId: creditorId.length ? creditorId : undefined,
+					contractId: contractId.length ? contractId : undefined,
+					maxAmount: maxAmount.length ? Number(maxAmount) : undefined,
+					validTillDate: validTillDate.length ? validTillDate : undefined
 				}
 
 			default:
@@ -126,22 +131,45 @@ export function assemble(tabbed: string): ParsedModel {
 		}
 	}
 
-	/**
-	 * Beneficiary list bysquare v1.1
-	 */
-	for (let i = 0; i < numberOfPayments; i++) {
-		const name = fields[order++ + i]
-		const addressLine1 = fields[order++ + i]
-		const addressLine2 = fields[order++ + i]
+	/** Beneficiary list bysquare v1.1 */
+	for (let i = 0; i < paymentsCount; i++) {
+		let beneficiary: string[] = []
+		switch (paymentOptions) {
+			case PaymentOptions.PaymentOrder:
+				beneficiary = fields.slice(16 + i, 20 + i)
+				break;
 
+			case PaymentOptions.StandingOrder:
+				beneficiary = fields.slice(20 + i, 24 + i)
+				break;
+
+			case PaymentOptions.DirectDebit:
+				beneficiary = fields.slice(25 + i, 29 + i)
+				break;
+		}
+
+		if (beneficiary.length === 0) {
+			break
+		}
+
+		const [
+			name,
+			addressLine1,
+			addressLine2
+		] = beneficiary
+
+		/**
+		 * The list of recipients is optional, if we find a missing record, the
+		 * stream ends
+		 */
 		if (!name && !addressLine1 && !addressLine2) {
 			break
 		}
 
 		output.payments[i].beneficiary = {
-			name: name.length ? name : undefined,
-			addressLine1: addressLine1.length ? addressLine1 : undefined,
-			addressLine2: addressLine2.length ? addressLine2 : undefined
+			name: name?.length ? name : undefined,
+			addressLine1: addressLine1?.length ? addressLine1 : undefined,
+			addressLine2: addressLine2?.length ? addressLine2 : undefined
 		}
 	}
 
@@ -149,9 +177,7 @@ export function assemble(tabbed: string): ParsedModel {
 }
 
 /**
- * Decoding client data from QR Code 2005 symbol
- *
- * @see {spec 3.16.}
+ * @see 3.16. Decoding client data from QR Code 2005 symbol
  */
 export function parse(qr: string): Promise<ParsedModel> {
 	const inversed: Buffer = inverseAlphanumericConversion(qr)
@@ -184,9 +210,7 @@ export function parse(qr: string): Promise<ParsedModel> {
 }
 
 /**
- * Reverse alphanumeric conversion using Base32hex
- *
- * @see {spec 3.13.}
+ * @see 3.13. Alphanumeric conversion using Base32hex
  */
 export function inverseAlphanumericConversion(qr: string): Buffer {
 	const binary: string = [...qr].reduce((acc, char) => {
@@ -203,25 +227,6 @@ export function inverseAlphanumericConversion(qr: string): Buffer {
 	}
 
 	return Buffer.from(bytes)
-}
-
-/**
- * Mapping semantic version to encoded version number, header 4-bits
- *
- * It's a bit silly to limit the version number to 4-bit, if they keep
- * increasing the version number, the latest possible mapped value is 16
- */
-enum Version {
-	/**
-	 * 2013-02-22
-	 * Created this document from original by square specifications
-	 */
-	"1.0.0" = 0,
-	/**
-	 * 2015-06-24
-	 * Added fields for beneficiary name and address
-	 */
-	"1.1.0" = 1
 }
 
 /**

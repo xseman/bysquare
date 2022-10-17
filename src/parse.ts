@@ -8,9 +8,10 @@ import {
 	SUBST
 } from "./index"
 
-const FIELDS_INVOICE = 0
-const FIELDS_NUMBER_OF_PAYMENTS = 1
-const FIELDS_PAYMENT_OPTIONS = 2
+const FIELD_INVOICE = 0
+const FIELD_PAYMENT_COUNT = 1
+const FIELD_PAYMENT_OPTIONS = 2
+const FIELD_BANK_ACCOUNT_COUNT = 11
 
 /**
  * @see 3.14. Generating by square Code
@@ -21,17 +22,21 @@ export function assemble(tabbed: string): ParsedModel {
 		/** The end of the qr-string might contain a NULL-terminated string */
 		.map((entry) => entry.replace("\x00", ""))
 
-	const invoiceId = fields[FIELDS_INVOICE]
+	const invoiceId = fields[FIELD_INVOICE]
 	const output: ParsedModel = {
-		invoiceId: !!invoiceId.length ? invoiceId : undefined,
+		invoiceId: invoiceId?.length ? invoiceId : undefined,
 		payments: []
 	}
 
-	const paymentsCount = Number(fields[FIELDS_NUMBER_OF_PAYMENTS])
-	const paymentOptions = Number(fields[FIELDS_PAYMENT_OPTIONS])
+	const paymentsCount = Number(fields[FIELD_PAYMENT_COUNT])
+	const paymentOptions = Number(fields[FIELD_PAYMENT_OPTIONS])
+	const bankAccountsCount = Number(fields[FIELD_BANK_ACCOUNT_COUNT])
 
 	for (let i = 0; i < paymentsCount; i++) {
-		const payment = fields.slice(3 + i, 11 + i)
+		const paymentFieldCount = 8
+		const paymentFieldStart = 3 + (i * paymentFieldCount)
+		const paymentFieldEnd = 11 + (i * paymentFieldCount)
+		const payment = fields.slice(paymentFieldStart, paymentFieldEnd)
 		const [
 			ammount,
 			currencyCode,
@@ -52,25 +57,23 @@ export function assemble(tabbed: string): ParsedModel {
 			specificSymbol: specificSymbol?.length ? specificSymbol : undefined,
 			originatorsReferenceInformation: originatorsReferenceInformation?.length ? originatorsReferenceInformation : undefined,
 			paymentNote: paymentNote?.length ? paymentNote : undefined,
-			bankAccounts: []
+			bankAccounts: [],
 		})
 
-		const bankAccounts = fields.slice(11 + i, 15 + i)
-		const [
-			bankAccountsCount,
-			iban,
-			bic
-		] = bankAccounts
-
-		if (bankAccountsCount?.length === 0) {
-			throw new Error("Missing bank accounts count");
-		}
-
-		if (iban?.length === 0) {
-			throw new Error("Missing IBAN")
-		}
-
 		for (let j = 0; j < Number(bankAccountsCount); j++) {
+			const bankAccountFieldCount = 2
+			const bankAccountFieldStart = 12 + (j * bankAccountFieldCount)
+			const bankAccountFieldEnd = 14 + (j * bankAccountFieldCount)
+			const bankAccounts = fields.slice(bankAccountFieldStart, bankAccountFieldEnd)
+			const [
+				iban,
+				bic
+			] = bankAccounts
+
+			if (iban?.length === 0) {
+				throw new Error("Missing IBAN")
+			}
+
 			output.payments[i].bankAccounts.push({
 				iban: iban,
 				bic: bic?.length ? bic : undefined
@@ -82,7 +85,10 @@ export function assemble(tabbed: string): ParsedModel {
 				break
 
 			case PaymentOptions.StandingOrder:
-				const standingOrder = fields.slice(15 + i, 20 + i)
+				const standingOrderFieldCount = 4
+				const standingOrderFieldStart = 15 + (i * standingOrderFieldCount)
+				const standingOrderFieldEnd = 20 + (i * standingOrderFieldCount)
+				const standingOrder = fields.slice(standingOrderFieldStart, standingOrderFieldEnd)
 				const [
 					day,
 					month,
@@ -99,7 +105,10 @@ export function assemble(tabbed: string): ParsedModel {
 				break
 
 			case PaymentOptions.DirectDebit:
-				const directDebit = fields.slice(16 + i, 26 + i)
+				const directDebitFieldCount = 10
+				const directDebitFieldStart = 16 + (i * directDebitFieldCount)
+				const directDebitFieldEnd = 27 + (i * directDebitFieldStart)
+				const directDebit = fields.slice(directDebitFieldStart, directDebitFieldEnd)
 				const [
 					directDebitScheme,
 					directDebitType,
@@ -134,18 +143,20 @@ export function assemble(tabbed: string): ParsedModel {
 	/** Beneficiary list bysquare v1.1 */
 	for (let i = 0; i < paymentsCount; i++) {
 		let beneficiary: string[] = []
+		const offset = (i || 1) * (2 * bankAccountsCount) - 2
+
 		switch (paymentOptions) {
 			case PaymentOptions.PaymentOrder:
-				beneficiary = fields.slice(16 + i, 20 + i)
-				break;
+				beneficiary = fields.slice(16 + offset, 20 + offset)
+				break
 
 			case PaymentOptions.StandingOrder:
-				beneficiary = fields.slice(20 + i, 24 + i)
-				break;
+				beneficiary = fields.slice(20 + offset, 24 + offset)
+				break
 
 			case PaymentOptions.DirectDebit:
-				beneficiary = fields.slice(25 + i, 29 + i)
-				break;
+				beneficiary = fields.slice(25 + offset, 29 + offset)
+				break
 		}
 
 		if (beneficiary.length === 0) {

@@ -2,7 +2,7 @@
  * The bit sequence is split into 5 bit chunks which are mapped onto the
  * characters
  *
- * @see {spec 3.13. Table 9 – Encoding table}
+ * @see 3.13. Table 9 – Encoding table
  */
 export const SUBST = "0123456789ABCDEFGHIJKLMNOPQRSTUV"
 
@@ -26,45 +26,45 @@ enum Version {
 }
 
 export enum PaymentOptions {
-	PaymentOrder = 1,
+	PaymentOrder  = 1,
 	StandingOrder = 2,
-	DirectDebit = 3
+	DirectDebit   = 4
 }
 
 export enum MonthClassifier {
-	January = 1,
-	February = 2,
-	March = 4,
-	April = 8,
-	May = 16,
-	June = 32,
-	July = 64,
-	August = 128,
-	September = 256,
-	October = 512,
-	November = 1024,
-	December = 2048
+	January 	= 1, // 2^0
+	February 	= 2, // 2^1
+	March 		= 4, // 2^2
+	April 		= 8, // 2^3
+	May 		= 16, // 2^4
+	June 		= 32, // 2^5
+	July 		= 64, // 2^6
+	August 		= 128, // 2^7
+	September 	= 256, // 2^8
+	October 	= 512, 	// 2^9
+	November 	= 1_024, // 2^10
+	December 	= 2_048 // 2^11
 }
 
 export enum PeriodicityClassifier {
-	Daily = "d",
-	Weekly = "w",
-	Biweekly = "b",
-	Monthly = "m",
-	Bimonthly = "B",
-	Quarterly = "q",
+	Daily 		 = "d",
+	Weekly 		 = "w",
+	Biweekly 	 = "b",
+	Monthly 	 = "m",
+	Bimonthly 	 = "B",
+	Quarterly 	 = "q",
 	Semiannually = "s",
-	Annually = "a"
+	Annually 	 = "a"
 }
 
 export enum DirectDebitType {
-	OneOff = 0,
+	OneOff 	  = 0,
 	Recurrent = 1
 }
 
 export enum DirectDebitScheme {
 	Other = 0,
-	Sepa = 1
+	Sepa  = 1
 }
 
 /**

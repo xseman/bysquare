@@ -1,4 +1,4 @@
-import { deburr } from "lodash-es"
+import deburr from "lodash.deburr"
 import * as lzma from "lzma-native"
 
 import { Model, SequenceOrder, SUBST } from "./index"

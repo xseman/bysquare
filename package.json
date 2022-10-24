@@ -35,7 +35,7 @@
 	},
 	"dependencies": {
 		"lodash.deburr": "4.1.0",
-		"lzma-native": "8.0.6"
+		"lzma-native": "7.0.1"
 	},
 	"devDependencies": {
 		"@types/lodash.deburr": "4.1.7",

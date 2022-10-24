@@ -1,4 +1,4 @@
-import { generate } from "bysquare"
+import { generate, PaymentOptions } from "bysquare"
 // import { generate } from "./../../lib/index.js"
 import express from "express"
 
@@ -13,10 +13,11 @@ const model = {
 	CurrencyCode: "EUR",
 	VariableSymbol: "123",
 	Payments: 1,
-	PaymentOptions: 1,
+	PaymentOptions: PaymentOptions.PaymentOrder,
 	BankAccounts: 1,
 	BeneficiaryName: "Filip",
-	BeneficiaryAddressLine1: "address"
+	BeneficiaryAddressLine1: "Address",
+	BeneficiaryAddressLine2: "City"
 }
 
 app.use("/", publicFolder)

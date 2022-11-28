@@ -2,6 +2,7 @@
 	"license": "MIT",
 	"author": "Filip Seman",
 	"type": "module",
+	"proxy": "http://localhost:4000",
 	"scripts": {
 		"start": "node server.js"
 	},

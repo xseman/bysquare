@@ -2,12 +2,14 @@ import { generate, PaymentOptions } from "bysquare"
 // import { generate } from "./../../lib/index.js"
 import express from "express"
 
-const publicFolder = express.static("./public")
 const app = express()
+
+const publicFolder = express.static("./public")
+app.use("/", publicFolder)
 
 /** @type {import("bysquare").Model} */
 const model = {
-	InvoiceID: "random-string",
+	InvoiceID: "123",
 	IBAN: "SK9611000000002918599669",
 	Amount: 100.0,
 	CurrencyCode: "EUR",
@@ -20,13 +22,13 @@ const model = {
 	BeneficiaryAddressLine2: "City"
 }
 
-app.use("/", publicFolder)
 app.get("/qr", async (_req, res) => {
-	const qrString = await generate(model)
-	res.send(qrString)
+	const qrstring = await generate(model)
+	console.log(qrstring);
+	res.send(qrstring)
 })
 
-const port = 3_000
+const port = 4_000
 app.listen(port, () => {
 	console.log(`Example app listening at http://localhost:${port}`)
 })

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from "fs"
-import path from "path"
-import { createInterface, ReadLine } from "readline"
+import { existsSync, readFileSync } from "node:fs"
+import path from "node:path"
+import { createInterface, ReadLine } from "node:readline"
 
 import { generate } from "./generate"
 import { Model } from "./types"
@@ -69,7 +69,7 @@ async function handleStdin(): Promise<string> {
 			.on("close", () => {
 				resolve(lines.join(""))
 			})
-			.on("SIGINT" /* CTRL+C */, reject)
+			.on("SIGINT", /* CTRL+C */ reject)
 	})
 }
 

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+	<div id="qrcode"></div>
+</body>
+
+<script src="qrcodejs.min.js"></script>
+<script type="text/javascript">
+	fetch("/qr")
+		.then((res) => res.text())
+		.then((data) => {
+			new QRCode(document.getElementById("qrcode"), data);
+		})
+</script>
+
+</html>

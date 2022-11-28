@@ -19,21 +19,17 @@ your implementation. See [examples](examples).
 
 ## How it works
 
-![diagram](./docs/uml/logic.svg)
-
-[build]: https://img.shields.io/github/workflow/status/xseman/bysquare/tests
-[version]: https://img.shields.io/npm/v/bysquare
-[license]: https://img.shields.io/github/license/xseman/bysquare
+![diagram](./doc/uml/logic.svg)
 
 ## Install
 
-Node.js
+npm registry
 
 ```sh
 npm install bysquare
 ```
 
-CLI, global
+CLI
 
 ```sh
 npm install --global bysquare
@@ -59,7 +55,7 @@ const model: Model = {
 	VariableSymbol: "123",
 	Payments: 1,
 	PaymentOptions: PaymentOptions.PaymentOrder,
-	BankAccounts: 1
+	BankAccounts: 1,
 }
 
 generate(model).then((qr: string) => {
@@ -70,12 +66,12 @@ generate(model).then((qr: string) => {
 **parse(qr: string): Promise\<ParsedModel>**
 
 ```ts
-import { ParsedModel, parse } from "bysquare"
+import { parse, ParsedModel } from "bysquare"
 
 const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
 parse(qr).then((model: ParsedModel) => {
 	// your logic...
-})
+});
 ```
 
 **detect(qr: string): Boolean**
@@ -85,8 +81,6 @@ import { detect } from "bysquare"
 
 const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
 const isBysquare = detect(qr)
-
-// your logic...
 ```
 
 ## CLI
@@ -142,14 +136,17 @@ Versioning
 https://github.com/dherges/npm-version-git-flow
 
 - Stash unfinished work
-- Run tests and build app
-- Run the `preversion` script
-- Bump version in `package.json` as requested (patch, minor, major, etc)
-- Run the `version` script
-- Commit and tag
-- Run the `postversion` script
+- Run `npm test`
+- Run `npm version <patch, minor, major>`
+- Commit and push
+- Run `npm version`
+- Follow git-flow instructions
 - Checkout to master
 - Push commits and tag, git push && git push --tags
-- npm publish --dry-run
-- Publish to npm, npm publish
+- Validate with `npm publish --dry-run`
+- Publish to npm, `npm publish`
 -->
+
+[build]: https://img.shields.io/github/workflow/status/xseman/bysquare/tests
+[version]: https://img.shields.io/npm/v/bysquare
+[license]: https://img.shields.io/github/license/xseman/bysquare

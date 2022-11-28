@@ -1,11 +1,11 @@
 import * as lzma from "lzma-native"
+import { base32hex } from "rfc4648"
 
 import {
-	CurrencyCode,
+	CurrencyCodeEnum,
 	ParsedModel,
-	PaymentOptions,
-	PeriodicityClassifier,
-	SUBST
+	PaymentOptionsEnum,
+	PeriodicityClassifier
 } from "./index"
 
 const FIELD_INVOICE = 0
@@ -49,8 +49,8 @@ export function assemble(tabbed: string): ParsedModel {
 		] = payment
 
 		output.payments.push({
-			amount: ammount.length ? Number(ammount) : undefined,
-			currencyCode: currencyCode as keyof typeof CurrencyCode,
+			amount: ammount.length ? Number(ammount) : 0,
+			currencyCode: currencyCode as keyof typeof CurrencyCodeEnum,
 			paymentDueDate: paymentDueDate?.length ? paymentDueDate : undefined,
 			variableSymbol: variableSymbol?.length ? variableSymbol : undefined,
 			constantSymbol: constantSymbol?.length ? constantSymbol : undefined,
@@ -81,10 +81,10 @@ export function assemble(tabbed: string): ParsedModel {
 		}
 
 		switch (paymentOptions) {
-			case PaymentOptions.PaymentOrder:
+			case PaymentOptionsEnum.PaymentOrder:
 				break
 
-			case PaymentOptions.StandingOrder:
+			case PaymentOptionsEnum.StandingOrder:
 				const standingOrderFieldCount = 4
 				const standingOrderFieldStart = 15 + (i * standingOrderFieldCount)
 				const standingOrderFieldEnd = 20 + (i * standingOrderFieldCount)
@@ -104,7 +104,7 @@ export function assemble(tabbed: string): ParsedModel {
 				}
 				break
 
-			case PaymentOptions.DirectDebit:
+			case PaymentOptionsEnum.DirectDebit:
 				const directDebitFieldCount = 10
 				const directDebitFieldStart = 16 + (i * directDebitFieldCount)
 				const directDebitFieldEnd = 27 + (i * directDebitFieldStart)
@@ -146,15 +146,15 @@ export function assemble(tabbed: string): ParsedModel {
 		const offset = (i || 1) * (2 * bankAccountsCount) - 2
 
 		switch (paymentOptions) {
-			case PaymentOptions.PaymentOrder:
+			case PaymentOptionsEnum.PaymentOrder:
 				beneficiary = fields.slice(16 + offset, 20 + offset)
 				break
 
-			case PaymentOptions.StandingOrder:
+			case PaymentOptionsEnum.StandingOrder:
 				beneficiary = fields.slice(20 + offset, 24 + offset)
 				break
 
-			case PaymentOptions.DirectDebit:
+			case PaymentOptionsEnum.DirectDebit:
 				beneficiary = fields.slice(25 + offset, 29 + offset)
 				break
 		}
@@ -191,10 +191,14 @@ export function assemble(tabbed: string): ParsedModel {
  * @see 3.16. Decoding client data from QR Code 2005 symbol
  */
 export function parse(qr: string): Promise<ParsedModel> {
-	const inversed: Buffer = inverseAlphanumericConversion(qr)
-	const _headerBysquare = inversed.slice(0, 2)
-	const _headerCompression = inversed.slice(2, 4)
-	const compressedData = inversed.slice(4)
+	const inversed = base32hex.parse(qr, {
+		out: Buffer,
+		loose: true
+	}) as Buffer
+
+	const _headerBysquare = inversed.subarray(0, 2)
+	const _headerCompression = inversed.subarray(2, 4)
+	const compressedData = inversed.subarray(4)
 
 	// @ts-ignore: Missing decored types
 	const decoder = lzma.createStream("rawDecoder", {
@@ -205,39 +209,17 @@ export function parse(qr: string): Promise<ParsedModel> {
 
 	return new Promise<ParsedModel>((resolve, reject) => {
 		decoder
-			.on("error", reject)
 			.on("data", (decompress: Buffer): void => {
-				const _crc32: Buffer = decompress.slice(0, 4)
-				const tabbed: string = decompress.slice(4).toString()
-				const model: ParsedModel = assemble(tabbed)
-
-				resolve(model)
+				const _crc32: Buffer = decompress.subarray(0, 4)
+				const tabbed: string = decompress.subarray(4).toString()
+				resolve(assemble(tabbed))
 			})
+			.on("error", reject)
 			.write(compressedData, (error): void => {
 				error && reject(error)
 				decoder.end()
 			})
 	})
-}
-
-/**
- * @see 3.13. Alphanumeric conversion using Base32hex
- */
-export function inverseAlphanumericConversion(qr: string): Buffer {
-	const binary: string = [...qr].reduce((acc, char) => {
-		acc += SUBST.indexOf(char).toString(2).padStart(5, "0")
-		return acc
-	}, "")
-
-	let bytes: number[] = []
-	for (let nth = 0, leftCount = 0; binary.length > leftCount; nth++) {
-		/** string representation of 8-bits */
-		const slice: string = binary.slice(leftCount, (leftCount += 8))
-		const byte: number = parseInt(slice, 2)
-		bytes[nth] = byte
-	}
-
-	return Buffer.from(bytes)
 }
 
 /**
@@ -247,16 +229,20 @@ export function inverseAlphanumericConversion(qr: string): Buffer {
  * I'd like
  */
 export function detect(qr: string): boolean {
-	const inversed: Buffer = inverseAlphanumericConversion(qr)
-	if (inversed.byteLength < 2) {
+	const parsed = base32hex.parse(qr, {
+		out: Buffer,
+		loose: true
+	}) as Buffer
+
+	if (parsed.byteLength < 2) {
 		return false
 	}
 
-	const headerBysquare = inversed.slice(0, 2)
+	const headerBysquare = parsed.slice(0, 2)
 	return [...headerBysquare.toString("hex")]
 		.map((nibble) => parseInt(nibble, 16))
 		.every((nibble, index) => {
-			if (index === 1 /** version */) {
+			if (/** version */ index === 1) {
 				return 0 >= nibble && nibble <= 1
 			}
 

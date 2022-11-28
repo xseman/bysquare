@@ -1,11 +1,14 @@
-import * as lzma from "lzma-native"
-import { expect, test } from "vitest"
+import * as lzma from "lzma-native";
+import { expect, test } from "vitest";
 
-import { generate, Model, PaymentOptions } from "./"
 import {
-	makeChecksum, makeHeaderBysquare, makeTabbed,
+	makeChecksum,
+	makeHeaderBysquare,
+	makeTabbed,
 	prepareForCompression
-} from "./generate"
+} from "./generate";
+import { generate, Model, PaymentOptionsEnum } from "./index";
+
 
 const model: Model = {
 	InvoiceID: "random-id",
@@ -14,7 +17,7 @@ const model: Model = {
 	CurrencyCode: "EUR",
 	VariableSymbol: "123",
 	Payments: 1,
-	PaymentOptions: PaymentOptions.PaymentOrder,
+	PaymentOptions: PaymentOptionsEnum.PaymentOrder,
 	BankAccounts: 1
 }
 
@@ -99,8 +102,6 @@ test("Lzma testing", () => {
 			dataChunks.push(data)
 		})
 		.on("end", (): void => {
-			// console.log(dataChunks);
-
 			// @ts-ignore: Missing decored types
 			const decoder = lzma.createStream("rawDecoder", {
 				synchronous: true,

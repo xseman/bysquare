@@ -1,7 +1,8 @@
 import deburr from "lodash.deburr"
 import * as lzma from "lzma-native"
+import { base32hex } from "rfc4648"
 
-import { Model, SequenceOrder, SUBST } from "./index"
+import { Model, SequenceOrder } from "./index"
 
 // echo "Hello" | xz --format=raw --lzma1=lc=3,lp=0,pb=2,dict=32KiB --stdout | hexdump -C
 
@@ -39,12 +40,12 @@ export function makeHeaderBysquare(
 	] = header
 
 	/** Combine 4-nibbles to 2-bytes */
-	const headerBuffer = Buffer.from([
+	const mergedNibbles = Buffer.from([
 		(bySquareType << 4) | (version << 0),
-		(documentType << 4) | (reserved << 0)
+		(documentType << 4) | (reserved << 0),
 	])
 
-	return headerBuffer
+	return mergedNibbles
 }
 
 /**
@@ -110,7 +111,7 @@ export function makeTabbed(model: Model): string {
 			acc[index] = String(model[key])
 			return acc
 		},
-		Array<string | undefined>(33).fill(undefined)
+		new Array<string | undefined>(33).fill(undefined)
 	)
 
 	const notStandingOrder = tabbed[14] === undefined
@@ -139,39 +140,6 @@ export function makeTabbed(model: Model): string {
 }
 
 /**
- * @see 3.13. Alphanumeric conversion using Base32hex
- */
-export function alphanumericConversion(data: Buffer): string {
-	let paddedBinString = data.reduce<string>(
-		(acc, byte) => acc + byte.toString(2).padStart(8, "0"),
-		""
-	)
-	let paddedLength = paddedBinString.length
-	const remainder = paddedLength % 5
-	if (remainder) {
-		paddedBinString += Array(5 - remainder).fill("0").join("")
-		paddedLength += 5 - remainder
-	}
-
-	/**
-	 * Map a binary number of 5 bits to a string representation 2^5
-	 * SUBST[0...32] represents char
-	 *
-	 * @see {@link SUBST}
-	 */
-	let encoded = ""
-	for (let i = 0; i < paddedLength / 5; i++) {
-		const binStart = 5 * i
-		const binEnd = 5 * i + 5
-		const sliced = paddedBinString.slice(binStart, binEnd)
-		const key = parseInt(sliced, 2)
-		encoded += SUBST[key]
-	}
-
-	return encoded
-}
-
-/**
  * Generate QR string ready for encoding into basic QR code
  */
 export function generate(model: Model): Promise<string> {
@@ -186,20 +154,18 @@ export function generate(model: Model): Promise<string> {
 		})
 
 		encoder
-			.on("data", (chunk: Buffer): void => {
-				compressedData.push(chunk)
-			})
-			.on("error", reject)
 			.on("end", (): void => {
 				const output = Buffer.concat([
 					makeHeaderBysquare(),
 					makeHeaderLzma(data),
 					...compressedData
 				])
-
-				const qr: string = alphanumericConversion(output)
-				resolve(qr)
+				resolve(base32hex.stringify(output, { pad: false }))
 			})
+			.on("data", (chunk: Buffer): void => {
+				compressedData.push(chunk)
+			})
+			.on("error", reject)
 			.write(data, (error): void => {
 				error && reject(error)
 				encoder.end()

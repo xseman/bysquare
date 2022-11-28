@@ -1,12 +1,4 @@
 /**
- * The bit sequence is split into 5 bit chunks which are mapped onto the
- * characters
- *
- * @see 3.13. Table 9 – Encoding table
- */
-export const SUBST = "0123456789ABCDEFGHIJKLMNOPQRSTUV"
-
-/**
  * Mapping semantic version to encoded version number, header 4-bits
  *
  * It's a bit silly to limit the version number to 4-bit, if they keep
@@ -25,7 +17,7 @@ enum Version {
 	"1.1.0" = 1
 }
 
-export enum PaymentOptions {
+export enum PaymentOptionsEnum {
 	PaymentOrder  = 1,
 	StandingOrder = 2,
 	DirectDebit   = 4
@@ -68,7 +60,7 @@ export enum DirectDebitScheme {
 }
 
 /**
- * Table 15. PAY by square sequence data model (page 30.)
+ * @see Table 15. PAY by square sequence data model
  */
 export interface Model {
 	/**
@@ -87,7 +79,7 @@ export interface Model {
 	/**
 	 * Max length 1
 	 */
-	PaymentOptions: PaymentOptions
+	PaymentOptions: PaymentOptionsEnum
 
 	/**
 	 * Encoded with amount payable. This field is not required and can be left
@@ -95,12 +87,12 @@ export interface Model {
 	 *
 	 * Decimal, max length 15
 	 */
-	Amount?: number
+	Amount: number
 
 	/**
 	 * 3 letter, payment currency code according to ISO 4217
 	 */
-	CurrencyCode: keyof typeof CurrencyCode
+	CurrencyCode: keyof typeof CurrencyCodeEnum
 
 	/**
 	 * Format YYYYMMDD
@@ -164,7 +156,7 @@ export interface Model {
 	 * (1=Monday,2=Tuesday, …, 7=Sunday).
 	 *
 	 * Max length 2
-	 * */
+	 */
 	Day?: number
 
 	/**
@@ -381,7 +373,7 @@ export enum SequenceOrder {
 /**
  * Currency codes based on ISO 4217
  */
-export enum CurrencyCode {
+export enum CurrencyCodeEnum {
 	AED = "United Arab Emirates Dirham",
 	AFN = "Afghanistan Afghani",
 	ALL = "Albania Lek",

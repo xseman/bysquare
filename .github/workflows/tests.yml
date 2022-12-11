@@ -3,13 +3,13 @@ name: tests
 on:
     push:
         branches:
-            - "develop"
-            - "develop/*"
+            - develop
+            - develop/*
         paths:
-            - "src/**.ts"
-            - "package.json"
-            - "tsconfig.json"
-            - ".github/workflows/**.yml"
+            - src/**.ts
+            - package.json
+            - tsconfig.json
+            - .github/workflows/**.yml
 
 jobs:
     test:
@@ -18,12 +18,13 @@ jobs:
         strategy:
             matrix:
                 os: [ubuntu-latest, windows-latest, macos-latest]
-                node-version: [16, 18, 19]
+                node-version: [16, 18]
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
+
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v2
+              uses: actions/setup-node@v3
 
             - name: Build
               run: |

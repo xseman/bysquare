@@ -7,7 +7,7 @@
 		"start": "node server.js"
 	},
 	"dependencies": {
-		"bysquare": "latest",
+		"bysquare": "github:xseman/bysquare#develop",
 		"express": "~4.18.0"
 	}
 }

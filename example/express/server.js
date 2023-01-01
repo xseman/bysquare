@@ -1,5 +1,5 @@
-import { generate, PaymentOptionsEnum } from "./../../lib/index.js"
-// import { generate, PaymentOptionsEnum } from "bysquare"
+// import { generate, PaymentOptionsEnum } from "./../../lib/index.js"
+import { generate, PaymentOptionsEnum } from "bysquare"
 import express from "express"
 
 const app = express()

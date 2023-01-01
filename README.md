@@ -21,6 +21,13 @@ your implementation. See [examples](examples).
 
 ## Install
 
+GitHub
+
+```sh
+npm install xseman/bysquare#master
+npm install xseman/bysquare#develop
+```
+
 npm registry
 
 ```sh

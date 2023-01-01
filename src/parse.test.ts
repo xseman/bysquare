@@ -1,35 +1,13 @@
-import { describe, expect, test } from "vitest"
+import { deepEqual, equal, throws } from 'node:assert/strict'
 
-import { detect, parse, ParsedModel } from "."
-import { assemble } from "./parse"
+import { buildModel, detect, parse } from "./parse.js"
+import { ParsedModel } from "./types.js"
 
 const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
 
-const tabbedString = [
-	"random-id",
-	"\t", "1",
-	"\t", "1",
-	"\t", "100",
-	"\t", "EUR",
-	"\t",
-	"\t", "123",
-	"\t",
-	"\t",
-	"\t",
-	"\t",
-	"\t", "1",
-	"\t", "SK9611000000002918599669",
-	"\t",
-	"\t", "0",
-	"\t", "0",
-	"\t",
-	"\t",
-	"\t",
-].join("")
-
-test("Parse model from qr-string", async () => {
+export async function parsing() {
 	const parsed = await parse(qr)
-	expect(parsed).toEqual({
+	deepEqual(parsed, {
 		invoiceId: "random-id",
 		payments: [
 			{
@@ -39,32 +17,57 @@ test("Parse model from qr-string", async () => {
 				bankAccounts: [{ iban: "SK9611000000002918599669" }]
 			}
 		]
-	} as ParsedModel)
-})
+	} satisfies ParsedModel)
+}
 
-test("Create model from tabbed string", () => {
-	const assembed = assemble(tabbedString)
-	expect(assembed).toEqual({
-		invoiceId: "random-id",
-		payments: [
-			{
-				amount: 100,
-				currencyCode: "EUR",
-				variableSymbol: "123",
-				bankAccounts: [{ iban: "SK9611000000002918599669" }]
-			}
-		]
-	} as ParsedModel)
-})
+export function building() {
+	const tabbedString = [
+		"random-id",
+		"\t", "1",
+		"\t", "1",
+		"\t", "100",
+		"\t", "EUR",
+		"\t",
+		"\t", "123",
+		"\t",
+		"\t",
+		"\t",
+		"\t",
+		"\t", "1",
+		"\t", "SK9611000000002918599669",
+		"\t",
+		"\t", "0",
+		"\t", "0",
+		"\t",
+		"\t",
+		"\t",
+	].join("")
 
-describe("Bysquare header detector", () => {
-	test("Valid QR string", () => {
-		const isBysquare = detect(qr)
-		expect(isBysquare).toBeTruthy()
-	})
+	const expected = buildModel(tabbedString)
+	deepEqual(
+		expected,
+		{
+			invoiceId: "random-id",
+			payments: [
+				{
+					amount: 100,
+					currencyCode: "EUR",
+					variableSymbol: "123",
+					bankAccounts: [{ iban: "SK9611000000002918599669" }]
+				}
+			]
+		} satisfies ParsedModel
+	)
+}
 
-	test("Invalid QR string", () => {
-		const isBysquare = detect("")
-		expect(isBysquare).toBeFalsy()
-	})
-})
+export function header() {
+	const isBysquare = detect(qr)
+	equal(isBysquare, true)
+
+	const notBysquare = detect("EHIN6T0=" /** "hello" in base32hex */)
+	equal(notBysquare, false)
+
+	/** should throw, invalid base32hex */
+	throws(() => detect("aaaa"))
+	throws(() => detect("XXXX"))
+}

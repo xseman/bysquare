@@ -3,14 +3,14 @@ import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 import { createInterface, ReadLine } from "node:readline"
 
-import { generate } from "./generate"
-import { Model } from "./types"
+import { generate } from "./generate.js"
+import { Model } from "./types.js"
 
 if (process.stdin.isTTY) {
-	/** bysquare "file" */
+	// bysquare "file"
 	handleInput(process.argv[2])
 } else {
-	/** echo "data" | bysquare */
+	// echo "data" | bysquare
 	;(async () => {
 		const stdin: string = await handleStdin()
 		const qrString = await jsonStringToQrString(stdin).catch((e) => {

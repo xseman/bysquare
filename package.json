@@ -3,7 +3,53 @@
 	"description": "It's a national standard for payment QR codes adopted by Slovak Banking Association (SBA)",
 	"version": "1.3.4",
 	"license": "Apache-2.0",
-	"author": "Filip Seman <filip.seman@protonmail.com>",
+	"type": "module",
+	"funding": "https://github.com/sponsors/xseman",
+	"homepage": "https://github.com/xseman/bysquare#readme",
+	"author": {
+		"name": "Filip Seman",
+		"email": "filip.seman@protonmail.com"
+	},
+	"scripts": {
+		"prebuild": "rm -rf ./lib || :",
+		"build": "tsc",
+		"postbuild": "chmod +x ./lib/cli.js",
+		"test": "xv --loader=tsx ./src",
+		"cli:local": "npm run build && npm link bysquare",
+		"version": "git flow release start v$npm_package_version",
+		"prepare": "",
+		"prepublishOnly": "npm run build",
+		"preversion": "git checkout develop",
+		"postversion": ""
+	},
+	"dependencies": {
+		"lodash.deburr": "~4.1.0",
+		"lzma-native": "7.0.1",
+		"rfc4648": "1.5.2"
+	},
+	"devDependencies": {
+		"@types/lodash.deburr": "~4.1.0",
+		"@types/lzma-native": "^4.0.1",
+		"@types/node": "~18.11.0",
+		"tsx": "~3.12.0",
+		"typescript": "~4.9.0",
+		"xv": "~2.1.0"
+	},
+	"bin": "lib/cli.js",
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"files": [
+		"lib",
+		"!lib/*.test.*"
+	],
+	"engines": {
+		"node": ">=16.0",
+		"npm": ">=7.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/xseman/bysquare.git"
+	},
 	"keywords": [
 		"pay by square",
 		"by square",
@@ -13,43 +59,5 @@
 		"qr-string",
 		"qr",
 		"cli"
-	],
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/xseman/bysquare.git"
-	},
-	"homepage": "https://github.com/xseman/bysquare#readme",
-	"funding": "https://github.com/sponsors/xseman",
-	"scripts": {
-		"prebuild": "rm -rf ./lib || :",
-		"build": "tsc && chmod +x ./lib/cli.js",
-		"test": "vitest",
-		"test:watch": "vitest --watch",
-		"cli:local": "npm run build && npm link bysquare",
-		"format": "npx prettier --write ./*/**.ts --ignore-path ./.gitignore",
-		"version": "git flow release start v$npm_package_version",
-		"prepare": "",
-		"prepublishOnly": "npm run build",
-		"preversion": "git checkout develop",
-		"postversion": ""
-	},
-	"dependencies": {
-		"lodash.deburr": "4.1.0",
-		"lzma-native": "7.0.1",
-		"rfc4648": "1.5.2"
-	},
-	"devDependencies": {
-		"@types/lodash.deburr": "4.1.7",
-		"@types/lzma-native": "^4.0.1",
-		"@types/node": "~18.11.0",
-		"typescript": "~4.9.0",
-		"vitest": "~0.25.0"
-	},
-	"files": [
-		"lib",
-		"!lib/*.test.*"
-	],
-	"bin": "lib/cli.js",
-	"main": "lib/index.js",
-	"types": "lib/index.d.ts"
+	]
 }

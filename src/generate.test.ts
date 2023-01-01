@@ -1,16 +1,15 @@
-import * as lzma from "lzma-native";
-import { expect, test } from "vitest";
+import { deepEqual, equal } from 'node:assert/strict';
 
 import {
+	generate,
 	makeChecksum,
 	makeHeaderBysquare,
 	makeTabbed,
 	prepareForCompression
-} from "./generate";
-import { generate, Model, PaymentOptionsEnum } from "./index";
+} from "./generate.js";
+import { Model, PaymentOptionsEnum } from "./types.js";
 
-
-const model: Model = {
+const model = {
 	InvoiceID: "random-id",
 	IBAN: "SK9611000000002918599669",
 	Amount: 100.0,
@@ -19,9 +18,9 @@ const model: Model = {
 	Payments: 1,
 	PaymentOptions: PaymentOptionsEnum.PaymentOrder,
 	BankAccounts: 1
-}
+} satisfies Model
 
-const tabbedString = [
+const tabbed = [
 	"random-id",
 	"\t", "1",
 	"\t", "1",
@@ -43,82 +42,51 @@ const tabbedString = [
 	"\t",
 ].join("")
 
-test("Generate query-string from model", async () => {
-	const base = await generate(model)
-	expect(base).toEqual("0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0")
-})
 
-test("Create tabbed string from model", () => {
+export async function generating() {
+	const qr = await generate(model)
+	equal(qr, "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0")
+}
+
+export function tabbedString() {
 	const created = makeTabbed(model)
-	expect(created).toEqual(tabbedString)
-})
+	equal(created, tabbed)
+}
 
-test("Create checksum", () => {
-	const base: Buffer = Buffer.from([0x90, 0x94, 0x19, 0x21])
-	const created: Buffer = makeChecksum(tabbedString)
-	expect(created).toStrictEqual(base)
-})
+export function checksum() {
+	const expected: Buffer = Buffer.from([0x90, 0x94, 0x19, 0x21])
+	const created: Buffer = makeChecksum(tabbed)
+	deepEqual(created, expected)
+}
 
-test("Create data with checksum", () => {
+export function testCreateDataWithChecksum() {
 	const checksum = prepareForCompression(model)
-	const base = Buffer.from(
+	const expected = Buffer.from(
 		"9094192172616e646f6d2d6964093109310931303009455552090931323309090909093109534b393631313030303030303030323931383539393636390909300930090909",
 		"hex"
 	)
 
-	expect(checksum).toStrictEqual(base)
-})
+	deepEqual(checksum, expected)
+}
 
-test("Create binary header, default", () => {
+
+export function testMakeHeaderBysquare() {
 	const created = makeHeaderBysquare()
-	const base = Buffer.from([0x0, 0x0])
+	const expected = Buffer.from([0x00, 0x00])
 
-	expect(created).toStrictEqual(base)
-})
+	deepEqual(created, expected)
+}
 
-test("Create binary header, args", () => {
-	expect(makeHeaderBysquare([
-		0b0000_0001, 0b0000_0010,
-		0b0000_0011, 0b0000_0100
-	])).toEqual(Buffer.from([
-		0b0001_0010,
-		0b0011_0100
-	]))
-})
 
-test("Lzma testing", () => {
-	const encoder = lzma.createStream("rawEncoder", {
-		synchronous: true,
-		// @ts-ignore: Missing filter types
-		filters: [{ id: lzma.FILTER_LZMA1 }]
-	})
-
-	const message = "Hello"
-	const compress = Buffer.from(message, "utf-8")
-	const dataChunks: Buffer[] = []
-
-	encoder
-		.on("data", (data: Buffer): void => {
-			dataChunks.push(data)
-		})
-		.on("end", (): void => {
-			// @ts-ignore: Missing decored types
-			const decoder = lzma.createStream("rawDecoder", {
-				synchronous: true,
-				// @ts-ignore: Missing filter types
-				filters: [{ id: lzma.FILTER_LZMA1 }]
-			})
-
-			decoder
-				.on("data", (res: Buffer): void => {
-					const decoded = res.toString("utf-8")
-					expect(decoded).toBe(message)
-				})
-				.write(Buffer.concat(dataChunks), (error): void => {
-					decoder.end()
-				})
-		})
-		.write(compress, (error): void => {
-			encoder.end()
-		})
-})
+export function binaryHeader() {
+	deepEqual(
+		makeHeaderBysquare([
+			0b0000_0001, 0b0000_0010,
+			0b0000_0011, 0b0000_0100
+		]),
+		Buffer.from([
+			0b0001_0010,
+			0b0011_0100
+		])
+	)
+}

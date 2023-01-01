@@ -102,13 +102,6 @@ export function makeTabbed(model: Model): string {
 	const tabbed = (Object.keys(model) as (keyof Model)[]).reduce(
 		(acc, key) => {
 			const index = SequenceOrder[key]
-
-			// Diacritical marks are not allowed
-			if (key === "PaymentNote") {
-				acc[index] = deburr(model[key])
-				return acc
-			}
-
 			acc[index] = String(model[key])
 			return acc
 		},
@@ -140,10 +133,27 @@ export function makeTabbed(model: Model): string {
 	return tabbed.join("\t")
 }
 
+type Options = { deburr?: boolean }
+
 /**
- * Generate QR string ready for encoding into basic QR code
+ * Generate QR string ready for encoding into text QR code
  */
-export function generate(model: Model): Promise<string> {
+export function generate(
+	model: Model,
+	options: Options = { deburr: true }
+): Promise<string> {
+	// Transfer diacritics to basic latin letters
+	if (options.deburr) {
+		if (model.PaymentNote)
+			model.PaymentNote = deburr(model.PaymentNote)
+
+		if (model.BeneficiaryAddressLine1)
+			model.BeneficiaryAddressLine1 = deburr(model.BeneficiaryAddressLine1)
+
+		if (model.BeneficiaryAddressLine2)
+			model.BeneficiaryAddressLine2 = deburr(model.BeneficiaryAddressLine2)
+	}
+
 	const data: Buffer = prepareForCompression(model)
 	const compressedData: Buffer[] = []
 

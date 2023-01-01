@@ -1,8 +1,8 @@
 import deburr from "lodash.deburr"
-import * as lzma from "lzma-native"
+import lzma from "lzma-native"
 import { base32hex } from "rfc4648"
 
-import { Model, SequenceOrder } from "./index"
+import { Model, SequenceOrder } from "./types.js"
 
 // echo "Hello" | xz --format=raw --lzma1=lc=3,lp=0,pb=2,dict=32KiB --stdout | hexdump -C
 
@@ -32,14 +32,15 @@ export function makeHeaderBysquare(
 ): Buffer {
 	const isValid = header.every((nibble) => 0 <= nibble && nibble <= 15)
 	if (!isValid) {
-		throw new Error("Header range of values must be <0,15>")
+		throw new Error(`Invalid header byte value, valid range <0,15>`)
 	}
+
 	const [
 		bySquareType, version,
 		documentType, reserved
 	] = header
 
-	/** Combine 4-nibbles to 2-bytes */
+	// Combine 4-nibbles to 2-bytes
 	const mergedNibbles = Buffer.from([
 		(bySquareType << 4) | (version << 0),
 		(documentType << 4) | (reserved << 0),
@@ -102,7 +103,7 @@ export function makeTabbed(model: Model): string {
 		(acc, key) => {
 			const index = SequenceOrder[key]
 
-			/** Diacritical marks are not allowed */
+			// Diacritical marks are not allowed
 			if (key === "PaymentNote") {
 				acc[index] = deburr(model[key])
 				return acc
@@ -150,7 +151,16 @@ export function generate(model: Model): Promise<string> {
 		const encoder = lzma.createStream("rawEncoder", {
 			synchronous: true,
 			// @ts-ignore: Missing filter types
-			filters: [{ id: lzma.FILTER_LZMA1 }]
+			filters: [
+				{
+					// @ts-ignore: Missing filter types
+					id: lzma.FILTER_LZMA1,
+					lc: 3,
+					lp: 0,
+					pb: 2,
+					dict_size: 2 ** 17, // 128 kilobytes
+				},
+			],
 		})
 
 		encoder

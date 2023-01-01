@@ -1,8 +1,6 @@
 # bysquare
 
-![build][build] ![build][license] ![build][version]
-
-<!-- Dependency free simple  -->
+![version][version] ![build][build]
 
 Simple `Node.js` library to generate "PAY by square" `QR` string.
 
@@ -147,6 +145,5 @@ https://github.com/dherges/npm-version-git-flow
 - Publish to npm, `npm publish`
 -->
 
-[build]: https://img.shields.io/github/workflow/status/xseman/bysquare/tests
+[build]: https://img.shields.io/github/actions/workflow/status/xseman/bysquare/tests.yml
 [version]: https://img.shields.io/npm/v/bysquare
-[license]: https://img.shields.io/github/license/xseman/bysquare

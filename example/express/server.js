@@ -1,5 +1,5 @@
-import { generate, PaymentOptions } from "bysquare"
-// import { generate } from "./../../lib/index.js"
+import { generate, PaymentOptionsEnum } from "./../../lib/index.js"
+// import { generate, PaymentOptionsEnum } from "bysquare"
 import express from "express"
 
 const app = express()
@@ -15,7 +15,7 @@ const model = {
 	CurrencyCode: "EUR",
 	VariableSymbol: "123",
 	Payments: 1,
-	PaymentOptions: PaymentOptions.PaymentOrder,
+	PaymentOptions: PaymentOptionsEnum.PaymentOrder,
 	BankAccounts: 1,
 	BeneficiaryName: "Filip",
 	BeneficiaryAddressLine1: "Address",

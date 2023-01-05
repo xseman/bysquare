@@ -1,5 +1,5 @@
 /// <reference types="node" resolution-mode="require"/>
-import { Model } from "./types.js";
+import { DataModel } from "./types.js";
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare
  * specification
@@ -15,7 +15,7 @@ import { Model } from "./types.js";
  *
  * @see 3.5. by square header
  */
-export declare function makeHeaderBysquare(header?: [
+export declare function bysquareHeader(header?: [
     bySquareType: number,
     version: number,
     documentType: number,
@@ -24,20 +24,25 @@ export declare function makeHeaderBysquare(header?: [
 /**
  * @see 3.10 Appending CRC32 checksum
  */
-export declare function makeChecksum(tabbedInput: string): Buffer;
+export declare function checksum(intermediate: string): Buffer;
 /**
  * Transfer object to a tabbed string and append a CRC32 checksum
  *
  * @see 3.10. Appending CRC32 checksum
  */
-export declare function prepareForCompression(model: Model): Buffer;
+export declare function prepareCompression(model: DataModel): Buffer;
 /**
- * Convert object to tab-separated fields according to the sequence specification
+ * Transform data to ordered tab-separated intermediate representation ready for
+ * encoding
  *
  * @see Table 15 PAY by square sequence data model
  */
-export declare function makeTabbed(model: Model): string;
+export declare function toIntermediate(data: DataModel): string;
+type Options = {
+    deburr: boolean;
+};
 /**
- * Generate QR string ready for encoding into basic QR code
+ * Generate QR string ready for encoding into text QR code
  */
-export declare function generate(model: Model): Promise<string>;
+export declare function generate(model: DataModel, options?: Options): Promise<string>;
+export {};

@@ -1,5 +1,5 @@
 // import { generate, PaymentOptionsEnum } from "./../../lib/index.js"
-import { generate, PaymentOptionsEnum } from "bysquare"
+import { generate, PaymentOptions } from "bysquare"
 import express from "express"
 
 const app = express()
@@ -7,19 +7,25 @@ const app = express()
 const publicFolder = express.static("./public")
 app.use("/", publicFolder)
 
-/** @type {import("bysquare").Model} */
+/** @type {import("bysquare").DataModel} */
 const model = {
-	InvoiceID: "123",
-	IBAN: "SK9611000000002918599669",
-	Amount: 100.0,
-	CurrencyCode: "EUR",
-	VariableSymbol: "123",
-	Payments: 1,
-	PaymentOptions: PaymentOptionsEnum.PaymentOrder,
-	BankAccounts: 1,
-	BeneficiaryName: "Filip",
-	BeneficiaryAddressLine1: "Address",
-	BeneficiaryAddressLine2: "City"
+	invoiceId: "random-id",
+	payments: [
+		{
+			type: PaymentOptions.PaymentOrder,
+			amount: 100.0,
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+			currencyCode: "EUR",
+			variableSymbol: "123",
+			beneficiary: {
+				name: "Filip",
+				city: "City",
+				street: "Street"
+			}
+		}
+	]
 }
 
 app.get("/qr", async (_req, res) => {

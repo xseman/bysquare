@@ -4,7 +4,7 @@
  * It's a bit silly to limit the version number to 4-bit, if they keep
  * increasing the version number, the latest possible mapped value is 16
  */
-enum Version {
+const enum Version {
 	/**
 	 * 2013-02-22
 	 * Created this document from original by square specifications
@@ -17,28 +17,33 @@ enum Version {
 	"1.1.0" = 1
 }
 
-export enum PaymentOptionsEnum {
-	PaymentOrder  = 1,
-	StandingOrder = 2,
-	DirectDebit   = 4
-}
-
+/**
+ * Selection of one or more months on which payment occurs. This is enabled
+ * only if periodicity is set to one of the following value: “Weekly,
+ * Biweekly, Monthly, Bimonthly”. Otherwise it must not be specified.
+ */
 export enum MonthClassifier {
-	January 	= 1, // 2^0
-	February 	= 2, // 2^1
-	March 		= 4, // 2^2
-	April 		= 8, // 2^3
-	May 		= 16, // 2^4
-	June 		= 32, // 2^5
-	July 		= 64, // 2^6
-	August 		= 128, // 2^7
-	September 	= 256, // 2^8
-	October 	= 512, 	// 2^9
-	November 	= 1_024, // 2^10
-	December 	= 2_048 // 2^11
+	January   = 1,
+	February  = 2,
+	March     = 4,
+	April     = 8,
+	May       = 16,
+	June      = 32,
+	July      = 64,
+	August 	  = 128,
+	September = 256,
+	October   = 512,
+	November  = 1_024,
+	December  = 2_048
 }
 
-export enum PeriodicityClassifier {
+/**
+ * Periodicity of the payment. All valid options are „Daily“, „Weekly“,
+ * „Biweekly“, „Monthly“, „Bimonthly“, „Quarterly“, „Annually“,
+ * „Semiannually“. To find out which periodicity types are supported by the
+ * banks see the following web site: http://www.sbaonline.sk/sk/
+ */
+export enum Periodicity {
 	Daily 		 = "d",
 	Weekly 		 = "w",
 	Biweekly 	 = "b",
@@ -49,75 +54,133 @@ export enum PeriodicityClassifier {
 	Annually 	 = "a"
 }
 
+/**
+ * This is the payment day. It‘s meaning depends on the periodicity, meaning
+ * either day of the month (number between 1 and 31) or day of the week
+ * (1=Monday,2=Tuesday, …, 7=Sunday).
+ *
+ * Max length 2
+ */
+export type Day = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31
+
+export enum PaymentOptions {
+	PaymentOrder  = 1,
+	StandingOrder = 2,
+	DirectDebit   = 4
+}
+
+/**
+ * In section „encoding BankAccounts“ we provide further recommendations for
+ * encoding bank account
+ */
+export type BankAccount = {
+	/**
+	 * Max length 34
+	 */
+	iban: string
+
+	/**
+	 * Format ISO 9362 (swift)
+	 * 8 or 11 characters long
+	 */
+	bic?: string
+}
+
+/**
+ * If DirectDebitScheme value is 1, which is „SEPA“ than encoded direct
+ * debit follows SEPA direct debit scheme which means that fields MandateID,
+ * CreditorID and optional ContractID are used. If direct debit scheme is 0,
+ * which is „OTHER“ this means no specific direct debit scheme and following
+ * rules do apply:
+ *
+ * a. Creditor is identified via bank accounts
+ *
+ * b. Contract between debtor and creditor is identified using one of the
+ *    following two ways: 1. by two optional fields SpecificSymbol and
+ *    VariableSymbol. 2. by one optional field OriginatorsReferenceInformation.
+ *    If SpecificSymbol and VariableSymbol fields or
+ *    OriginatorsReferenceInformation field is filled in DirectDebitExt then
+ *    these fields do apply for the direct debit.
+ */
+export enum DirectDebitScheme {
+	Other = 0,
+	Sepa  = 1,
+}
+
+/**
+ * Can be „one­off“ for one time debit or „recurrent“ for repeated debit
+ * until cancelled.
+ *
+ * Max length 1
+ */
 export enum DirectDebitType {
 	OneOff 	  = 0,
 	Recurrent = 1
 }
 
-export enum DirectDebitScheme {
-	Other = 0,
-	Sepa  = 1
+export type Beneficiary = {
+	/**
+	 * Belongs to the N-th payment
+	 *
+	 * Max length 70
+	 */
+	name?: string
+
+	/**
+	 * Belongs to the N-th payment
+	 * Commonly used street and street number
+	 *
+	 * Max length 70
+	 */
+	street?: string
+
+	/**
+	 * Belongs to the N-th payment
+	 * Commonly used for City
+	 *
+	 * Max length 70
+	 */
+	city?: string
 }
 
-/**
- * @see Table 15. PAY by square sequence data model
- */
-export interface Model {
-	/**
-	 * Max length 10
-	 */
-	InvoiceID?: string
-
-	/**
-	 * Appendix E extended beneficiary fields
-	 * Table 16 PAY by square extended fields for bulk payment order
-	 *
-	 * Number of payments
-	 */
-	Payments: number
-
-	/**
-	 * Max length 1
-	 */
-	PaymentOptions: PaymentOptionsEnum
-
+export type SimplePayment = {
 	/**
 	 * Encoded with amount payable. This field is not required and can be left
 	 * blank in cases payment amount is not known ­such as donations.
 	 *
 	 * Decimal, max length 15
 	 */
-	Amount: number
+	amount?: number
 
 	/**
-	 * 3 letter, payment currency code according to ISO 4217
+	 * 3 letter, payment currency code according to ISO-4217
 	 */
-	CurrencyCode: keyof typeof CurrencyCodeEnum
+	currencyCode: keyof typeof CurrencyCodeEnum
 
 	/**
 	 * Format YYYYMMDD
 	 */
-	PaymentDueDate?: string
+	paymentDueDate?: string
 
 	/**
 	 * Max length 10
 	 */
-	VariableSymbol?: string
+	variableSymbol?: string
 
 	/**
 	 * Max length 4
 	 */
-	ConstantSymbol?: string
+	constantSymbol?: string
 
 	/**
 	 * Max length 10
 	 */
-	SpecificSymbol?: string
+	specificSymbol?: string
 
 	/**
 	 * Max length 35
 	 */
-	OriginatorsReferenceInformation?: string
+	originatorRefInfo?: string
 
 	/**
 	 * Optional field. In previous section we provide further recommendations
@@ -125,58 +188,20 @@ export interface Model {
 	 *
 	 * Max length 140
 	 */
-	PaymentNote?: string
+	paymentNote?: string
+	bankAccounts: BankAccount[]
+	beneficiary?: Beneficiary
+}
 
-	/**
-	 * In section „encoding BankAccounts“ we provide further recommendations for
-	 * encoding bank account
-	 */
-	BankAccounts: number
+export type PaymentOrder = SimplePayment & {
+	type: PaymentOptions.PaymentOrder
+}
 
-	/**
-	 * Max length 34
-	 */
-	IBAN: string
-
-	/**
-	 * Format ISO 9362, 8 or 11 characters long
-	 *
-	 * Max length 11
-	 */
-	BIC?: string
-
-	/**
-	 * Max length 1
-	 */
-	StandingOrderExt?: 0 | 1
-
-	/**
-	 * This is the payment day. It‘s meaning depends on the periodicity, meaning
-	 * either day of the month (number between 1 and 31) or day of the week
-	 * (1=Monday,2=Tuesday, …, 7=Sunday).
-	 *
-	 * Max length 2
-	 */
-	Day?: number
-
-	/**
-	 * Selection of one or more months on which payment occurs. This is enabled
-	 * only if periodicity is set to one of the following value: “Weekly,
-	 * Biweekly, Monthly, Bimonthly”. Otherwise it must not be specified.
-	 *
-	 * Max length 4
-	 */
-	Month?: MonthClassifier
-
-	/**
-	 * Periodicity of the payment. All valid options are „Daily“, „Weekly“,
-	 * „Biweekly“, „Monthly“, „Bimonthly“, „Quarterly“, „Annually“,
-	 * „Semiannually“. To find out which periodicity types are supported by the
-	 * banks see the following web site: http://www.sbaonline.sk/sk/
-	 *
-	 * Max length 1
-	 */
-	Periodicity?: PeriodicityClassifier
+export type StandingOrder = SimplePayment & {
+	type: PaymentOptions.StandingOrder
+	day?: Day
+	month?: MonthClassifier
+	periodicity?: Periodicity
 
 	/**
 	 * Defines the day of the last payment of the standing order. After this
@@ -184,70 +209,28 @@ export interface Model {
 	 *
 	 * Format YYYYMMDD
 	 */
-	LastDate?: string
+	lastDate?: string
+}
 
-	/**
-	 * Max length 1
-	 */
-	DirectDebitExt?: 0 | 1
-
-	/**
-	 * If DirectDebitScheme value is 1, which is „SEPA“ than encoded direct
-	 * debit follows SEPA direct debit scheme which means that fields MandateID,
-	 * CreditorID and optional ContractID are used. If direct debit scheme is 0,
-	 * which is „OTHER“ this means no specific direct debit scheme and following
-	 * rules do apply:
-	 *
-	 * a. Creditor is identified via bank accounts
-	 *
-	 * b. Contract between debtor and creditor is identified using one of the
-	 * following two ways: 1. by two optional fields SpecificSymbol and
-	 * VariableSymbol. 2. by one optional field OriginatorsReferenceInformation.
-	 * If SpecificSymbol and VariableSymbol fields or
-	 * OriginatorsReferenceInformation field is filled in DirectDebitExt then
-	 * these fields do apply for the direct debit.
-	 *
-	 * Max length 1
-	 */
-	DirectDebitScheme?: DirectDebitScheme
-
-	/**
-	 * Can be „one­off“ for one time debit or „recurrent“ for repeated debit
-	 * until cancelled.
-	 *
-	 * Max length 1
-	 */
-	DirectDebitType?: DirectDebitType
-
-	/**
-	 * Max length 10
-	 */
-	VariableSymbol_?: string
-
-	/**
-	 * Max length 10
-	 */
-	SpecificSymbol_?: string
+export type DirectDebit = SimplePayment & {
+	type: PaymentOptions.DirectDebit
+	directDebitScheme?: DirectDebitScheme
+	directDebitType?: DirectDebitType
 
 	/**
 	 * Max length 35
 	 */
-	OriginatorsReferenceInformation_?: string
+	mandateId?: string
 
 	/**
 	 * Max length 35
 	 */
-	MandateID?: string
+	creditorId?: string
 
 	/**
 	 * Max length 35
 	 */
-	CreditorID?: string
-
-	/**
-	 * Max length 35
-	 */
-	ContractID?: string
+	contractId?: string
 
 	/**
 	 * Optional field. As most users prefer to set up some maximum amount for
@@ -255,7 +238,7 @@ export interface Model {
 	 *
 	 * Decimal, max length 15
 	 */
-	MaxAmount?: number
+	maxAmount?: number
 
 	/**
 	 * Defines the day after which direct debit is cancelled.
@@ -263,115 +246,21 @@ export interface Model {
 	 * Max length 8
 	 * Format YYYYMMDD
 	 */
-	ValidTillDate?: string
-
-	/**
-	 * Belongs to the first payment
-	 *
-	 * Max length 70
-	 */
-	BeneficiaryName?: string
-
-	/**
-	 * Belongs to the first payment
-	 *
-	 * Max length 70
-	 */
-	BeneficiaryAddressLine1?: string
-
-	/**
-	 * Belongs to the first payment
-	 *
-	 * Max length 70
-	 */
-	BeneficiaryAddressLine2?: string
+	validTillDate?: string
 }
 
-export interface ParsedModel {
-	invoiceId: Model["InvoiceID"]
-	payments: Array<{
-		amount: Model["Amount"]
-		currencyCode: Model["CurrencyCode"]
-		paymentDueDate?: Model["PaymentDueDate"]
-		variableSymbol?: Model["VariableSymbol"]
-		constantSymbol?: Model["ConstantSymbol"]
-		specificSymbol?: Model["SpecificSymbol"]
-		originatorsReferenceInformation?: Model["OriginatorsReferenceInformation"]
-		paymentNote?: Model["PaymentNote"]
-		bankAccounts: Array<{
-			iban: Model["IBAN"]
-			bic?: Model["BIC"]
-		}>
-		standingOrder?: {
-			day?: Model["Day"]
-			month?: Model["Month"]
-			periodicity?: Model["Periodicity"]
-			lastDate?: Model["LastDate"]
-		}
-		directDebit?: {
-			directDebitScheme?: Model["DirectDebitScheme"]
-			directDebitType?: Model["DirectDebitType"]
-			variableSymbol?: Model["VariableSymbol"]
-			specificSymbol?: Model["SpecificSymbol"]
-			originatorsReferenceInformation?: Model["OriginatorsReferenceInformation_"]
-			mandateId?: Model["MandateID"]
-			creditorId?: Model["CreditorID"]
-			contractId?: Model["ContractID"]
-			maxAmount?: Model["MaxAmount"]
-			validTillDate?: Model["ValidTillDate"]
-		}
-		beneficiary?: {
-			name?: Model["BeneficiaryName"]
-			addressLine1?: Model["BeneficiaryAddressLine1"]
-			addressLine2?: Model["BeneficiaryAddressLine2"]
-		}
-	}>
+export type Payment = PaymentOrder | StandingOrder | DirectDebit
+
+export type DataModel = {
+	/**
+	 * Max length 10
+	 */
+	invoiceId?: string
+	payments: Payment[]
 }
 
 /**
- * Atributes must follow specific order
- * Based on Table 15. PAY by square sequence data model (page 30.)
- *
- * @see{./docs/specification_v1.1.0.pdf}
- */
-export enum SequenceOrder {
-	InvoiceID,
-	Payments,
-	PaymentOptions,
-	Amount,
-	CurrencyCode,
-	PaymentDueDate,
-	VariableSymbol,
-	ConstantSymbol,
-	SpecificSymbol,
-	OriginatorsReferenceInformation,
-	PaymentNote,
-	BankAccounts,
-	IBAN,
-	BIC,
-	StandingOrderExt,
-	Day,
-	Month,
-	Periodicity,
-	LastDate,
-	DirectDebitExt,
-	DirectDebitScheme,
-	DirectDebitType,
-	VariableSymbol_,
-	SpecificSymbol_,
-	OriginatorsReferenceInformation_,
-	MandateID,
-	CreditorID,
-	ContractID,
-	MaxAmount,
-	ValidTillDate,
-	BeneficiaryName,
-	BeneficiaryAddressLine1,
-	BeneficiaryAddressLine2
-}
-
-/**
- * Currency codes based on ISO 4217
+ * Currency codes based on ISO-4217
  */
 export enum CurrencyCodeEnum {
 	AED = "United Arab Emirates Dirham",

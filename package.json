@@ -15,6 +15,7 @@
 		"build": "tsc",
 		"postbuild": "chmod +x ./lib/cli.js",
 		"test": "xv --loader=tsx ./src",
+		"test:watch": "find ./src/*.ts | entr xv --loader=tsx ./src",
 		"cli:local": "npm run build && npm link bysquare",
 		"version": "git flow release start v$npm_package_version",
 		"prepare": "",

@@ -2,7 +2,7 @@ import deburr from "lodash.deburr"
 import lzma from "lzma-native"
 import { base32hex } from "rfc4648"
 
-import { Model, SequenceOrder } from "./types.js"
+import { DataModel, PaymentOptions } from "./types.js"
 
 // echo "Hello" | xz --format=raw --lzma1=lc=3,lp=0,pb=2,dict=32KiB --stdout | hexdump -C
 
@@ -21,7 +21,7 @@ import { Model, SequenceOrder } from "./types.js"
  *
  * @see 3.5. by square header
  */
-export function makeHeaderBysquare(
+export function bysquareHeader(
 	header: [
 		bySquareType: number, version: number,
 		documentType: number, reserved: number
@@ -57,7 +57,7 @@ export function makeHeaderBysquare(
  *
  * @see 3.11. LZMA Compression
  */
-function makeHeaderLzma(decompressedData: Buffer): Buffer {
+function lzmaHeader(decompressedData: Buffer): Buffer {
 	const bytesCount = decompressedData.length
 	if (bytesCount >= 2 ** 16) {
 		throw new Error("The maximum compressed data size has been reached")
@@ -71,9 +71,9 @@ function makeHeaderLzma(decompressedData: Buffer): Buffer {
 /**
  * @see 3.10 Appending CRC32 checksum
  */
-export function makeChecksum(tabbedInput: string): Buffer {
+export function checksum(intermediate: string): Buffer {
 	// @ts-ignore: Wrong return type
-	const data = lzma.crc32(tabbedInput) as number
+	const data = lzma.crc32(intermediate) as number
 	const crc32 = Buffer.alloc(4)
 	crc32.writeUInt32LE(data)
 
@@ -85,76 +85,118 @@ export function makeChecksum(tabbedInput: string): Buffer {
  *
  * @see 3.10. Appending CRC32 checksum
  */
-export function prepareForCompression(model: Model): Buffer {
-	const tabbed: string = makeTabbed(model)
+export function prepareCompression(model: DataModel): Buffer {
+	const intermediate = toIntermediate(model)
 	return Buffer.concat([
-		makeChecksum(tabbed),
-		Buffer.from(tabbed, "utf-8")
+		checksum(intermediate),
+		Buffer.from(intermediate, "utf-8")
 	])
 }
 
 /**
- * Convert object to tab-separated fields according to the sequence specification
+ * Transform data to ordered tab-separated intermediate representation ready for
+ * encoding
  *
  * @see Table 15 PAY by square sequence data model
  */
-export function makeTabbed(model: Model): string {
-	const tabbed = (Object.keys(model) as (keyof Model)[]).reduce(
-		(acc, key) => {
-			const index = SequenceOrder[key]
-			acc[index] = String(model[key])
-			return acc
-		},
-		new Array<string | undefined>(33).fill(undefined)
-	)
+export function toIntermediate(data: DataModel): string {
+	const intermediate = new Array<string | undefined>()
 
-	const notStandingOrder = tabbed[14] === undefined
-	const notDirectDebit = tabbed[19] === undefined
+	intermediate.push(data.invoiceId?.toString())
+	intermediate.push(data.payments.length.toString())
 
-	if (notStandingOrder) {
-		const attributesLength = 4
-		tabbed[14] = String(0)
-		tabbed.splice(15, attributesLength)
+	for (const p of data.payments) {
+		intermediate.push(p.type.toString())
+		intermediate.push(p.amount?.toString())
+		intermediate.push(p.currencyCode)
+		intermediate.push(p.paymentDueDate)
+		intermediate.push(p.variableSymbol)
+		intermediate.push(p.constantSymbol)
+		intermediate.push(p.specificSymbol)
+		intermediate.push(p.originatorRefInfo)
+		intermediate.push(p.paymentNote)
 
-		if (notDirectDebit) {
-			tabbed[19 - attributesLength] = String(0)
-			tabbed.splice(20 - attributesLength, 10)
+		intermediate.push(p.bankAccounts.length.toString())
+		for (const ba of p.bankAccounts) {
+			intermediate.push(ba.iban)
+			intermediate.push(ba.bic)
 		}
 
-		return tabbed.join("\t")
+		if (p.type === PaymentOptions.StandingOrder) {
+			intermediate.push('1')
+			intermediate.push(p.day?.toString())
+			intermediate.push(p.month?.toString())
+			intermediate.push(p.periodicity)
+			intermediate.push(p.lastDate)
+		} else {
+			intermediate.push('0')
+		}
+
+		if (p.type === PaymentOptions.DirectDebit) {
+			intermediate.push('1')
+			intermediate.push(p.directDebitScheme?.toString())
+			intermediate.push(p.directDebitType?.toString())
+			intermediate.push(p.variableSymbol?.toString())
+			intermediate.push(p.specificSymbol?.toString())
+			intermediate.push(p.originatorRefInfo?.toString())
+			intermediate.push(p.mandateId?.toString())
+			intermediate.push(p.creditorId?.toString())
+			intermediate.push(p.contractId?.toString())
+			intermediate.push(p.maxAmount?.toString())
+			intermediate.push(p.validTillDate?.toString())
+		} else {
+			intermediate.push('0')
+		}
 	}
 
-	if (notDirectDebit) {
-		const attributesLength = 10
-		tabbed[19] = String(0)
-		tabbed.splice(20, attributesLength)
+	for (const p of data.payments) {
+		intermediate.push(p.beneficiary?.name)
+		intermediate.push(p.beneficiary?.street)
+		intermediate.push(p.beneficiary?.city)
 	}
 
-	return tabbed.join("\t")
+	return intermediate.join('\t')
 }
 
-type Options = { deburr?: boolean }
+/**
+ * Transfer diacritics to basic latin letters
+ */
+function removeDiacritics(model: DataModel): void {
+	for (const payment of model.payments) {
+		if (payment.paymentNote) {
+			payment.paymentNote = deburr(payment.paymentNote)
+		}
+
+		if (payment.beneficiary?.name) {
+			payment.beneficiary.name = deburr(payment.beneficiary.name)
+		}
+
+		if (payment.beneficiary?.city) {
+			payment.beneficiary.city = deburr(payment.beneficiary.city)
+		}
+
+		if (payment.beneficiary?.street) {
+			payment.beneficiary.street = deburr(payment.beneficiary.street)
+		}
+	}
+}
+
+type Options = {
+	deburr: boolean
+}
 
 /**
  * Generate QR string ready for encoding into text QR code
  */
 export function generate(
-	model: Model,
+	model: DataModel,
 	options: Options = { deburr: true }
 ): Promise<string> {
-	// Transfer diacritics to basic latin letters
 	if (options.deburr) {
-		if (model.PaymentNote)
-			model.PaymentNote = deburr(model.PaymentNote)
-
-		if (model.BeneficiaryAddressLine1)
-			model.BeneficiaryAddressLine1 = deburr(model.BeneficiaryAddressLine1)
-
-		if (model.BeneficiaryAddressLine2)
-			model.BeneficiaryAddressLine2 = deburr(model.BeneficiaryAddressLine2)
+		removeDiacritics(model)
 	}
 
-	const data: Buffer = prepareForCompression(model)
+	const data: Buffer = prepareCompression(model)
 	const compressedData: Buffer[] = []
 
 	return new Promise<string>((resolve, reject) => {
@@ -176,8 +218,8 @@ export function generate(
 		encoder
 			.on("end", (): void => {
 				const output = Buffer.concat([
-					makeHeaderBysquare(),
-					makeHeaderLzma(data),
+					bysquareHeader(),
+					lzmaHeader(data),
 					...compressedData
 				])
 				resolve(base32hex.stringify(output, { pad: false }))

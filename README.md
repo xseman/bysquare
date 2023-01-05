@@ -43,24 +43,29 @@ npm install --global bysquare
 ## API
 
 ```ts
-generate(model: Model): Promise<string>
-parse(qr: string): Promise<ParsedModel>
+generate(model: DataModel): Promise<string>
+parse(qr: string): Promise<DataModel>
 detect(qr: string): Boolean
 ```
 
-**generate(model: Model): Promise\<string>**
+**generate(model: DataModel): Promise\<string>**
 
 ```ts
-import { generate, Model, parse, PaymentOptions } from "bysquare"
+import { generate, DataModel, parse, PaymentOptions } from "bysquare"
 
-const model: Model = {
-	IBAN: "SK9611000000002918599669",
-	Amount: 100.0,
-	CurrencyCode: "EUR",
-	VariableSymbol: "123",
-	Payments: 1,
-	PaymentOptions: PaymentOptions.PaymentOrder,
-	BankAccounts: 1,
+const model: DataModel = {
+	invoiceId: "random-id",
+	payments: [
+		{
+			type: PaymentOptions.PaymentOrder,
+			amount: 100.0,
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+			currencyCode: "EUR",
+			variableSymbol: "123",
+		}
+	]
 }
 
 generate(model).then((qr: string) => {
@@ -68,13 +73,13 @@ generate(model).then((qr: string) => {
 })
 ```
 
-**parse(qr: string): Promise\<ParsedModel>**
+**parse(qr: string): Promise\<DataModel>**
 
 ```ts
-import { parse, ParsedModel } from "bysquare"
+import { parse, DataModel } from "bysquare"
 
 const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
-parse(qr).then((model: ParsedModel) => {
+parse(qr).then((model: DataModel) => {
 	// your logic...
 });
 ```
@@ -95,14 +100,18 @@ You can use json file with valid model to generate qr-string.
 ```sh
 # example.json
 # {
-#     "InvoiceID: "random-id",
-#     "IBAN": "SK9611000000002918599669",
-#     "Amount": 100.0,
-#     "CurrencyCode": "EUR",
-#     "VariableSymbol": "123",
-#     "Payments": 1,
-#     "PaymentOptions": 1,
-#     "BankAccounts": 1
+# 	"invoiceId": "random-id",
+# 	"payments": [
+# 		{
+# 			"type": 1,
+# 			"amount": 100.0,
+# 			"bankAccounts": [
+# 				{ "iban": "SK9611000000002918599669" }
+# 			],
+# 			"currencyCode": "EUR",
+# 			"variableSymbol": "123"
+# 		}
+# 	]
 # }
 
 $ npx bysquare ./example.json
@@ -113,14 +122,18 @@ You can also use stdin.
 
 ```sh
 $ bysquare <<< '{
-	"InvoiceID": "random-id",
-	"IBAN": "SK9611000000002918599669",
-	"Amount": 100.0,
-	"CurrencyCode": "EUR",
-	"VariableSymbol": "123",
-	"Payments": 1,
-	"PaymentOptions": 1,
-	"BankAccounts": 1
+	"invoiceId": "random-id",
+	"payments": [
+		{
+			"type": 1,
+			"amount": 100.0,
+			"bankAccounts": [
+				{ "iban": "SK9611000000002918599669" }
+			],
+			"currencyCode": "EUR",
+			"variableSymbol": "123"
+		}
+	]
 }'
 $ 0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0
 ```

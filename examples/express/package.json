@@ -1,12 +1,13 @@
 {
-	"license": "MIT",
+	"license": "Apache-2.0",
 	"author": "Filip Seman",
 	"type": "module",
+	"proxy": "http://localhost:4000",
 	"scripts": {
 		"start": "node server.js"
 	},
 	"dependencies": {
-		"bysquare": "latest",
+		"bysquare": "github:xseman/bysquare#develop",
 		"express": "~4.18.0"
 	}
 }

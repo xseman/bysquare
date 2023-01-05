@@ -1,32 +1,40 @@
+// import { generate, PaymentOptionsEnum } from "./../../lib/index.js"
 import { generate, PaymentOptions } from "bysquare"
-// import { generate } from "./../../lib/index.js"
 import express from "express"
 
-const publicFolder = express.static("./public")
 const app = express()
 
-/** @type {import("bysquare").Model} */
+const publicFolder = express.static("./public")
+app.use("/", publicFolder)
+
+/** @type {import("bysquare").DataModel} */
 const model = {
-	InvoiceID: "random-string",
-	IBAN: "SK9611000000002918599669",
-	Amount: 100.0,
-	CurrencyCode: "EUR",
-	VariableSymbol: "123",
-	Payments: 1,
-	PaymentOptions: PaymentOptions.PaymentOrder,
-	BankAccounts: 1,
-	BeneficiaryName: "Filip",
-	BeneficiaryAddressLine1: "Address",
-	BeneficiaryAddressLine2: "City"
+	invoiceId: "random-id",
+	payments: [
+		{
+			type: PaymentOptions.PaymentOrder,
+			amount: 100.0,
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+			currencyCode: "EUR",
+			variableSymbol: "123",
+			beneficiary: {
+				name: "Filip",
+				city: "City",
+				street: "Street"
+			}
+		}
+	]
 }
 
-app.use("/", publicFolder)
 app.get("/qr", async (_req, res) => {
-	const qrString = await generate(model)
-	res.send(qrString)
+	const qrstring = await generate(model)
+	console.log(qrstring);
+	res.send(qrstring)
 })
 
-const port = 3_000
+const port = 4_000
 app.listen(port, () => {
 	console.log(`Example app listening at http://localhost:${port}`)
 })

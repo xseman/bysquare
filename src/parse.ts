@@ -1,186 +1,127 @@
-import * as lzma from "lzma-native"
+import lzma from "lzma-native";
+import { base32hex } from "rfc4648";
 
 import {
-	CurrencyCode,
-	ParsedModel,
-	PaymentOptions,
-	PeriodicityClassifier,
-	SUBST
-} from "./index"
+	BankAccount,
+	Beneficiary,
+	CurrencyCodeEnum, DataModel, Day, Payment, PaymentOptions, Periodicity
+} from "./index.js";
 
-const FIELD_INVOICE = 0
-const FIELD_PAYMENT_COUNT = 1
-const FIELD_PAYMENT_OPTIONS = 2
-const FIELD_BANK_ACCOUNT_COUNT = 11
+function cleanEmptyProps(obj: any): void {
+	Object.keys(obj).forEach((key) => {
+		if (typeof obj[key] === 'undefined') {
+			delete obj[key];
+		}
+	});
+}
 
 /**
  * @see 3.14. Generating by square Code
  */
-export function assemble(tabbed: string): ParsedModel {
-	const fields: string[] = tabbed
+export function buildModel(qr: string): DataModel {
+	const intermediate = qr
 		.split("\t")
 		/** The end of the qr-string might contain a NULL-terminated string */
-		.map((entry) => entry.replace("\x00", ""))
+		.map<string>((entry) => entry.replace("\x00", ""))
 
-	const invoiceId = fields[FIELD_INVOICE]
-	const output: ParsedModel = {
+	const invoiceId = intermediate.shift()
+	const output: DataModel = {
 		invoiceId: invoiceId?.length ? invoiceId : undefined,
 		payments: []
 	}
 
-	const paymentsCount = Number(fields[FIELD_PAYMENT_COUNT])
-	const paymentOptions = Number(fields[FIELD_PAYMENT_OPTIONS])
-	const bankAccountsCount = Number(fields[FIELD_BANK_ACCOUNT_COUNT])
+	const paymentslen = Number(intermediate.shift())
 
-	for (let i = 0; i < paymentsCount; i++) {
-		const paymentFieldCount = 8
-		const paymentFieldStart = 3 + (i * paymentFieldCount)
-		const paymentFieldEnd = 11 + (i * paymentFieldCount)
-		const payment = fields.slice(paymentFieldStart, paymentFieldEnd)
-		const [
-			ammount,
-			currencyCode,
-			paymentDueDate,
-			variableSymbol,
-			constantSymbol,
-			specificSymbol,
-			originatorsReferenceInformation,
-			paymentNote
-		] = payment
+	for (let i = 0; i < paymentslen; i++) {
+		const paymentOptions = intermediate.shift()
+		const ammount = intermediate.shift()
+		const currency = intermediate.shift()
+		const dueDate = intermediate.shift()
+		const variables = intermediate.shift()
+		const constants = intermediate.shift()
+		const specifics = intermediate.shift()
+		const originatorRefInfo = intermediate.shift()
+		const paymentNote = intermediate.shift()
 
-		output.payments.push({
-			amount: ammount.length ? Number(ammount) : undefined,
-			currencyCode: currencyCode as keyof typeof CurrencyCode,
-			paymentDueDate: paymentDueDate?.length ? paymentDueDate : undefined,
-			variableSymbol: variableSymbol?.length ? variableSymbol : undefined,
-			constantSymbol: constantSymbol?.length ? constantSymbol : undefined,
-			specificSymbol: specificSymbol?.length ? specificSymbol : undefined,
-			originatorsReferenceInformation: originatorsReferenceInformation?.length ? originatorsReferenceInformation : undefined,
-			paymentNote: paymentNote?.length ? paymentNote : undefined,
+		let payment: Payment = {
+			type: Number(paymentOptions) as PaymentOptions,
 			bankAccounts: [],
-		})
+			amount: ammount?.length ? Number(ammount) : undefined,
+			currencyCode: currency as keyof typeof CurrencyCodeEnum,
+			paymentDueDate: dueDate?.length ? dueDate : undefined,
+			variableSymbol: variables?.length ? variables : undefined,
+			constantSymbol: constants?.length ? constants : undefined,
+			specificSymbol: specifics?.length ? specifics : undefined,
+			originatorRefInfo: originatorRefInfo?.length ? originatorRefInfo : undefined,
+			paymentNote: paymentNote?.length ? paymentNote : undefined,
+		}
 
-		for (let j = 0; j < Number(bankAccountsCount); j++) {
-			const bankAccountFieldCount = 2
-			const bankAccountFieldStart = 12 + (j * bankAccountFieldCount)
-			const bankAccountFieldEnd = 14 + (j * bankAccountFieldCount)
-			const bankAccounts = fields.slice(bankAccountFieldStart, bankAccountFieldEnd)
-			const [
-				iban,
-				bic
-			] = bankAccounts
-
-			if (iban?.length === 0) {
+		const accountslen = Number(intermediate.shift())
+		for (let j = 0; j < accountslen; j++) {
+			const iban = intermediate.shift()
+			if (iban === undefined || iban.length === 0) {
 				throw new Error("Missing IBAN")
 			}
-
-			output.payments[i].bankAccounts.push({
+			const bic = intermediate.shift()
+			const account = {
 				iban: iban,
-				bic: bic?.length ? bic : undefined
-			})
+				bic: bic?.length ? bic : undefined,
+			} satisfies BankAccount
+			cleanEmptyProps(account)
+			payment.bankAccounts.push(account)
 		}
 
-		switch (paymentOptions) {
+		intermediate.shift() // StandingOrderExt
+		intermediate.shift() // DirectDebitExt
+
+		// narrowing payment type
+		switch (payment.type) {
 			case PaymentOptions.PaymentOrder:
-				break
+				break;
 
 			case PaymentOptions.StandingOrder:
-				const standingOrderFieldCount = 4
-				const standingOrderFieldStart = 15 + (i * standingOrderFieldCount)
-				const standingOrderFieldEnd = 20 + (i * standingOrderFieldCount)
-				const standingOrder = fields.slice(standingOrderFieldStart, standingOrderFieldEnd)
-				const [
-					day,
-					month,
-					periodicity,
-					lastDate
-				] = standingOrder
-
-				output.payments[i].standingOrder = {
-					day: day?.length ? Number(day) : undefined,
-					month: month?.length ? Number(month) : undefined,
-					periodicity: periodicity?.length ? periodicity as PeriodicityClassifier : undefined,
-					lastDate: lastDate?.length ? lastDate : undefined
+				payment = {
+					...payment,
+					day: Number(intermediate.shift()) as Day,
+					month: Number(intermediate.shift()),
+					periodicity: intermediate.shift() as Periodicity,
+					lastDate: intermediate.shift()
 				}
-				break
+				break;
 
 			case PaymentOptions.DirectDebit:
-				const directDebitFieldCount = 10
-				const directDebitFieldStart = 16 + (i * directDebitFieldCount)
-				const directDebitFieldEnd = 27 + (i * directDebitFieldStart)
-				const directDebit = fields.slice(directDebitFieldStart, directDebitFieldEnd)
-				const [
-					directDebitScheme,
-					directDebitType,
-					variableSymbol,
-					specificSymbol,
-					originatorsReferenceInformation,
-					mandateId,
-					creditorId,
-					contractId,
-					maxAmount,
-					validTillDate,
-				] = directDebit
-
-				output.payments[i].directDebit = {
-					directDebitScheme: directDebitScheme.length ? Number(directDebitScheme) : undefined,
-					directDebitType: directDebitType.length ? Number(directDebitType) : undefined,
-					variableSymbol: variableSymbol.length ? variableSymbol : undefined,
-					specificSymbol: specificSymbol.length ? specificSymbol : undefined,
-					originatorsReferenceInformation: originatorsReferenceInformation.length ? originatorsReferenceInformation : undefined,
-					mandateId: mandateId.length ? mandateId : undefined,
-					creditorId: creditorId.length ? creditorId : undefined,
-					contractId: contractId.length ? contractId : undefined,
-					maxAmount: maxAmount.length ? Number(maxAmount) : undefined,
-					validTillDate: validTillDate.length ? validTillDate : undefined
+				payment = {
+					...payment,
+					directDebitScheme: Number(intermediate.shift()),
+					directDebitType: Number(intermediate.shift()),
+					mandateId: intermediate.shift(),
+					creditorId: intermediate.shift(),
+					contractId: intermediate.shift(),
+					maxAmount: Number(intermediate.shift()),
+					validTillDate: intermediate.shift()
 				}
+				break;
 
 			default:
-				throw new Error("Unknown payment option")
+				break;
 		}
+		cleanEmptyProps(payment)
+		output.payments.push(payment)
 	}
 
-	/** Beneficiary list bysquare v1.1 */
-	for (let i = 0; i < paymentsCount; i++) {
-		let beneficiary: string[] = []
-		const offset = (i || 1) * (2 * bankAccountsCount) - 2
+	for (let i = 0; i < paymentslen; i++) {
+		const name = intermediate.shift()
+		const addressLine1 = intermediate.shift()
+		const addressLine2 = intermediate.shift()
 
-		switch (paymentOptions) {
-			case PaymentOptions.PaymentOrder:
-				beneficiary = fields.slice(16 + offset, 20 + offset)
-				break
-
-			case PaymentOptions.StandingOrder:
-				beneficiary = fields.slice(20 + offset, 24 + offset)
-				break
-
-			case PaymentOptions.DirectDebit:
-				beneficiary = fields.slice(25 + offset, 29 + offset)
-				break
-		}
-
-		if (beneficiary.length === 0) {
-			break
-		}
-
-		const [
-			name,
-			addressLine1,
-			addressLine2
-		] = beneficiary
-
-		/**
-		 * The list of recipients is optional, if we find a missing record, the
-		 * stream ends
-		 */
-		if (!name && !addressLine1 && !addressLine2) {
-			break
-		}
-
-		output.payments[i].beneficiary = {
-			name: name?.length ? name : undefined,
-			addressLine1: addressLine1?.length ? addressLine1 : undefined,
-			addressLine2: addressLine2?.length ? addressLine2 : undefined
+		if (Boolean(name) || Boolean(addressLine1) || Boolean(addressLine2)) {
+			const beneficiary = {
+				name: name?.length ? name : undefined,
+				street: addressLine1?.length ? addressLine1 : undefined,
+				city: addressLine2?.length ? addressLine2 : undefined,
+			} satisfies Beneficiary
+			cleanEmptyProps(beneficiary)
+			output.payments[i].beneficiary = beneficiary
 		}
 	}
 
@@ -190,11 +131,19 @@ export function assemble(tabbed: string): ParsedModel {
 /**
  * @see 3.16. Decoding client data from QR Code 2005 symbol
  */
-export function parse(qr: string): Promise<ParsedModel> {
-	const inversed: Buffer = inverseAlphanumericConversion(qr)
-	const _headerBysquare = inversed.slice(0, 2)
-	const _headerCompression = inversed.slice(2, 4)
-	const compressedData = inversed.slice(4)
+export function parse(qr: string): Promise<DataModel> {
+	try {
+		var decoded = base32hex.parse(qr, {
+			out: Buffer,
+			loose: true
+		}) as Buffer
+	} catch {
+		throw new Error("Unable to parse QR");
+	}
+
+	// const bysquareHeader = decoded.subarray(0, 2)
+	// const compressionHeader = decoded.subarray(2, 4)
+	const compressedData = decoded.subarray(4)
 
 	// @ts-ignore: Missing decored types
 	const decoder = lzma.createStream("rawDecoder", {
@@ -203,16 +152,14 @@ export function parse(qr: string): Promise<ParsedModel> {
 		filters: [{ id: lzma.FILTER_LZMA1 }]
 	})
 
-	return new Promise<ParsedModel>((resolve, reject) => {
+	return new Promise<DataModel>((resolve, reject) => {
 		decoder
-			.on("error", reject)
 			.on("data", (decompress: Buffer): void => {
-				const _crc32: Buffer = decompress.slice(0, 4)
-				const tabbed: string = decompress.slice(4).toString()
-				const model: ParsedModel = assemble(tabbed)
-
-				resolve(model)
+				// const crc32: Buffer = decompress.subarray(0, 4)
+				const tabbed: string = decompress.subarray(4).toString()
+				resolve(buildModel(tabbed))
 			})
+			.on("error", reject)
 			.write(compressedData, (error): void => {
 				error && reject(error)
 				decoder.end()
@@ -221,42 +168,30 @@ export function parse(qr: string): Promise<ParsedModel> {
 }
 
 /**
- * @see 3.13. Alphanumeric conversion using Base32hex
- */
-export function inverseAlphanumericConversion(qr: string): Buffer {
-	const binary: string = [...qr].reduce((acc, char) => {
-		acc += SUBST.indexOf(char).toString(2).padStart(5, "0")
-		return acc
-	}, "")
-
-	let bytes: number[] = []
-	for (let nth = 0, leftCount = 0; binary.length > leftCount; nth++) {
-		/** string representation of 8-bits */
-		const slice: string = binary.slice(leftCount, (leftCount += 8))
-		const byte: number = parseInt(slice, 2)
-		bytes[nth] = byte
-	}
-
-	return Buffer.from(bytes)
-}
-
-/**
- * Simple binary header detector
+ * Detect if qr string contains bysquare header.
  *
- * The Bysquare header is pretty useless, so the detection isn't as reliable as
- * I'd like
+ * Bysquare header does not have too much information, therefore it is
+ * not very reliable, there is room for improvement for the future.
  */
 export function detect(qr: string): boolean {
-	const inversed: Buffer = inverseAlphanumericConversion(qr)
-	if (inversed.byteLength < 2) {
+	try {
+		var parsed = base32hex.parse(qr, {
+			out: Buffer,
+			loose: true
+		}) as Buffer
+	} catch {
+		throw new Error("Unable to parse QR string, invalid data");
+	}
+
+	if (parsed.byteLength < 2) {
 		return false
 	}
 
-	const headerBysquare = inversed.slice(0, 2)
+	const headerBysquare = parsed.subarray(0, 2)
 	return [...headerBysquare.toString("hex")]
 		.map((nibble) => parseInt(nibble, 16))
 		.every((nibble, index) => {
-			if (index === 1 /** version */) {
+			if (/** version */ index === 1) {
 				return 0 >= nibble && nibble <= 1
 			}
 

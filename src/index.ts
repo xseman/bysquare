@@ -1,4 +1,3 @@
-// Library exposed functions and types
-export { parse, detect } from "./parse"
-export { generate } from "./generate"
-export * from "./types"
+export { generate } from "./generate.js"
+export { detect, parse } from "./parse.js"
+export * from "./types.js"

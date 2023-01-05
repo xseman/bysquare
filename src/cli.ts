@@ -1,23 +1,23 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from "fs"
-import path from "path"
-import { createInterface, ReadLine } from "readline"
+import { existsSync, readFileSync } from "node:fs"
+import path from "node:path"
+import { createInterface, ReadLine } from "node:readline"
 
-import { generate } from "./generate"
-import { Model } from "./types"
+import { generate } from "./generate.js"
+import { DataModel } from "./types.js"
 
 if (process.stdin.isTTY) {
-	/** bysquare "file" */
+	// bysquare "file"
 	handleInput(process.argv[2])
 } else {
-	/** echo "data" | bysquare */
+	// echo "data" | bysquare
 	;(async () => {
 		const stdin: string = await handleStdin()
-		const qrString = await jsonStringToQrString(stdin).catch((e) => {
+		const qr = await fromJsonString(stdin).catch((e) => {
 			console.error(e)
 			process.exit(1)
 		})
-		console.log(qrString)
+		console.log(qr)
 		process.exit(0)
 	})()
 }
@@ -30,21 +30,21 @@ async function handleInput(input?: string): Promise<void> {
 
 	if (existsSync(process.argv[2])) {
 		const file = readFileSync(process.argv[2], "utf8")
-		const qrString = await jsonStringToQrString(file).catch((e) => {
+		const qr = await fromJsonString(file).catch((e) => {
 			console.error(e)
 			process.exit(1)
 		})
-		console.log(qrString)
+		console.log(qr)
 	} else {
 		console.error(`File ${process.argv[2]} doesn't exists`)
 		process.exit(1)
 	}
 }
 
-async function jsonStringToQrString(stdin: string): Promise<string> {
+async function fromJsonString(stdin: string): Promise<string> {
 	return new Promise<string>((resolve, reject) => {
 		try {
-			const data = JSON.parse(stdin) as Model
+			const data = JSON.parse(stdin) as DataModel
 			const qrString: Promise<string> = generate(data)
 			resolve(qrString)
 		} catch (e) {
@@ -69,7 +69,7 @@ async function handleStdin(): Promise<string> {
 			.on("close", () => {
 				resolve(lines.join(""))
 			})
-			.on("SIGINT" /* CTRL+C */, reject)
+			.on("SIGINT", /* CTRL+C */ reject)
 	})
 }
 

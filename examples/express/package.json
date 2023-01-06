@@ -4,10 +4,13 @@
 	"type": "module",
 	"proxy": "http://localhost:4000",
 	"scripts": {
-		"start": "node server.js"
+		"start": "tsx server.ts"
 	},
 	"dependencies": {
 		"bysquare": "github:xseman/bysquare#develop",
 		"express": "~4.18.0"
+	},
+	"devDependencies": {
+		"tsx": "~3.12.0"
 	}
 }

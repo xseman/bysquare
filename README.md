@@ -17,7 +17,7 @@ your implementation. See [examples](examples).
 
 ## How it works
 
-![diagram](./doc/uml/logic.svg)
+![diagram](./docs/uml/logic.svg)
 
 ## Install
 

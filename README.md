@@ -43,12 +43,12 @@ npm install --global bysquare
 ## API
 
 ```ts
-generate(model: DataModel): Promise<string>
+generate(model: DataModel, options?: Options): Promise<string>
 parse(qr: string): Promise<DataModel>
 detect(qr: string): Boolean
 ```
 
-**generate(model: DataModel): Promise\<string>**
+**generate(model: DataModel, options?: Options): Promise\<string>**
 
 ```ts
 import { generate, DataModel, parse, PaymentOptions } from "bysquare"

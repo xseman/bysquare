@@ -15,30 +15,35 @@ other payment regulations.
 This library is un-opinionated. Image generation from qr-code string depends on
 your implementation. See [examples](examples).
 
-## How it works
-
-![diagram](./docs/uml/logic.svg)
-
 ## Install
 
-GitHub
-
-```sh
-npm install xseman/bysquare#master
-npm install xseman/bysquare#develop
-```
-
-npm registry
+**npm registry**
 
 ```sh
 npm install bysquare
 ```
 
-CLI
+**GitHub**
+
+```sh
+# same as latest released npm registry version
+npm install xseman/bysquare#master
+
+# latest unreleased changes
+npm install xseman/bysquare#develop
+```
+
+**CLI**
 
 ```sh
 npm install --global bysquare
 ```
+
+## How it works
+
+### Encoding sequence
+
+![logic](./docs/uml/logic.svg)
 
 ## API
 

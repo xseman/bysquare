@@ -1,0 +1,69 @@
+{
+  "name": "bysquare",
+  "description": "It's a national standard for payment QR codes adopted by Slovak Banking Association (SBA)",
+  "version": "2.0.0",
+  "license": "Apache-2.0",
+  "type": "commonjs",
+  "funding": "https://github.com/sponsors/xseman",
+  "homepage": "https://github.com/xseman/bysquare#readme",
+  "author": {
+    "name": "Filip Seman",
+    "email": "filip.seman@protonmail.com"
+  },
+  "scripts": {
+    "prebuild": "rm -rf ./lib || :",
+    "build": "tsc --project ./tsconfig.json && tsc --project ./tsconfig.cjs.json",
+    "postbuild": "bash -c 'chmod +x ./lib/{cjs,mjs}/cli.js' && cp package.json ./lib/mjs/ && jq '.type=\"commonjs\"' package.json > lib/cjs/package.json",
+    "test": "xv --loader=tsx ./src",
+    "test:watch": "find ./src/*.ts | entr xv --loader=tsx ./src",
+    "cli:local": "npm run build && npm link bysquare",
+    "version": "git flow release start v$npm_package_version",
+    "prepare": "",
+    "prepublishOnly": "npm run build",
+    "preversion": "git checkout develop",
+    "postversion": ""
+  },
+  "dependencies": {
+    "lodash.deburr": "~4.1.0",
+    "lzma-native": "7.0.1",
+    "rfc4648": "1.5.2"
+  },
+  "devDependencies": {
+    "@types/lodash.deburr": "~4.1.0",
+    "@types/lzma-native": "^4.0.1",
+    "@types/node": "~18.11.0",
+    "tsx": "~3.12.0",
+    "typescript": "~4.9.0",
+    "xv": "~2.1.0"
+  },
+  "bin": "lib/mjs/cli.js",
+  "types": "lib/mjs/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./lib/cjs/index.js",
+      "import": "./lib/mjs/index.js"
+    }
+  },
+  "files": [
+    "lib",
+    "!lib/*.test.*"
+  ],
+  "engines": {
+    "node": ">=16.0",
+    "npm": ">=7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xseman/bysquare.git"
+  },
+  "keywords": [
+    "pay by square",
+    "by square",
+    "paybysquare",
+    "bysquare",
+    "payments",
+    "qr-string",
+    "qr",
+    "cli"
+  ]
+}

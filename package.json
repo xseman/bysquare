@@ -1,7 +1,7 @@
 {
 	"name": "bysquare",
 	"description": "It's a national standard for payment QR codes adopted by Slovak Banking Association (SBA)",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"license": "Apache-2.0",
 	"type": "module",
 	"funding": "https://github.com/sponsors/xseman",
@@ -38,12 +38,12 @@
 	},
 	"bin": "lib/mjs/cli.js",
 	"types": "lib/mjs/index.d.ts",
-    "exports": {
-        ".": {
-            "require": "./lib/cjs/index.js",
-            "import": "./lib/mjs/index.js"
-        }
-    },
+	"exports": {
+		".": {
+			"require": "./lib/cjs/index.js",
+			"import": "./lib/mjs/index.js"
+		}
+	},
 	"files": [
 		"lib",
 		"!lib/*.test.*"

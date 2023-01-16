@@ -43,7 +43,7 @@ npm install --global bysquare
 
 ### Encoding sequence
 
-![logic](./docs/uml/logic.svg)
+![logic](./doc/uml/logic.svg)
 
 ## API
 

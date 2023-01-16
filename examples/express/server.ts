@@ -1,13 +1,7 @@
-// import { generate, PaymentOptionsEnum } from "./../../lib/index.js"
-import { generate, PaymentOptions } from "bysquare"
+// import { DataModel, generate, PaymentOptions } from "./../../lib/index.js"
+import { DataModel, generate, PaymentOptions } from "bysquare"
 import express from "express"
 
-const app = express()
-
-const publicFolder = express.static("./public")
-app.use("/", publicFolder)
-
-/** @type {import("bysquare").DataModel} */
 const model = {
 	invoiceId: "random-id",
 	payments: [
@@ -26,7 +20,12 @@ const model = {
 			}
 		}
 	]
-}
+} satisfies DataModel
+
+const publicFolder = express.static("./public")
+const app = express()
+
+app.use("/", publicFolder)
 
 app.get("/qr", async (_req, res) => {
 	const qrstring = await generate(model)

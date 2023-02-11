@@ -39,6 +39,12 @@ npm install xseman/bysquare#develop
 npm install --global bysquare
 ```
 
+**Deno** `v1.28+`, just import `npm:bysquare` `v2.1.0+`
+
+```
+import { generate, parse } from "npm:bysquare@2.1.0"
+```
+
 ## How it works
 
 ### Encoding sequence
@@ -155,9 +161,9 @@ https://github.com/dherges/npm-version-git-flow
 - Run `npm test`
 - Run `npm version <patch, minor, major>`
 - Commit and push
-- Run `npm version`
 - Follow git-flow instructions
 - Checkout to master
+- Build artefacts
 - Push commits and tag, git push && git push --tags
 - Validate with `npm publish --dry-run`
 - Publish to npm, `npm publish`

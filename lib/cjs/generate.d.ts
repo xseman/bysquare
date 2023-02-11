@@ -20,7 +20,7 @@ export declare function bysquareHeader(header?: [
     version: number,
     documentType: number,
     reserved: number
-]): Buffer;
+]): Uint8Array;
 /**
  * @see 3.10 Appending CRC32 checksum
  */
@@ -30,19 +30,25 @@ export declare function checksum(intermediate: string): Buffer;
  *
  * @see 3.10. Appending CRC32 checksum
  */
-export declare function prepareCompression(model: DataModel): Buffer;
+export declare function addChecksum(model: DataModel): Uint8Array;
 /**
  * Transform data to ordered tab-separated intermediate representation ready for
  * encoding
  *
  * @see Table 15 PAY by square sequence data model
  */
-export declare function toIntermediate(data: DataModel): string;
+export declare function deserialize(data: DataModel): string;
 type Options = {
+    /**
+     * Many banking apps do not support diacritics, which results in errors when
+     * serializing data from QR codes.
+     *
+     * @default true
+     */
     deburr: boolean;
 };
 /**
  * Generate QR string ready for encoding into text QR code
  */
-export declare function generate(model: DataModel, options?: Options): Promise<string>;
+export declare function generate(model: DataModel, options?: Options): string;
 export {};

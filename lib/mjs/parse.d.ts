@@ -2,11 +2,11 @@ import { DataModel } from "./index.js";
 /**
  * @see 3.14. Generating by square Code
  */
-export declare function buildModel(qr: string): DataModel;
+export declare function serialize(qr: string): DataModel;
 /**
  * @see 3.16. Decoding client data from QR Code 2005 symbol
  */
-export declare function parse(qr: string): Promise<DataModel>;
+export declare function parse(qr: string): DataModel;
 /**
  * Detect if qr string contains bysquare header.
  *

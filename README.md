@@ -48,17 +48,17 @@ npm install --global bysquare
 ## API
 
 ```ts
-generate(model: DataModel, options?: Options): Promise<string>
-parse(qr: string): Promise<DataModel>
+generate(model: DataModel, options?: Options): string
+parse(qr: string): DataModel
 detect(qr: string): Boolean
 ```
 
-**generate(model: DataModel, options?: Options): Promise\<string>**
+**generate(model: DataModel, options?: Options): string**
 
 ```ts
 import { generate, DataModel, parse, PaymentOptions } from "bysquare"
 
-const model: DataModel = {
+const model {
 	invoiceId: "random-id",
 	payments: [
 		{
@@ -71,22 +71,18 @@ const model: DataModel = {
 			variableSymbol: "123",
 		}
 	]
-}
+} satisfies DataModel
 
-generate(model).then((qr: string) => {
-	// your logic...
-})
+const qr = generate(model)
 ```
 
-**parse(qr: string): Promise\<DataModel>**
+**parse(qr: string): DataModel**
 
 ```ts
-import { parse, DataModel } from "bysquare"
+import { parse } from "bysquare"
 
-const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
-parse(qr).then((model: DataModel) => {
-	// your logic...
-});
+const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
+const model = parse(qr)
 ```
 
 **detect(qr: string): Boolean**
@@ -94,7 +90,7 @@ parse(qr).then((model: DataModel) => {
 ```ts
 import { detect } from "bysquare"
 
-const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
+const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
 const isBysquare = detect(qr)
 ```
 
@@ -110,9 +106,7 @@ You can use json file with valid model to generate qr-string.
 # 		{
 # 			"type": 1,
 # 			"amount": 100.0,
-# 			"bankAccounts": [
-# 				{ "iban": "SK9611000000002918599669" }
-# 			],
+# 			"bankAccounts": [{ "iban": "SK9611000000002918599669" }],
 # 			"currencyCode": "EUR",
 # 			"variableSymbol": "123"
 # 		}
@@ -120,27 +114,26 @@ You can use json file with valid model to generate qr-string.
 # }
 
 $ npx bysquare ./example.json
-$ 0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0
+$ 0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000
 ```
 
 You can also use stdin.
 
 ```sh
-$ bysquare <<< '{
-	"invoiceId": "random-id",
-	"payments": [
-		{
-			"type": 1,
-			"amount": 100.0,
-			"bankAccounts": [
-				{ "iban": "SK9611000000002918599669" }
-			],
-			"currencyCode": "EUR",
-			"variableSymbol": "123"
-		}
-	]
+$ npx bysquare <<< '{
+    "invoiceId": "random-id",
+    "payments": [
+        {
+            "type": 1,
+            "amount": 100.0,
+            "bankAccounts": [{ "iban": "SK9611000000002918599669" }],
+            "currencyCode": "EUR",
+            "variableSymbol": "123"
+        }
+    ]
 }'
-$ 0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0
+
+$ 0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000
 ```
 
 ## Related

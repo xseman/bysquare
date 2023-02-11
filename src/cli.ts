@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 import { createInterface, ReadLine } from "node:readline"
@@ -13,16 +14,12 @@ if (process.stdin.isTTY) {
 	// echo "data" | bysquare
 	;(async () => {
 		const stdin: string = await handleStdin()
-		const qr = await fromJsonString(stdin).catch((e) => {
-			console.error(e)
-			process.exit(1)
-		})
-		console.log(qr)
+		console.log(fromJsonString(stdin))
 		process.exit(0)
 	})()
 }
 
-async function handleInput(input?: string): Promise<void> {
+function handleInput(input?: string): void {
 	if (input === undefined || input === "-h" || input === "--help") {
 		console.log(help())
 		process.exit(0)
@@ -30,27 +27,16 @@ async function handleInput(input?: string): Promise<void> {
 
 	if (existsSync(process.argv[2])) {
 		const file = readFileSync(process.argv[2], "utf8")
-		const qr = await fromJsonString(file).catch((e) => {
-			console.error(e)
-			process.exit(1)
-		})
-		console.log(qr)
+		console.log(fromJsonString(file))
 	} else {
 		console.error(`File ${process.argv[2]} doesn't exists`)
 		process.exit(1)
 	}
 }
 
-async function fromJsonString(stdin: string): Promise<string> {
-	return new Promise<string>((resolve, reject) => {
-		try {
-			const data = JSON.parse(stdin) as DataModel
-			const qrString: Promise<string> = generate(data)
-			resolve(qrString)
-		} catch (e) {
-			reject(e)
-		}
-	})
+function fromJsonString(stdin: string): string {
+	const data = JSON.parse(stdin) as DataModel
+	return generate(data)
 }
 
 async function handleStdin(): Promise<string> {
@@ -90,18 +76,17 @@ function help(): string {
 		"If <file> is omitted, reads from stdin.",
 		"",
 		"Examples:",
-		"   bysquare ./example.json",
-		"",
-		"   echo ",
-		"       {",
-		'           "IBAN": "SK9611000000002918599669"',
-		'           "Amount": 100.0',
-		'           "CurrencyCode": "EUR"',
-		'           "VariableSymbol": "123"',
-		'           "Payments": 1',
-		'           "PaymentOptions": 1',
-		'           "BankAccounts": 1',
-		"       }'",
-		"   | bysquare"
+		"	bysquare <<< \"{",
+		"		\"invoiceId\": \"random-id\",",
+		"		\"payments\": [",
+		"			{",
+		"				\"type\": 1,",
+		"				\"amount\": 100.0,",
+		"				\"bankAccounts\": [{ \"iban\": \"SK9611000000002918599669\" }],",
+		"				\"currencyCode\": \"EUR\",",
+		"				\"variableSymbol\": \"123\"",
+		"			}",
+		"		]",
+		"	}\"",
 	].join("\n")
 }

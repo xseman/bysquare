@@ -1,15 +1,17 @@
 import { deepEqual, equal } from 'node:assert/strict';
 
 import {
+	addChecksum,
 	bysquareHeader,
 	checksum,
-	generate,
-	prepareCompression,
-	toIntermediate
+	deserialize,
+	generate
 } from "./generate.js";
-import { DataModel, PaymentOptions } from "./types.js";
+import {
+	DataModel, PaymentOptions
+} from "./types.js";
 
-const model = {
+export const qrData = {
 	invoiceId: "random-id",
 	payments: [
 		{
@@ -46,15 +48,15 @@ const intermediate = [
 	"\t",
 ].join("")
 
-export async function generating() {
+export function generating() {
 	equal(
-		await generate(model),
-		"0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
+		generate(qrData),
+		"0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
 	)
 }
 
 export function tabbedString() {
-	equal(toIntermediate(model), intermediate)
+	equal(deserialize(qrData), intermediate)
 }
 
 export function testChecksum() {
@@ -65,21 +67,18 @@ export function testChecksum() {
 }
 
 export function testCreateDataWithChecksum() {
-	const checksum = prepareCompression(model)
-	const expected = Buffer.from(
-		"9094192172616e646f6d2d6964093109310931303009455552090931323309090909093109534b393631313030303030303030323931383539393636390909300930090909",
-		"hex"
-	)
+	const checksum = addChecksum(qrData)
+	const expected = Uint8Array.from([0x90, 0x94, 0x19, 0x21, 0x72, 0x61, 0x6e, 0x64, 0x6f, 0x6d, 0x2d, 0x69, 0x64, 0x09, 0x31, 0x09, 0x31, 0x09, 0x31, 0x30, 0x30, 0x09, 0x45, 0x55, 0x52, 0x09, 0x09, 0x31, 0x32, 0x33, 0x09, 0x09, 0x09, 0x09, 0x09, 0x31, 0x09, 0x53, 0x4b, 0x39, 0x36, 0x31, 0x31, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x32, 0x39, 0x31, 0x38, 0x35, 0x39, 0x39, 0x36, 0x36, 0x39, 0x09, 0x09, 0x30, 0x09, 0x30, 0x09, 0x09, 0x09])
 
 	deepEqual(checksum, expected)
 }
 
 
 export function testMakeBysquareHeader() {
-	const created = bysquareHeader()
-	const expected = Buffer.from([0x00, 0x00])
+	const header = bysquareHeader()
+	const expected = Uint8Array.from([0x00, 0x00])
 
-	deepEqual(created, expected)
+	deepEqual(header, expected)
 }
 
 
@@ -89,7 +88,7 @@ export function binaryHeader() {
 			0b0000_0001, 0b0000_0010,
 			0b0000_0011, 0b0000_0100
 		]),
-		Buffer.from([
+		Uint8Array.from([
 			0b0001_0010,
 			0b0011_0100
 		])

@@ -1,25 +1,11 @@
 import { deepEqual, equal, throws } from 'node:assert/strict'
 import { generate } from "./generate.js"
+import { qrData } from "./generate.test.js"
 
-import { buildModel, detect, parse } from "./parse.js"
+import { detect, parse, serialize } from "./parse.js"
 import { DataModel, PaymentOptions } from "./types.js"
 
-const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6C75G19O246KTT5G8LTLM67HOIATP4OOG8F8FDLJ6T26KFCB1690NEVPQVSG0"
-const qrData = {
-	invoiceId: "random-id",
-	payments: [
-		{
-			type: PaymentOptions.PaymentOrder,
-			amount: 100,
-			currencyCode: "EUR",
-			variableSymbol: "123",
-			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
-			]
-		}
-	]
-} satisfies DataModel
-
+const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
 
 export async function parsing() {
 	const parsed = await parse(qr)
@@ -55,7 +41,7 @@ export function building() {
 		"\t",
 	].join("")
 
-	const expected = buildModel(tabbedString)
+	const expected = serialize(tabbedString)
 	deepEqual(
 		expected,
 		{

@@ -1,10 +1,10 @@
-import deburr from "lodash.deburr"
-import lzma from "lzma-native"
-import { base32hex } from "rfc4648"
+import crc32 from 'crc-32';
+import deburr from "lodash.deburr";
+import { base32hex } from "rfc4648";
+import { DataModel, PaymentOptions } from "./types.js";
 
-import { DataModel, PaymentOptions } from "./types.js"
-
-// echo "Hello" | xz --format=raw --lzma1=lc=3,lp=0,pb=2,dict=32KiB --stdout | hexdump -C
+// @ts-ignore: missing types
+import lzma from "lzma";
 
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare
@@ -29,7 +29,7 @@ export function bysquareHeader(
 			0b0000_0000, 0b0000_0000,
 			0b0000_0000, 0b0000_0000
 		]
-): Buffer {
+): Uint8Array {
 	const isValid = header.every((nibble) => 0 <= nibble && nibble <= 15)
 	if (!isValid) {
 		throw new Error(`Invalid header byte value, valid range <0,15>`)
@@ -41,7 +41,7 @@ export function bysquareHeader(
 	] = header
 
 	// Combine 4-nibbles to 2-bytes
-	const mergedNibbles = Buffer.from([
+	const mergedNibbles = Uint8Array.from([
 		(bySquareType << 4) | (version << 0),
 		(documentType << 4) | (reserved << 0),
 	])
@@ -57,27 +57,26 @@ export function bysquareHeader(
  *
  * @see 3.11. LZMA Compression
  */
-function lzmaHeader(decompressedData: Buffer): Buffer {
-	const bytesCount = decompressedData.length
-	if (bytesCount >= 2 ** 16) {
+function datasizeHeader(data: Uint8Array): Uint8Array {
+	if (data.byteLength >= 2 ** 16) {
 		throw new Error("The maximum compressed data size has been reached")
 	}
 
-	const dataSize = Buffer.alloc(2)
-	dataSize.writeInt16LE(bytesCount)
-	return dataSize
+	const header = new Uint8Array(2);
+	header.set(Uint16Array.from([data.byteLength]))
+
+	return header
 }
 
 /**
  * @see 3.10 Appending CRC32 checksum
  */
 export function checksum(intermediate: string): Buffer {
-	// @ts-ignore: Wrong return type
-	const data = lzma.crc32(intermediate) as number
-	const crc32 = Buffer.alloc(4)
-	crc32.writeUInt32LE(data)
+	const data = crc32.str(intermediate)
+	const checksum = Buffer.alloc(4)
+	checksum.writeUInt32LE(data)
 
-	return crc32
+	return checksum
 }
 
 /**
@@ -85,11 +84,14 @@ export function checksum(intermediate: string): Buffer {
  *
  * @see 3.10. Appending CRC32 checksum
  */
-export function prepareCompression(model: DataModel): Buffer {
-	const intermediate = toIntermediate(model)
-	return Buffer.concat([
-		checksum(intermediate),
-		Buffer.from(intermediate, "utf-8")
+export function addChecksum(model: DataModel): Uint8Array {
+	const intermediate = deserialize(model)
+	const checksum = Uint32Array.from([crc32.str(intermediate)])
+	const byearray = [...intermediate].map(char => char.charCodeAt(0))
+
+	return Uint8Array.from([
+		...new Uint8Array(checksum.buffer),
+		...Uint8Array.from(byearray)
 	])
 }
 
@@ -99,7 +101,7 @@ export function prepareCompression(model: DataModel): Buffer {
  *
  * @see Table 15 PAY by square sequence data model
  */
-export function toIntermediate(data: DataModel): string {
+export function deserialize(data: DataModel): string {
 	const intermediate = new Array<string | undefined>()
 
 	intermediate.push(data.invoiceId?.toString())
@@ -158,9 +160,6 @@ export function toIntermediate(data: DataModel): string {
 	return intermediate.join('\t')
 }
 
-/**
- * Transfer diacritics to basic latin letters
- */
 function removeDiacritics(model: DataModel): void {
 	for (const payment of model.payments) {
 		if (payment.paymentNote) {
@@ -182,6 +181,12 @@ function removeDiacritics(model: DataModel): void {
 }
 
 type Options = {
+	/**
+	 * Many banking apps do not support diacritics, which results in errors when
+	 * serializing data from QR codes.
+	 *
+	 * @default true
+	 */
 	deburr: boolean
 }
 
@@ -191,46 +196,27 @@ type Options = {
 export function generate(
 	model: DataModel,
 	options: Options = { deburr: true }
-): Promise<string> {
+): string {
 	if (options.deburr) {
 		removeDiacritics(model)
 	}
 
-	const data: Buffer = prepareCompression(model)
-	const compressedData: Buffer[] = []
+	const payload = addChecksum(model)
+	const compressed = Uint8Array.from(lzma.compress(payload))
 
-	return new Promise<string>((resolve, reject) => {
-		const encoder = lzma.createStream("rawEncoder", {
-			synchronous: true,
-			// @ts-ignore: Missing filter types
-			filters: [
-				{
-					// @ts-ignore: Missing filter types
-					id: lzma.FILTER_LZMA1,
-					lc: 3,
-					lp: 0,
-					pb: 2,
-					dict_size: 2 ** 17, // 128 kilobytes
-				},
-			],
-		})
+	/**
+	 * @see https://docs.fileformat.com/compression/lzma/#lzma-header
+	 */
+	const _header = Uint8Array.from(compressed.subarray(0, 13));
+	const data = Uint8Array.from(compressed.subarray(13));
 
-		encoder
-			.on("end", (): void => {
-				const output = Buffer.concat([
-					bysquareHeader(),
-					lzmaHeader(data),
-					...compressedData
-				])
-				resolve(base32hex.stringify(output, { pad: false }))
-			})
-			.on("data", (chunk: Buffer): void => {
-				compressedData.push(chunk)
-			})
-			.on("error", reject)
-			.write(data, (error): void => {
-				error && reject(error)
-				encoder.end()
-			})
+	const output = Uint8Array.from([
+		...bysquareHeader(),
+		...datasizeHeader(payload),
+		...data
+	])
+
+	return base32hex.stringify(output, {
+		pad: false
 	})
 }

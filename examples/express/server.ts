@@ -9,7 +9,7 @@ const model = {
 			type: PaymentOptions.PaymentOrder,
 			amount: 100.0,
 			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
+				{ iban: "SK9611000000002918599669" }
 			],
 			currencyCode: "EUR",
 			variableSymbol: "123",
@@ -29,7 +29,7 @@ app.use("/", publicFolder)
 
 app.get("/qr", async (_req, res) => {
 	const qrstring = await generate(model)
-	console.log(qrstring);
+	console.log(qrstring)
 	res.send(qrstring)
 })
 

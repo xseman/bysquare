@@ -1,7 +1,8 @@
 {
 	"recommendations": [
-		"editorconfig.editorconfig",
-		"hediet.vscode-drawio"
+		"dprint.dprint",
+		"hediet.vscode-drawio",
+		"editorconfig.editorconfig"
 	],
 	"unwantedRecommendations": []
 }

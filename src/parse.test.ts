@@ -1,11 +1,12 @@
-import { deepEqual, equal, throws } from 'node:assert/strict'
+import { deepEqual, equal, throws } from "node:assert/strict"
 import { generate } from "./generate.js"
 import { qrData } from "./generate.test.js"
 
 import { detect, parse, serialize } from "./parse.js"
 import { DataModel, PaymentOptions } from "./types.js"
 
-const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
+const qr =
+	"0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
 
 export async function parsing() {
 	const parsed = await parse(qr)
@@ -19,7 +20,7 @@ export async function bidirectional() {
 }
 
 export function building() {
-	const tabbedString = [
+	const tabbedString = /** dprint-ignore */ [
 		"random-id",
 		"\t", "1",
 		"\t", "1",

@@ -3,6 +3,6 @@
 	"compilerOptions": {
 		"module": "CommonJS",
 		"moduleResolution": "Node",
-		"outDir": "./lib/cjs/",
-	},
+		"outDir": "./lib/cjs/"
+	}
 }

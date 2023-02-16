@@ -3,4 +3,8 @@
 	"editor.codeActionsOnSave": {
         "source.organizeImports": true
     },
+	"[typescript][json]": {
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "dprint.dprint"
+	}
 }

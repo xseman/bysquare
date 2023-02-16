@@ -7,11 +7,9 @@ import { createInterface, ReadLine } from "node:readline"
 import { generate } from "./generate.js"
 import { DataModel } from "./types.js"
 
-if (process.stdin.isTTY) {
-	// bysquare "file"
+if /** bysquare "file" */ (process.stdin.isTTY) {
 	handleInput(process.argv[2])
-} else {
-	// echo "data" | bysquare
+} /** bysquare <<< "data" */ else {
 	;(async () => {
 		const stdin: string = await handleStdin()
 		console.log(fromJsonString(stdin))
@@ -87,6 +85,6 @@ function help(): string {
 		"				\"variableSymbol\": \"123\"",
 		"			}",
 		"		]",
-		"	}\"",
+		"	}\""
 	].join("\n")
 }

@@ -1,10 +1,10 @@
-import crc32 from 'crc-32';
-import deburr from "lodash.deburr";
-import { base32hex } from "rfc4648";
-import { DataModel, PaymentOptions } from "./types.js";
+import crc32 from "crc-32"
+import deburr from "lodash.deburr"
+import { base32hex } from "rfc4648"
+import { DataModel, PaymentOptions } from "./types.js"
 
 // @ts-ignore: missing types
-import lzma from "lzma";
+import lzma from "lzma"
 
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare
@@ -22,13 +22,14 @@ import lzma from "lzma";
  * @see 3.5. by square header
  */
 export function bysquareHeader(
+	/** dprint-ignore */
 	header: [
 		bySquareType: number, version: number,
 		documentType: number, reserved: number
 	] = [
-			0b0000_0000, 0b0000_0000,
-			0b0000_0000, 0b0000_0000
-		]
+		0b0000_0000, 0b0000_0000,
+		0b0000_0000, 0b0000_0000
+	]
 ): Uint8Array {
 	const isValid = header.every((nibble) => 0 <= nibble && nibble <= 15)
 	if (!isValid) {
@@ -36,14 +37,16 @@ export function bysquareHeader(
 	}
 
 	const [
-		bySquareType, version,
-		documentType, reserved
+		bySquareType,
+		version,
+		documentType,
+		reserved
 	] = header
 
 	// Combine 4-nibbles to 2-bytes
 	const mergedNibbles = Uint8Array.from([
 		(bySquareType << 4) | (version << 0),
-		(documentType << 4) | (reserved << 0),
+		(documentType << 4) | (reserved << 0)
 	])
 
 	return mergedNibbles
@@ -62,7 +65,7 @@ function datasizeHeader(data: Uint8Array): Uint8Array {
 		throw new Error("The maximum compressed data size has been reached")
 	}
 
-	const header = new Uint8Array(2);
+	const header = new Uint8Array(2)
 	header.set(Uint16Array.from([data.byteLength]))
 
 	return header
@@ -87,7 +90,7 @@ export function checksum(intermediate: string): Buffer {
 export function addChecksum(model: DataModel): Uint8Array {
 	const intermediate = deserialize(model)
 	const checksum = Uint32Array.from([crc32.str(intermediate)])
-	const byearray = [...intermediate].map(char => char.charCodeAt(0))
+	const byearray = [...intermediate].map((char) => char.charCodeAt(0))
 
 	return Uint8Array.from([
 		...new Uint8Array(checksum.buffer),
@@ -125,17 +128,17 @@ export function deserialize(data: DataModel): string {
 		}
 
 		if (p.type === PaymentOptions.StandingOrder) {
-			intermediate.push('1')
+			intermediate.push("1")
 			intermediate.push(p.day?.toString())
 			intermediate.push(p.month?.toString())
 			intermediate.push(p.periodicity)
 			intermediate.push(p.lastDate)
 		} else {
-			intermediate.push('0')
+			intermediate.push("0")
 		}
 
 		if (p.type === PaymentOptions.DirectDebit) {
-			intermediate.push('1')
+			intermediate.push("1")
 			intermediate.push(p.directDebitScheme?.toString())
 			intermediate.push(p.directDebitType?.toString())
 			intermediate.push(p.variableSymbol?.toString())
@@ -147,7 +150,7 @@ export function deserialize(data: DataModel): string {
 			intermediate.push(p.maxAmount?.toString())
 			intermediate.push(p.validTillDate?.toString())
 		} else {
-			intermediate.push('0')
+			intermediate.push("0")
 		}
 	}
 
@@ -157,7 +160,7 @@ export function deserialize(data: DataModel): string {
 		intermediate.push(p.beneficiary?.city)
 	}
 
-	return intermediate.join('\t')
+	return intermediate.join("\t")
 }
 
 function removeDiacritics(model: DataModel): void {
@@ -207,8 +210,8 @@ export function generate(
 	/**
 	 * @see https://docs.fileformat.com/compression/lzma/#lzma-header
 	 */
-	const _header = Uint8Array.from(compressed.subarray(0, 13));
-	const data = Uint8Array.from(compressed.subarray(13));
+	const _header = Uint8Array.from(compressed.subarray(0, 13))
+	const data = Uint8Array.from(compressed.subarray(13))
 
 	const output = Uint8Array.from([
 		...bysquareHeader(),

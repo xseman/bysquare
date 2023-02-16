@@ -9,7 +9,3 @@ tab_width = 4
 max_line_length = 80
 insert_final_newline = true
 trim_trailing_whitespace = true
-
-[*.{yaml,yml}]
-indent_style = space
-indent_size = 4

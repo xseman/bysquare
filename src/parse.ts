@@ -1,20 +1,25 @@
-import { base32hex } from "rfc4648";
+import { base32hex } from "rfc4648"
 
 // @ts-ignore: missing types
-import lzma from "lzma";
+import lzma from "lzma"
 
 import {
 	BankAccount,
 	Beneficiary,
-	CurrencyCodeEnum, DataModel, Day, Payment, PaymentOptions, Periodicity
-} from "./index.js";
+	CurrencyCodeEnum,
+	DataModel,
+	Day,
+	Payment,
+	PaymentOptions,
+	Periodicity
+} from "./index.js"
 
 function cleanEmptyProps(obj: any): void {
 	Object.keys(obj).forEach((key) => {
-		if (typeof obj[key] === 'undefined') {
-			delete obj[key];
+		if (typeof obj[key] === "undefined") {
+			delete obj[key]
 		}
-	});
+	})
 }
 
 /**
@@ -46,16 +51,30 @@ export function serialize(qr: string): DataModel {
 		const paymentNote = intermediate.shift()
 
 		let payment: Payment = {
-			type: Number(paymentOptions) as PaymentOptions,
 			bankAccounts: [],
-			amount: ammount?.length ? Number(ammount) : undefined,
+			type: Number(paymentOptions) as PaymentOptions,
 			currencyCode: currency as keyof typeof CurrencyCodeEnum,
-			paymentDueDate: dueDate?.length ? dueDate : undefined,
-			variableSymbol: variables?.length ? variables : undefined,
-			constantSymbol: constants?.length ? constants : undefined,
-			specificSymbol: specifics?.length ? specifics : undefined,
-			originatorRefInfo: originatorRefInfo?.length ? originatorRefInfo : undefined,
-			paymentNote: paymentNote?.length ? paymentNote : undefined,
+			amount: ammount?.length
+				? Number(ammount)
+				: undefined,
+			paymentDueDate: dueDate?.length
+				? dueDate
+				: undefined,
+			variableSymbol: variables?.length
+				? variables
+				: undefined,
+			constantSymbol: constants?.length
+				? constants
+				: undefined,
+			specificSymbol: specifics?.length
+				? specifics
+				: undefined,
+			originatorRefInfo: originatorRefInfo?.length
+				? originatorRefInfo
+				: undefined,
+			paymentNote: paymentNote?.length
+				? paymentNote
+				: undefined
 		}
 
 		const accountslen = Number(intermediate.shift())
@@ -68,7 +87,9 @@ export function serialize(qr: string): DataModel {
 			const bic = intermediate.shift()
 			const account = {
 				iban: iban,
-				bic: bic?.length ? bic : undefined,
+				bic: bic?.length
+					? bic
+					: undefined
 			} satisfies BankAccount
 			cleanEmptyProps(account)
 			payment.bankAccounts.push(account)
@@ -80,7 +101,7 @@ export function serialize(qr: string): DataModel {
 		// narrowing payment type
 		switch (payment.type) {
 			case PaymentOptions.PaymentOrder:
-				break;
+				break
 
 			case PaymentOptions.StandingOrder:
 				payment = {
@@ -90,7 +111,7 @@ export function serialize(qr: string): DataModel {
 					periodicity: intermediate.shift() as Periodicity,
 					lastDate: intermediate.shift()
 				}
-				break;
+				break
 
 			case PaymentOptions.DirectDebit:
 				payment = {
@@ -103,10 +124,10 @@ export function serialize(qr: string): DataModel {
 					maxAmount: Number(intermediate.shift()),
 					validTillDate: intermediate.shift()
 				}
-				break;
+				break
 
 			default:
-				break;
+				break
 		}
 		cleanEmptyProps(payment)
 		output.payments.push(payment)
@@ -119,10 +140,17 @@ export function serialize(qr: string): DataModel {
 
 		if (Boolean(name) || Boolean(addressLine1) || Boolean(addressLine2)) {
 			const beneficiary = {
-				name: name?.length ? name : undefined,
-				street: addressLine1?.length ? addressLine1 : undefined,
-				city: addressLine2?.length ? addressLine2 : undefined,
+				name: name?.length
+					? name
+					: undefined,
+				street: addressLine1?.length
+					? addressLine1
+					: undefined,
+				city: addressLine2?.length
+					? addressLine2
+					: undefined
 			} satisfies Beneficiary
+
 			cleanEmptyProps(beneficiary)
 			output.payments[i].beneficiary = beneficiary
 		}
@@ -140,7 +168,7 @@ export function parse(qr: string): DataModel {
 			loose: true
 		})
 	} catch {
-		throw new Error("Unable to parse QR");
+		throw new Error("Unable to parse QR")
 	}
 
 	/**
@@ -156,7 +184,7 @@ export function parse(qr: string): DataModel {
 	 * @see https://docs.fileformat.com/compression/lzma/
 	 * @see https://en.wikipedia.org/wiki/Lempel–Ziv–Markov_chain_algorithm
 	 */
-	const header = new Uint8Array([
+	const header = new Uint8Array(/** dprint-ignore */ [
 		0x5D /** lc <0,8> lp<0,4> pb <0,4> = lc + (lp * 9) + (pb * 9 * 5) */,
 		0x00, 0x00, 0x80, 0x00, /** Dictionary Size 32-bits */
 		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF /** Uncompressed Size 64-bit little endian integer */
@@ -167,7 +195,7 @@ export function parse(qr: string): DataModel {
 
 	const body = new Uint8Array([
 		...header,
-		...decoded.slice(4),
+		...decoded.slice(4)
 	])
 
 	const decompressed = lzma.decompress(body) as Uint8Array
@@ -189,7 +217,7 @@ export function detect(qr: string): boolean {
 			loose: true
 		})
 	} catch {
-		throw new Error("Unable to parse QR string, invalid data");
+		throw new Error("Unable to parse QR string, invalid data")
 	}
 
 	if (parsed.byteLength < 2) {
@@ -200,7 +228,6 @@ export function detect(qr: string): boolean {
 	const valid = [...hexStrFromUint8(header)]
 		.map((nibble) => parseInt(nibble, 16))
 		.every((nibble, index) => {
-
 			if (/** version */ index === 1) {
 				return 0 >= nibble && nibble <= 1
 			}
@@ -213,42 +240,52 @@ export function detect(qr: string): boolean {
 
 // https://stackoverflow.com/questions/34309988/byte-array-to-hex-string-conversion-in-javascript#answer-34310051
 function hexStrFromUint8(bytes: Uint8Array): string {
-	return Array.from(bytes, function (byte) {
-		return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-	}).join('')
+	return Array.from(bytes, (byte) => {
+		return ("0" + (byte & 0xFF).toString(16)).slice(-2)
+	}).join("")
 }
 
 // https://stackoverflow.com/questions/17191945/conversion-between-utf-8-arraybuffer-and-string#answer-22373135
 function strFromUTF8Array(bytes: Uint8Array): string {
-	let out, i, len, c;
-	let char2, char3;
+	let out, i, len, c
+	let char2, char3
 
-	out = "";
-	len = bytes.length;
-	i = 0;
+	out = ""
+	len = bytes.length
+	i = 0
 
 	while (i < len) {
-		c = bytes[i++];
+		c = bytes[i++]
 		switch (c >> 4) {
-			case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
 				// 0xxxxxxx
-				out += String.fromCharCode(c);
-				break;
-			case 12: case 13:
+				out += String.fromCharCode(c)
+				break
+			case 12:
+			case 13:
 				// 110x xxxx   10xx xxxx
-				char2 = bytes[i++];
-				out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F));
-				break;
+				char2 = bytes[i++]
+				out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F))
+				break
 			case 14:
 				// 1110 xxxx  10xx xxxx  10xx xxxx
-				char2 = bytes[i++];
-				char3 = bytes[i++];
-				out += String.fromCharCode(((c & 0x0F) << 12) |
-					((char2 & 0x3F) << 6) |
-					((char3 & 0x3F) << 0));
-				break;
+				char2 = bytes[i++]
+				char3 = bytes[i++]
+				out += String.fromCharCode(
+					((c & 0x0F) << 12)
+						| ((char2 & 0x3F) << 6)
+						| ((char3 & 0x3F) << 0)
+				)
+				break
 		}
 	}
 
-	return out;
+	return out
 }

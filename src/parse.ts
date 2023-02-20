@@ -1,7 +1,5 @@
+import * as lzma from "lzma1"
 import { base32hex } from "rfc4648"
-
-// @ts-ignore: missing types
-import lzma from "lzma"
 
 import {
 	BankAccount,
@@ -198,7 +196,7 @@ export function parse(qr: string): DataModel {
 		...decoded.slice(4)
 	])
 
-	const decompressed = lzma.decompress(body) as Uint8Array
+	const decompressed = new Uint8Array(lzma.decompress(body))
 	const _crc32 = decompressed.slice(0, 4)
 	const deserialized = strFromUTF8Array(decompressed.slice(4))
 

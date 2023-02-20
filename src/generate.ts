@@ -1,10 +1,8 @@
 import crc32 from "crc-32"
 import deburr from "lodash.deburr"
+import * as lzma from "lzma1"
 import { base32hex } from "rfc4648"
 import { DataModel, PaymentOptions } from "./types.js"
-
-// @ts-ignore: missing types
-import lzma from "lzma"
 
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare

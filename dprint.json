@@ -8,10 +8,6 @@
 		"arrowFunction.useParentheses": "force",
 		"binaryExpression.operatorPosition": "nextLine"
 	},
-	"json": {
-	},
-	"markdown": {
-	},
 	"includes": ["**/*.{ts,json,md}"],
 	"excludes": [
 		"**/node_modules",

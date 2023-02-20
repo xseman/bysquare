@@ -3,7 +3,7 @@
 	"author": "Filip Seman",
 	"type": "module",
 	"scripts": {
-		"build": "esbuild main.ts --bundle --minify --format=esm --platform=browser --outdir=./",
+		"prestart": "esbuild index.ts --outfile=index.js --format=esm --platform=browser --bundle --minify",
 		"start": "esbuild --servedir=./"
 	},
 	"dependencies": {

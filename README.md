@@ -31,6 +31,9 @@ npm install xseman/bysquare#master
 
 # latest unreleased changes
 npm install xseman/bysquare#develop
+
+# specific tag version
+npm install xseman/lzma1#v0.0.1
 ```
 
 **CLI**
@@ -59,48 +62,58 @@ parse(qr: string): DataModel
 detect(qr: string): Boolean
 ```
 
-**generate(model: DataModel, options?: Options): string**
+## Usage
+
+Generate
 
 ```ts
-import { generate, DataModel, parse, PaymentOptions } from "bysquare"
+import { DataModel, generate, parse, PaymentOptions } from "bysquare"
 
-const model {
+const model = {
 	invoiceId: "random-id",
 	payments: [
 		{
 			type: PaymentOptions.PaymentOrder,
 			amount: 100.0,
 			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
+				{ iban: "SK9611000000002918599669" }
 			],
 			currencyCode: "EUR",
-			variableSymbol: "123",
+			variableSymbol: "123"
 		}
 	]
 } satisfies DataModel
 
+// long string ready to be encoded to QR
 const qr = generate(model)
 ```
 
-**parse(qr: string): DataModel**
+Parse
 
 ```ts
 import { parse } from "bysquare"
 
-const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
+const qr =
+	"0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
+
 const model = parse(qr)
+/**
+ *  {
+ * 	invoiceId: "random-id",
+ * 	payments: [
+ * 		{
+ * 			type: PaymentOptions.PaymentOrder,
+ * 			amount: 100.0,
+ * 			bankAccounts: [
+ * 				{ iban: "SK9611000000002918599669" },
+ * 			],
+ * 			currencyCode: "EUR",
+ * 			variableSymbol: "123",
+ * 		}
+ * 	]
+ * }
+ */
 ```
-
-**detect(qr: string): Boolean**
-
-```ts
-import { detect } from "bysquare"
-
-const qr = "0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
-const isBysquare = detect(qr)
-```
-
-## CLI
 
 You can use json file with valid model to generate qr-string.
 

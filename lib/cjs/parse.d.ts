@@ -1,10 +1,19 @@
 import { DataModel } from "./index.js";
 /**
- * @see 3.14. Generating by square Code
+ * Generating by square Code
+ *
+ * @see 3.14.
  */
-export declare function serialize(qr: string): DataModel;
+export declare function deserialize(qr: string): DataModel;
+export declare class DecodeError extends Error {
+    cause: Error;
+    name: string;
+    constructor(cause: Error, msg?: string);
+}
 /**
- * @see 3.16. Decoding client data from QR Code 2005 symbol
+ * Decoding client data from QR Code 2005 symbol
+ *
+ * @see 3.16.
  */
 export declare function parse(qr: string): DataModel;
 /**

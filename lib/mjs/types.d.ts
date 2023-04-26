@@ -1,4 +1,22 @@
 /**
+ * Mapping semantic version to encoded version number, header 4-bits
+ *
+ * It's a bit silly to limit the version number to 4-bit, if they keep
+ * increasing the version number, the latest possible mapped value is 16
+ */
+export declare const enum Version {
+    /**
+     * 2013-02-22
+     * Created this document from original by square specifications
+     */
+    "1.0.0" = 0,
+    /**
+     * 2015-06-24
+     * Added fields for beneficiary name and address
+     */
+    "1.1.0" = 1
+}
+/**
  * Selection of one or more months on which payment occurs. This is enabled
  * only if periodicity is set to one of the following value: “Weekly,
  * Biweekly, Monthly, Bimonthly”. Otherwise it must not be specified.

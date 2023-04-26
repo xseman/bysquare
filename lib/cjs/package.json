@@ -1,14 +1,24 @@
 {
   "name": "bysquare",
   "description": "It's a national standard for payment QR codes adopted by Slovak Banking Association (SBA)",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "license": "Apache-2.0",
-  "type": "commonjs",
   "funding": "https://github.com/sponsors/xseman",
   "homepage": "https://github.com/xseman/bysquare#readme",
-  "author": {
-    "name": "Filip Seman",
-    "email": "filip.seman@protonmail.com"
+  "author": "Filip Seman <filip.seman@pm.me>",
+  "keywords": [
+    "pay by square",
+    "by square",
+    "paybysquare",
+    "bysquare",
+    "payments",
+    "qr-string",
+    "generate",
+    "parse"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xseman/bysquare.git"
   },
   "scripts": {
     "prebuild": "rm -rf ./lib || :",
@@ -27,17 +37,18 @@
   "dependencies": {
     "crc-32": "~1.2.0",
     "lodash.deburr": "~4.1.0",
-    "lzma": "~2.3.0",
+    "lzma1": "~0.0.1",
     "rfc4648": "~1.5.0"
   },
   "devDependencies": {
     "@types/lodash.deburr": "~4.1.0",
-    "@types/lzma-native": "^4.0.1",
-    "@types/node": "~18.11.0",
+    "@types/node": ">=16.14",
+    "dprint": "~0.35.0",
     "tsx": "~3.12.0",
-    "typescript": "~4.9.0",
+    "typescript": "~5.0.0",
     "xv": "~2.1.0"
   },
+  "type": "commonjs",
   "bin": "lib/mjs/cli.js",
   "types": "lib/mjs/index.d.ts",
   "exports": {
@@ -51,21 +62,7 @@
     "!lib/*.test.*"
   ],
   "engines": {
-    "node": ">=16.0",
+    "node": ">=16.14",
     "npm": ">=7.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/xseman/bysquare.git"
-  },
-  "keywords": [
-    "pay by square",
-    "by square",
-    "paybysquare",
-    "bysquare",
-    "payments",
-    "qr-string",
-    "qr",
-    "cli"
-  ]
+  }
 }

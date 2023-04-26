@@ -27,13 +27,14 @@
 		<div>
 			<pre></pre>
 			<pre></pre>
-			<div id="test"></div>
+			<canvas></canvas>
 		</div>
 	</body>
 
-	<script src="./qrcode.min.js"></script>
 	<script type="module">
-		import { generate } from "./index.js";
+		import { qrcanvas } from 'https://esm.sh/qrcanvas@3.1.2/';
+		import { generate } from "https://esm.sh/bysquare@2.2.0/";
+		// import { generate } from "./index.js";
 
 		const payload = {
 			payments: [
@@ -47,11 +48,11 @@
 			],
 		};
 
-		const qrcode = new QRCode("test", { correctLevel: QRCode.CorrectLevel.H });
 		function update(payload) {
 			const qr = generate(payload);
-			qrcode.clear();
-			qrcode.makeCode(qr);
+			const canvas = qrcanvas({ data: qr });
+			const [el] = document.getElementsByTagName('canvas');
+			el.replaceWith(canvas)
 
 			qrVisual.innerHTML = "<b>QR-string:</b> " + qr;
 			payloadVisual.innerText = JSON.stringify(payload, null, 4);

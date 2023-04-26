@@ -110,26 +110,6 @@ const model =
 // 	]
 // }
 //
-const qr =
-	"0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
-
-const model = parse(qr)
-/**
- *  {
- * 	invoiceId: "random-id",
- * 	payments: [
- * 		{
- * 			type: PaymentOptions.PaymentOrder,
- * 			amount: 100.0,
- * 			bankAccounts: [
- * 				{ iban: "SK9611000000002918599669" },
- * 			],
- * 			currencyCode: "EUR",
- * 			variableSymbol: "123",
- * 		}
- * 	]
- * }
- */
 ```
 
 You can use json file with valid model to generate qr-string.

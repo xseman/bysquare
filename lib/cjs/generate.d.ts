@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { DataModel } from "./types.js";
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare
@@ -13,31 +12,34 @@ import { DataModel } from "./types.js";
  * | Reserved     | 4              | 0-15            | bits reserved for future needs
  * ```
  *
- * @see 3.5. by square header
+ * @see 3.5.
  */
-export declare function bysquareHeader(header?: [
+export declare function headerBysquare(
+/** dprint-ignore */
+header?: [
     bySquareType: number,
     version: number,
     documentType: number,
     reserved: number
 ]): Uint8Array;
 /**
- * @see 3.10 Appending CRC32 checksum
+ * Creates a one-byte array that represents the length of compressed data in
+ * combination with CRC32 in bytes.
  */
-export declare function checksum(intermediate: string): Buffer;
+export declare function headerDataLength(length: number): Uint8Array;
 /**
  * Transfer object to a tabbed string and append a CRC32 checksum
  *
- * @see 3.10. Appending CRC32 checksum
+ * @see 3.10.
  */
-export declare function addChecksum(model: DataModel): Uint8Array;
+export declare function addChecksum(serialized: string): Uint8Array;
 /**
  * Transform data to ordered tab-separated intermediate representation ready for
  * encoding
  *
- * @see Table 15 PAY by square sequence data model
+ * @see Table 15.
  */
-export declare function deserialize(data: DataModel): string;
+export declare function serialize(data: DataModel): string;
 type Options = {
     /**
      * Many banking apps do not support diacritics, which results in errors when

@@ -1,0 +1,22 @@
+{
+	"lineWidth": 80,
+	"useTabs": true,
+	"indentWidth": 4,
+	"typescript": {
+		"semiColons": "asi",
+		"trailingCommas": "never",
+		"arrowFunction.useParentheses": "force",
+		"arguments.preferHanging": "onlySingleItem",
+		"binaryExpression.operatorPosition": "nextLine"
+	},
+	"includes": ["**/*.{ts,json,md}"],
+	"excludes": [
+		"**/node_modules",
+		"**/*-lock.json"
+	],
+	"plugins": [
+		"https://plugins.dprint.dev/typescript-0.84.2.wasm",
+		"https://plugins.dprint.dev/json-0.17.1.wasm",
+		"https://plugins.dprint.dev/markdown-0.15.2.wasm"
+	]
+}

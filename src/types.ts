@@ -4,17 +4,17 @@
  * It's a bit silly to limit the version number to 4-bit, if they keep
  * increasing the version number, the latest possible mapped value is 16
  */
-const enum Version {
+export const enum Version {
 	/**
 	 * 2013-02-22
 	 * Created this document from original by square specifications
 	 */
-	"1.0.0" = 0,
+	"1.0.0" = 0x00,
 	/**
 	 * 2015-06-24
 	 * Added fields for beneficiary name and address
 	 */
-	"1.1.0" = 1
+	"1.1.0" = 0x01
 }
 
 /**
@@ -23,18 +23,18 @@ const enum Version {
  * Biweekly, Monthly, Bimonthly”. Otherwise it must not be specified.
  */
 export enum MonthClassifier {
-	January   = 1,
-	February  = 2,
-	March     = 4,
-	April     = 8,
-	May       = 16,
-	June      = 32,
-	July      = 64,
-	August 	  = 128,
+	January = 1,
+	February = 2,
+	March = 4,
+	April = 8,
+	May = 16,
+	June = 32,
+	July = 64,
+	August = 128,
 	September = 256,
-	October   = 512,
-	November  = 1_024,
-	December  = 2_048
+	October = 512,
+	November = 1_024,
+	December = 2_048
 }
 
 /**
@@ -44,14 +44,14 @@ export enum MonthClassifier {
  * banks see the following web site: http://www.sbaonline.sk/sk/
  */
 export enum Periodicity {
-	Daily 		 = "d",
-	Weekly 		 = "w",
-	Biweekly 	 = "b",
-	Monthly 	 = "m",
-	Bimonthly 	 = "B",
-	Quarterly 	 = "q",
+	Daily = "d",
+	Weekly = "w",
+	Biweekly = "b",
+	Monthly = "m",
+	Bimonthly = "B",
+	Quarterly = "q",
 	Semiannually = "s",
-	Annually 	 = "a"
+	Annually = "a"
 }
 
 /**
@@ -61,12 +61,43 @@ export enum Periodicity {
  *
  * Max length 2
  */
-export type Day = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31
+export type Day =
+	| 1
+	| 2
+	| 3
+	| 4
+	| 5
+	| 6
+	| 7
+	| 8
+	| 9
+	| 10
+	| 11
+	| 12
+	| 13
+	| 14
+	| 15
+	| 16
+	| 17
+	| 18
+	| 19
+	| 20
+	| 21
+	| 22
+	| 23
+	| 24
+	| 25
+	| 26
+	| 27
+	| 28
+	| 29
+	| 30
+	| 31
 
 export enum PaymentOptions {
-	PaymentOrder  = 1,
+	PaymentOrder = 1,
 	StandingOrder = 2,
-	DirectDebit   = 4
+	DirectDebit = 4
 }
 
 /**
@@ -104,7 +135,7 @@ export type BankAccount = {
  */
 export enum DirectDebitScheme {
 	Other = 0,
-	Sepa  = 1,
+	Sepa = 1
 }
 
 /**
@@ -114,7 +145,7 @@ export enum DirectDebitScheme {
  * Max length 1
  */
 export enum DirectDebitType {
-	OneOff 	  = 0,
+	OneOff = 0,
 	Recurrent = 1
 }
 

@@ -1,0 +1,15 @@
+{
+	"license": "Apache-2.0",
+	"author": "Filip Seman",
+	"type": "module",
+	"scripts": {
+		"prestart": "esbuild index.ts --outfile=index.js --format=esm --platform=browser --bundle --minify",
+		"start": "esbuild --servedir=./"
+	},
+	"dependencies": {
+		"bysquare": "github:xseman/bysquare#develop"
+	},
+	"devDependencies": {
+		"esbuild": "~0.17.0"
+	}
+}

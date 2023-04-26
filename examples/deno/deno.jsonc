@@ -1,0 +1,5 @@
+{
+	"tasks": {
+		"dev": "deno run --watch --allow-all --reload --unstable ./main.ts"
+	}
+}

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body style="display: flex; flex-direction: row;">
+		<div style="margin-right: 10px;">
+			<label style="display: block; margin-bottom: 5px">
+				Ammount: <br />
+				<input style="width: 210px;" type="number"/>
+			</label>
+
+			<label style="display: block; margin-bottom: 5px">
+				IBAN: <br />
+				<input style="width: 210px;" />
+			</label>
+
+			<label style="display: block; margin-bottom: 5px">
+				Variable: <br />
+				<input style="width: 210px;" />
+			</label>
+		</div>
+
+		<div>
+			<pre></pre>
+			<pre></pre>
+			<div id="test"></div>
+		</div>
+	</body>
+
+	<script src="./qrcode.min.js"></script>
+	<script type="module">
+		import { generate } from "./index.js";
+
+		const payload = {
+			payments: [
+				{
+					type: 1,
+					amount: 100.0,
+					bankAccounts: [{ iban: "SK9611000000002918599669" }],
+					currencyCode: "EUR",
+					variableSymbol: "123",
+				},
+			],
+		};
+
+		const qrcode = new QRCode("test", { correctLevel: QRCode.CorrectLevel.H });
+		function update(payload) {
+			const qr = generate(payload);
+			qrcode.clear();
+			qrcode.makeCode(qr);
+
+			qrVisual.innerHTML = "<b>QR-string:</b> " + qr;
+			payloadVisual.innerText = JSON.stringify(payload, null, 4);
+		}
+
+		const [
+			payloadVisual,
+			qrVisual
+		] = document.getElementsByTagName("pre");
+
+		const [
+			ammout,
+			iban,
+			variable
+		] = document.getElementsByTagName("input");
+
+		ammout.value = payload.payments[0].amount
+		ammout.addEventListener("input", (e) => {
+			payload.payments[0].amount = e.target.value;
+			update(payload);
+		});
+
+		iban.value = payload.payments[0].bankAccounts[0].iban
+		iban.addEventListener("input", (e) => {
+			payload.payments[0].bankAccounts[0].iban = e.target.value;
+			update(payload);
+		});
+
+		variable.value = payload.payments[0].variableSymbol
+		variable.addEventListener("input", (e) => {
+			payload.payments[0].variableSymbol = e.target.value;
+			update(payload);
+		});
+
+		// init
+		update(payload);
+	</script>
+</html>

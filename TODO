@@ -1,5 +1,0 @@
-* validation, generate model input
-* validation, parse qrstring input
-* remove lzma-native dependency
-* add web compatible compression (webassembly maybe)
-* deno implementation

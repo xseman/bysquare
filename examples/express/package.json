@@ -4,7 +4,7 @@
 	"type": "module",
 	"proxy": "http://localhost:4000",
 	"scripts": {
-		"start": "tsx server.ts"
+		"start": "npm i && tsx server.ts"
 	},
 	"dependencies": {
 		"bysquare": "github:xseman/bysquare#develop",

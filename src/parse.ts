@@ -1,128 +1,153 @@
-import { base32hex } from "rfc4648";
-
-// @ts-ignore: missing types
-import lzma from "lzma";
+import * as lzma from "lzma1"
+import { base32hex } from "rfc4648"
 
 import {
 	BankAccount,
 	Beneficiary,
-	CurrencyCodeEnum, DataModel, Day, Payment, PaymentOptions, Periodicity
-} from "./index.js";
+	CurrencyCodeEnum,
+	DataModel,
+	Day,
+	Payment,
+	PaymentOptions,
+	Periodicity,
+	Version
+} from "./index.js"
 
 function cleanEmptyProps(obj: any): void {
 	Object.keys(obj).forEach((key) => {
-		if (typeof obj[key] === 'undefined') {
-			delete obj[key];
+		if (typeof obj[key] === "undefined") {
+			delete obj[key]
 		}
-	});
+	})
 }
 
 /**
- * @see 3.14. Generating by square Code
+ * Generating by square Code
+ *
+ * @see 3.14.
  */
-export function serialize(qr: string): DataModel {
-	const intermediate = qr
-		.split("\t")
-		/** The end of the qr-string might contain a NULL-terminated string */
-		.map<string>((entry) => entry.replace("\x00", ""))
-
-	const invoiceId = intermediate.shift()
+export function deserialize(qr: string): DataModel {
+	const serialized = qr.split("\t")
+	const invoiceId = serialized.shift()
 	const output: DataModel = {
 		invoiceId: invoiceId?.length ? invoiceId : undefined,
 		payments: []
 	}
 
-	const paymentslen = Number(intermediate.shift())
+	const paymentslen = Number(serialized.shift())
 
 	for (let i = 0; i < paymentslen; i++) {
-		const paymentOptions = intermediate.shift()
-		const ammount = intermediate.shift()
-		const currency = intermediate.shift()
-		const dueDate = intermediate.shift()
-		const variables = intermediate.shift()
-		const constants = intermediate.shift()
-		const specifics = intermediate.shift()
-		const originatorRefInfo = intermediate.shift()
-		const paymentNote = intermediate.shift()
+		const paymentOptions = serialized.shift()
+		const ammount = serialized.shift()
+		const currency = serialized.shift()
+		const dueDate = serialized.shift()
+		const variables = serialized.shift()
+		const constants = serialized.shift()
+		const specifics = serialized.shift()
+		const originatorRefInfo = serialized.shift()
+		const paymentNote = serialized.shift()
 
 		let payment: Payment = {
-			type: Number(paymentOptions) as PaymentOptions,
 			bankAccounts: [],
-			amount: ammount?.length ? Number(ammount) : undefined,
+			type: Number(paymentOptions) as PaymentOptions,
 			currencyCode: currency as keyof typeof CurrencyCodeEnum,
-			paymentDueDate: dueDate?.length ? dueDate : undefined,
-			variableSymbol: variables?.length ? variables : undefined,
-			constantSymbol: constants?.length ? constants : undefined,
-			specificSymbol: specifics?.length ? specifics : undefined,
-			originatorRefInfo: originatorRefInfo?.length ? originatorRefInfo : undefined,
-			paymentNote: paymentNote?.length ? paymentNote : undefined,
+			amount: ammount?.length
+				? Number(ammount)
+				: undefined,
+			paymentDueDate: dueDate?.length
+				? dueDate
+				: undefined,
+			variableSymbol: variables?.length
+				? variables
+				: undefined,
+			constantSymbol: constants?.length
+				? constants
+				: undefined,
+			specificSymbol: specifics?.length
+				? specifics
+				: undefined,
+			originatorRefInfo: originatorRefInfo?.length
+				? originatorRefInfo
+				: undefined,
+			paymentNote: paymentNote?.length
+				? paymentNote
+				: undefined
 		}
 
-		const accountslen = Number(intermediate.shift())
+		const accountslen = Number(serialized.shift())
 		for (let j = 0; j < accountslen; j++) {
-			const iban = intermediate.shift()
+			const iban = serialized.shift()
 			if (iban === undefined || iban.length === 0) {
 				throw new Error("Missing IBAN")
 			}
 
-			const bic = intermediate.shift()
+			const bic = serialized.shift()
 			const account = {
 				iban: iban,
-				bic: bic?.length ? bic : undefined,
+				bic: bic?.length
+					? bic
+					: undefined
 			} satisfies BankAccount
 			cleanEmptyProps(account)
 			payment.bankAccounts.push(account)
 		}
 
-		intermediate.shift() // StandingOrderExt
-		intermediate.shift() // DirectDebitExt
+		serialized.shift() // StandingOrderExt
+		serialized.shift() // DirectDebitExt
 
 		// narrowing payment type
 		switch (payment.type) {
 			case PaymentOptions.PaymentOrder:
-				break;
+				break
 
 			case PaymentOptions.StandingOrder:
 				payment = {
 					...payment,
-					day: Number(intermediate.shift()) as Day,
-					month: Number(intermediate.shift()),
-					periodicity: intermediate.shift() as Periodicity,
-					lastDate: intermediate.shift()
+					day: Number(serialized.shift()) as Day,
+					month: Number(serialized.shift()),
+					periodicity: serialized.shift() as Periodicity,
+					lastDate: serialized.shift()
 				}
-				break;
+				break
 
 			case PaymentOptions.DirectDebit:
 				payment = {
 					...payment,
-					directDebitScheme: Number(intermediate.shift()),
-					directDebitType: Number(intermediate.shift()),
-					mandateId: intermediate.shift(),
-					creditorId: intermediate.shift(),
-					contractId: intermediate.shift(),
-					maxAmount: Number(intermediate.shift()),
-					validTillDate: intermediate.shift()
+					directDebitScheme: Number(serialized.shift()),
+					directDebitType: Number(serialized.shift()),
+					mandateId: serialized.shift(),
+					creditorId: serialized.shift(),
+					contractId: serialized.shift(),
+					maxAmount: Number(serialized.shift()),
+					validTillDate: serialized.shift()
 				}
-				break;
+				break
 
 			default:
-				break;
+				break
 		}
 		cleanEmptyProps(payment)
 		output.payments.push(payment)
 	}
 
 	for (let i = 0; i < paymentslen; i++) {
-		const name = intermediate.shift()
-		const addressLine1 = intermediate.shift()
-		const addressLine2 = intermediate.shift()
+		const name = serialized.shift()
+		const addressLine1 = serialized.shift()
+		const addressLine2 = serialized.shift()
 
 		if (Boolean(name) || Boolean(addressLine1) || Boolean(addressLine2)) {
 			const beneficiary = {
-				name: name?.length ? name : undefined,
-				street: addressLine1?.length ? addressLine1 : undefined,
-				city: addressLine2?.length ? addressLine2 : undefined,
+				name: name?.length
+					? name
+					: undefined,
+				street: addressLine1?.length
+					? addressLine1
+					: undefined,
+				city: addressLine2?.length
+					? addressLine2
+					: undefined
 			} satisfies Beneficiary
+
 			cleanEmptyProps(beneficiary)
 			output.payments[i].beneficiary = beneficiary
 		}
@@ -131,50 +156,135 @@ export function serialize(qr: string): DataModel {
 	return output
 }
 
+type Properties = {
+	lc: number
+	lp: number
+	pb: number
+}
+
 /**
- * @see 3.16. Decoding client data from QR Code 2005 symbol
+ * LZMA compression properties from the byte
+ *
+ * @param props 1-byte size
+ */
+function LzmaPropertiesDecoder(props: Uint8Array): Properties {
+	const byte = props[0]
+	return {
+		lc: byte >> 5,
+		lp: byte >> 2 & 0b0111,
+		pb: byte & 0b0011
+	}
+}
+
+function calcLzmaDictionarySize(props: Properties): Uint8Array {
+	const dictionarySize = new ArrayBuffer(4)
+	new DataView(dictionarySize).setUint32(
+		0,
+		Math.pow(2, props.pb + props.lp)
+	)
+
+	return new Uint8Array(dictionarySize)
+}
+
+/**
+ * The function uses bit-shifting and masking to convert the first two bytes of
+ * the input header array into four nibbles representing the bysquare header
+ * values.
+ *
+ * @param header 2-bytes sie
+ */
+function bysquareHeaderDecoder(header: Uint8Array) {
+	const bytes = (header[0] << 8) | header[1]
+	const bysquareType = bytes >> 12
+	const version = (bytes >> 8) & 0b1111
+	const documentType = (bytes >> 4) & 0b1111
+	const reserved = bytes & 0b1111
+
+	return {
+		bysquareType,
+		version,
+		documentType,
+		reserved
+	}
+}
+
+export class DecodeError extends Error {
+	override name = "DecodeError"
+	constructor(public cause: Error, msg?: string) {
+		super(msg)
+	}
+}
+
+/**
+ * Decoding client data from QR Code 2005 symbol
+ *
+ * @see 3.16.
  */
 export function parse(qr: string): DataModel {
 	try {
-		var decoded = base32hex.parse(qr, {
+		var bytes = base32hex.parse(qr, {
 			loose: true
 		})
-	} catch {
-		throw new Error("Unable to parse QR");
+	} catch (error) {
+		throw new DecodeError(
+			error,
+			"Unable to decode QR string base32hex encoding"
+		)
+	}
+
+	const bysquareHeader = bytes.slice(0, 2)
+	const { version } = bysquareHeaderDecoder(bysquareHeader)
+	if ((version > Version["1.1.0"])) {
+		throw new Error("Unsupported Bysquare version")
 	}
 
 	/**
-	 * Omited lzma header based on properties lc: 3, lp: 0, pb: 2
+	 * The process of decompressing data requires the addition of an LZMA header
+	 * to the compressed data. This header is necessary for the decompression
+	 * algorithm to properly interpret and extract the original uncompressed
+	 * data. Bysquare only store properties
 	 *
-	 * The LZMA files has a 13-byte header that is followed by the LZMA
-	 * compressed data. The LZMA header consists of:
+	 * <----------------------- 13-bytes ----------------------->
 	 *
 	 * +------------+----+----+----+----+--+--+--+--+--+--+--+--+
 	 * | Properties |  Dictionary Size  |   Uncompressed Size   |
 	 * +------------+----+----+----+----+--+--+--+--+--+--+--+--+
-	 *
-	 * @see https://docs.fileformat.com/compression/lzma/
-	 * @see https://en.wikipedia.org/wiki/Lempel–Ziv–Markov_chain_algorithm
 	 */
+	const lzmaProperties: Uint8Array = bytes.slice(2, 3)
+	const decodedProps = LzmaPropertiesDecoder(lzmaProperties)
+	const dictSize = calcLzmaDictionarySize(decodedProps)
+
 	const header = new Uint8Array([
-		0x5D /** lc <0,8> lp<0,4> pb <0,4> = lc + (lp * 9) + (pb * 9 * 5) */,
-		0x00, 0x00, 0x80, 0x00, /** Dictionary Size 32-bits */
-		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF /** Uncompressed Size 64-bit little endian integer */
+		lzmaProperties[0],
+		...dictSize,
+		/** Uncompressed size, this value indicates that size is unknown */
+		...[0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
 	])
 
-	const _bysquareHeader = decoded.slice(0, 2)
-	const _sizeChecksum = decoded.slice(2, 4)
-
+	const payload = bytes.slice(4)
 	const body = new Uint8Array([
 		...header,
-		...decoded.slice(4),
+		...payload
 	])
 
-	const decompressed = lzma.decompress(body) as Uint8Array
-	const _crc32 = decompressed.slice(0, 4)
-	const deserialized = strFromUTF8Array(decompressed.slice(4))
+	try {
+		var decompressed = new Uint8Array(lzma.decompress(body))
+	} catch (error) {
+		throw new DecodeError(error, "LZMA decompression failed")
+	}
 
-	return serialize(deserialized)
+	const dataLength = bytes.slice(3, 4)
+	if (dataLength[0] !== decompressed.length) {
+		throw new Error(
+			"The length of the data after decompression is not as expected."
+		)
+	}
+
+	const _checksum = decompressed.slice(0, 4)
+	const decompressedBody = decompressed.slice(4)
+	const decoded = new TextDecoder("utf-8").decode(decompressedBody)
+
+	return deserialize(decoded)
 }
 
 /**
@@ -189,66 +299,31 @@ export function detect(qr: string): boolean {
 			loose: true
 		})
 	} catch {
-		throw new Error("Unable to parse QR string, invalid data");
+		throw new Error(
+			"Invalid data, Unable to decode base32hex QR string"
+		)
 	}
 
 	if (parsed.byteLength < 2) {
 		return false
 	}
 
-	const header = parsed.subarray(0, 2)
-	const valid = [...hexStrFromUint8(header)]
-		.map((nibble) => parseInt(nibble, 16))
-		.every((nibble, index) => {
+	const bysquareHeader = parsed.subarray(0, 2)
+	const {
+		bysquareType,
+		version,
+		documentType,
+		reserved
+	} = bysquareHeaderDecoder(bysquareHeader)
 
-			if (/** version */ index === 1) {
-				return 0 >= nibble && nibble <= 1
+	const isValid = [bysquareType, version, documentType, reserved]
+		.every((nibble, index) => {
+			if (index === 1) {
+				return nibble <= Version["1.1.0"]
 			}
 
-			return 0 <= nibble && nibble <= 15
+			return 0x00 <= nibble && nibble <= 0x0F
 		})
 
-	return valid
-}
-
-// https://stackoverflow.com/questions/34309988/byte-array-to-hex-string-conversion-in-javascript#answer-34310051
-function hexStrFromUint8(bytes: Uint8Array): string {
-	return Array.from(bytes, function (byte) {
-		return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-	}).join('')
-}
-
-// https://stackoverflow.com/questions/17191945/conversion-between-utf-8-arraybuffer-and-string#answer-22373135
-function strFromUTF8Array(bytes: Uint8Array): string {
-	let out, i, len, c;
-	let char2, char3;
-
-	out = "";
-	len = bytes.length;
-	i = 0;
-
-	while (i < len) {
-		c = bytes[i++];
-		switch (c >> 4) {
-			case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
-				// 0xxxxxxx
-				out += String.fromCharCode(c);
-				break;
-			case 12: case 13:
-				// 110x xxxx   10xx xxxx
-				char2 = bytes[i++];
-				out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F));
-				break;
-			case 14:
-				// 1110 xxxx  10xx xxxx  10xx xxxx
-				char2 = bytes[i++];
-				char3 = bytes[i++];
-				out += String.fromCharCode(((c & 0x0F) << 12) |
-					((char2 & 0x3F) << 6) |
-					((char3 & 0x3F) << 0));
-				break;
-		}
-	}
-
-	return out;
+	return isValid
 }

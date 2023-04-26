@@ -13,8 +13,8 @@
 		"bysquare",
 		"payments",
 		"qr-string",
-		"qr",
-		"cli"
+		"generate",
+		"parse"
 	],
 	"repository": {
 		"type": "git",

@@ -2,18 +2,19 @@
 
 ![version][version] ![build][build]
 
-Simple `Node.js` library to generate "PAY by square" `QR` string.
+Simple JavaScript library to generate and parse "PAY by square" string.
 
 **What is `PAY by square`?**
 
-It's a national standard for payment QR codes adopted by Slovak Banking
-Association in 2013. It is part of a large number of invoices, reminders and
-other payment regulations.
+It's a national standard for QR code payments that was adopted by the Slovak
+Banking Association in 2013. It is incorporated into a variety of invoices,
+reminders and other payment regulations.
 
 **Can I generate an image?**
 
-This library is un-opinionated. Image generation from qr-code string depends on
-your implementation. See [examples](examples).
+This library doesn't have a specific opinion and how the QR code string is
+transformed into images depends on how you implement it. See
+[examples](examples).
 
 ## Install
 
@@ -32,8 +33,8 @@ npm install xseman/bysquare#master
 # latest unreleased changes
 npm install xseman/bysquare#develop
 
-# specific tag version
-npm install xseman/lzma1#v0.0.1
+# specific tag version, e.g. v2.1.0
+npm install xseman/bysquare#v2.1.0
 ```
 
 **CLI**
@@ -67,9 +68,10 @@ detect(qr: string): Boolean
 Generate
 
 ```ts
-import { DataModel, generate, parse, PaymentOptions } from "bysquare"
+import { DataModel, generate, PaymentOptions } from "bysquare"
 
-const model = {
+// long string ready to be encoded to QR
+const qrString = generate({
 	invoiceId: "random-id",
 	payments: [
 		{
@@ -82,10 +84,7 @@ const model = {
 			variableSymbol: "123"
 		}
 	]
-} satisfies DataModel
-
-// long string ready to be encoded to QR
-const qr = generate(model)
+})
 ```
 
 Parse
@@ -93,6 +92,24 @@ Parse
 ```ts
 import { parse } from "bysquare"
 
+const model =
+	parse("0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000")
+
+// {
+// 	invoiceId: "random-id",
+// 	payments: [
+// 		{
+// 			type: 1,
+// 			amount: 100.0,
+// 			bankAccounts: [
+// 				{ iban: "SK9611000000002918599669" },
+// 			],
+// 			currencyCode: "EUR",
+// 			variableSymbol: "123",
+// 		}
+// 	]
+// }
+//
 const qr =
 	"0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
 
@@ -133,7 +150,7 @@ You can use json file with valid model to generate qr-string.
 # }
 
 $ npx bysquare ./example.json
-$ 0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000
+$ 0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000
 ```
 
 You can also use stdin.
@@ -152,7 +169,7 @@ $ npx bysquare <<< '{
     ]
 }'
 
-$ 0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000
+$ 0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000
 ```
 
 ## Related

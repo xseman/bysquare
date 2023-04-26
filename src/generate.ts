@@ -2,7 +2,7 @@ import crc32 from "crc-32"
 import deburr from "lodash.deburr"
 import * as lzma from "lzma1"
 import { base32hex } from "rfc4648"
-import { DataModel, PaymentOptions } from "./types.js"
+import { DataModel, PaymentOptions, Version } from "./types.js"
 
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare
@@ -17,21 +17,23 @@ import { DataModel, PaymentOptions } from "./types.js"
  * | Reserved     | 4              | 0-15            | bits reserved for future needs
  * ```
  *
- * @see 3.5. by square header
+ * @see 3.5.
  */
-export function bysquareHeader(
+export function headerBysquare(
 	/** dprint-ignore */
 	header: [
 		bySquareType: number, version: number,
 		documentType: number, reserved: number
 	] = [
-		0b0000_0000, 0b0000_0000,
-		0b0000_0000, 0b0000_0000
+		0x00, 0x00,
+		0x00, 0x00
 	]
 ): Uint8Array {
 	const isValid = header.every((nibble) => 0 <= nibble && nibble <= 15)
 	if (!isValid) {
-		throw new Error(`Invalid header byte value, valid range <0,15>`)
+		throw new Error(
+			"Invalid header byte value, valid range <0,15>"
+		)
 	}
 
 	const [
@@ -51,48 +53,56 @@ export function bysquareHeader(
 }
 
 /**
- * Allocates a new buffer of a 2 bytes that represents LZMA header which
- * contains 16-bit unsigned integer (word, little-endian), which is the size of
- * the decompressed data. Therefore the maximum size of compressed data is
- * limited to 65535
+ * The function first sets default values for the lc, lp, and pb properties,
+ * which represent the number of literal context bits, literal position bits,
+ * and position bits, respectively. These values are then used to calculate the
+ * properties value, which is a single byte that encodes all three properties.
  *
- * @see 3.11. LZMA Compression
+ * @see 3.11.
  */
-function datasizeHeader(data: Uint8Array): Uint8Array {
-	if (data.byteLength >= 2 ** 16) {
-		throw new Error("The maximum compressed data size has been reached")
-	}
+function headerLzmaProps(): Uint8Array {
+	const lc = 3
+	const lp = 0
+	const pb = 2
+	const properties = (((pb * 5) + lp) * 9) + lc
 
-	const header = new Uint8Array(2)
-	header.set(Uint16Array.from([data.byteLength]))
+	const header = new ArrayBuffer(1)
+	new DataView(header).setUint8(0, properties)
 
-	return header
+	return new Uint8Array(header)
 }
 
 /**
- * @see 3.10 Appending CRC32 checksum
+ * Creates a one-byte array that represents the length of compressed data in
+ * combination with CRC32 in bytes.
  */
-export function checksum(intermediate: string): Buffer {
-	const data = crc32.str(intermediate)
-	const checksum = Buffer.alloc(4)
-	checksum.writeUInt32LE(data)
+export function headerDataLength(length: number): Uint8Array {
+	if (length >= 2 ** 16) {
+		throw new Error(
+			"The maximum compressed data size has been reached"
+		)
+	}
 
-	return checksum
+	const header = new ArrayBuffer(1)
+	new DataView(header).setUint8(0, length)
+
+	return new Uint8Array(header)
 }
 
 /**
  * Transfer object to a tabbed string and append a CRC32 checksum
  *
- * @see 3.10. Appending CRC32 checksum
+ * @see 3.10.
  */
-export function addChecksum(model: DataModel): Uint8Array {
-	const intermediate = deserialize(model)
-	const checksum = Uint32Array.from([crc32.str(intermediate)])
-	const byearray = [...intermediate].map((char) => char.charCodeAt(0))
+export function addChecksum(serialized: string): Uint8Array {
+	const checksum = new ArrayBuffer(4)
+	new DataView(checksum).setUint32(0, crc32.str(serialized), true)
+
+	const byteArray = new TextEncoder().encode(serialized)
 
 	return Uint8Array.from([
-		...new Uint8Array(checksum.buffer),
-		...Uint8Array.from(byearray)
+		...new Uint8Array(checksum),
+		...Uint8Array.from(byteArray)
 	])
 }
 
@@ -100,65 +110,65 @@ export function addChecksum(model: DataModel): Uint8Array {
  * Transform data to ordered tab-separated intermediate representation ready for
  * encoding
  *
- * @see Table 15 PAY by square sequence data model
+ * @see Table 15.
  */
-export function deserialize(data: DataModel): string {
-	const intermediate = new Array<string | undefined>()
+export function serialize(data: DataModel): string {
+	const serialized = new Array<string | undefined>()
 
-	intermediate.push(data.invoiceId?.toString())
-	intermediate.push(data.payments.length.toString())
+	serialized.push(data.invoiceId?.toString())
+	serialized.push(data.payments.length.toString())
 
 	for (const p of data.payments) {
-		intermediate.push(p.type.toString())
-		intermediate.push(p.amount?.toString())
-		intermediate.push(p.currencyCode)
-		intermediate.push(p.paymentDueDate)
-		intermediate.push(p.variableSymbol)
-		intermediate.push(p.constantSymbol)
-		intermediate.push(p.specificSymbol)
-		intermediate.push(p.originatorRefInfo)
-		intermediate.push(p.paymentNote)
+		serialized.push(p.type.toString())
+		serialized.push(p.amount?.toString())
+		serialized.push(p.currencyCode)
+		serialized.push(p.paymentDueDate)
+		serialized.push(p.variableSymbol)
+		serialized.push(p.constantSymbol)
+		serialized.push(p.specificSymbol)
+		serialized.push(p.originatorRefInfo)
+		serialized.push(p.paymentNote)
 
-		intermediate.push(p.bankAccounts.length.toString())
+		serialized.push(p.bankAccounts.length.toString())
 		for (const ba of p.bankAccounts) {
-			intermediate.push(ba.iban)
-			intermediate.push(ba.bic)
+			serialized.push(ba.iban)
+			serialized.push(ba.bic)
 		}
 
 		if (p.type === PaymentOptions.StandingOrder) {
-			intermediate.push("1")
-			intermediate.push(p.day?.toString())
-			intermediate.push(p.month?.toString())
-			intermediate.push(p.periodicity)
-			intermediate.push(p.lastDate)
+			serialized.push("1")
+			serialized.push(p.day?.toString())
+			serialized.push(p.month?.toString())
+			serialized.push(p.periodicity)
+			serialized.push(p.lastDate)
 		} else {
-			intermediate.push("0")
+			serialized.push("0")
 		}
 
 		if (p.type === PaymentOptions.DirectDebit) {
-			intermediate.push("1")
-			intermediate.push(p.directDebitScheme?.toString())
-			intermediate.push(p.directDebitType?.toString())
-			intermediate.push(p.variableSymbol?.toString())
-			intermediate.push(p.specificSymbol?.toString())
-			intermediate.push(p.originatorRefInfo?.toString())
-			intermediate.push(p.mandateId?.toString())
-			intermediate.push(p.creditorId?.toString())
-			intermediate.push(p.contractId?.toString())
-			intermediate.push(p.maxAmount?.toString())
-			intermediate.push(p.validTillDate?.toString())
+			serialized.push("1")
+			serialized.push(p.directDebitScheme?.toString())
+			serialized.push(p.directDebitType?.toString())
+			serialized.push(p.variableSymbol?.toString())
+			serialized.push(p.specificSymbol?.toString())
+			serialized.push(p.originatorRefInfo?.toString())
+			serialized.push(p.mandateId?.toString())
+			serialized.push(p.creditorId?.toString())
+			serialized.push(p.contractId?.toString())
+			serialized.push(p.maxAmount?.toString())
+			serialized.push(p.validTillDate?.toString())
 		} else {
-			intermediate.push("0")
+			serialized.push("0")
 		}
 	}
 
 	for (const p of data.payments) {
-		intermediate.push(p.beneficiary?.name)
-		intermediate.push(p.beneficiary?.street)
-		intermediate.push(p.beneficiary?.city)
+		serialized.push(p.beneficiary?.name)
+		serialized.push(p.beneficiary?.street)
+		serialized.push(p.beneficiary?.city)
 	}
 
-	return intermediate.join("\t")
+	return serialized.join("\t")
 }
 
 function removeDiacritics(model: DataModel): void {
@@ -202,19 +212,19 @@ export function generate(
 		removeDiacritics(model)
 	}
 
-	const payload = addChecksum(model)
-	const compressed = Uint8Array.from(lzma.compress(payload))
+	const payload = serialize(model)
+	const withChecksum = addChecksum(payload)
 
-	/**
-	 * @see https://docs.fileformat.com/compression/lzma/#lzma-header
-	 */
-	const _header = Uint8Array.from(compressed.subarray(0, 13))
-	const data = Uint8Array.from(compressed.subarray(13))
+	const compressed = Uint8Array.from(lzma.compress(withChecksum))
+	/** Exclude the LZMA header and retain raw compressed data */
+	const _headerLzma = Uint8Array.from(compressed.subarray(0, 13))
+	const compressedPayload = Uint8Array.from(compressed.subarray(13))
 
 	const output = Uint8Array.from([
-		...bysquareHeader(),
-		...datasizeHeader(payload),
-		...data
+		...headerBysquare([0x00, Version["1.1.0"], 0x00, 0x00]),
+		...headerLzmaProps(),
+		...headerDataLength(withChecksum.byteLength),
+		...compressedPayload
 	])
 
 	return base32hex.stringify(output, {

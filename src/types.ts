@@ -4,17 +4,17 @@
  * It's a bit silly to limit the version number to 4-bit, if they keep
  * increasing the version number, the latest possible mapped value is 16
  */
-const enum Version {
+export const enum Version {
 	/**
 	 * 2013-02-22
 	 * Created this document from original by square specifications
 	 */
-	"1.0.0" = 0,
+	"1.0.0" = 0x00,
 	/**
 	 * 2015-06-24
 	 * Added fields for beneficiary name and address
 	 */
-	"1.1.0" = 1
+	"1.1.0" = 0x01
 }
 
 /**

@@ -6,6 +6,7 @@
 		"semiColons": "asi",
 		"trailingCommas": "never",
 		"arrowFunction.useParentheses": "force",
+		"arguments.preferHanging": "onlySingleItem",
 		"binaryExpression.operatorPosition": "nextLine"
 	},
 	"includes": ["**/*.{ts,json,md}"],

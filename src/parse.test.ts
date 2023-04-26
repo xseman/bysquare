@@ -1,26 +1,23 @@
 import { deepEqual, equal, throws } from "node:assert/strict"
 import { generate } from "./generate.js"
-import { qrData } from "./generate.test.js"
+import { payload } from "./generate.test.js"
 
-import { detect, parse, serialize } from "./parse.js"
+import { deserialize, detect, parse } from "./parse.js"
 import { DataModel, PaymentOptions } from "./types.js"
 
-const qr =
-	"0004A00090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
-
 export async function parsing() {
-	const parsed = await parse(qr)
-	deepEqual(parsed, qrData)
+	const generated = generate(payload)
+	const parsed = parse(generated)
+	deepEqual(parsed, payload)
 }
 
-export async function bidirectional() {
-	const qr = await generate(qrData)
-	const data = await parse(qr)
-	deepEqual(qrData, data)
+export function bidirectional() {
+	const qrString = generate(payload)
+	deepEqual(payload, parse(qrString))
 }
 
-export function building() {
-	const tabbedString = /** dprint-ignore */ [
+export function serialization() {
+	const serialized = /** dprint-ignore */ [
 		"random-id",
 		"\t", "1",
 		"\t", "1",
@@ -42,28 +39,30 @@ export function building() {
 		"\t",
 	].join("")
 
-	const expected = serialize(tabbedString)
+	const payload = {
+		invoiceId: "random-id",
+		payments: [
+			{
+				type: PaymentOptions.PaymentOrder,
+				amount: 100,
+				currencyCode: "EUR",
+				variableSymbol: "123",
+				bankAccounts: [
+					{ iban: "SK9611000000002918599669" }
+				]
+			}
+		]
+	} satisfies DataModel
+
 	deepEqual(
-		expected,
-		{
-			invoiceId: "random-id",
-			payments: [
-				{
-					type: PaymentOptions.PaymentOrder,
-					amount: 100,
-					currencyCode: "EUR",
-					variableSymbol: "123",
-					bankAccounts: [
-						{ iban: "SK9611000000002918599669" }
-					]
-				}
-			]
-		} satisfies DataModel
+		deserialize(serialized),
+		payload
 	)
 }
 
 export function header() {
-	const isBysquare = detect(qr)
+	const generated = generate(payload)
+	const isBysquare = detect(generated)
 	equal(isBysquare, true)
 
 	const notBysquare = detect("EHIN6T0=" /** "hello" in base32hex */)

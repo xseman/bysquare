@@ -1,6 +1,5 @@
-import * as lzma from "lzma1"
+import { decompress } from "lzma1"
 import { base32hex } from "rfc4648"
-
 import {
 	BankAccount,
 	Beneficiary,
@@ -156,36 +155,6 @@ export function deserialize(qr: string): DataModel {
 	return output
 }
 
-type Properties = {
-	lc: number
-	lp: number
-	pb: number
-}
-
-/**
- * LZMA compression properties from the byte
- *
- * @param props 1-byte size
- */
-function LzmaPropertiesDecoder(props: Uint8Array): Properties {
-	const byte = props[0]
-	return {
-		lc: byte >> 5,
-		lp: byte >> 2 & 0b0111,
-		pb: byte & 0b0011
-	}
-}
-
-function calcLzmaDictionarySize(props: Properties): Uint8Array {
-	const dictionarySize = new ArrayBuffer(4)
-	new DataView(dictionarySize).setUint32(
-		0,
-		Math.pow(2, props.pb + props.lp)
-	)
-
-	return new Uint8Array(dictionarySize)
-}
-
 /**
  * The function uses bit-shifting and masking to convert the first two bytes of
  * the input header array into four nibbles representing the bysquare header
@@ -196,9 +165,9 @@ function calcLzmaDictionarySize(props: Properties): Uint8Array {
 function bysquareHeaderDecoder(header: Uint8Array) {
 	const bytes = (header[0] << 8) | header[1]
 	const bysquareType = bytes >> 12
-	const version = (bytes >> 8) & 0b1111
-	const documentType = (bytes >> 4) & 0b1111
-	const reserved = bytes & 0b1111
+	const version = (bytes >> 8) & 0b0000_1111
+	const documentType = (bytes >> 4) & 0b0000_1111
+	const reserved = bytes & 0b0000_1111
 
 	return {
 		bysquareType,
@@ -233,8 +202,7 @@ export function parse(qr: string): DataModel {
 	}
 
 	const bysquareHeader = bytes.slice(0, 2)
-	const { version } = bysquareHeaderDecoder(bysquareHeader)
-	if ((version > Version["1.1.0"])) {
+	if ((bysquareHeaderDecoder(bysquareHeader).version > Version["1.1.0"])) {
 		throw new Error("Unsupported Bysquare version")
 	}
 
@@ -250,15 +218,19 @@ export function parse(qr: string): DataModel {
 	 * | Properties |  Dictionary Size  |   Uncompressed Size   |
 	 * +------------+----+----+----+----+--+--+--+--+--+--+--+--+
 	 */
-	const lzmaProperties: Uint8Array = bytes.slice(2, 3)
-	const decodedProps = LzmaPropertiesDecoder(lzmaProperties)
-	const dictSize = calcLzmaDictionarySize(decodedProps)
+	const defaultProperties = [0x5D] // lc=3, lp=0, pb=2
+	const defaultDictionarySize = [0x00, 0x02, 0x00, 0x00] // 2^17
+
+	const dataLengthView = new DataView(bytes.slice(2, 4).buffer)
+	const dataLength = dataLengthView.getUint16(0)
+
+	const uncompressedSize = new ArrayBuffer(8)
+	new DataView(uncompressedSize).setBigUint64(0, BigInt(dataLength), true)
 
 	const header = new Uint8Array([
-		lzmaProperties[0],
-		...dictSize,
-		/** Uncompressed size, this value indicates that size is unknown */
-		...[0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+		...defaultProperties,
+		...defaultDictionarySize,
+		...new Uint8Array(uncompressedSize)
 	])
 
 	const payload = bytes.slice(4)
@@ -268,16 +240,9 @@ export function parse(qr: string): DataModel {
 	])
 
 	try {
-		var decompressed = new Uint8Array(lzma.decompress(body))
+		var decompressed = new Uint8Array(decompress(body))
 	} catch (error) {
 		throw new DecodeError(error, "LZMA decompression failed")
-	}
-
-	const dataLength = bytes.slice(3, 4)
-	if (dataLength[0] !== decompressed.length) {
-		throw new Error(
-			"The length of the data after decompression is not as expected."
-		)
 	}
 
 	const _checksum = decompressed.slice(0, 4)
@@ -299,9 +264,7 @@ export function detect(qr: string): boolean {
 			loose: true
 		})
 	} catch {
-		throw new Error(
-			"Invalid data, Unable to decode base32hex QR string"
-		)
+		throw new Error("Invalid data, Unable to decode base32hex QR string")
 	}
 
 	if (parsed.byteLength < 2) {

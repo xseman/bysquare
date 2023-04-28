@@ -1,8 +1,8 @@
 import crc32 from "crc-32"
 import deburr from "lodash.deburr"
-import * as lzma from "lzma1"
+import { compress } from "lzma1"
 import { base32hex } from "rfc4648"
-import { DataModel, PaymentOptions, Version } from "./types.js"
+import { DataModel, PaymentOptions } from "./types.js"
 
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare
@@ -31,9 +31,7 @@ export function headerBysquare(
 ): Uint8Array {
 	const isValid = header.every((nibble) => 0 <= nibble && nibble <= 15)
 	if (!isValid) {
-		throw new Error(
-			"Invalid header byte value, valid range <0,15>"
-		)
+		throw new Error("Invalid header byte value, valid range <0,15>")
 	}
 
 	const [
@@ -53,38 +51,16 @@ export function headerBysquare(
 }
 
 /**
- * The function first sets default values for the lc, lp, and pb properties,
- * which represent the number of literal context bits, literal position bits,
- * and position bits, respectively. These values are then used to calculate the
- * properties value, which is a single byte that encodes all three properties.
- *
- * @see 3.11.
- */
-function headerLzmaProps(): Uint8Array {
-	const lc = 3
-	const lp = 0
-	const pb = 2
-	const properties = (((pb * 5) + lp) * 9) + lc
-
-	const header = new ArrayBuffer(1)
-	new DataView(header).setUint8(0, properties)
-
-	return new Uint8Array(header)
-}
-
-/**
  * Creates a one-byte array that represents the length of compressed data in
  * combination with CRC32 in bytes.
  */
-export function headerDataLength(length: number): Uint8Array {
-	if (length >= 2 ** 16) {
-		throw new Error(
-			"The maximum compressed data size has been reached"
-		)
+export function headerDataLength(length: number) {
+	if (length >= 131072 /** 2^17 */) {
+		throw new Error("The maximum compressed data size has been reached")
 	}
 
-	const header = new ArrayBuffer(1)
-	new DataView(header).setUint8(0, length)
+	const header = new ArrayBuffer(2)
+	new DataView(header).setUint16(0, length)
 
 	return new Uint8Array(header)
 }
@@ -214,17 +190,19 @@ export function generate(
 
 	const payload = serialize(model)
 	const withChecksum = addChecksum(payload)
+	const compressed = Uint8Array.from(compress(withChecksum))
 
-	const compressed = Uint8Array.from(lzma.compress(withChecksum))
-	/** Exclude the LZMA header and retain raw compressed data */
-	const _headerLzma = Uint8Array.from(compressed.subarray(0, 13))
-	const compressedPayload = Uint8Array.from(compressed.subarray(13))
+	const _lzmaHeader = Uint8Array.from(compressed.subarray(0, 13))
+	const lzmaBody = Uint8Array.from(compressed.subarray(13))
 
 	const output = Uint8Array.from([
-		...headerBysquare([0x00, Version["1.1.0"], 0x00, 0x00]),
-		...headerLzmaProps(),
+		// FIXME:
+		// for now other implementation of bysquare doesn't recognize header if
+		// version is specified like TatraBanka
+		// ...headerBysquare([0x00, Version["1.1.0"], 0x00, 0x00]),
+		...headerBysquare([0x00, 0x00, 0x00, 0x00]),
 		...headerDataLength(withChecksum.byteLength),
-		...compressedPayload
+		...lzmaBody
 	])
 
 	return base32hex.stringify(output, {

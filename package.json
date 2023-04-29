@@ -25,6 +25,7 @@
 		"typecheck": "tsc --noEmit",
 		"cli:local": "npm run build && npm link bysquare",
 		"preversion": "git checkout develop",
+		"version": "git commit -am ${npm_package_version}",
 		"postversion": "npm run build && git flow release start v${npm_package_version}"
 	},
 	"dependencies": {

@@ -2,5 +2,5 @@
 
 chmod +x ./lib/{cjs,mjs}/cli.js
 cp package.json ./lib/mjs/
-jq '.type="commonjs"' package.json > ./lib/cjs/package.json
+cd ./lib/cjs && npm pkg set type="commonjs"
 git commit -am "feat: build artefacts"

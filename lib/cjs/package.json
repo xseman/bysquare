@@ -1,20 +1,16 @@
 {
   "name": "bysquare",
   "description": "It's a national standard for payment QR codes adopted by Slovak Banking Association (SBA)",
-  "version": "2.2.0",
+  "version": "2.4.0",
   "license": "Apache-2.0",
   "funding": "https://github.com/sponsors/xseman",
   "homepage": "https://github.com/xseman/bysquare#readme",
   "author": "Filip Seman <filip.seman@pm.me>",
   "keywords": [
     "pay by square",
-    "by square",
+    "qr string",
     "paybysquare",
-    "bysquare",
-    "payments",
-    "qr-string",
-    "generate",
-    "parse"
+    "bysquare"
   ],
   "repository": {
     "type": "git",
@@ -22,17 +18,14 @@
   },
   "scripts": {
     "prebuild": "rm -rf ./lib || :",
-    "build": "tsc --project ./tsconfig.json && tsc --project ./tsconfig.cjs.json",
-    "typecheck": "tsc --noEmit",
-    "postbuild": "bash -c 'chmod +x ./lib/{cjs,mjs}/cli.js' && cp package.json ./lib/mjs/ && jq '.type=\"commonjs\"' package.json > lib/cjs/package.json",
+    "build": ".scripts/build.sh",
+    "postbuild": ".scripts/postbuild.sh",
     "test": "xv --loader=tsx ./src",
-    "test:watch": "find ./src/*.ts | entr xv --loader=tsx ./src",
+    "test:watch": "xv --loader=tsx --watch ./src",
+    "typecheck": "tsc --noEmit",
     "cli:local": "npm run build && npm link bysquare",
-    "version": "git flow release start v$npm_package_version",
-    "prepare": "",
-    "prepublishOnly": "npm run build",
     "preversion": "git checkout develop",
-    "postversion": ""
+    "postversion": "npm run build && git flow release start v${npm_package_version}"
   },
   "dependencies": {
     "crc-32": "~1.2.0",
@@ -43,7 +36,7 @@
   "devDependencies": {
     "@types/lodash.deburr": "~4.1.0",
     "@types/node": ">=16.14",
-    "dprint": "~0.35.0",
+    "dprint": "~0.36.0",
     "tsx": "~3.12.0",
     "typescript": "~5.0.0",
     "xv": "~2.1.0"

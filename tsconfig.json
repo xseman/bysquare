@@ -1,9 +1,8 @@
 {
 	"compilerOptions": {
 		"target": "ES2022",
-		"module": "Node16",
+		"module": "ESNext",
 		"moduleResolution": "Node16",
-		"outDir": "./lib/mjs/",
 		"downlevelIteration": true,
 		"strict": true,
 		"declaration": true,

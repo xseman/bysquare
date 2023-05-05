@@ -17,9 +17,9 @@
 		"url": "git+https://github.com/xseman/bysquare.git"
 	},
 	"scripts": {
-		"prebuild": "rm -rf ./lib || :",
-		"build": ".scripts/build.sh",
-		"postbuild": ".scripts/postbuild.sh",
+		"prebuild": "make prebuild",
+		"build": "make build",
+		"postbuild": "make postbuild",
 		"test": "xv --loader=tsx ./src",
 		"test:watch": "xv --loader=tsx --watch ./src",
 		"typecheck": "tsc --noEmit",
@@ -43,12 +43,14 @@
 		"xv": "~2.1.0"
 	},
 	"type": "module",
-	"bin": "lib/mjs/cli.js",
-	"types": "lib/mjs/index.d.ts",
+	"bin": "lib/esm/cli.js",
+	"main": "./lib/cjs/index.js",
+	"module": "./lib/esm/index.js",
 	"exports": {
 		".": {
+			"import": "./lib/esm/index.js",
 			"require": "./lib/cjs/index.js",
-			"import": "./lib/mjs/index.js"
+			"types": "./lib/esm/index.d.ts"
 		}
 	},
 	"files": [

@@ -1,4 +1,4 @@
-// import { DataModel, generate, PaymentOptions } from "./../../lib/index.js"
+// import { DataModel, generate, PaymentOptions } from "./../../../dist/index.js"
 import { DataModel, generate, PaymentOptions } from "bysquare"
 import express from "express"
 

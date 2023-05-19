@@ -12,7 +12,7 @@ import {
 	Version
 } from "./index.js"
 
-function cleanEmptyProps(obj: any): void {
+function cleanUndefined(obj: any): void {
 	Object.keys(obj).forEach((key) => {
 		if (typeof obj[key] === "undefined") {
 			delete obj[key]
@@ -34,7 +34,6 @@ export function deserialize(qr: string): DataModel {
 	}
 
 	const paymentslen = Number(serialized.shift())
-
 	for (let i = 0; i < paymentslen; i++) {
 		const paymentOptions = serialized.shift()
 		const ammount = serialized.shift()
@@ -87,7 +86,7 @@ export function deserialize(qr: string): DataModel {
 					? bic
 					: undefined
 			} satisfies BankAccount
-			cleanEmptyProps(account)
+			cleanUndefined(account)
 			payment.bankAccounts.push(account)
 		}
 
@@ -125,7 +124,7 @@ export function deserialize(qr: string): DataModel {
 			default:
 				break
 		}
-		cleanEmptyProps(payment)
+		cleanUndefined(payment)
 		output.payments.push(payment)
 	}
 
@@ -147,7 +146,7 @@ export function deserialize(qr: string): DataModel {
 					: undefined
 			} satisfies Beneficiary
 
-			cleanEmptyProps(beneficiary)
+			cleanUndefined(beneficiary)
 			output.payments[i].beneficiary = beneficiary
 		}
 	}
@@ -221,16 +220,13 @@ export function parse(qr: string): DataModel {
 	const defaultProperties = [0x5D] // lc=3, lp=0, pb=2
 	const defaultDictionarySize = [0x00, 0x02, 0x00, 0x00] // 2^17
 
-	const dataLengthView = new DataView(bytes.slice(2, 4).buffer)
-	const dataLength = dataLengthView.getUint16(0)
-
-	const uncompressedSize = new ArrayBuffer(8)
-	new DataView(uncompressedSize).setBigUint64(0, BigInt(dataLength), true)
+	const uncompressedSize = new Uint8Array(8)
+	uncompressedSize.set(bytes.slice(2, 4))
 
 	const header = new Uint8Array([
 		...defaultProperties,
 		...defaultDictionarySize,
-		...new Uint8Array(uncompressedSize)
+		...uncompressedSize
 	])
 
 	const payload = bytes.slice(4)
@@ -240,7 +236,7 @@ export function parse(qr: string): DataModel {
 	])
 
 	try {
-		var decompressed = new Uint8Array(decompress(body))
+		var decompressed = new Uint8Array(decompress(body) as Int8Array)
 	} catch (error) {
 		throw new DecodeError(error, "LZMA decompression failed")
 	}

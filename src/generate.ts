@@ -54,13 +54,13 @@ export function headerBysquare(
  * Creates a one-byte array that represents the length of compressed data in
  * combination with CRC32 in bytes.
  */
-export function headerDataLength(length: number) {
+export function headerDataLength(length: number): Uint8Array {
 	if (length >= 131072 /** 2^17 */) {
 		throw new Error("The maximum compressed data size has been reached")
 	}
 
 	const header = new ArrayBuffer(2)
-	new DataView(header).setUint16(0, length)
+	new DataView(header).setUint16(0, length, true)
 
 	return new Uint8Array(header)
 }

@@ -1,5 +1,5 @@
 {
-	"lineWidth": 80,
+	"lineWidth": 100,
 	"useTabs": true,
 	"indentWidth": 4,
 	"typescript": {
@@ -15,8 +15,8 @@
 		"**/*-lock.json"
 	],
 	"plugins": [
-		"https://plugins.dprint.dev/typescript-0.84.2.wasm",
-		"https://plugins.dprint.dev/json-0.17.1.wasm",
+		"https://plugins.dprint.dev/typescript-0.84.4.wasm",
+		"https://plugins.dprint.dev/json-0.17.2.wasm",
 		"https://plugins.dprint.dev/markdown-0.15.2.wasm"
 	]
 }

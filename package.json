@@ -19,6 +19,7 @@
 	"scripts": {
 		"prebuild": "tsc --build --clean",
 		"build": "tsc --build",
+		"format": "dprint fmt ./src/**/*",
 		"typecheck": "tsc --noEmit",
 		"test": "xv --loader=tsx ./src",
 		"test:watch": "xv --loader=tsx --watch ./src",

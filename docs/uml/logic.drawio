@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="QBfXTE_qWPWNibvKBBgT" name="Page-1">
-        <mxGraphModel dx="1197" dy="442" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1104" dy="219" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -46,10 +46,10 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="86" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;aspect=fixed;imageAspect=0;image=data:image/png,iVBORw0KGgoAAAANSUhEUgAAAKgAAACoCAYAAAB0S6W0AAAABHNCSVQICAgIfAhkiAAACFVJREFUeF7tndGuHDcSQzNB/v+XHfeNL2BoSM1wpFKXg+O3VlezqCOuMLXOZh8/fv75iz8QaErgn8vX4/Foau8/W7v+M+T2qfRd7S5Qqmf1WdzRc5XX36sCfA+BSgIEtJIu2ssECOgyQgQqCRDQSrpoLxMgoMsIEagk8DXFuz9u6nP1O9aT6dnV7vDtNFzPdO9Ox/VN9J12orHDR9LvqlW+uUFTitQfJUBAj+KmWUqAgKbEqD9KgIAexU2zlMB0SFJi6oesqnu1tuNHeKqR1Kf7dNpOx9W/4nb3e7ef1Ne7++cGTclSf5QAAT2Km2YpAQKaEqP+KAECehQ3zVICBDQlRv1RAvEUf9Tdi2anJ8rLjps+d3lROq6nw5PWO50O69ygHU4BD5YAAbVoeNGBAAHtcAp4sAQIqEXDiw4ECGiHU8CDJfBHT/FuWlWT8EXA1Ss6Se1M23lx66qvq1W+Z2tKe1bf4R03aIdTwIMlQEAtGl50IEBAO5wCHiwBAmrR8KIDAQLa4RTwYAnEU3ynSXDXdJvopPtP6+1JiRdOO9mPkJ0uuZ7TjxZecoMuwOPTegIEtJ4xHRYIENAFeHxaT4CA1jOmwwIBAroAj0/rCUyn+MppsHJrbtJ0+1H1rtb5dvVK+9JI613fqnXnr6qf0+UGdWRYb0GAgLY4Bkw4AgTUkWG9BQEC2uIYMOEIfA1J7oe8+6jLuvOd/sBX9U77jr07L8r3J+fp9O/Y69iTG3QkwnMrAgS01XFgZiRAQEciPLciQEBbHQdmRgIEdCTCcysCj58T3A83DVY6dZNjpZekp6utZHJpq/2nXpTGzLfSdxqq1vm+1pN6VcsNOjs53t1OgIDefgQYmBEgoDM6vLudAAG9/QgwMCNAQGd0eHc7ga8p3rlQk9yk3Mksrysfl2jqJdFxtcub+SXgvFf2rezptBNeau/coAlBao8TIKDHkdMwIUBAE1rUHidAQI8jp2FCgIAmtKg9TmD6PztWbtSkpeq+19LpTuk7DVV79XX1M5/jO6fheo7fv3pOdJyXVz3efZ/oJ77f7f9dp3xwg6YUqT9KgIAexU2zlAABTYlRf5QAAT2Km2YpAQKaEqP+KIGvKd5NZmqqcrW7XFf2VNrOd7pPp71Dx2m4nm5PO9Zdz9Sjqlfa3KA7Tg2NMgIEtAwtwjsIENAdFNEoI0BAy9AivIPA9B9Y3tLg8dghU6qhfpyrH/GXCVV7rbt6Z3yXjtNX666nqk3Xdu1/7MsNOhLhuRUBAtrqODAzEiCgIxGeWxEgoK2OAzMjAQI6EuG5FYHpvzwsmfqqprhPaDkvyX4+6Zt84zwmGp1qd7BVTLhBO50yXp4IENAnJCx0IkBAO50GXp4IENAnJCx0IkBAO50GXp4ITP8uXk1VO6a1y4XSfnL34ULqMfGyS9vpKC+u1uFRGq72Wk/0U23X992e3KCOIOstCBDQFseACUeAgDoyrLcgQEBbHAMmHAEC6siw3oLA9O/idzh8d1r7pNeuiVL1Tn07L6mO8uLWXE9XX7me7lN5VxrcoJWnhvYyAQK6jBCBSgIEtJIu2ssECOgyQgQqCRDQSrpoLxOY/ivA1VS13PGFwLvT3QuZ468dK7Wf1JzTdjqu3nlR9Unt5cPVpx7Hem7QkQjPrQgQ0FbHgZmRAAEdifDcigABbXUcmBkJENCRCM+tCEyneOU0ndaUxmxNTZSz+h3vVM9d+1Tal2enr+pd7Y69z7wofedF+d6hzQ2qToG1NgQIaJujwIgiQEAVFdbaECCgbY4CI4pAPCQpkWttx4/kS8f9CFd9XU9Vu0s78Zf2TOvd/p3HtN5xrFpX/rhBq2iju4UAAd2CEZEqAgS0iiy6WwgQ0C0YEakiQECryKK7hUA8xatJ63KSTo5b3BuRHV6chmkZ/7cYjqPST70ojdkZqfrEn/r+e83pqD2pWm7QGV3e3U6AgN5+BBiYESCgMzq8u50AAb39CDAwI0BAZ3R4dzuBeIpX09fOXST6aurb6UVpuZ6Jb6X7vaZ0qnsqP8qHqvte2+FR9eQGnVHn3e0ECOjtR4CBGQECOqPDu9sJENDbjwADMwIEdEaHd7cTmP4fed3u7oUBNfXNPnGT5uybqneJ99S300511N6dtqrdscYNuoMiGmUECGgZWoR3ECCgOyiiUUaAgJahRXgHAQK6gyIaZQS+/i7+9GSW7iadPtP6ZP+V2hcXpZ/4S9m681c+PtF237yrzw3qCLLeggABbXEMmHAECKgjw3oLAgS0xTFgwhGY/gPL7/6QdeKfrCcDgfPnNFy98pnUXt+7nko7XXNedvV0+onPVONd79ygySlQe5wAAT2OnIYJAQKa0KL2OAECehw5DRMCBDShRe1xAtMpXrl5d/pS3/6+lk59Ss95cdquXmmna7t6Ko9O260rjWs/bj3da1Kf9FT74QZNaFN7nAABPY6chgkBAprQovY4AQJ6HDkNEwIENKFF7XEC8RR/3OHGhmpKdPLJ9Ok0rnXX0+m7etXDaajamRdXn6ynXpS20uAGVaRYa0OAgLY5CowoAgRUUWGtDQEC2uYoMKIIEFBFhbU2BP6XU7yaBmfE1eSs1i6NVLu6frav8V3qZfy++lkx5watpo7+EgECuoSPj6sJENBqwugvESCgS/j4uJoAAa0mjP4SgXiKV5PWkoODHyfe04nXaTsdV78Dh+vptJUXp6FqL91d9aNHbtCRCM+tCBDQVseBmZEAAR2J8NyKAAFtdRyYGQlMhyT3w3cU+VOe3X7cD3+1L1frtJXGtZbUpz1d/Q4vzrfrmdaPHrlBRyI8tyJAQFsdB2ZGAgR0JMJzKwIEtNVxYGYk8C/qEg18LVeamwAAAABJRU5ErkJggg==;rounded=0;" parent="1" vertex="1">
-                    <mxGeometry x="388" y="520" width="84" height="84" as="geometry"/>
+                    <mxGeometry x="371.25" y="520" width="84" height="84" as="geometry"/>
                 </mxCell>
                 <mxCell id="340" value="" style="group;rounded=0;" parent="1" vertex="1" connectable="0">
-                    <mxGeometry x="71.75" y="20" width="370" height="60" as="geometry"/>
+                    <mxGeometry x="55" y="30" width="370" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="328" value="16-bits" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;startArrow=classic;endSize=8;startSize=8;rounded=0;" parent="340" edge="1">
                     <mxGeometry width="100" relative="1" as="geometry">
@@ -72,7 +72,7 @@
                     <mxGeometry y="20" width="92.5" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="344" value="" style="group;rounded=0;" parent="1" vertex="1" connectable="0">
-                    <mxGeometry x="315" y="420" width="230" height="70" as="geometry"/>
+                    <mxGeometry x="298.25" y="420" width="230" height="70" as="geometry"/>
                 </mxCell>
                 <mxCell id="8" value="String ready for encoding into QR code" style="whiteSpace=wrap;html=1;rounded=0;" parent="344" vertex="1">
                     <mxGeometry y="30" width="230" height="40" as="geometry"/>
@@ -89,30 +89,30 @@
                 <mxCell id="357" value="Serialized&amp;nbsp;data" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
                     <mxGeometry x="528.25" y="250" width="90" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="4" value="Data length &lt;br&gt;(2 bytes)" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
-                    <mxGeometry x="295.5" y="250" width="92.5" height="40" as="geometry"/>
+                <mxCell id="4" value="Data length little-endian&lt;br&gt;(2 bytes)" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="267.74" y="250" width="134.5" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="349" value="CRC32&lt;br&gt;(4 bytes)" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
                     <mxGeometry x="438.25" y="250" width="90" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="352" value="Header &lt;br&gt;(2 bytes)" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
-                    <mxGeometry x="218" y="250" width="77.5" height="40" as="geometry"/>
+                    <mxGeometry x="190.24" y="250" width="77.5" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="350" style="edgeStyle=none;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" target="4" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="530" y="240" as="sourcePoint"/>
                         <Array as="points">
                             <mxPoint x="530" y="230"/>
-                            <mxPoint x="342" y="230"/>
+                            <mxPoint x="335" y="230"/>
                         </Array>
                         <mxPoint x="380" y="220" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="7" value="Data compressed by LZMA" style="whiteSpace=wrap;html=1;rounded=0;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;connectable=1;" parent="1" vertex="1">
-                    <mxGeometry x="460" y="360" width="130.48" height="40" as="geometry"/>
+                <mxCell id="7" value="Data compressed by LZMA alone" style="whiteSpace=wrap;html=1;rounded=0;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;connectable=1;" parent="1" vertex="1">
+                    <mxGeometry x="460" y="340" width="130.48" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="77" value="Header&lt;br&gt;(4 bytes)" style="whiteSpace=wrap;html=1;rounded=0;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;connectable=1;" parent="1" vertex="1">
-                    <mxGeometry x="260" y="360" width="80" height="40" as="geometry"/>
+                    <mxGeometry x="260" y="340" width="80" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="360" style="edgeStyle=none;html=1;entryX=0;entryY=0;entryDx=0;entryDy=0;dashed=1;endArrow=none;endFill=0;rounded=0;exitX=0;exitY=1;exitDx=0;exitDy=0;" parent="1" source="352" target="77" edge="1">
                     <mxGeometry relative="1" as="geometry">
@@ -133,10 +133,10 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="2" value="Header bysquare&lt;br&gt;(2 bytes)" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
-                    <mxGeometry x="190.24" y="130" width="133.01204819277106" height="40" as="geometry"/>
+                    <mxGeometry x="162.48000000000002" y="150" width="133.01204819277106" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="348" value="Serialized data&lt;br&gt;Max 550 UTF-8 characters" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
-                    <mxGeometry x="420" y="130" width="240" height="40" as="geometry"/>
+                    <mxGeometry x="420" y="150" width="240" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="368" style="edgeStyle=none;html=1;entryX=1;entryY=1;entryDx=0;entryDy=0;dashed=1;endArrow=none;endFill=0;rounded=0;exitX=1;exitY=0;exitDx=0;exitDy=0;" parent="1" source="77" target="4" edge="1">
                     <mxGeometry relative="1" as="geometry">

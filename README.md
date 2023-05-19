@@ -53,7 +53,7 @@ import { generate, parse } from "npm:bysquare@2.1.0"
 
 ### Encoding sequence
 
-![logic](./doc/uml/logic.svg)
+![logic](./docs/uml/logic.svg)
 
 ## API
 

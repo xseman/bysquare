@@ -1,5 +1,4 @@
 {
-	"license": "Apache-2.0",
 	"author": "Filip Seman",
 	"type": "module",
 	"scripts": {
@@ -7,7 +6,7 @@
 		"start": "esbuild --servedir=./"
 	},
 	"dependencies": {
-		"bysquare": "github:xseman/bysquare#develop"
+		"bysquare": "2.4.0"
 	},
 	"devDependencies": {
 		"esbuild": "~0.17.0"

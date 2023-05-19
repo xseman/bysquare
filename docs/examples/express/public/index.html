@@ -2,15 +2,18 @@
 <html>
 
 <body>
-	<div id="qrcode"></div>
+	<div id="qrcode">Loading...</div>
 </body>
 
-<script src="qrcodejs.min.js"></script>
-<script type="text/javascript">
+<script type="module">
+	import { qrcanvas } from 'https://esm.sh/qrcanvas@3.1.2/';
+
 	fetch("/qr")
 		.then((res) => res.text())
 		.then((data) => {
-			new QRCode(document.getElementById("qrcode"), data);
+			const canvas = qrcanvas({ data: data });
+			const el = document.getElementById("qrcode")
+			el.replaceWith(canvas)
 		})
 </script>
 

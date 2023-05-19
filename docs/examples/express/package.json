@@ -1,13 +1,12 @@
 {
-	"license": "Apache-2.0",
 	"author": "Filip Seman",
 	"type": "module",
 	"proxy": "http://localhost:4000",
 	"scripts": {
-		"start": "npm i && tsx server.ts"
+		"start": "tsx server.ts"
 	},
 	"dependencies": {
-		"bysquare": "github:xseman/bysquare#develop",
+		"bysquare": "2.4.0",
 		"express": "~4.18.0"
 	},
 	"devDependencies": {

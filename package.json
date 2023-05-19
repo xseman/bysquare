@@ -17,21 +17,20 @@
 		"url": "git+https://github.com/xseman/bysquare.git"
 	},
 	"scripts": {
-		"prebuild": "make prebuild",
-		"build": "make build",
-		"postbuild": "make postbuild",
+		"prebuild": "tsc --build --clean",
+		"build": "tsc --build",
+		"typecheck": "tsc --noEmit",
 		"test": "xv --loader=tsx ./src",
 		"test:watch": "xv --loader=tsx --watch ./src",
-		"typecheck": "tsc --noEmit",
 		"cli:local": "npm run build && npm link bysquare",
 		"preversion": "git checkout develop",
 		"version": "git commit -am ${npm_package_version}",
-		"postversion": "npm run build && git flow release start v${npm_package_version}"
+		"postversion": "git flow release start v${npm_package_version} && npm run build"
 	},
 	"dependencies": {
 		"crc-32": "~1.2.0",
 		"lodash.deburr": "~4.1.0",
-		"lzma1": "~0.0.2",
+		"lzma1": "0.0.2",
 		"rfc4648": "~1.5.0"
 	},
 	"devDependencies": {
@@ -43,22 +42,21 @@
 		"xv": "~2.1.0"
 	},
 	"type": "module",
-	"bin": "lib/esm/cli.js",
-	"main": "./lib/cjs/index.js",
-	"module": "./lib/esm/index.js",
+	"bin": "./dist/cli.js",
+	"types": "./dist/index.d.ts",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
 	"exports": {
 		".": {
-			"import": "./lib/esm/index.js",
-			"require": "./lib/cjs/index.js",
-			"types": "./lib/esm/index.d.ts"
+			"import": "./dist/index.js"
 		}
 	},
 	"files": [
-		"lib",
-		"!lib/*.test.*"
+		"dist",
+		"!dist/*.test.*"
 	],
 	"engines": {
-		"node": ">=16.14",
+		"node": ">=14.13.1 || >=16.0.0",
 		"npm": ">=7.0"
 	}
 }

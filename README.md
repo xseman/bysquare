@@ -14,7 +14,7 @@ reminders and other payment regulations.
 
 This library doesn't have a specific opinion and how the QR code string is
 transformed into images depends on how you implement it. See
-[examples](examples).
+[examples](./docs/examples/).
 
 ## Install
 
@@ -22,19 +22,6 @@ transformed into images depends on how you implement it. See
 
 ```sh
 npm install bysquare
-```
-
-**GitHub**
-
-```sh
-# same as latest released npm registry version
-npm install xseman/bysquare#master
-
-# latest unreleased changes
-npm install xseman/bysquare#develop
-
-# specific tag version, e.g. v2.1.0
-npm install xseman/bysquare#v2.1.0
 ```
 
 **CLI**
@@ -45,7 +32,7 @@ npm install --global bysquare
 
 **Deno** `v1.28+`, just import `npm:bysquare` `v2.1.0+`
 
-```
+```ts
 import { generate, parse } from "npm:bysquare@2.1.0"
 ```
 
@@ -68,7 +55,7 @@ detect(qr: string): Boolean
 Generate
 
 ```ts
-import { DataModel, generate, PaymentOptions } from "bysquare"
+import { CurrencyCode, DataModel, generate, PaymentOptions } from "bysquare"
 
 // long string ready to be encoded to QR
 const qrString = generate({
@@ -80,7 +67,7 @@ const qrString = generate({
 			bankAccounts: [
 				{ iban: "SK9611000000002918599669" }
 			],
-			currencyCode: "EUR",
+			currencyCode: CurrencyCode.EUR,
 			variableSymbol: "123"
 		}
 	]

@@ -24,9 +24,8 @@
 		"test": "xv --loader=tsx ./src",
 		"test:watch": "xv --loader=tsx --watch ./src",
 		"cli:local": "npm run build && npm link bysquare",
-		"preversion": "git checkout develop",
-		"version": "git commit -am ${npm_package_version}",
-		"postversion": "git flow release start v${npm_package_version} && npm run build"
+		"version": "git checkout develop && npm test",
+		"postversion": "echo 'Now run npm run build && npm publish'"
 	},
 	"dependencies": {
 		"crc-32": "~1.2.0",

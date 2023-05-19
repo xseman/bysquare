@@ -30,6 +30,14 @@ npm install bysquare
 npm install --global bysquare
 ```
 
+**Browser**
+
+```html
+<script type="module">
+	import { generate, parse } from "https://esm.sh/bysquare@2.4.0/";
+</script>
+```
+
 **Deno** `v1.28+`, just import `npm:bysquare` `v2.1.0+`
 
 ```ts

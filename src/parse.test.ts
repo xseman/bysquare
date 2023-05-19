@@ -3,7 +3,7 @@ import { generate } from "./generate.js"
 import { payload } from "./generate.test.js"
 
 import { deserialize, detect, parse } from "./parse.js"
-import { DataModel, PaymentOptions } from "./types.js"
+import { CurrencyCode, DataModel, PaymentOptions } from "./types.js"
 
 export async function parsing() {
 	const generated = generate(payload)
@@ -45,7 +45,7 @@ export function serialization() {
 			{
 				type: PaymentOptions.PaymentOrder,
 				amount: 100,
-				currencyCode: "EUR",
+				currencyCode: CurrencyCode.EUR,
 				variableSymbol: "123",
 				bankAccounts: [
 					{ iban: "SK9611000000002918599669" }

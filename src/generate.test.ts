@@ -3,7 +3,7 @@ import { deepEqual, equal } from "node:assert/strict"
 import { deepStrictEqual } from "node:assert"
 import { addChecksum, generate, headerBysquare, serialize } from "./generate.js"
 import { parse } from "./parse.js"
-import { DataModel, PaymentOptions } from "./types.js"
+import { CurrencyCode, DataModel, PaymentOptions } from "./types.js"
 
 export const payload = {
 	invoiceId: "random-id",
@@ -14,7 +14,7 @@ export const payload = {
 			bankAccounts: [
 				{ iban: "SK9611000000002918599669" }
 			],
-			currencyCode: "EUR",
+			currencyCode: CurrencyCode.EUR,
 			variableSymbol: "123"
 		}
 	]

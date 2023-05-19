@@ -102,7 +102,7 @@ export function serialize(data: DataModel): string {
 		serialized.push(p.variableSymbol)
 		serialized.push(p.constantSymbol)
 		serialized.push(p.specificSymbol)
-		serialized.push(p.originatorRefInfo)
+		serialized.push(p.originatorsReferenceInformation)
 		serialized.push(p.paymentNote)
 
 		serialized.push(p.bankAccounts.length.toString())
@@ -127,7 +127,7 @@ export function serialize(data: DataModel): string {
 			serialized.push(p.directDebitType?.toString())
 			serialized.push(p.variableSymbol?.toString())
 			serialized.push(p.specificSymbol?.toString())
-			serialized.push(p.originatorRefInfo?.toString())
+			serialized.push(p.originatorsReferenceInformation?.toString())
 			serialized.push(p.mandateId?.toString())
 			serialized.push(p.creditorId?.toString())
 			serialized.push(p.contractId?.toString())

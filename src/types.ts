@@ -18,9 +18,7 @@ export const enum Version {
 }
 
 /**
- * Selection of one or more months on which payment occurs. This is enabled
- * only if periodicity is set to one of the following value: “Weekly,
- * Biweekly, Monthly, Bimonthly”. Otherwise it must not be specified.
+ * Kalendárny mesiac.
  */
 export enum MonthClassifier {
 	January = 1,
@@ -38,10 +36,9 @@ export enum MonthClassifier {
 }
 
 /**
- * Periodicity of the payment. All valid options are „Daily“, „Weekly“,
- * „Biweekly“, „Monthly“, „Bimonthly“, „Quarterly“, „Annually“,
- * „Semiannually“. To find out which periodicity types are supported by the
- * banks see the following web site: http://www.sbaonline.sk/sk/
+ * Deň platby vyplývajúci z opakovania (Periodicity). Deň v mesiaci je číslo
+ * medzi 1 a 31. Deň v týždni je číslo medzi 1 a 7 (1 = pondelok, 2=utorok, …, 7
+ * = nedeľa).
  */
 export enum Periodicity {
 	Daily = "d",
@@ -59,7 +56,7 @@ export enum Periodicity {
  * either day of the month (number between 1 and 31) or day of the week
  * (1=Monday,2=Tuesday, …, 7=Sunday).
  *
- * Max length 2
+ * Maximálna dĺžka 2
  */
 export type Day =
 	| 1
@@ -94,6 +91,14 @@ export type Day =
 	| 30
 	| 31
 
+/**
+ * Možnosti platby sa dajú kombinovať. Oddeľujú sa medzerou a treba uviesť vždy
+ * aspoň jednu z možností:
+ *
+ * - paymentorder: platobný príkaz
+ * - standingorder: trvalý príkaz, údaje sa vyplnia do StandingOrderExt
+ * - directdebit: inkaso, údaje sa vyplnia do DirectDebitExt
+ */
 export enum PaymentOptions {
 	PaymentOrder = 1,
 	StandingOrder = 2,
@@ -101,37 +106,34 @@ export enum PaymentOptions {
 }
 
 /**
- * In section „encoding BankAccounts“ we provide further recommendations for
- * encoding bank account
+ * Údaje bankového účtu prijímateľa platby.
  */
 export type BankAccount = {
 	/**
-	 * Max length 34
+	 * Maximálna dĺžka 34
+	 * Pattern: [A-Z]{2}[0-9]{2}[A-Z0-9]{0,30}
+	 *
+	 * Medzinárodné číslo bankového účtu vo formáte IBAN. Príklad:
+	 * "SK8209000000000011424060". Viac na
+	 * http://www.sbaonline.sk/sk/projekty/financne-vzdelavanie/slovnik-bankovych-pojmov/iii/.
 	 */
 	iban: string
 
 	/**
-	 * Format ISO 9362 (swift)
-	 * 8 or 11 characters long
+	 * Formát ISO 9362 (swift) 8 or 11 characters long
+	 * Pattern: [A-Z]{4}[A-Z]{2}[A-Z\d]{2}([A-Z\d]{3})?
+	 *
+	 * Medzinárodný bankový identifikačný kód (z ang. Bank Identification Code).
+	 * Viac na http://www.sbaonline.sk/sk/projekty/financne-vzdelavanie/slovnik-bankovych-pojmov/bbb/bic
 	 */
 	bic?: string
 }
 
 /**
- * If DirectDebitScheme value is 1, which is „SEPA“ than encoded direct
- * debit follows SEPA direct debit scheme which means that fields MandateID,
- * CreditorID and optional ContractID are used. If direct debit scheme is 0,
- * which is „OTHER“ this means no specific direct debit scheme and following
- * rules do apply:
+ * Inksaná schéma. Uvádza ja jedna z možností:
  *
- * a. Creditor is identified via bank accounts
- *
- * b. Contract between debtor and creditor is identified using one of the
- *    following two ways: 1. by two optional fields SpecificSymbol and
- *    VariableSymbol. 2. by one optional field OriginatorsReferenceInformation.
- *    If SpecificSymbol and VariableSymbol fields or
- *    OriginatorsReferenceInformation field is filled in DirectDebitExt then
- *    these fields do apply for the direct debit.
+ * SEPA - Inkaso zodpovedá schéme
+ * SEPA. other - iné
  */
 export enum DirectDebitScheme {
 	Other = 0,
@@ -139,10 +141,12 @@ export enum DirectDebitScheme {
 }
 
 /**
- * Can be „one­off“ for one time debit or „recurrent“ for repeated debit
- * until cancelled.
+ * Maximálna dĺžka 1
  *
- * Max length 1
+ * Typ inkasa. Uvádza ja jedna z možností:
+ *
+ * one-off - jednorázové inkaso
+ * recurrent - opakované inkaso
  */
 export enum DirectDebitType {
 	OneOff = 0,
@@ -151,75 +155,86 @@ export enum DirectDebitType {
 
 export type Beneficiary = {
 	/**
-	 * Belongs to the N-th payment
+	 * Maximálna dĺžka 70
 	 *
-	 * Max length 70
+	 * Rozšírenie o meno príjemcu
 	 */
 	name?: string
-
 	/**
-	 * Belongs to the N-th payment
-	 * Commonly used street and street number
+	 * Maximálna dĺžka 70
 	 *
-	 * Max length 70
+	 * Rozšírenie o adresu príjemcu
 	 */
 	street?: string
-
 	/**
-	 * Belongs to the N-th payment
-	 * Commonly used for City
+	 * Maximálna dĺžka 70
 	 *
-	 * Max length 70
+	 * Rozšírenie o adresu príjemcu (druhý riadok)
 	 */
 	city?: string
 }
 
 export type SimplePayment = {
 	/**
-	 * Encoded with amount payable. This field is not required and can be left
-	 * blank in cases payment amount is not known ­such as donations.
+	 * Maximálna dĺžka 15
 	 *
-	 * Decimal, max length 15
+	 * Čiastka platby. Povolené sú len kladné hodnoty. Desatinná čast je
+	 * oddelená bodkou. Môže ostať nevyplnené, napríklad pre dobrovoľný
+	 * príspevok (donations). Príklad: Tisíc sa uvádza ako "1000". Jedna celá
+	 * deväťdesiatdeväť sa uvádza ako "1.99". Desať celých peťdesiat sa uvádza
+	 * ako "10.5". Nula celá nula osem sa uvádza ako "0.08".
 	 */
 	amount?: number
-
 	/**
-	 * 3 letter, payment currency code according to ISO-4217
+	 * Pattern: [A-Z]{3}
+	 *
+	 * Mena v ISO 4217 formáte (3 písmená). Príklad: "EUR"
 	 */
-	currencyCode: keyof typeof CurrencyCodeEnum
-
+	currencyCode: CurrencyCode
 	/**
-	 * Format YYYYMMDD
+	 * Formát YYYYMMDD
+	 *
+	 * Dátum splatnosti vo formáte ISO 8601 "RRRR-MM-DD". Nepovinný údaj. V
+	 * prípade trvalého príkazu označuje dátum prvej platby.
 	 */
 	paymentDueDate?: string
-
 	/**
-	 * Max length 10
+	 * Maximálna dĺžka 10
+	 * Pattern: [0-9]{0,10}
+	 *
+	 * Variabilný symbol je maximálne 10 miestne číslo. Nepovinný údaj.
 	 */
 	variableSymbol?: string
-
 	/**
-	 * Max length 4
+	 * Maximálna dĺžka 4
+	 * Pattern: [0-9]{0,4}
+	 *
+	 * Konštantný symbol je 4 miestne identifikačné číslo. Nepovinný údaj.
 	 */
 	constantSymbol?: string
-
 	/**
-	 * Max length 10
+	 * Maximálna dĺžka 10
+	 * Pattern: [0-9]{0,10}
+	 *
+	 * Špecifický symbol je maximálne 10 miestne číslo. Nepovinný údaj.
 	 */
 	specificSymbol?: string
-
 	/**
-	 * Max length 35
-	 */
-	originatorRefInfo?: string
-
-	/**
-	 * Optional field. In previous section we provide further recommendations
-	 * for encoding payment note.
+	 * Maximálna dĺžka 35
 	 *
-	 * Max length 140
+	 * Referenčná informácia prijímateľa podľa SEPA.
+	 */
+	originatorsReferenceInformation?: string
+	/**
+	 * Maximálna dĺžka 140
+	 *
+	 * Správa pre prijímateľa. Údaje o platbe, na základe ktorých príjemca bude
+	 * môcť platbu identifikovať. Odporúča sa maximálne 140 Unicode znakov.
 	 */
 	paymentNote?: string
+	/**
+	 * Zoznam bankových účtov.
+	 */
 	bankAccounts: BankAccount[]
 	beneficiary?: Beneficiary
 }
@@ -228,232 +243,252 @@ export type PaymentOrder = SimplePayment & {
 	type: PaymentOptions.PaymentOrder
 }
 
+/**
+ * Rozšírenie platobných údajov o údaje pre nastavenie trvalého príkazu.
+ */
 export type StandingOrder = SimplePayment & {
 	type: PaymentOptions.StandingOrder
-	day?: Day
-	month?: MonthClassifier
-	periodicity?: Periodicity
-
 	/**
-	 * Defines the day of the last payment of the standing order. After this
-	 * date, standing order is cancelled.
+	 * Deň platby vyplývajúci z opakovania (Periodicity). Deň v mesiaci je číslo
+	 * medzi 1 a 31. Deň v týždni je číslo medzi 1 a 7 (1 = pondelok, 2 =utorok,
+	 * …, 7 = nedeľa).
+	 */
+	day?: Day
+	/**
+	 * Medzerou oddelený zoznam mesiacov, v ktoré sa má platba uskutočniť.
+	 */
+	month?: MonthClassifier
+	/**
+	 * Opakovanie (periodicita) trvalého príkazu.
+	 */
+	periodicity?: Periodicity
+	/**
+	 * Dátum poslednej platby v trvalom príkaze.
 	 *
-	 * Format YYYYMMDD
+	 * Formát YYYYMMDD
 	 */
 	lastDate?: string
 }
 
+/**
+ * Rozšírenie platobných údajov o údaje pre nastavenie a identifikáciu inkasa.
+ */
 export type DirectDebit = SimplePayment & {
 	type: PaymentOptions.DirectDebit
 	directDebitScheme?: DirectDebitScheme
 	directDebitType?: DirectDebitType
-
 	/**
-	 * Max length 35
+	 * Maximálna dĺžka 35
+	 *
+	 * Identifikácia mandátu medzi veriteľom a dlžníkom podľa SEPA.
 	 */
 	mandateId?: string
-
 	/**
-	 * Max length 35
+	 * Maximálna dĺžka 35
+	 *
+	 * Identifikácia veriteľa podľa SEPA.
 	 */
 	creditorId?: string
-
 	/**
-	 * Max length 35
+	 * Maximálna dĺžka 35
+	 *
+	 * Identifikácia zmluvy medzi veriteľom a dlžníkom podľa SEPA.
 	 */
 	contractId?: string
-
 	/**
-	 * Optional field. As most users prefer to set up some maximum amount for
-	 * the direct debit, this can be pre­-filled for them.
+	 * Maximálna dĺžka 15
 	 *
-	 * Decimal, max length 15
+	 * Maximálna čiastka inkasa.
 	 */
 	maxAmount?: number
-
 	/**
-	 * Defines the day after which direct debit is cancelled.
+	 * Maximálna dĺžka 8
+	 * Formát YYYYMMDD
 	 *
-	 * Max length 8
-	 * Format YYYYMMDD
+	 * Dátum platnosti inkasa. Platnosť inkasa zaníka dňom tohto dátumu.
 	 */
 	validTillDate?: string
 }
 
+/**
+ * Údaje pre jeden platobný príkaz.
+ */
 export type Payment = PaymentOrder | StandingOrder | DirectDebit
 
 export type DataModel = {
 	/**
-	 * Max length 10
+	 * Maximálna dĺžka 10
+	 *
+	 * Číslo faktúry v prípade, že údaje sú súčasťou faktúry, alebo
+	 * identifikátor pre intérne potreby vystavovateľa.
 	 */
 	invoiceId?: string
+	/**
+	 * Zoznam jednej alebo viacerých platieb v prípade hromadného príkazu.
+	 * Hlavná (preferovaná) platba sa uvádza ako prvá.
+	 */
 	payments: Payment[]
 }
 
 /**
- * Currency codes based on ISO-4217
+ * ISO-4217
  */
-export enum CurrencyCodeEnum {
-	AED = "United Arab Emirates Dirham",
-	AFN = "Afghanistan Afghani",
-	ALL = "Albania Lek",
-	AMD = "Armenia Dram",
-	ANG = "Netherlands Antilles Guilder",
-	AOA = "Angola Kwanza",
-	ARS = "Argentina Peso",
-	AUD = "Australia Dollar",
-	AWG = "Aruba Guilder",
-	AZN = "Azerbaijan New Manat",
-	BAM = "Bosnia and Herzegovina Convertible Marka",
-	BBD = "Barbados Dollar",
-	BDT = "Bangladesh Taka",
-	BGN = "Bulgaria Lev",
-	BHD = "Bahrain Dinar",
-	BIF = "Burundi Franc",
-	BMD = "Bermuda Dollar",
-	BND = "Brunei Darussalam Dollar",
-	BOB = "Bolivia Bolíviano",
-	BRL = "Brazil Real",
-	BSD = "Bahamas Dollar",
-	BTN = "Bhutan Ngultrum",
-	BWP = "Botswana Pula",
-	BYR = "Belarus Ruble",
-	BZD = "Belize Dollar",
-	CAD = "Canada Dollar",
-	CDF = "Congo/Kinshasa Franc",
-	CHF = "Switzerland Franc",
-	CLP = "Chile Peso",
-	CNY = "China Yuan Renminbi",
-	COP = "Colombia Peso",
-	CRC = "Costa Rica Colon",
-	CUC = "Cuba Convertible Peso",
-	CUP = "Cuba Peso",
-	CVE = "Cape Verde Escudo",
-	CZK = "Czech Republic Koruna",
-	DJF = "Djibouti Franc",
-	DKK = "Denmark Krone",
-	DOP = "Dominican Republic Peso",
-	DZD = "Algeria Dinar",
-	EGP = "Egypt Pound",
-	ERN = "Eritrea Nakfa",
-	ETB = "Ethiopia Birr",
-	EUR = "Euro Member Countries",
-	FJD = "Fiji Dollar",
-	FKP = "Falkland Islands  = Malvinas Pound",
-	GBP = "United Kingdom Pound",
-	GEL = "Georgia Lari",
-	GGP = "Guernsey Pound",
-	GHS = "Ghana Cedi",
-	GIP = "Gibraltar Pound",
-	GMD = "Gambia Dalasi",
-	GNF = "Guinea Franc",
-	GTQ = "Guatemala Quetzal",
-	GYD = "Guyana Dollar",
-	HKD = "Hong Kong Dollar",
-	HNL = "Honduras Lempira",
-	HRK = "Croatia Kuna",
-	HTG = "Haiti Gourde",
-	HUF = "Hungary Forint",
-	IDR = "Indonesia Rupiah",
-	ILS = "Israel Shekel",
-	IMP = "Isle of Man Pound",
-	INR = "India Rupee",
-	IQD = "Iraq Dinar",
-	IRR = "Iran Rial",
-	ISK = "Iceland Krona",
-	JEP = "Jersey Pound",
-	JMD = "Jamaica Dollar",
-	JOD = "Jordan Dinar",
-	JPY = "Japan Yen",
-	KES = "Kenya Shilling",
-	KGS = "Kyrgyzstan Som",
-	KHR = "Cambodia Riel",
-	KMF = "Comoros Franc",
-	KPW = "Korea  = North Won",
-	KRW = "Korea  = South Won",
-	KWD = "Kuwait Dinar",
-	KYD = "Cayman Islands Dollar",
-	KZT = "Kazakhstan Tenge",
-	LAK = "Laos Kip",
-	LBP = "Lebanon Pound",
-	LKR = "Sri Lanka Rupee",
-	LRD = "Liberia Dollar",
-	LSL = "Lesotho Loti",
-	LYD = "Libya Dinar",
-	MAD = "Morocco Dirham",
-	MDL = "Moldova Leu",
-	MGA = "Madagascar Ariary",
-	MKD = "Macedonia Denar",
-	MMK = "Myanmar  = Burma Kyat",
-	MNT = "Mongolia Tughrik",
-	MOP = "Macau Pataca",
-	MRO = "Mauritania Ouguiya",
-	MUR = "Mauritius Rupee",
-	MVR = "Maldives  = Maldive Islands Rufiyaa",
-	MWK = "Malawi Kwacha",
-	MXN = "Mexico Peso",
-	MYR = "Malaysia Ringgit",
-	MZN = "Mozambique Metical",
-	NAD = "Namibia Dollar",
-	NGN = "Nigeria Naira",
-	NIO = "Nicaragua Cordoba",
-	NOK = "Norway Krone",
-	NPR = "Nepal Rupee",
-	NZD = "New Zealand Dollar",
-	OMR = "Oman Rial",
-	PAB = "Panama Balboa",
-	PEN = "Peru Sol",
-	PGK = "Papua New Guinea Kina",
-	PHP = "Philippines Peso",
-	PKR = "Pakistan Rupee",
-	PLN = "Poland Zloty",
-	PYG = "Paraguay Guarani",
-	QAR = "Qatar Riyal",
-	RON = "Romania New Leu",
-	RSD = "Serbia Dinar",
-	RUB = "Russia Ruble",
-	RWF = "Rwanda Franc",
-	SAR = "Saudi Arabia Riyal",
-	SBD = "Solomon Islands Dollar",
-	SCR = "Seychelles Rupee",
-	SDG = "Sudan Pound",
-	SEK = "Sweden Krona",
-	SGD = "Singapore Dollar",
-	SHP = "Saint Helena Pound",
-	SLL = "Sierra Leone Leone",
-	SOS = "Somalia Shilling",
-	SPL = "Seborga Luigino",
-	SRD = "Suriname Dollar",
-	STD = "São Tomé and Príncipe Dobra",
-	SVC = "El Salvador Colon",
-	SYP = "Syria Pound",
-	SZL = "Swaziland Lilangeni",
-	THB = "Thailand Baht",
-	TJS = "Tajikistan Somoni",
-	TMT = "Turkmenistan Manat",
-	TND = "Tunisia Dinar",
-	TOP = "Tonga Pa'anga",
-	TRY = "Turkey Lira",
-	TTD = "Trinidad and Tobago Dollar",
-	TVD = "Tuvalu Dollar",
-	TWD = "Taiwan New Dollar",
-	TZS = "Tanzania Shilling",
-	UAH = "Ukraine Hryvnia",
-	UGX = "Uganda Shilling",
-	USD = "United States Dollar",
-	UYU = "Uruguay Peso",
-	UZS = "Uzbekistan Som",
-	VEF = "Venezuela Bolivar",
-	VND = "Viet Nam Dong",
-	VUV = "Vanuatu Vatu",
-	WST = "Samoa Tala",
-	XAF = "Communauté Financière Africaine  = BEAC CFA Franc BEAC",
-	XCD = "East Caribbean Dollar",
-	XDR = "International Monetary Fund  = IMF Special Drawing Rights",
-	XOF = "Communauté Financière Africaine  = BCEAO Franc",
-	XPF = "Comptoirs Français du Pacifique  = CFP Franc",
-	YER = "Yemen Rial",
-	ZAR = "South Africa Rand",
-	ZMW = "Zambia Kwacha",
-	ZWD = "Zimbabwe Dollar"
+export enum CurrencyCode {
+	AED = "AED",
+	AFN = "AFN",
+	ALL = "ALL",
+	AMD = "AMD",
+	ANG = "ANG",
+	AOA = "AOA",
+	ARS = "ARS",
+	AUD = "AUD",
+	AWG = "AWG",
+	AZN = "AZN",
+	BAM = "BAM",
+	BBD = "BBD",
+	BDT = "BDT",
+	BGN = "BGN",
+	BHD = "BHD",
+	BIF = "BIF",
+	BMD = "BMD",
+	BND = "BND",
+	BOB = "BOB",
+	BRL = "BRL",
+	BSD = "BSD",
+	BTN = "BTN",
+	BWP = "BWP",
+	BYN = "BYN",
+	BZD = "BZD",
+	CAD = "CAD",
+	CDF = "CDF",
+	CHF = "CHF",
+	CLP = "CLP",
+	CNY = "CNY",
+	COP = "COP",
+	CRC = "CRC",
+	CUC = "CUC",
+	CUP = "CUP",
+	CVE = "CVE",
+	CZK = "CZK",
+	DJF = "DJF",
+	DKK = "DKK",
+	DOP = "DOP",
+	DZD = "DZD",
+	EGP = "EGP",
+	ERN = "ERN",
+	ETB = "ETB",
+	EUR = "EUR",
+	FJD = "FJD",
+	FKP = "FKP",
+	GBP = "GBP",
+	GEL = "GEL",
+	GHS = "GHS",
+	GIP = "GIP",
+	GMD = "GMD",
+	GNF = "GNF",
+	GTQ = "GTQ",
+	GYD = "GYD",
+	HKD = "HKD",
+	HNL = "HNL",
+	HRK = "HRK",
+	HTG = "HTG",
+	HUF = "HUF",
+	IDR = "IDR",
+	ILS = "ILS",
+	INR = "INR",
+	IQD = "IQD",
+	IRR = "IRR",
+	ISK = "ISK",
+	JMD = "JMD",
+	JOD = "JOD",
+	JPY = "JPY",
+	KES = "KES",
+	KGS = "KGS",
+	KHR = "KHR",
+	KMF = "KMF",
+	KPW = "KPW",
+	KRW = "KRW",
+	KWD = "KWD",
+	KYD = "KYD",
+	KZT = "KZT",
+	LAK = "LAK",
+	LBP = "LBP",
+	LKR = "LKR",
+	LRD = "LRD",
+	LSL = "LSL",
+	LYD = "LYD",
+	MAD = "MAD",
+	MDL = "MDL",
+	MGA = "MGA",
+	MKD = "MKD",
+	MMK = "MMK",
+	MNT = "MNT",
+	MOP = "MOP",
+	MRU = "MRU",
+	MUR = "MUR",
+	MVR = "MVR",
+	MWK = "MWK",
+	MXN = "MXN",
+	MYR = "MYR",
+	MZN = "MZN",
+	NAD = "NAD",
+	NGN = "NGN",
+	NIO = "NIO",
+	NOK = "NOK",
+	NPR = "NPR",
+	NZD = "NZD",
+	OMR = "OMR",
+	PAB = "PAB",
+	PEN = "PEN",
+	PGK = "PGK",
+	PHP = "PHP",
+	PKR = "PKR",
+	PLN = "PLN",
+	PYG = "PYG",
+	QAR = "QAR",
+	RON = "RON",
+	RSD = "RSD",
+	RUB = "RUB",
+	RWF = "RWF",
+	SAR = "SAR",
+	SBD = "SBD",
+	SCR = "SCR",
+	SDG = "SDG",
+	SEK = "SEK",
+	SGD = "SGD",
+	SHP = "SHP",
+	SLL = "SLL",
+	SOS = "SOS",
+	SRD = "SRD",
+	SSP = "SSP",
+	STN = "STN",
+	SVC = "SVC",
+	SYP = "SYP",
+	SZL = "SZL",
+	THB = "THB",
+	TJS = "TJS",
+	TMT = "TMT",
+	TND = "TND",
+	TOP = "TOP",
+	TRY = "TRY",
+	TTD = "TTD",
+	TWD = "TWD",
+	TZS = "TZS",
+	UAH = "UAH",
+	UGX = "UGX",
+	USD = "USD",
+	UYU = "UYU",
+	UZS = "UZS",
+	VES = "VES",
+	VND = "VND",
+	VUV = "VUV",
+	WST = "WST",
+	XAF = "XAF",
+	XCD = "XCD",
+	XOF = "XOF",
+	XPF = "XPF",
+	YER = "YER",
+	ZAR = "ZAR",
+	ZMW = "ZMW",
+	ZWL = "ZWL"
 }

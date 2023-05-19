@@ -3,7 +3,7 @@ import { base32hex } from "rfc4648"
 import {
 	BankAccount,
 	Beneficiary,
-	CurrencyCodeEnum,
+	CurrencyCode,
 	DataModel,
 	Day,
 	Payment,
@@ -49,7 +49,7 @@ export function deserialize(qr: string): DataModel {
 		let payment: Payment = {
 			bankAccounts: [],
 			type: Number(paymentOptions) as PaymentOptions,
-			currencyCode: currency as keyof typeof CurrencyCodeEnum,
+			currencyCode: currency as CurrencyCode,
 			amount: ammount?.length
 				? Number(ammount)
 				: undefined,
@@ -65,7 +65,7 @@ export function deserialize(qr: string): DataModel {
 			specificSymbol: specifics?.length
 				? specifics
 				: undefined,
-			originatorRefInfo: originatorRefInfo?.length
+			originatorsReferenceInformation: originatorRefInfo?.length
 				? originatorRefInfo
 				: undefined,
 			paymentNote: paymentNote?.length

@@ -24,12 +24,6 @@ transformed into images depends on how you implement it. See
 npm install bysquare
 ```
 
-**CLI**
-
-```sh
-npm install --global bysquare
-```
-
 **Browser**
 
 ```html
@@ -44,13 +38,19 @@ npm install --global bysquare
 import { generate, parse } from "npm:bysquare@2.1.0"
 ```
 
-## How it works
+**CLI** (Node.JS `v18`+)
 
-### Encoding sequence
+```sh
+npm install --global bysquare
+```
+
+# How it works
+
+## Encoding sequence
 
 ![logic](./docs/uml/logic.svg)
 
-## API
+# API
 
 ```ts
 generate(model: DataModel, options?: Options): string
@@ -58,14 +58,14 @@ parse(qr: string): DataModel
 detect(qr: string): Boolean
 ```
 
-## Usage
+# Usage
 
-Generate
+## Generate
 
 ```ts
 import { CurrencyCode, DataModel, generate, PaymentOptions } from "bysquare"
 
-// long string ready to be encoded to QR
+// string ready to be encoded to QR
 const qrString = generate({
 	invoiceId: "random-id",
 	payments: [
@@ -82,7 +82,7 @@ const qrString = generate({
 })
 ```
 
-Parse
+## Parse
 
 ```ts
 import { parse } from "bysquare"
@@ -107,44 +107,20 @@ const model =
 //
 ```
 
-You can use json file with valid model to generate qr-string.
+## CLI
+
+Encode JSON data from a file and print the corresponding QR code. The file
+argument should be a path to a JSON file.
 
 ```sh
-# example.json
-# {
-# 	"invoiceId": "random-id",
-# 	"payments": [
-# 		{
-# 			"type": 1,
-# 			"amount": 100.0,
-# 			"bankAccounts": [{ "iban": "SK9611000000002918599669" }],
-# 			"currencyCode": "EUR",
-# 			"variableSymbol": "123"
-# 		}
-# 	]
-# }
-
-$ npx bysquare ./example.json
-$ 0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000
+npx bysquare --encode <file>
 ```
 
-You can also use stdin.
+Decode the specified QR code string and print the corresponding JSON data. The
+qrstring argument should be a valid QR code string.
 
 ```sh
-$ npx bysquare <<< '{
-    "invoiceId": "random-id",
-    "payments": [
-        {
-            "type": 1,
-            "amount": 100.0,
-            "bankAccounts": [{ "iban": "SK9611000000002918599669" }],
-            "currencyCode": "EUR",
-            "variableSymbol": "123"
-        }
-    ]
-}'
-
-$ 0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000
+npx bysquare --decode <qrstring>
 ```
 
 ## Related

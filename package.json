@@ -21,7 +21,6 @@
 		"build": "tsc --build",
 		"format": "dprint fmt ./src/**/*",
 		"typecheck": "tsc --noEmit",
-		"cli:local": "npm run build && npm link bysquare",
 		"version": "git checkout develop && npm test",
 		"postversion": "echo 'Now run npm run build && npm publish'",
 		"test": "node --test --loader tsx --no-warnings src/*.test.ts",

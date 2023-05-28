@@ -132,23 +132,5 @@ npx bysquare --decode <qrstring>
 - <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>
 - <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
 
-<!--
-Versioning
-----------
-
-https://github.com/dherges/npm-version-git-flow
-
-- Stash unfinished work
-- Run `npm test`
-- Run `npm version <patch, minor, major>`
-- Commit and push
-- Follow git-flow instructions
-- Checkout to master
-- Build artefacts
-- Push commits and tag, git push && git push --tags
-- Validate with `npm publish --dry-run`
-- Publish to npm, `npm publish`
--->
-
 [build]: https://img.shields.io/github/actions/workflow/status/xseman/bysquare/tests.yml
 [version]: https://img.shields.io/npm/v/bysquare

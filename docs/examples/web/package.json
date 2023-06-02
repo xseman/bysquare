@@ -1,14 +1,11 @@
 {
-	"author": "Filip Seman",
-	"type": "module",
 	"scripts": {
-		"prestart": "esbuild index.ts --outfile=index.js --format=esm --platform=browser --bundle --minify",
 		"start": "esbuild --servedir=./"
 	},
-	"dependencies": {
-		"bysquare": "2.4.0"
-	},
 	"devDependencies": {
-		"esbuild": "~0.17.0"
+		"bysquare": "~2.6.0",
+		"esbuild": "~0.17.0",
+		"preact": "~10.15.0",
+		"qrcanvas": "~3.1.0"
 	}
 }

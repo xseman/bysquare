@@ -1,6 +1,6 @@
 {
 	"typescript.tsdk": "node_modules/typescript/lib",
-	"[typescript][json][markdown]": {
+	"[typescript][javascript][json][markdown]": {
 		"editor.formatOnSave": true,
 		"editor.defaultFormatter": "dprint.dprint"
 	}

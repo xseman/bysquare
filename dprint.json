@@ -10,7 +10,7 @@
 		"binaryExpression.operatorPosition": "nextLine",
 		"ifStatement.nextControlFlowPosition": "maintain"
 	},
-	"includes": ["**/*.{ts,json,md}"],
+	"includes": ["**/*.{ts,js,json,md}"],
 	"excludes": [
 		"**/node_modules",
 		"**/*-lock.json"

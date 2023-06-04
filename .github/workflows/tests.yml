@@ -3,8 +3,8 @@ name: tests
 on:
   push:
     branches:
-      - develop
-      - develop/*
+      - master
+      - master/*
     paths:
       - src/**.ts
       - package.json

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { existsSync, readFileSync } from "node:fs"
-import { parseArgs } from "node:util"
+import { existsSync, readFileSync } from "node:fs";
+import { parseArgs } from "node:util";
 
-import { generate } from "./generate.js"
-import { parse } from "./parse.js"
+import { generate } from "./generate.js";
+import { parse } from "./parse.js";
 
 const args = parseArgs({
 	allowPositionals: true,
@@ -22,25 +22,25 @@ const args = parseArgs({
 			short: "h"
 		}
 	}
-})
+});
 
 if (process.stdin.isTTY) {
 	/** json file */
 	if (args.values.encode) {
-		const file = args.values.encode
+		const file = args.values.encode;
 		if (existsSync(file)) {
-			const data = readFileSync(file, "utf8")
-			console.log(generate(JSON.parse(data)))
+			const data = readFileSync(file, "utf8");
+			console.log(generate(JSON.parse(data)));
 		} else {
-			console.error(`File ${file} doesn't exists`)
-			process.exit(1)
+			console.error(`File ${file} doesn't exists`);
+			process.exit(1);
 		}
 	}
 
 	/** input string */
 	if (args.values.decode) {
-		const qrstring = args.values.decode
-		console.log(JSON.stringify(parse(qrstring), null, 4))
+		const qrstring = args.values.decode;
+		console.log(JSON.stringify(parse(qrstring), null, 4));
 	}
 
 	if (args.values.help || Object.keys(args.values).length === 0) {
@@ -81,6 +81,6 @@ if (process.stdin.isTTY) {
 			"	Replace qrstring with the QR code string you want to decode.",
 			"	The program will parse the QR code string and print the resulting JSON data.",
 			""
-		].join("\n"))
+		].join("\n"));
 	}
 }

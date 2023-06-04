@@ -89,7 +89,7 @@ export type Day =
 	| 28
 	| 29
 	| 30
-	| 31
+	| 31;
 
 /**
  * Možnosti platby sa dajú kombinovať. Oddeľujú sa medzerou a treba uviesť vždy
@@ -117,7 +117,7 @@ export type BankAccount = {
 	 * "SK8209000000000011424060". Viac na
 	 * http://www.sbaonline.sk/sk/projekty/financne-vzdelavanie/slovnik-bankovych-pojmov/iii/.
 	 */
-	iban: string
+	iban: string;
 
 	/**
 	 * Formát ISO 9362 (swift) 8 or 11 characters long
@@ -126,8 +126,8 @@ export type BankAccount = {
 	 * Medzinárodný bankový identifikačný kód (z ang. Bank Identification Code).
 	 * Viac na http://www.sbaonline.sk/sk/projekty/financne-vzdelavanie/slovnik-bankovych-pojmov/bbb/bic
 	 */
-	bic?: string
-}
+	bic?: string;
+};
 
 /**
  * Inksaná schéma. Uvádza ja jedna z možností:
@@ -159,20 +159,20 @@ export type Beneficiary = {
 	 *
 	 * Rozšírenie o meno príjemcu
 	 */
-	name?: string
+	name?: string;
 	/**
 	 * Maximálna dĺžka 70
 	 *
 	 * Rozšírenie o adresu príjemcu
 	 */
-	street?: string
+	street?: string;
 	/**
 	 * Maximálna dĺžka 70
 	 *
 	 * Rozšírenie o adresu príjemcu (druhý riadok)
 	 */
-	city?: string
-}
+	city?: string;
+};
 
 export type SimplePayment = {
 	/**
@@ -184,136 +184,136 @@ export type SimplePayment = {
 	 * deväťdesiatdeväť sa uvádza ako "1.99". Desať celých peťdesiat sa uvádza
 	 * ako "10.5". Nula celá nula osem sa uvádza ako "0.08".
 	 */
-	amount?: number
+	amount?: number;
 	/**
 	 * Pattern: [A-Z]{3}
 	 *
 	 * Mena v ISO 4217 formáte (3 písmená). Príklad: "EUR"
 	 */
-	currencyCode: CurrencyCode
+	currencyCode: CurrencyCode;
 	/**
 	 * Formát YYYYMMDD
 	 *
 	 * Dátum splatnosti vo formáte ISO 8601 "RRRR-MM-DD". Nepovinný údaj. V
 	 * prípade trvalého príkazu označuje dátum prvej platby.
 	 */
-	paymentDueDate?: string
+	paymentDueDate?: string;
 	/**
 	 * Maximálna dĺžka 10
 	 * Pattern: [0-9]{0,10}
 	 *
 	 * Variabilný symbol je maximálne 10 miestne číslo. Nepovinný údaj.
 	 */
-	variableSymbol?: string
+	variableSymbol?: string;
 	/**
 	 * Maximálna dĺžka 4
 	 * Pattern: [0-9]{0,4}
 	 *
 	 * Konštantný symbol je 4 miestne identifikačné číslo. Nepovinný údaj.
 	 */
-	constantSymbol?: string
+	constantSymbol?: string;
 	/**
 	 * Maximálna dĺžka 10
 	 * Pattern: [0-9]{0,10}
 	 *
 	 * Špecifický symbol je maximálne 10 miestne číslo. Nepovinný údaj.
 	 */
-	specificSymbol?: string
+	specificSymbol?: string;
 	/**
 	 * Maximálna dĺžka 35
 	 *
 	 * Referenčná informácia prijímateľa podľa SEPA.
 	 */
-	originatorsReferenceInformation?: string
+	originatorsReferenceInformation?: string;
 	/**
 	 * Maximálna dĺžka 140
 	 *
 	 * Správa pre prijímateľa. Údaje o platbe, na základe ktorých príjemca bude
 	 * môcť platbu identifikovať. Odporúča sa maximálne 140 Unicode znakov.
 	 */
-	paymentNote?: string
+	paymentNote?: string;
 	/**
 	 * Zoznam bankových účtov.
 	 */
-	bankAccounts: BankAccount[]
-	beneficiary?: Beneficiary
-}
+	bankAccounts: BankAccount[];
+	beneficiary?: Beneficiary;
+};
 
 export type PaymentOrder = SimplePayment & {
-	type: PaymentOptions.PaymentOrder
-}
+	type: PaymentOptions.PaymentOrder;
+};
 
 /**
  * Rozšírenie platobných údajov o údaje pre nastavenie trvalého príkazu.
  */
 export type StandingOrder = SimplePayment & {
-	type: PaymentOptions.StandingOrder
+	type: PaymentOptions.StandingOrder;
 	/**
 	 * Deň platby vyplývajúci z opakovania (Periodicity). Deň v mesiaci je číslo
 	 * medzi 1 a 31. Deň v týždni je číslo medzi 1 a 7 (1 = pondelok, 2 =utorok,
 	 * …, 7 = nedeľa).
 	 */
-	day?: Day
+	day?: Day;
 	/**
 	 * Medzerou oddelený zoznam mesiacov, v ktoré sa má platba uskutočniť.
 	 */
-	month?: MonthClassifier
+	month?: MonthClassifier;
 	/**
 	 * Opakovanie (periodicita) trvalého príkazu.
 	 */
-	periodicity?: Periodicity
+	periodicity?: Periodicity;
 	/**
 	 * Dátum poslednej platby v trvalom príkaze.
 	 *
 	 * Formát YYYYMMDD
 	 */
-	lastDate?: string
-}
+	lastDate?: string;
+};
 
 /**
  * Rozšírenie platobných údajov o údaje pre nastavenie a identifikáciu inkasa.
  */
 export type DirectDebit = SimplePayment & {
-	type: PaymentOptions.DirectDebit
-	directDebitScheme?: DirectDebitScheme
-	directDebitType?: DirectDebitType
+	type: PaymentOptions.DirectDebit;
+	directDebitScheme?: DirectDebitScheme;
+	directDebitType?: DirectDebitType;
 	/**
 	 * Maximálna dĺžka 35
 	 *
 	 * Identifikácia mandátu medzi veriteľom a dlžníkom podľa SEPA.
 	 */
-	mandateId?: string
+	mandateId?: string;
 	/**
 	 * Maximálna dĺžka 35
 	 *
 	 * Identifikácia veriteľa podľa SEPA.
 	 */
-	creditorId?: string
+	creditorId?: string;
 	/**
 	 * Maximálna dĺžka 35
 	 *
 	 * Identifikácia zmluvy medzi veriteľom a dlžníkom podľa SEPA.
 	 */
-	contractId?: string
+	contractId?: string;
 	/**
 	 * Maximálna dĺžka 15
 	 *
 	 * Maximálna čiastka inkasa.
 	 */
-	maxAmount?: number
+	maxAmount?: number;
 	/**
 	 * Maximálna dĺžka 8
 	 * Formát YYYYMMDD
 	 *
 	 * Dátum platnosti inkasa. Platnosť inkasa zaníka dňom tohto dátumu.
 	 */
-	validTillDate?: string
-}
+	validTillDate?: string;
+};
 
 /**
  * Údaje pre jeden platobný príkaz.
  */
-export type Payment = PaymentOrder | StandingOrder | DirectDebit
+export type Payment = PaymentOrder | StandingOrder | DirectDebit;
 
 export type DataModel = {
 	/**
@@ -322,13 +322,13 @@ export type DataModel = {
 	 * Číslo faktúry v prípade, že údaje sú súčasťou faktúry, alebo
 	 * identifikátor pre intérne potreby vystavovateľa.
 	 */
-	invoiceId?: string
+	invoiceId?: string;
 	/**
 	 * Zoznam jednej alebo viacerých platieb v prípade hromadného príkazu.
 	 * Hlavná (preferovaná) platba sa uvádza ako prvá.
 	 */
-	payments: Payment[]
-}
+	payments: Payment[];
+};
 
 /**
  * ISO-4217

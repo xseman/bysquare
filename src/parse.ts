@@ -1,5 +1,5 @@
-import { decompress } from "lzma1"
-import { base32hex } from "rfc4648"
+import { decompress } from "lzma1";
+import { base32hex } from "rfc4648";
 import {
 	BankAccount,
 	Beneficiary,
@@ -10,14 +10,14 @@ import {
 	PaymentOptions,
 	Periodicity,
 	Version
-} from "./index.js"
+} from "./index.js";
 
 function cleanUndefined(obj: any): void {
 	Object.keys(obj).forEach((key) => {
 		if (typeof obj[key] === "undefined") {
-			delete obj[key]
+			delete obj[key];
 		}
-	})
+	});
 }
 
 /**
@@ -26,24 +26,24 @@ function cleanUndefined(obj: any): void {
  * @see 3.14.
  */
 export function deserialize(qr: string): DataModel {
-	const serialized = qr.split("\t")
-	const invoiceId = serialized.shift()
+	const serialized = qr.split("\t");
+	const invoiceId = serialized.shift();
 	const output: DataModel = {
 		invoiceId: invoiceId?.length ? invoiceId : undefined,
 		payments: []
-	}
+	};
 
-	const paymentslen = Number(serialized.shift())
+	const paymentslen = Number(serialized.shift());
 	for (let i = 0; i < paymentslen; i++) {
-		const paymentOptions = serialized.shift()
-		const ammount = serialized.shift()
-		const currency = serialized.shift()
-		const dueDate = serialized.shift()
-		const variables = serialized.shift()
-		const constants = serialized.shift()
-		const specifics = serialized.shift()
-		const originatorRefInfo = serialized.shift()
-		const paymentNote = serialized.shift()
+		const paymentOptions = serialized.shift();
+		const ammount = serialized.shift();
+		const currency = serialized.shift();
+		const dueDate = serialized.shift();
+		const variables = serialized.shift();
+		const constants = serialized.shift();
+		const specifics = serialized.shift();
+		const originatorRefInfo = serialized.shift();
+		const paymentNote = serialized.shift();
 
 		let payment: Payment = {
 			bankAccounts: [],
@@ -70,33 +70,33 @@ export function deserialize(qr: string): DataModel {
 			paymentNote: paymentNote?.length
 				? paymentNote
 				: undefined
-		}
+		};
 
-		const accountslen = Number(serialized.shift())
+		const accountslen = Number(serialized.shift());
 		for (let j = 0; j < accountslen; j++) {
-			const iban = serialized.shift()
+			const iban = serialized.shift();
 			if (iban === undefined || iban.length === 0) {
-				throw new Error("Missing IBAN")
+				throw new Error("Missing IBAN");
 			}
 
-			const bic = serialized.shift()
+			const bic = serialized.shift();
 			const account = {
 				iban: iban,
 				bic: bic?.length
 					? bic
 					: undefined
-			} satisfies BankAccount
-			cleanUndefined(account)
-			payment.bankAccounts.push(account)
+			} satisfies BankAccount;
+			cleanUndefined(account);
+			payment.bankAccounts.push(account);
 		}
 
-		serialized.shift() // StandingOrderExt
-		serialized.shift() // DirectDebitExt
+		serialized.shift(); // StandingOrderExt
+		serialized.shift(); // DirectDebitExt
 
 		// narrowing payment type
 		switch (payment.type) {
 			case PaymentOptions.PaymentOrder:
-				break
+				break;
 
 			case PaymentOptions.StandingOrder:
 				payment = {
@@ -105,8 +105,8 @@ export function deserialize(qr: string): DataModel {
 					month: Number(serialized.shift()),
 					periodicity: serialized.shift() as Periodicity,
 					lastDate: serialized.shift()
-				}
-				break
+				};
+				break;
 
 			case PaymentOptions.DirectDebit:
 				payment = {
@@ -118,20 +118,20 @@ export function deserialize(qr: string): DataModel {
 					contractId: serialized.shift(),
 					maxAmount: Number(serialized.shift()),
 					validTillDate: serialized.shift()
-				}
-				break
+				};
+				break;
 
 			default:
-				break
+				break;
 		}
-		cleanUndefined(payment)
-		output.payments.push(payment)
+		cleanUndefined(payment);
+		output.payments.push(payment);
 	}
 
 	for (let i = 0; i < paymentslen; i++) {
-		const name = serialized.shift()
-		const addressLine1 = serialized.shift()
-		const addressLine2 = serialized.shift()
+		const name = serialized.shift();
+		const addressLine1 = serialized.shift();
+		const addressLine2 = serialized.shift();
 
 		if (Boolean(name) || Boolean(addressLine1) || Boolean(addressLine2)) {
 			const beneficiary = {
@@ -144,14 +144,14 @@ export function deserialize(qr: string): DataModel {
 				city: addressLine2?.length
 					? addressLine2
 					: undefined
-			} satisfies Beneficiary
+			} satisfies Beneficiary;
 
-			cleanUndefined(beneficiary)
-			output.payments[i].beneficiary = beneficiary
+			cleanUndefined(beneficiary);
+			output.payments[i].beneficiary = beneficiary;
 		}
 	}
 
-	return output
+	return output;
 }
 
 /**
@@ -162,24 +162,24 @@ export function deserialize(qr: string): DataModel {
  * @param header 2-bytes sie
  */
 function bysquareHeaderDecoder(header: Uint8Array) {
-	const bytes = (header[0] << 8) | header[1]
-	const bysquareType = bytes >> 12
-	const version = (bytes >> 8) & 0b0000_1111
-	const documentType = (bytes >> 4) & 0b0000_1111
-	const reserved = bytes & 0b0000_1111
+	const bytes = (header[0] << 8) | header[1];
+	const bysquareType = bytes >> 12;
+	const version = (bytes >> 8) & 0b0000_1111;
+	const documentType = (bytes >> 4) & 0b0000_1111;
+	const reserved = bytes & 0b0000_1111;
 
 	return {
 		bysquareType,
 		version,
 		documentType,
 		reserved
-	}
+	};
 }
 
 export class DecodeError extends Error {
-	override name = "DecodeError"
+	override name = "DecodeError";
 	constructor(public cause: Error, msg?: string) {
-		super(msg)
+		super(msg);
 	}
 }
 
@@ -192,17 +192,17 @@ export function parse(qr: string): DataModel {
 	try {
 		var bytes = base32hex.parse(qr, {
 			loose: true
-		})
+		});
 	} catch (error) {
 		throw new DecodeError(
 			error,
 			"Unable to decode QR string base32hex encoding"
-		)
+		);
 	}
 
-	const bysquareHeader = bytes.slice(0, 2)
+	const bysquareHeader = bytes.slice(0, 2);
 	if ((bysquareHeaderDecoder(bysquareHeader).version > Version["1.1.0"])) {
-		throw new Error("Unsupported Bysquare version")
+		throw new Error("Unsupported Bysquare version");
 	}
 
 	/**
@@ -217,35 +217,35 @@ export function parse(qr: string): DataModel {
 	 * | Properties |  Dictionary Size  |   Uncompressed Size   |
 	 * +------------+----+----+----+----+--+--+--+--+--+--+--+--+
 	 */
-	const defaultProperties = [0x5D] // lc=3, lp=0, pb=2
-	const defaultDictionarySize = [0x00, 0x02, 0x00, 0x00] // 2^17
+	const defaultProperties = [0x5D]; // lc=3, lp=0, pb=2
+	const defaultDictionarySize = [0x00, 0x02, 0x00, 0x00]; // 2^17
 
-	const uncompressedSize = new Uint8Array(8)
-	uncompressedSize.set(bytes.slice(2, 4))
+	const uncompressedSize = new Uint8Array(8);
+	uncompressedSize.set(bytes.slice(2, 4));
 
 	const header = new Uint8Array([
 		...defaultProperties,
 		...defaultDictionarySize,
 		...uncompressedSize
-	])
+	]);
 
-	const payload = bytes.slice(4)
+	const payload = bytes.slice(4);
 	const body = new Uint8Array([
 		...header,
 		...payload
-	])
+	]);
 
 	try {
-		var decompressed = new Uint8Array(decompress(body) as Int8Array)
+		var decompressed = new Uint8Array(decompress(body) as Int8Array);
 	} catch (error) {
-		throw new DecodeError(error, "LZMA decompression failed")
+		throw new DecodeError(error, "LZMA decompression failed");
 	}
 
-	const _checksum = decompressed.slice(0, 4)
-	const decompressedBody = decompressed.slice(4)
-	const decoded = new TextDecoder("utf-8").decode(decompressedBody)
+	const _checksum = decompressed.slice(0, 4);
+	const decompressedBody = decompressed.slice(4);
+	const decoded = new TextDecoder("utf-8").decode(decompressedBody);
 
-	return deserialize(decoded)
+	return deserialize(decoded);
 }
 
 /**
@@ -258,31 +258,31 @@ export function detect(qr: string): boolean {
 	try {
 		var parsed = base32hex.parse(qr, {
 			loose: true
-		})
+		});
 	} catch {
-		throw new Error("Invalid data, Unable to decode base32hex QR string")
+		throw new Error("Invalid data, Unable to decode base32hex QR string");
 	}
 
 	if (parsed.byteLength < 2) {
-		return false
+		return false;
 	}
 
-	const bysquareHeader = parsed.subarray(0, 2)
+	const bysquareHeader = parsed.subarray(0, 2);
 	const {
 		bysquareType,
 		version,
 		documentType,
 		reserved
-	} = bysquareHeaderDecoder(bysquareHeader)
+	} = bysquareHeaderDecoder(bysquareHeader);
 
 	const isValid = [bysquareType, version, documentType, reserved]
 		.every((nibble, index) => {
 			if (index === 1) {
-				return nibble <= Version["1.1.0"]
+				return nibble <= Version["1.1.0"];
 			}
 
-			return 0x00 <= nibble && nibble <= 0x0F
-		})
+			return 0x00 <= nibble && nibble <= 0x0F;
+		});
 
-	return isValid
+	return isValid;
 }

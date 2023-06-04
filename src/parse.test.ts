@@ -1,9 +1,9 @@
-import assert from "node:assert"
-import test, { describe } from "node:test"
+import assert from "node:assert";
+import test, { describe } from "node:test";
 
-import { generate } from "./generate.js"
-import { deserialize, detect, parse } from "./parse.js"
-import { CurrencyCode, DataModel, PaymentOptions } from "./types.js"
+import { generate } from "./generate.js";
+import { deserialize, detect, parse } from "./parse.js";
+import { CurrencyCode, DataModel, PaymentOptions } from "./types.js";
 
 export const payload = {
 	invoiceId: "random-id",
@@ -18,19 +18,19 @@ export const payload = {
 			variableSymbol: "123"
 		}
 	]
-} satisfies DataModel
+} satisfies DataModel;
 
 describe("parse", () => {
 	test("parsing", () => {
-		const generated = generate(payload)
-		const parsed = parse(generated)
-		assert.deepEqual(parsed, payload)
-	})
+		const generated = generate(payload);
+		const parsed = parse(generated);
+		assert.deepEqual(parsed, payload);
+	});
 
 	test("bidirectional", () => {
-		const qrString = generate(payload)
-		assert.deepEqual(payload, parse(qrString))
-	})
+		const qrString = generate(payload);
+		assert.deepEqual(payload, parse(qrString));
+	});
 
 	test("serialization", () => {
 		const serialized = /** dprint-ignore */ [
@@ -53,7 +53,7 @@ describe("parse", () => {
 		"\t",
 		"\t",
 		"\t",
-	].join("")
+	].join("");
 
 		const payload = {
 			invoiceId: "random-id",
@@ -68,26 +68,26 @@ describe("parse", () => {
 					]
 				}
 			]
-		} satisfies DataModel
+		} satisfies DataModel;
 
 		assert.deepEqual(
 			deserialize(serialized),
 			payload
-		)
-	})
+		);
+	});
 
 	test("header", () => {
-		const generated = generate(payload)
-		const isBysquare = detect(generated)
-		assert.equal(isBysquare, true)
+		const generated = generate(payload);
+		const isBysquare = detect(generated);
+		assert.equal(isBysquare, true);
 
-		const notBysquare = detect("EHIN6T0=" /** "hello" in base32hex */)
-		assert.equal(notBysquare, false)
+		const notBysquare = detect("EHIN6T0=" /** "hello" in base32hex */);
+		assert.equal(notBysquare, false);
 
 		/** should throw, invalid base32hex */
-		assert.throws(() => detect("aaaa"))
-		assert.throws(() => detect("XXXX"))
-	})
+		assert.throws(() => detect("aaaa"));
+		assert.throws(() => detect("XXXX"));
+	});
 
 	test("multiple data", () => {
 		const data = new Map<string, DataModel>([
@@ -118,10 +118,10 @@ describe("parse", () => {
 					}]
 				}
 			]
-		])
+		]);
 
 		for (const [qr, parsed] of data) {
-			assert.deepEqual(parse(qr), parsed)
+			assert.deepEqual(parse(qr), parsed);
 		}
-	})
-})
+	});
+});

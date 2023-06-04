@@ -3,7 +3,6 @@
 	"useTabs": true,
 	"indentWidth": 4,
 	"typescript": {
-		"semiColons": "asi",
 		"trailingCommas": "never",
 		"arrowFunction.useParentheses": "force",
 		"arguments.preferHanging": "onlySingleItem",

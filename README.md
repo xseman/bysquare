@@ -35,7 +35,7 @@ npm install bysquare
 **Deno** `v1.28+`, just import `npm:bysquare` `v2.1.0+`
 
 ```ts
-import { generate, parse } from "npm:bysquare@2.1.0"
+import { generate, parse } from "npm:bysquare@2.1.0";
 ```
 
 **CLI** (Node.JS `v18`+)
@@ -63,7 +63,7 @@ detect(qr: string): Boolean
 ## Generate
 
 ```ts
-import { CurrencyCode, DataModel, generate, PaymentOptions } from "bysquare"
+import { CurrencyCode, DataModel, generate, PaymentOptions } from "bysquare";
 
 // string ready to be encoded to QR
 const qrString = generate({
@@ -79,16 +79,16 @@ const qrString = generate({
 			variableSymbol: "123"
 		}
 	]
-})
+});
 ```
 
 ## Parse
 
 ```ts
-import { parse } from "bysquare"
+import { parse } from "bysquare";
 
 const model =
-	parse("0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000")
+	parse("0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000");
 
 // {
 // 	invoiceId: "random-id",
@@ -107,7 +107,9 @@ const model =
 //
 ```
 
-## CLI
+# CLI
+
+## Encode
 
 Encode JSON data from a file and print the corresponding QR code. The file
 argument should be a path to a JSON file.
@@ -115,6 +117,8 @@ argument should be a path to a JSON file.
 ```sh
 npx bysquare --encode <file>
 ```
+
+## Decode
 
 Decode the specified QR code string and print the corresponding JSON data. The
 qrstring argument should be a valid QR code string.

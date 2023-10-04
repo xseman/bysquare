@@ -1,6 +1,7 @@
 # bysquare
 
-![version][version] ![build][build]
+![version][version]
+![build][build]
 
 Simple JavaScript library to generate and parse "PAY by square" string.
 
@@ -17,6 +18,10 @@ transformed into images depends on how you implement it. See
 [examples](./docs/examples/).
 
 ## Install
+
+**NOTE**: This package is native [ESM][mozzila-esm] and no longer provides a
+CommonJS export. If your project uses CommonJS, you will have to convert to ESM
+or use the dynamic [`import()`][mozzila-import] function.
 
 **npm registry**
 
@@ -73,12 +78,14 @@ const qrString = generate({
 			type: PaymentOptions.PaymentOrder,
 			amount: 100.0,
 			bankAccounts: [
-				{ iban: "SK9611000000002918599669" }
+				{
+					iban: "SK9611000000002918599669",
+				},
 			],
 			currencyCode: CurrencyCode.EUR,
-			variableSymbol: "123"
-		}
-	]
+			variableSymbol: "123",
+		},
+	],
 });
 ```
 
@@ -87,8 +94,9 @@ const qrString = generate({
 ```ts
 import { parse } from "bysquare";
 
-const model =
-	parse("0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000");
+const model = parse(
+	"0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
+);
 
 // {
 // 	invoiceId: "random-id",
@@ -129,12 +137,14 @@ npx bysquare --decode <qrstring>
 
 ## Related
 
-- <https://bysquare.com/>
-- <https://devel.cz/otazka/qr-kod-pay-by-square>
-- <https://github.com/matusf/pay-by-square>
-- <https://www.bsqr.co/schema/>
-- <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>
-- <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
+-   <https://bysquare.com/>
+-   <https://devel.cz/otazka/qr-kod-pay-by-square>
+-   <https://github.com/matusf/pay-by-square>
+-   <https://www.bsqr.co/schema/>
+-   <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>
+-   <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
 
 [build]: https://img.shields.io/github/actions/workflow/status/xseman/bysquare/tests.yml
 [version]: https://img.shields.io/npm/v/bysquare
+[mozzila-esm]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
+[mozzila-import]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import

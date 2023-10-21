@@ -1,7 +1,11 @@
-import { CurrencyCode, generate, PaymentOptions } from "bysquare";
+// @ts-check
+import { CurrencyCode, encode, PaymentOptions } from "bysquare";
 import { html, LitElement } from "lit";
 import { qrcanvas } from "qrcanvas";
 
+/**
+ * @extends {LitElement}
+ */
 class Bysquare extends LitElement {
 	static properties = {
 		_qrstring: { state: true },
@@ -23,7 +27,7 @@ class Bysquare extends LitElement {
 	}
 
 	get #canvas() {
-		return this.shadowRoot.querySelector("canvas");
+		return this.shadowRoot?.querySelector("canvas");
 	}
 
 	render() {
@@ -79,7 +83,7 @@ class Bysquare extends LitElement {
 	}
 
 	#generateQrstring() {
-		const qrstring = generate({
+		const qrstring = encode({
 			invoiceId: new Date().toLocaleDateString("sk"),
 			payments: [
 				{

@@ -1,7 +1,7 @@
 // @ts-check
-import { CurrencyCode, generate, PaymentOptions } from "bysquare"
-import { Component, createRef, h, render } from "preact"
-import { qrcanvas } from "qrcanvas"
+import { CurrencyCode, encode, PaymentOptions } from "bysquare";
+import { Component, createRef, h, render } from "preact";
+import { qrcanvas } from "qrcanvas";
 
 /**
  * @typedef {Object} State
@@ -20,16 +20,13 @@ class App extends Component {
 		ammount: 100,
 		variable: "123",
 		iban: "SK9611000000002918599669"
-	}
+	};
 
-	#refCanvas = createRef()
+	#refCanvas = createRef();
 
 	componentDidMount() {
-		this.#generateQrstring()
+		this.#generateQrstring();
 	}
-
-	// componentWillUnmount() {}
-	// componentDidUpdate(_prevProps, _prevState) {}
 
 	render() {
 		return h("div", null, [
@@ -68,18 +65,18 @@ class App extends Component {
 				h("pre", null, this.state.qrstring),
 				h("canvas", { ref: this.#refCanvas, height: 200, width: 200 })
 			])
-		])
+		]);
 	}
 
 	#handleChange = (event) => {
-		const { name, value } = event.target
+		const { name, value } = event.target;
 		this.setState({
 			[name]: value
-		}, this.#generateQrstring)
-	}
+		}, this.#generateQrstring);
+	};
 
 	#generateQrstring = () => {
-		const qrstring = generate({
+		const qrstring = encode({
 			invoiceId: new Date().toLocaleDateString("sk"),
 			payments: [
 				{
@@ -92,22 +89,22 @@ class App extends Component {
 					variableSymbol: this.state.variable
 				}
 			]
-		})
+		});
 
 		this.setState({
 			qrstring: qrstring
-		}, this.#setCanvas)
-	}
+		}, this.#setCanvas);
+	};
 
 	#setCanvas = () => {
-		const context = this.#refCanvas.current.getContext("2d")
-		context.reset()
+		const context = this.#refCanvas.current.getContext("2d");
+		context.reset();
 		qrcanvas({
 			data: this.state.qrstring,
 			canvas: this.#refCanvas.current
-		})
-	}
+		});
+	};
 }
 
 // @ts-ignore
-render(h(App, null), document.getElementById("app"))
+render(h(App, null), document.getElementById("app"));

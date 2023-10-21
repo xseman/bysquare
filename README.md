@@ -33,14 +33,14 @@ npm install bysquare
 
 ```html
 <script type="module">
-	import { encode, decode } from "https://esm.sh/bysquare@2.4.0/";
+	import { encode, decode } from "https://esm.sh/bysquare@2.7.1/";
 </script>
 ```
 
-**Deno** `v1.28+`, just import `npm:bysquare` `v2.1.0+`
+**Deno** `v1.28+` using npm prefix
 
 ```ts
-import { encode, decode } from "npm:bysquare@2.1.0";
+import { encode, decode } from "npm:bysquare@2.7.1";
 ```
 
 **CLI** (Node.JS `v18`+)

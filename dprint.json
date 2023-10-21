@@ -9,14 +9,14 @@
 		"binaryExpression.operatorPosition": "nextLine",
 		"ifStatement.nextControlFlowPosition": "maintain"
 	},
-	"includes": ["**/*.{ts,js,json,md}"],
+	"includes": ["./**/*.{ts,js,json,md}"],
 	"excludes": [
 		"**/node_modules",
 		"**/*-lock.json"
 	],
 	"plugins": [
-		"https://plugins.dprint.dev/typescript-0.84.4.wasm",
-		"https://plugins.dprint.dev/json-0.17.2.wasm",
-		"https://plugins.dprint.dev/markdown-0.15.2.wasm"
+		"https://plugins.dprint.dev/typescript-0.88.2.wasm",
+		"https://plugins.dprint.dev/json-0.18.0.wasm",
+		"https://plugins.dprint.dev/markdown-0.16.2.wasm"
 	]
 }

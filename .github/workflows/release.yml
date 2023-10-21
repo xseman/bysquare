@@ -1,7 +1,8 @@
 on:
-    push:
-      branches:
-        - master
+    workflow_run:
+        workflows: ["tests"]
+        types:
+            - completed
 
 permissions:
     contents: write
@@ -16,9 +17,9 @@ jobs:
             - uses: google-github-actions/release-please-action@v3
               id: release
               with:
-                release-type: node
-                package-name: bysquare
-                pull-request-title-pattern: "chore${scope}: release ${version}"
+                  release-type: node
+                  package-name: bysquare
+                  pull-request-title-pattern: "v${version}"
 
             # The logic below handles the npm publication:
             - if: ${{ steps.release.outputs.release_created }}

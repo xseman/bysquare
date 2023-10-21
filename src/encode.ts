@@ -177,10 +177,13 @@ type Options = {
 	deburr: boolean;
 };
 
+/** @deprecated */
+export const generate = encode;
+
 /**
  * Generate QR string ready for encoding into text QR code
  */
-export function generate(
+export function encode(
 	model: DataModel,
 	options: Options = { deburr: true }
 ): string {

@@ -3,8 +3,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 
-import { generate } from "./generate.js";
-import { parse } from "./parse.js";
+import { encode } from "./encode.js";
+import { decode } from "./decode.js";
 
 const args = parseArgs({
 	allowPositionals: true,
@@ -30,7 +30,7 @@ if (process.stdin.isTTY) {
 		const file = args.values.encode;
 		if (existsSync(file)) {
 			const data = readFileSync(file, "utf8");
-			console.log(generate(JSON.parse(data)));
+			console.log(encode(JSON.parse(data)));
 		} else {
 			console.error(`File ${file} doesn't exists`);
 			process.exit(1);
@@ -40,7 +40,7 @@ if (process.stdin.isTTY) {
 	/** input string */
 	if (args.values.decode) {
 		const qrstring = args.values.decode;
-		console.log(JSON.stringify(parse(qrstring), null, 4));
+		console.log(JSON.stringify(decode(qrstring), null, 4));
 	}
 
 	if (args.values.help || Object.keys(args.values).length === 0) {

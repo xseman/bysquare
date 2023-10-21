@@ -3,7 +3,7 @@
 ![version][version]
 ![build][build]
 
-Simple JavaScript library to generate and parse "PAY by square" string.
+Simple JavaScript library to encode and decode "PAY by square" string.
 
 **What is `PAY by square`?**
 
@@ -33,14 +33,14 @@ npm install bysquare
 
 ```html
 <script type="module">
-	import { generate, parse } from "https://esm.sh/bysquare@2.4.0/";
+	import { encode, decode } from "https://esm.sh/bysquare@2.4.0/";
 </script>
 ```
 
 **Deno** `v1.28+`, just import `npm:bysquare` `v2.1.0+`
 
 ```ts
-import { generate, parse } from "npm:bysquare@2.1.0";
+import { encode, decode } from "npm:bysquare@2.1.0";
 ```
 
 **CLI** (Node.JS `v18`+)
@@ -58,20 +58,20 @@ npm install --global bysquare
 # API
 
 ```ts
-generate(model: DataModel, options?: Options): string
-parse(qr: string): DataModel
+encode(model: DataModel, options?: Options): string
+decode(qr: string): DataModel
 detect(qr: string): Boolean
 ```
 
 # Usage
 
-## Generate
+## Encode
 
 ```ts
-import { CurrencyCode, DataModel, generate, PaymentOptions } from "bysquare";
+import { CurrencyCode, DataModel, encode, PaymentOptions } from "bysquare";
 
 // string ready to be encoded to QR
-const qrString = generate({
+const qrString = encode({
 	invoiceId: "random-id",
 	payments: [
 		{
@@ -89,12 +89,12 @@ const qrString = generate({
 });
 ```
 
-## Parse
+## Decode
 
 ```ts
-import { parse } from "bysquare";
+import { decode } from "bysquare";
 
-const model = parse(
+const model = decode(
 	"0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
 );
 

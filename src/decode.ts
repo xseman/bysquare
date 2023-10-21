@@ -183,12 +183,16 @@ export class DecodeError extends Error {
 	}
 }
 
+/** @deprecated */
+export const parse = decode;
+
 /**
  * Decoding client data from QR Code 2005 symbol
  *
  * @see 3.16.
+ *
  */
-export function parse(qr: string): DataModel {
+export function decode(qr: string): DataModel {
 	try {
 		var bytes = base32hex.parse(qr, {
 			loose: true

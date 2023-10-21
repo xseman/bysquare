@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import test, { describe } from "node:test";
 
-import { generate } from "./generate.js";
-import { deserialize, detect, parse } from "./parse.js";
+import { encode } from "./encode.js";
+import { deserialize, detect, decode } from "./decode.js";
 import { CurrencyCode, DataModel, PaymentOptions } from "./types.js";
 
 export const payload = {
@@ -22,38 +22,38 @@ export const payload = {
 
 describe("parse", () => {
 	test("parsing", () => {
-		const generated = generate(payload);
-		const parsed = parse(generated);
-		assert.deepEqual(parsed, payload);
+		const encoded = encode(payload);
+		const decoded = decode(encoded);
+		assert.deepEqual(decoded, payload);
 	});
 
 	test("bidirectional", () => {
-		const qrString = generate(payload);
-		assert.deepEqual(payload, parse(qrString));
+		const qrString = encode(payload);
+		assert.deepEqual(payload, decode(qrString));
 	});
 
 	test("serialization", () => {
-		const serialized = /** dprint-ignore */ [
-		"random-id",
-		"\t", "1",
-		"\t", "1",
-		"\t", "100",
-		"\t", "EUR",
-		"\t",
-		"\t", "123",
-		"\t",
-		"\t",
-		"\t",
-		"\t",
-		"\t", "1",
-		"\t", "SK9611000000002918599669",
-		"\t",
-		"\t", "0",
-		"\t", "0",
-		"\t",
-		"\t",
-		"\t",
-	].join("");
+		const serialized = /** dprint-ignore */[
+			"random-id",
+			"\t", "1",
+			"\t", "1",
+			"\t", "100",
+			"\t", "EUR",
+			"\t",
+			"\t", "123",
+			"\t",
+			"\t",
+			"\t",
+			"\t",
+			"\t", "1",
+			"\t", "SK9611000000002918599669",
+			"\t",
+			"\t", "0",
+			"\t", "0",
+			"\t",
+			"\t",
+			"\t",
+		].join("");
 
 		const payload = {
 			invoiceId: "random-id",
@@ -77,8 +77,8 @@ describe("parse", () => {
 	});
 
 	test("header", () => {
-		const generated = generate(payload);
-		const isBysquare = detect(generated);
+		const encoded = encode(payload);
+		const isBysquare = detect(encoded);
 		assert.equal(isBysquare, true);
 
 		const notBysquare = detect("EHIN6T0=" /** "hello" in base32hex */);
@@ -120,8 +120,9 @@ describe("parse", () => {
 			]
 		]);
 
-		for (const [qr, parsed] of data) {
-			assert.deepEqual(parse(qr), parsed);
+		for (const [qr, encoded] of data) {
+			const decoded = decode(qr);
+			assert.deepEqual(decoded, encoded);
 		}
 	});
 });

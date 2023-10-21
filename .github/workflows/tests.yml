@@ -1,24 +1,24 @@
 name: tests
 
 on:
-  push:
-    branches:
-      - master
-      - master/*
-    paths:
-      - src/**.ts
-      - package.json
-      - tsconfig.json
-      - .github/workflows/**.yml
+    push:
+        branches:
+            - master
+            - master/*
+        paths:
+            - src/**.ts
+            - package.json
+            - tsconfig.json
+            - .github/workflows/**.yml
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version-file: ".nvmrc"
-      - run: |
-          npm install --silent
-          npm test
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                  node-version-file: ".nvmrc"
+            - run: |
+                  npm install --silent
+                  npm test

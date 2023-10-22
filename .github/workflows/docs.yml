@@ -1,11 +1,11 @@
-name: Deploy Static Pages
+name: Static Pages
 
 on:
     push:
-        paths:
-            - 'docs/*'
         branches:
             - master
+        paths:
+            - docs/**
 
 jobs:
     build:

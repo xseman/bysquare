@@ -1,3 +1,5 @@
+name: Release
+
 on:
     workflow_run:
         workflows: ["tests"]
@@ -9,7 +11,6 @@ permissions:
     pull-requests: write
     id-token: write
 
-name: release
 jobs:
     release-please:
         runs-on: ubuntu-latest
@@ -21,11 +22,8 @@ jobs:
                   package-name: bysquare
                   pull-request-title-pattern: "v${version}"
 
-            # The logic below handles the npm publication:
             - if: ${{ steps.release.outputs.release_created }}
               uses: actions/checkout@v3
-              # these if statements ensure that a publication only occurs when
-              # a new release is created:
 
             - if: ${{ steps.release.outputs.release_created }}
               uses: actions/setup-node@v3
@@ -34,12 +32,9 @@ jobs:
                   registry-url: "https://registry.npmjs.org"
 
             - if: ${{ steps.release.outputs.release_created }}
-              run: |
-                  npm ci
-                  npm run build
-
-            - if: ${{ steps.release.outputs.release_created }}
-              run: |
+              run: >
+                  npm ci &&
+                  npm run build &&
                   npm publish --provenance --access public
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

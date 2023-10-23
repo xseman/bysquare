@@ -16,7 +16,7 @@ const args = parseArgs({
 		},
 		encode: {
 			type: "boolean",
-			short: "e",
+			short: "e"
 		},
 		help: {
 			type: "boolean",
@@ -26,27 +26,45 @@ const args = parseArgs({
 });
 
 if (process.stdin.isTTY) {
-	/**
-	 * Process multiple files if the encode option is used
-	 */
 	if (args.values.encode) {
+		if (args.positionals.length === 0) {
+			console.error("No files provided for encoding.");
+			process.exit(1);
+		}
+
 		for (const file of args.positionals) {
 			if (existsSync(file) === false) {
 				console.error(`File ${file} doesn't exist`);
 				process.exit(1);
 			}
 
-			const data = readFileSync(file, "utf8");
-			const encoded = encode(JSON.parse(data));
-			console.log(encoded);
-		}
+			if (
+				file.endsWith(".json") === false &&
+				file.endsWith(".jsonl") === false
+			) {
+				console.error(`Unsupported file format for ${file}`);
+				process.exit(1);
+			}
 
-		process.exit(0);
+			const data = readFileSync(file, "utf8");
+			if (file.endsWith(".jsonl")) {
+				const lines = data.split('\n');
+				for (const line of lines) {
+					if (!line) continue;
+
+					const json = JSON.parse(line);
+					console.log(encode(json));
+				}
+			}
+
+			if (file.endsWith(".json")) {
+				console.log(encode(JSON.parse(data)));
+			}
+
+			process.exit(0);
+		}
 	}
 
-	/**
-	 * Input string
-	 */
 	if (args.values.decode) {
 		const qrstring = args.values.decode;
 		console.log(JSON.stringify(decode(qrstring), null, 4));
@@ -62,7 +80,7 @@ if (process.stdin.isTTY) {
 			"	bysquare - Simple Node.js library to generate and parse PAY bysquare standard",
 			"",
 			"SYNOPSIS",
-			"	bysquare [OPTIONS]",
+			"	bysquare [OPTIONS] [FILES...]",
 			"",
 			"DESCRIPTION",
 			"	bysquare is a command-line tool that provides a simple Node.js library to generate ",
@@ -74,10 +92,8 @@ if (process.stdin.isTTY) {
 			"		Decode the specified QR code string and print the corresponding JSON data.",
 			"		The qrstring argument should be a valid QR code string.",
 			"",
-			"	-e, --encode <file(s)>",
+			"	-e, --encode",
 			"		Encode JSON data from one or more files and print the corresponding QR code.",
-			"		The file(s) argument should be a path to JSON file(s). You can specify multiple",
-			"		files separated by spaces.",
 			"",
 			"	-h, --help",
 			"		Display the help message and exit.",
@@ -85,10 +101,10 @@ if (process.stdin.isTTY) {
 			"USAGE",
 			"	Encoding JSON data from one or more files",
 			"",
-			`	${process.argv[1]} --encode <file1> <file2> ...`,
-			"	The <file1>, <file2>, ... arguments should be the paths to the JSON files you want ",
-			"	to encode. The tool will read each file, generate a QR code representing the JSON ",
-			"	data, and print them.",
+			`	${process.argv[1]} --encode file1.json file2.json ...`,
+			"	The file1.json, file2.json, ... arguments should be the paths to the JSON or JSONL",
+			"   files you want to encode. The tool will read each file, generate a QR code representing",
+			"	the JSON data, and print them.",
 			"",
 			"	Decoding a QR code string",
 			"",

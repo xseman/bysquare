@@ -119,11 +119,11 @@ const model = decode(
 
 ## Encode
 
-Encode JSON data from a file and print the corresponding QR code. The file
+Encode JSON data from files and print the corresponding QR code. The file
 argument should be a path to a JSON file.
 
 ```sh
-npx bysquare --encode <file>
+npx bysquare --encode <file1> <file2> <fileN>
 ```
 
 ## Decode

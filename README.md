@@ -23,18 +23,10 @@ transformed into images depends on how you implement it. See
 CommonJS export. If your project uses CommonJS, you will have to convert to ESM
 or use the dynamic [`import()`][mozzila-import] function.
 
-**npm registry**
+**Nodejs**
 
 ```sh
 npm install bysquare
-```
-
-**Browser**
-
-```html
-<script type="module">
-	import { encode, decode } from "https://esm.sh/bysquare@2.7.1/";
-</script>
 ```
 
 **Deno** `v1.28+` using npm prefix
@@ -47,6 +39,14 @@ import { encode, decode } from "npm:bysquare@2.7.1";
 
 ```sh
 npm install --global bysquare
+```
+
+**Browser**
+
+```html
+<script type="module">
+	import { encode, decode } from "https://esm.sh/bysquare@2.7.1/";
+</script>
 ```
 
 # How it works
@@ -134,6 +134,16 @@ qrstring argument should be a valid QR code string.
 ```sh
 npx bysquare --decode <qrstring>
 ```
+
+# Support
+
+## Nodejs
+
+I mainly focus on the last two LTS versions of Node.js and try to use the most
+idiomatic ECMAScript possible to avoid specific runtime coupling.
+
+This doesn't mean that the library won't work on older versions, but it might
+not be as reliable.
 
 ## Related
 

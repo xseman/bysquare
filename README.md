@@ -3,6 +3,9 @@
 ![version][version]
 ![build][build]
 
+[version]: https://img.shields.io/npm/v/bysquare
+[build]: https://img.shields.io/github/actions/workflow/status/xseman/bysquare/tests.yml
+
 Simple JavaScript library to encode and decode "PAY by square" string.
 
 **What is `PAY by square`?**
@@ -23,7 +26,10 @@ transformed into images depends on how you implement it. See
 CommonJS export. If your project uses CommonJS, you will have to convert to ESM
 or use the dynamic [`import()`][mozzila-import] function.
 
-**Nodejs**
+[mozzila-esm]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
+[mozzila-import]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import
+
+**Node.js**
 
 ```sh
 npm install bysquare
@@ -135,15 +141,25 @@ qrstring argument should be a valid QR code string.
 npx bysquare --decode <qrstring>
 ```
 
-# Support
+# Platform support
 
-## Nodejs
-
-I mainly focus on the last two LTS versions of Node.js and try to use the most
-idiomatic ECMAScript possible to avoid specific runtime coupling.
+I mainly focus on LTS versions of Node.js and try to use the most idiomatic
+ECMAScript possible to avoid specific runtime coupling.
 
 This doesn't mean that the library won't work on older versions, but it might
 not be as reliable.
+
+As of `v1.28`, Deno now includes built-in support for npm modules and is ready
+to use without additional setup, showing its improved maturity.
+
+## Node.js & Deno
+
+-   Node.js `v18` and later.
+-   Deno `v1.28` and later.
+
+## Browser
+
+The latest version of Chrome, Firefox, and Safari.
 
 ## Related
 
@@ -153,8 +169,3 @@ not be as reliable.
 -   <https://www.bsqr.co/schema/>
 -   <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>
 -   <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
-
-[build]: https://img.shields.io/github/actions/workflow/status/xseman/bysquare/tests.yml
-[version]: https://img.shields.io/npm/v/bysquare
-[mozzila-esm]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
-[mozzila-import]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import

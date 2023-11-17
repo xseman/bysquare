@@ -23,8 +23,8 @@
 		"typecheck": "tsc --noEmit",
 		"version": "git checkout develop && npm test",
 		"postversion": "echo 'Now run npm run build && npm publish'",
-		"test": "node --test --loader tsx --no-warnings src/*.test.ts",
-		"test:watch": "node --test --watch --loader tsx --no-warnings src/*.test.ts"
+		"test": "TS_NODE_TRANSPILE_ONLY=true node --test --loader=ts-node/esm --no-warnings src/*.test.ts",
+		"test:watch": "TS_NODE_TRANSPILE_ONLY=true node --test --watch --loader=ts-node/esm --no-warnings src/*.test.ts"
 	},
 	"dependencies": {
 		"crc-32": "~1.2.0",
@@ -36,8 +36,8 @@
 		"@types/lodash.deburr": "~4.1.0",
 		"@types/node": ">=18.18.2",
 		"dprint": "~0.41.0",
-		"tsx": "~3.12.0",
-		"typescript": "~5.0.0"
+		"ts-node": "~10.9.0",
+		"typescript": "~5.2.0"
 	},
 	"type": "module",
 	"bin": "./dist/cli.js",

@@ -1,7 +1,10 @@
 {
 	"typescript.tsdk": "node_modules/typescript/lib",
+	"files.associations": {
+		"tsconfig.json": "jsonc"
+	},
 	"[typescript][javascript][json][markdown]": {
 		"editor.formatOnSave": true,
 		"editor.defaultFormatter": "dprint.dprint"
-	}
+	},
 }

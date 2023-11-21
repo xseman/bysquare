@@ -19,7 +19,7 @@
 	"scripts": {
 		"prebuild": "tsc --build --clean",
 		"build": "tsc --build",
-		"format": "dprint fmt ./src/**/*",
+		"fmt": "dprint fmt ./src/**/*",
 		"typecheck": "tsc --noEmit",
 		"version": "git checkout develop && npm test",
 		"postversion": "echo 'Now run npm run build && npm publish'",
@@ -35,9 +35,9 @@
 	"devDependencies": {
 		"@types/lodash.deburr": "~4.1.0",
 		"@types/node": ">=18.18.2",
-		"dprint": "~0.41.0",
+		"dprint": "~0.43.0",
 		"ts-node": "~10.9.0",
-		"typescript": "~5.2.0"
+		"typescript": "~5.3.0"
 	},
 	"type": "module",
 	"bin": "./dist/cli.js",

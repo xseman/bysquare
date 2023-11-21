@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import test, { describe } from "node:test";
 
+import { decode, deserialize, detect } from "./decode.js";
 import { encode } from "./encode.js";
-import { deserialize, detect, decode } from "./decode.js";
 import { CurrencyCode, DataModel, PaymentOptions } from "./types.js";
 
 export const payload = {
@@ -12,12 +12,12 @@ export const payload = {
 			type: PaymentOptions.PaymentOrder,
 			amount: 100.0,
 			bankAccounts: [
-				{ iban: "SK9611000000002918599669" }
+				{ iban: "SK9611000000002918599669" },
 			],
 			currencyCode: CurrencyCode.EUR,
-			variableSymbol: "123"
-		}
-	]
+			variableSymbol: "123",
+		},
+	],
 } satisfies DataModel;
 
 describe("parse", () => {
@@ -33,7 +33,7 @@ describe("parse", () => {
 	});
 
 	test("serialization", () => {
-		const serialized = /** dprint-ignore */[
+		const serialized = /** dprint-ignore */ [
 			"random-id",
 			"\t", "1",
 			"\t", "1",
@@ -64,15 +64,15 @@ describe("parse", () => {
 					currencyCode: CurrencyCode.EUR,
 					variableSymbol: "123",
 					bankAccounts: [
-						{ iban: "SK9611000000002918599669" }
-					]
-				}
-			]
+						{ iban: "SK9611000000002918599669" },
+					],
+				},
+			],
 		} satisfies DataModel;
 
 		assert.deepEqual(
 			deserialize(serialized),
-			payload
+			payload,
 		);
 	});
 
@@ -100,9 +100,9 @@ describe("parse", () => {
 						currencyCode: CurrencyCode.EUR,
 						type: PaymentOptions.PaymentOrder,
 						bankAccounts: [{ iban: "SK4523585719461382368397" }],
-						beneficiary: { name: "John Doe" }
-					}]
-				}
+						beneficiary: { name: "John Doe" },
+					}],
+				},
 			],
 			[
 				"00054000DG4GL2L1JL66N01P4GCBG05KQEPULNMP9EB7MEE935VG4P4B1BDBN7MV4GU13R7DMGU9O93QEI2KQJLPTFFU7GJNP6QL0UADVHOQ3B0OP0OO5P4L58M918PG00",
@@ -114,10 +114,10 @@ describe("parse", () => {
 						type: PaymentOptions.PaymentOrder,
 						bankAccounts: [{ iban: "SK2738545237537948273958" }],
 						beneficiary: { name: "Jane Doe" },
-						paymentNote: "bendzín"
-					}]
-				}
-			]
+						paymentNote: "bendzín",
+					}],
+				},
+			],
 		]);
 
 		for (const [qr, encoded] of data) {

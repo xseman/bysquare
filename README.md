@@ -38,7 +38,7 @@ npm install bysquare
 **Deno** `v1.28+` using npm prefix
 
 ```ts
-import { encode, decode } from "npm:bysquare@2.7.1";
+import { decode, encode } from "npm:bysquare@2.7.1";
 ```
 
 **CLI** (Node.JS `v18`+)
@@ -101,7 +101,7 @@ const qrString = encode({
 import { decode } from "bysquare";
 
 const model = decode(
-	"0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000"
+	"0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000",
 );
 
 // {
@@ -154,8 +154,8 @@ to use without additional setup, showing its improved maturity.
 
 ## Node.js & Deno
 
--   Node.js `v18` and later.
--   Deno `v1.28` and later.
+- Node.js `v18` and later.
+- Deno `v1.28` and later.
 
 ## Browser
 
@@ -163,9 +163,9 @@ The latest version of Chrome, Firefox, and Safari.
 
 ## Related
 
--   <https://bysquare.com/>
--   <https://devel.cz/otazka/qr-kod-pay-by-square>
--   <https://github.com/matusf/pay-by-square>
--   <https://www.bsqr.co/schema/>
--   <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>
--   <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
+- <https://bysquare.com/>
+- <https://devel.cz/otazka/qr-kod-pay-by-square>
+- <https://github.com/matusf/pay-by-square>
+- <https://www.bsqr.co/schema/>
+- <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>
+- <https://www.vutbr.cz/studenti/zav-prace/detail/78439>

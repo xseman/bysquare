@@ -14,7 +14,7 @@ export const enum Version {
 	 * 2015-06-24
 	 * Added fields for beneficiary name and address
 	 */
-	"1.1.0" = 0x01
+	"1.1.0" = 0x01,
 }
 
 /**
@@ -32,7 +32,7 @@ export enum MonthClassifier {
 	September = 256,
 	October = 512,
 	November = 1_024,
-	December = 2_048
+	December = 2_048,
 }
 
 /**
@@ -48,7 +48,7 @@ export enum Periodicity {
 	Bimonthly = "B",
 	Quarterly = "q",
 	Semiannually = "s",
-	Annually = "a"
+	Annually = "a",
 }
 
 /**
@@ -102,7 +102,7 @@ export type Day =
 export enum PaymentOptions {
 	PaymentOrder = 1,
 	StandingOrder = 2,
-	DirectDebit = 4
+	DirectDebit = 4,
 }
 
 /**
@@ -137,7 +137,7 @@ export type BankAccount = {
  */
 export enum DirectDebitScheme {
 	Other = 0,
-	Sepa = 1
+	Sepa = 1,
 }
 
 /**
@@ -150,7 +150,7 @@ export enum DirectDebitScheme {
  */
 export enum DirectDebitType {
 	OneOff = 0,
-	Recurrent = 1
+	Recurrent = 1,
 }
 
 export type Beneficiary = {
@@ -490,5 +490,5 @@ export enum CurrencyCode {
 	YER = "YER",
 	ZAR = "ZAR",
 	ZMW = "ZMW",
-	ZWL = "ZWL"
+	ZWL = "ZWL",
 }

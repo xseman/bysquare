@@ -27,7 +27,7 @@ export function headerBysquare(
 	] = [
 		0x00, 0x00,
 		0x00, 0x00
-	]
+	],
 ): Uint8Array {
 	const isValid = header.every((nibble) => 0 <= nibble && nibble <= 15);
 	if (!isValid) {
@@ -38,13 +38,13 @@ export function headerBysquare(
 		bySquareType,
 		version,
 		documentType,
-		reserved
+		reserved,
 	] = header;
 
 	// Combine 4-nibbles to 2-bytes
 	const mergedNibbles = Uint8Array.from([
 		(bySquareType << 4) | (version << 0),
-		(documentType << 4) | (reserved << 0)
+		(documentType << 4) | (reserved << 0),
 	]);
 
 	return mergedNibbles;
@@ -78,7 +78,7 @@ export function addChecksum(serialized: string): Uint8Array {
 
 	return Uint8Array.from([
 		...new Uint8Array(checksum),
-		...Uint8Array.from(byteArray)
+		...Uint8Array.from(byteArray),
 	]);
 }
 
@@ -185,7 +185,7 @@ export const generate = encode;
  */
 export function encode(
 	model: DataModel,
-	options: Options = { deburr: true }
+	options: Options = { deburr: true },
 ): string {
 	if (options.deburr) {
 		removeDiacritics(model);
@@ -205,10 +205,10 @@ export function encode(
 		// ...headerBysquare([0x00, Version["1.1.0"], 0x00, 0x00]),
 		...headerBysquare([0x00, 0x00, 0x00, 0x00]),
 		...headerDataLength(withChecksum.byteLength),
-		...lzmaBody
+		...lzmaBody,
 	]);
 
 	return base32hex.stringify(output, {
-		pad: false
+		pad: false,
 	});
 }

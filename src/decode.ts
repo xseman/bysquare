@@ -9,7 +9,7 @@ import {
 	Payment,
 	PaymentOptions,
 	Periodicity,
-	Version
+	Version,
 } from "./index.js";
 
 function cleanUndefined(obj: any): void {
@@ -30,7 +30,7 @@ export function deserialize(qr: string): DataModel {
 	const invoiceId = serialized.shift();
 	const output: DataModel = {
 		invoiceId: invoiceId?.length ? invoiceId : undefined,
-		payments: []
+		payments: [],
 	};
 
 	const paymentslen = Number(serialized.shift());
@@ -69,7 +69,7 @@ export function deserialize(qr: string): DataModel {
 				: undefined,
 			paymentNote: paymentNote?.length
 				? paymentNote
-				: undefined
+				: undefined,
 		};
 
 		const accountslen = Number(serialized.shift());
@@ -84,7 +84,7 @@ export function deserialize(qr: string): DataModel {
 				iban: iban,
 				bic: bic?.length
 					? bic
-					: undefined
+					: undefined,
 			} satisfies BankAccount;
 			cleanUndefined(account);
 			payment.bankAccounts.push(account);
@@ -104,7 +104,7 @@ export function deserialize(qr: string): DataModel {
 					day: Number(serialized.shift()) as Day,
 					month: Number(serialized.shift()),
 					periodicity: serialized.shift() as Periodicity,
-					lastDate: serialized.shift()
+					lastDate: serialized.shift(),
 				};
 				break;
 
@@ -117,7 +117,7 @@ export function deserialize(qr: string): DataModel {
 					creditorId: serialized.shift(),
 					contractId: serialized.shift(),
 					maxAmount: Number(serialized.shift()),
-					validTillDate: serialized.shift()
+					validTillDate: serialized.shift(),
 				};
 				break;
 
@@ -143,7 +143,7 @@ export function deserialize(qr: string): DataModel {
 					: undefined,
 				city: addressLine2?.length
 					? addressLine2
-					: undefined
+					: undefined,
 			} satisfies Beneficiary;
 
 			cleanUndefined(beneficiary);
@@ -172,7 +172,7 @@ function bysquareHeaderDecoder(header: Uint8Array) {
 		bysquareType,
 		version,
 		documentType,
-		reserved
+		reserved,
 	};
 }
 
@@ -190,17 +190,17 @@ export const parse = decode;
  * Decoding client data from QR Code 2005 symbol
  *
  * @see 3.16.
- *
  */
 export function decode(qr: string): DataModel {
 	try {
 		var bytes = base32hex.parse(qr, {
-			loose: true
+			loose: true,
 		});
-	} catch (error) {
+	}
+	catch (error) {
 		throw new DecodeError(
 			error,
-			"Unable to decode QR string base32hex encoding"
+			"Unable to decode QR string base32hex encoding",
 		);
 	}
 
@@ -230,18 +230,19 @@ export function decode(qr: string): DataModel {
 	const header = new Uint8Array([
 		...defaultProperties,
 		...defaultDictionarySize,
-		...uncompressedSize
+		...uncompressedSize,
 	]);
 
 	const payload = bytes.slice(4);
 	const body = new Uint8Array([
 		...header,
-		...payload
+		...payload,
 	]);
 
 	try {
 		var decompressed = new Uint8Array(decompress(body) as Int8Array);
-	} catch (error) {
+	}
+	catch (error) {
 		throw new DecodeError(error, "LZMA decompression failed");
 	}
 
@@ -261,9 +262,10 @@ export function decode(qr: string): DataModel {
 export function detect(qr: string): boolean {
 	try {
 		var parsed = base32hex.parse(qr, {
-			loose: true
+			loose: true,
 		});
-	} catch {
+	}
+	catch {
 		throw new Error("Invalid data, Unable to decode base32hex QR string");
 	}
 
@@ -276,7 +278,7 @@ export function detect(qr: string): boolean {
 		bysquareType,
 		version,
 		documentType,
-		reserved
+		reserved,
 	} = bysquareHeaderDecoder(bysquareHeader);
 
 	const isValid = [bysquareType, version, documentType, reserved]

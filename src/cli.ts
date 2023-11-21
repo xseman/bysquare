@@ -1,28 +1,28 @@
 #!/usr/bin/env node
 
 import { existsSync, readFileSync } from "node:fs";
-import { parseArgs } from "node:util";
 import process from "node:process";
+import { parseArgs } from "node:util";
 
-import { encode } from "./encode.js";
 import { decode } from "./decode.js";
+import { encode } from "./encode.js";
 
 const args = parseArgs({
 	allowPositionals: true,
 	options: {
 		decode: {
 			type: "string",
-			short: "d"
+			short: "d",
 		},
 		encode: {
 			type: "boolean",
-			short: "e"
+			short: "e",
 		},
 		help: {
 			type: "boolean",
-			short: "h"
-		}
-	}
+			short: "h",
+		},
+	},
 });
 
 if (process.stdin.isTTY) {
@@ -39,8 +39,8 @@ if (process.stdin.isTTY) {
 			}
 
 			if (
-				file.endsWith(".json") === false &&
-				file.endsWith(".jsonl") === false
+				file.endsWith(".json") === false
+				&& file.endsWith(".jsonl") === false
 			) {
 				console.error(`Unsupported file format for ${file}`);
 				process.exit(1);
@@ -48,7 +48,7 @@ if (process.stdin.isTTY) {
 
 			const data = readFileSync(file, "utf8");
 			if (file.endsWith(".jsonl")) {
-				const lines = data.split('\n');
+				const lines = data.split("\n");
 				for (const line of lines) {
 					if (!line) continue;
 
@@ -72,8 +72,8 @@ if (process.stdin.isTTY) {
 	}
 
 	if (
-		args.values.help ||
-		Object.keys(args.values).length === 0
+		args.values.help
+		|| Object.keys(args.values).length === 0
 	) {
 		console.log([
 			"NAME",
@@ -111,7 +111,7 @@ if (process.stdin.isTTY) {
 			`	${process.argv[1]} --decode <qrstring>`,
 			"	Replace qrstring with the QR code string you want to decode.",
 			"	The program will parse the QR code string and print the resulting JSON data.",
-			""
+			"",
 		].join("\n"));
 	}
 }

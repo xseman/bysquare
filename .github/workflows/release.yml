@@ -20,7 +20,7 @@ jobs:
               with:
                   release-type: node
                   package-name: bysquare
-                  pull-request-title-pattern: "v${version}"
+                  pull-request-title-pattern: 'v${version}'
 
             - if: ${{ steps.release.outputs.release_created }}
               uses: actions/checkout@v3
@@ -28,8 +28,8 @@ jobs:
             - if: ${{ steps.release.outputs.release_created }}
               uses: actions/setup-node@v3
               with:
-                  node-version-file: ".nvmrc"
-                  registry-url: "https://registry.npmjs.org"
+                  node-version-file: '.nvmrc'
+                  registry-url: 'https://registry.npmjs.org'
 
             - if: ${{ steps.release.outputs.release_created }}
               run: >

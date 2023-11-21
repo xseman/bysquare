@@ -1,10 +1,12 @@
 {
 	"typescript.tsdk": "node_modules/typescript/lib",
+	"typescript.preferences.preferTypeOnlyAutoImports": true,
 	"files.associations": {
-		"tsconfig.json": "jsonc"
+		"tsconfig.json": "jsonc",
+		"dprint.json": "jsonc"
 	},
-	"[typescript][javascript][json][markdown]": {
-		"editor.formatOnSave": true,
-		"editor.defaultFormatter": "dprint.dprint"
-	},
+	"[typescript][javascript][markdown][json][yaml][yml][github-actions-workflow]": {
+		"editor.defaultFormatter": "dprint.dprint",
+		"editor.formatOnSave": true
+	}
 }

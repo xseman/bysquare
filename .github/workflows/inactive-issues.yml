@@ -1,19 +1,27 @@
-name: Inactive issues
+name: Close inactive issues
 
 on:
     schedule:
         - cron: 30 1 * * *
+
 jobs:
     close-issues:
         runs-on: ubuntu-latest
         permissions:
             issues: write
+        env:
+            DAYS_BEFORE_STALE: 90
+            DAYS_BEFORE_CLOSE: 30
         steps:
             - uses: actions/stale@v8
               with:
-                  days-before-issue-stale: 30
-                  days-before-issue-close: 14
+                  days-before-issue-stale: ${{ env.DAYS_BEFORE_STALE }}
+                  days-before-issue-close: ${{ env.DAYS_BEFORE_CLOSE }}
                   stale-issue-label: stale
-                  stale-issue-message: This issue is stale because it has been open for 30 days with no activity.
-                  close-issue-message: This issue was closed because it has been inactive for 14 days since being marked as stale.
+                  stale-issue-message: >
+                      This issue is stale because it has been open for
+                      ${DAYS_BEFORE_STALE} days with no activity.
+                  close-issue-message: >
+                      This issue was closed because it has been inactive
+                      for ${DAYS_BEFORE_CLOSE} days since being marked as stale.
                   repo-token: ${{ secrets.GITHUB_TOKEN }}

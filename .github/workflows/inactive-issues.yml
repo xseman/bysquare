@@ -17,11 +17,12 @@ jobs:
               with:
                   days-before-issue-stale: ${{ env.DAYS_BEFORE_STALE }}
                   days-before-issue-close: ${{ env.DAYS_BEFORE_CLOSE }}
+                  exempt-issue-labels: good first issue,help wanted
                   stale-issue-label: stale
                   stale-issue-message: >
                       This issue is stale because it has been open for
-                      ${DAYS_BEFORE_STALE} days with no activity.
+                      ${{ env.DAYS_BEFORE_STALE }} days with no activity.
                   close-issue-message: >
                       This issue was closed because it has been inactive
-                      for ${DAYS_BEFORE_CLOSE} days since being marked as stale.
+                      for ${{ env.DAYS_BEFORE_CLOSE }} days since being marked as stale.
                   repo-token: ${{ secrets.GITHUB_TOKEN }}

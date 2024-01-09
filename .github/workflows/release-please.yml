@@ -27,8 +27,8 @@ jobs:
             - if: ${{ steps.release.outputs.release_created }}
               uses: actions/setup-node@v4
               with:
-                  node-version-file: '.nvmrc'
-                  registry-url: 'https://registry.npmjs.org'
+                  node-version-file: ".nvmrc"
+                  registry-url: "https://registry.npmjs.org"
 
             - if: ${{ steps.release.outputs.release_created }}
               env:

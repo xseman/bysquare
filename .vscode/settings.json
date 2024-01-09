@@ -5,6 +5,9 @@
 		"tsconfig.json": "jsonc",
 		"dprint.json": "jsonc"
 	},
+	"editor.codeActionsOnSave": {
+		"source.organizeImports": "explicit"
+	},
 	"[typescript][javascript][markdown][json][yaml][yml][github-actions-workflow]": {
 		"editor.defaultFormatter": "dprint.dprint",
 		"editor.formatOnSave": true

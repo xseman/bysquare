@@ -3,6 +3,5 @@
 		"dprint.dprint",
 		"hediet.vscode-drawio",
 		"editorconfig.editorconfig"
-	],
-	"unwantedRecommendations": []
+	]
 }

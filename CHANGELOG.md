@@ -1,5 +1,37 @@
 # Changelog
 
+## [2.8.1](https://github.com/xseman/bysquare/compare/v2.8.0...v2.8.1) (2024-03-16)
+
+
+### Documentation
+
+* cleanup ([c1a2a2f](https://github.com/xseman/bysquare/commit/c1a2a2fb1e8e4188388856dbdba75e6d51a8207d))
+* mention nodejs support & cleanup ([bcd06b5](https://github.com/xseman/bysquare/commit/bcd06b5af6d59a2de500ebf703cfd204c1633f76))
+* platform support ([9d1bda9](https://github.com/xseman/bysquare/commit/9d1bda942f5f86b0fdcc75ef1b01451869e7fa4f))
+
+
+### Maintenance
+
+* **ci:** update inactive issues ([d5a2676](https://github.com/xseman/bysquare/commit/d5a267634602e389c815f57d04804fad65ef9300))
+* **deps:** update node types ([a7cea81](https://github.com/xseman/bysquare/commit/a7cea81f38449c79ead92ab5ed6b4b85cdacb484))
+* **deps:** update release ([4698324](https://github.com/xseman/bysquare/commit/469832474eb558af755e9b583ef101e1e2ebf0be))
+* **deps:** update typescript, switch tsx for ts-node ([d7dca11](https://github.com/xseman/bysquare/commit/d7dca11ace5e49aac61b53da58094cd9856e7476))
+* **fix:** message variable, exempt label ([c27fc7d](https://github.com/xseman/bysquare/commit/c27fc7db89d0e2ebdab2ee08c2c430bb22f0ddb2))
+* update configs ([614d6c0](https://github.com/xseman/bysquare/commit/614d6c00b3d2fcb5a2743d2134554e389463e09d))
+* update configs & formatting ([77a898a](https://github.com/xseman/bysquare/commit/77a898a75bb62fa1cf973af604f16576566cece5))
+* update deps ([82513a1](https://github.com/xseman/bysquare/commit/82513a1439dfe2f832f24dd6a0999d07b9092df9))
+* update tsconfig ([1167cca](https://github.com/xseman/bysquare/commit/1167ccaeb8277b2e6db0d230644a09737f25c96a))
+
+
+### Refactors
+
+* tests ([68d77a7](https://github.com/xseman/bysquare/commit/68d77a76cbd0bf334b25ca861e56165bddc6968f))
+
+
+### Styles
+
+* apply fmt ([a09641d](https://github.com/xseman/bysquare/commit/a09641d0343328c4dee16ce7a776d4660ae6dab9))
+
 ## [2.8.0](https://github.com/xseman/bysquare/compare/v2.7.0...v2.8.0) (2023-10-23)
 
 

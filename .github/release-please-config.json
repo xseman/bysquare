@@ -9,14 +9,16 @@
 		}
 	},
 	"changelog-sections": [
-		{ "section": "Features", "type": "feat" },
-		{ "section": "Dependency updates", "type": "deps" },
-		{ "section": "Documentation", "type": "docs" },
-		{ "section": "Maintenance", "type": "build" },
-		{ "section": "Maintenance", "type": "chore" },
-		{ "section": "Maintenance", "type": "ci" },
-		{ "section": "Refactors", "type": "refactor" },
-		{ "section": "Styles", "type": "style" },
-		{ "section": "Tests", "type": "test", "hidden": true }
+		{ "type": "feat", "section": "Features" },
+		{ "type": "fix", "section": "Bug Fixes" },
+		{ "type": "perf", "section": "Performance Improvements" },
+		{ "type": "deps", "section": "Dependency updates" },
+		{ "type": "docs", "section": "Documentation" },
+		{ "type": "build", "section": "Maintenance" },
+		{ "type": "chore", "section": "Maintenance" },
+		{ "type": "ci", "section": "Maintenance" },
+		{ "type": "refactor", "section": "Refactors" },
+		{ "type": "style", "section": "Code Style" },
+		{ "type": "test", "section": "Tests" }
 	]
 }

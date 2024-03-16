@@ -20,7 +20,7 @@ export const enum Version {
 /**
  * Kalendárny mesiac.
  */
-export enum MonthClassifier {
+export const enum MonthClassifier {
 	January = 1,
 	February = 2,
 	March = 4,
@@ -40,7 +40,7 @@ export enum MonthClassifier {
  * medzi 1 a 31. Deň v týždni je číslo medzi 1 a 7 (1 = pondelok, 2=utorok, …, 7
  * = nedeľa).
  */
-export enum Periodicity {
+export const enum Periodicity {
 	Daily = "d",
 	Weekly = "w",
 	Biweekly = "b",
@@ -99,7 +99,7 @@ export type Day =
  * - standingorder: trvalý príkaz, údaje sa vyplnia do StandingOrderExt
  * - directdebit: inkaso, údaje sa vyplnia do DirectDebitExt
  */
-export enum PaymentOptions {
+export const enum PaymentOptions {
 	PaymentOrder = 1,
 	StandingOrder = 2,
 	DirectDebit = 4,
@@ -135,7 +135,7 @@ export type BankAccount = {
  * SEPA - Inkaso zodpovedá schéme
  * SEPA. other - iné
  */
-export enum DirectDebitScheme {
+export const enum DirectDebitScheme {
 	Other = 0,
 	Sepa = 1,
 }
@@ -148,7 +148,7 @@ export enum DirectDebitScheme {
  * one-off - jednorázové inkaso
  * recurrent - opakované inkaso
  */
-export enum DirectDebitType {
+export const enum DirectDebitType {
 	OneOff = 0,
 	Recurrent = 1,
 }
@@ -190,7 +190,7 @@ export type SimplePayment = {
 	 *
 	 * Mena v ISO 4217 formáte (3 písmená). Príklad: "EUR"
 	 */
-	currencyCode: CurrencyCode;
+	currencyCode: string | CurrencyCode;
 	/**
 	 * Formát YYYYMMDD
 	 *
@@ -253,7 +253,7 @@ export type StandingOrder = SimplePayment & {
 	 * medzi 1 a 31. Deň v týždni je číslo medzi 1 a 7 (1 = pondelok, 2 =utorok,
 	 * …, 7 = nedeľa).
 	 */
-	day?: Day;
+	day?: number | Day;
 	/**
 	 * Medzerou oddelený zoznam mesiacov, v ktoré sa má platba uskutočniť.
 	 */
@@ -333,7 +333,7 @@ export type DataModel = {
 /**
  * ISO-4217
  */
-export enum CurrencyCode {
+export const enum CurrencyCode {
 	AED = "AED",
 	AFN = "AFN",
 	ALL = "ALL",

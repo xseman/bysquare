@@ -240,15 +240,19 @@ export function decode(qr: string): DataModel {
 	]);
 
 	try {
-		var decompressed = new Uint8Array(decompress(body) as Int8Array);
+		var decompressed = decompress(body);
 	}
 	catch (error) {
 		throw new DecodeError(error, "LZMA decompression failed");
 	}
 
+	if (typeof decompressed === "string") {
+		return deserialize(decompressed);
+	}
+
 	const _checksum = decompressed.slice(0, 4);
 	const decompressedBody = decompressed.slice(4);
-	const decoded = new TextDecoder("utf-8").decode(decompressedBody);
+	const decoded = new TextDecoder("utf-8").decode(decompressedBody.buffer);
 
 	return deserialize(decoded);
 }

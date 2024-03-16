@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import test, { describe } from "node:test";
+import test from "node:test";
 
 import { decode } from "./decode.js";
 import { addChecksum, encode, headerBysquare, serialize } from "./encode.js";
@@ -42,45 +42,39 @@ const serialized = /** dprint-ignore */ [
 	"\t",
 ].join("");
 
-describe("generate", () => {
-	test("generating", () => {
-		const encoded = encode(payload);
-		const decoded = decode(encoded);
-		assert.deepStrictEqual(payload, decoded);
-	});
+test("encode", () => {
+	const encoded = encode(payload);
+	const decoded = decode(encoded);
+	assert.deepStrictEqual(payload, decoded);
+});
 
-	test("serialize", () => {
-		assert.equal(
-			serialize(payload),
-			serialized,
-		);
-	});
+test("encode - serialize", () => {
+	const created = serialize(payload);
+	assert.equal(created, serialized);
+});
 
-	test("create data with checksum", () => {
-		const checksum = addChecksum(serialized);
-		/** dprint-ignore */
-		const expected = Uint8Array.from([0x90, 0x94, 0x19, 0x21, 0x72, 0x61, 0x6e, 0x64, 0x6f, 0x6d, 0x2d, 0x69, 0x64, 0x09, 0x31, 0x09, 0x31, 0x09, 0x31, 0x30, 0x30, 0x09, 0x45, 0x55, 0x52, 0x09, 0x09, 0x31, 0x32, 0x33, 0x09, 0x09, 0x09, 0x09, 0x09, 0x31, 0x09, 0x53, 0x4b, 0x39, 0x36, 0x31, 0x31, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x32, 0x39, 0x31, 0x38, 0x35, 0x39, 0x39, 0x36, 0x36, 0x39, 0x09, 0x09, 0x30, 0x09, 0x30, 0x09, 0x09, 0x09]);
-		assert.deepEqual(checksum, expected);
-	});
+test("encode - create data with checksum", () => {
+	const checksum = addChecksum(serialized);
+	/** dprint-ignore */
+	const expected = Uint8Array.from([0x90, 0x94, 0x19, 0x21, 0x72, 0x61, 0x6e, 0x64, 0x6f, 0x6d, 0x2d, 0x69, 0x64, 0x09, 0x31, 0x09, 0x31, 0x09, 0x31, 0x30, 0x30, 0x09, 0x45, 0x55, 0x52, 0x09, 0x09, 0x31, 0x32, 0x33, 0x09, 0x09, 0x09, 0x09, 0x09, 0x31, 0x09, 0x53, 0x4b, 0x39, 0x36, 0x31, 0x31, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x32, 0x39, 0x31, 0x38, 0x35, 0x39, 0x39, 0x36, 0x36, 0x39, 0x09, 0x09, 0x30, 0x09, 0x30, 0x09, 0x09, 0x09]);
+	assert.deepEqual(checksum, expected);
+});
 
-	test("make bysquare header", () => {
-		const header = headerBysquare();
-		const expected = Uint8Array.from([0x00, 0x00]);
-		assert.deepEqual(header, expected);
-	});
+test("encode - make bysquare header", () => {
+	const header = headerBysquare();
+	const expected = Uint8Array.from([0x00, 0x00]);
+	assert.deepEqual(header, expected);
+});
 
-	test("binary header", () => {
-		assert.deepEqual(
-			headerBysquare([
-				0b0000_0001,
-				0b0000_0010,
-				0b0000_0011,
-				0b0000_0100,
+test("encode - binary header", () => {
+	assert.deepEqual(
+		headerBysquare(/** dprint-ignore */ [
+				0b0000_0001, 0b0000_0010,
+				0b0000_0011, 0b0000_0100,
 			]),
-			Uint8Array.from([
-				0b0001_0010,
-				0b0011_0100,
-			]),
-		);
-	});
+		Uint8Array.from([
+			0b0001_0010,
+			0b0011_0100,
+		]),
+	);
 });

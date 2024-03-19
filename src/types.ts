@@ -4,7 +4,7 @@
  * It's a bit silly to limit the version number to 4-bit, if they keep
  * increasing the version number, the latest possible mapped value is 16
  */
-export const enum Version {
+export enum Version {
 	/**
 	 * 2013-02-22
 	 * Created this document from original by square specifications
@@ -20,7 +20,7 @@ export const enum Version {
 /**
  * Kalendárny mesiac.
  */
-export const enum MonthClassifier {
+export enum MonthClassifier {
 	January = 1,
 	February = 2,
 	March = 4,
@@ -40,7 +40,7 @@ export const enum MonthClassifier {
  * medzi 1 a 31. Deň v týždni je číslo medzi 1 a 7 (1 = pondelok, 2=utorok, …, 7
  * = nedeľa).
  */
-export const enum Periodicity {
+export enum Periodicity {
 	Daily = "d",
 	Weekly = "w",
 	Biweekly = "b",
@@ -99,7 +99,7 @@ export type Day =
  * - standingorder: trvalý príkaz, údaje sa vyplnia do StandingOrderExt
  * - directdebit: inkaso, údaje sa vyplnia do DirectDebitExt
  */
-export const enum PaymentOptions {
+export enum PaymentOptions {
 	PaymentOrder = 1,
 	StandingOrder = 2,
 	DirectDebit = 4,
@@ -135,7 +135,7 @@ export type BankAccount = {
  * SEPA - Inkaso zodpovedá schéme
  * SEPA. other - iné
  */
-export const enum DirectDebitScheme {
+export enum DirectDebitScheme {
 	Other = 0,
 	Sepa = 1,
 }
@@ -148,7 +148,7 @@ export const enum DirectDebitScheme {
  * one-off - jednorázové inkaso
  * recurrent - opakované inkaso
  */
-export const enum DirectDebitType {
+export enum DirectDebitType {
 	OneOff = 0,
 	Recurrent = 1,
 }
@@ -333,7 +333,7 @@ export type DataModel = {
 /**
  * ISO-4217
  */
-export const enum CurrencyCode {
+export enum CurrencyCode {
 	AED = "AED",
 	AFN = "AFN",
 	ALL = "ALL",

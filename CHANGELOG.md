@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.8.2](https://github.com/xseman/bysquare/compare/v2.8.1...v2.8.2) (2024-03-19)
+
+
+### Bug Fixes
+
+* inlined enums in emited js ([c53101d](https://github.com/xseman/bysquare/commit/c53101d0faa02d1899f42ce9dcdbe6eff907a2f4))
+
+
+### Maintenance
+
+* update release sections ([a6c6608](https://github.com/xseman/bysquare/commit/a6c6608e90251c1c3194cf0f5362af0a3e0d5734))
+
 ## [2.8.1](https://github.com/xseman/bysquare/compare/v2.8.0...v2.8.1) (2024-03-16)
 
 

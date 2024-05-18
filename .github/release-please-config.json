@@ -19,6 +19,7 @@
 		{ "type": "ci", "section": "Maintenance" },
 		{ "type": "refactor", "section": "Refactors" },
 		{ "type": "style", "section": "Code Style" },
-		{ "type": "test", "section": "Tests" }
+		{ "type": "test", "section": "Tests" },
+		{ "type": "examples", "section": "Examples" }
 	]
 }

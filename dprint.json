@@ -7,7 +7,6 @@
 		"arrowFunction.useParentheses": "force",
 		"binaryExpression.operatorPosition": "nextLine",
 		"ifStatement.nextControlFlowPosition": "maintain",
-		"nextControlFlowPosition": "nextLine", // Stroustrup style braces.
 		"semiColons": "always",
 		"trailingCommas": "onlyMultiLine"
 	},

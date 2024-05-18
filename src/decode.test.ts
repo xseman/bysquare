@@ -83,9 +83,9 @@ test("decode - header", () => {
 	const notBysquare = detect("EHIN6T0=" /** "hello" in base32hex */);
 	assert.equal(notBysquare, false);
 
-	/** should throw, invalid base32hex */
-	assert.throws(() => detect("aaaa"));
-	assert.throws(() => detect("XXXX"));
+	/** invalid base32hex */
+	assert.equal(detect("aaaa"), false);
+	assert.equal(detect("XXXX"), false);
 });
 
 test("decode - multiple data", () => {

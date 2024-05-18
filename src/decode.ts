@@ -159,6 +159,13 @@ export function deserialize(qr: string): DataModel {
 	return output;
 }
 
+interface Header {
+	bysquareType: number;
+	version: number;
+	documentType: number;
+	reserved: number;
+}
+
 /**
  * The function uses bit-shifting and masking to convert the first two bytes of
  * the input header array into four nibbles representing the bysquare header
@@ -166,7 +173,7 @@ export function deserialize(qr: string): DataModel {
  *
  * @param header 2-bytes sie
  */
-function bysquareHeaderDecoder(header: Uint8Array) {
+function bysquareHeaderDecoder(header: Uint8Array): Header {
 	const bytes = (header[0] << 8) | header[1];
 	const bysquareType = bytes >> 12;
 	const version = (bytes >> 8) & 0b0000_1111;
@@ -197,16 +204,11 @@ export const parse = decode;
  * @see 3.16.
  */
 export function decode(qr: string): DataModel {
+	let bytes: Uint8Array | undefined;
 	try {
-		var bytes = base32hex.parse(qr, {
-			loose: true,
-		});
-	}
-	catch (error) {
-		throw new DecodeError(
-			error,
-			"Unable to decode QR string base32hex encoding",
-		);
+		bytes = base32hex.parse(qr, { loose: true });
+	} catch (error) {
+		throw new DecodeError(error, "Unable to decode QR string base32hex encoding");
 	}
 
 	const bysquareHeader = bytes.slice(0, 2);
@@ -244,10 +246,10 @@ export function decode(qr: string): DataModel {
 		...payload,
 	]);
 
+	let decompressed: string | Int8Array | undefined;
 	try {
-		var decompressed = decompress(body);
-	}
-	catch (error) {
+		decompressed = decompress(body);
+	} catch (error) {
 		throw new DecodeError(error, "LZMA decompression failed");
 	}
 
@@ -269,13 +271,11 @@ export function decode(qr: string): DataModel {
  * not very reliable, there is room for improvement for the future.
  */
 export function detect(qr: string): boolean {
+	let parsed: Uint8Array | undefined;
 	try {
-		var parsed = base32hex.parse(qr, {
-			loose: true,
-		});
-	}
-	catch {
-		throw new Error("Invalid data, Unable to decode base32hex QR string");
+		parsed = base32hex.parse(qr, { loose: true });
+	} catch {
+		return false;
 	}
 
 	if (parsed.byteLength < 2) {
@@ -283,21 +283,20 @@ export function detect(qr: string): boolean {
 	}
 
 	const bysquareHeader = parsed.subarray(0, 2);
-	const {
-		bysquareType,
-		version,
-		documentType,
-		reserved,
-	} = bysquareHeaderDecoder(bysquareHeader);
+	const header = bysquareHeaderDecoder(bysquareHeader);
 
-	const isValid = [bysquareType, version, documentType, reserved]
-		.every((nibble, index) => {
-			if (index === 1) {
-				return nibble <= Version["1.1.0"];
-			}
+	const isValid = [
+		header.bysquareType,
+		header.version,
+		header.documentType,
+		header.reserved,
+	].every((nibble, index) => {
+		if (index === 1) {
+			return nibble <= Version["1.1.0"];
+		}
 
-			return 0x00 <= nibble && nibble <= 0x0F;
-		});
+		return 0x00 <= nibble && nibble <= 0x0F;
+	});
 
 	return isValid;
 }

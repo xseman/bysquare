@@ -1,11 +1,14 @@
 {
 	"$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+	"last-release-sha": "467e6fa5543842f3d74f7a847103f3992cdd1f85",
 	"packages": {
 		".": {
 			"release-type": "node",
 			"include-v-in-tag": true,
 			"include-component-in-tag": false,
-			"pull-request-title-pattern": "v${version}"
+			"pull-request-title-pattern": "v${version}",
+			"pull-request-header": "",
+			"pull-request-footer": ""
 		}
 	},
 	"changelog-sections": [
@@ -19,6 +22,7 @@
 		{ "type": "ci", "section": "Maintenance" },
 		{ "type": "refactor", "section": "Refactors" },
 		{ "type": "style", "section": "Code Style" },
-		{ "type": "test", "section": "Tests" }
+		{ "type": "test", "section": "Tests" },
+		{ "type": "examples", "section": "Examples" }
 	]
 }

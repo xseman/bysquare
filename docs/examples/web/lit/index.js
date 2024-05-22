@@ -1,7 +1,6 @@
-// @ts-check
-import { CurrencyCode, encode, PaymentOptions } from "bysquare";
-import { html, LitElement } from "lit";
-import { qrcanvas } from "qrcanvas";
+import { CurrencyCode, encode, PaymentOptions } from "https://esm.sh/bysquare@2.7.1/";
+import { html, LitElement } from "https://esm.sh/lit@3.0.0/";
+import { qrcanvas } from "https://esm.sh/qrcanvas@3.1.2/";
 
 /**
  * @extends {LitElement}

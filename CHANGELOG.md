@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.8.3](https://github.com/xseman/bysquare/compare/v2.8.2...v2.8.3) (2024-05-22)
+
+
+### Documentation
+
+* cleanup web examples ([12b1421](https://github.com/xseman/bysquare/commit/12b14213ee9fe5fd32c9056c06b6eb6008fb262e))
+
+
+### Maintenance
+
+* cleanup release config ([4b5da25](https://github.com/xseman/bysquare/commit/4b5da253c77c61780cd2648d4949cb761e1c7e50))
+* update configs ([b977962](https://github.com/xseman/bysquare/commit/b9779624a9af701d89d052badeacdba59ef4f1e8))
+
+
+### Refactors
+
+* decode ([2015d4e](https://github.com/xseman/bysquare/commit/2015d4e2e5dd498852b9d02dfca5154fa56c42e3))
+
 ## [2.8.2](https://github.com/xseman/bysquare/compare/v2.8.1...v2.8.2) (2024-03-19)
 
 

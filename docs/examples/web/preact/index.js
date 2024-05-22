@@ -1,7 +1,6 @@
-// @ts-check
-import { CurrencyCode, encode, PaymentOptions } from "bysquare";
-import { Component, createRef, h, render } from "preact";
-import { qrcanvas } from "qrcanvas";
+import { CurrencyCode, encode, PaymentOptions } from "https://esm.sh/bysquare@2.7.1/";
+import { Component, createRef, h, render } from "https://esm.sh/preact@10.22.0";
+import { qrcanvas } from "https://esm.sh/qrcanvas@3.1.2/";
 
 /**
  * @typedef {Object} State
@@ -106,5 +105,4 @@ class App extends Component {
 	};
 }
 
-// @ts-ignore
 render(h(App, null), document.getElementById("app"));

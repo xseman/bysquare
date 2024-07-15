@@ -15,7 +15,7 @@ const rsCombo = '[' + rsComboMarksRange + rsComboSymbolsRange + ']';
 const reComboMark = RegExp(rsCombo, 'g');
 
 /** Used to map Latin Unicode letters to basic Latin letters. */
-export const deburredLettersMap: {[key: string]: string} = {
+const deburredLettersMap: {[key: string]: string} = {
 	// Latin-1 Supplement block.
 	'\xc0': 'A',  '\xc1': 'A', '\xc2': 'A', '\xc3': 'A', '\xc4': 'A', '\xc5': 'A',
 	'\xe0': 'a',  '\xe1': 'a', '\xe2': 'a', '\xe3': 'a', '\xe4': 'a', '\xe5': 'a',

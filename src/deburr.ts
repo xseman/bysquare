@@ -1,19 +1,3 @@
-/** Used to match Latin Unicode letters (excluding mathematical operators). */
-const reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
-
-/** Used to compose unicode character classes. */
-const rsComboMarksRange = '\\u0300-\\u036f\\ufe20-\\ufe23',
-	rsComboSymbolsRange = '\\u20d0-\\u20f0';
-
-/** Used to compose unicode capture groups. */
-const rsCombo = '[' + rsComboMarksRange + rsComboSymbolsRange + ']';
-
-/**
- * Used to match [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) and
- * [combining diacritical marks for symbols](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks_for_Symbols).
- */
-const reComboMark = RegExp(rsCombo, 'g');
-
 /** Used to map Latin Unicode letters to basic Latin letters. */
 const deburredLettersMap: {[key: string]: string} = {
 	// Latin-1 Supplement block.
@@ -75,6 +59,22 @@ const deburredLettersMap: {[key: string]: string} = {
 export function deburrLetter(key: string) {
 	return deburredLettersMap[key]
 }
+
+/** Used to match Latin Unicode letters (excluding mathematical operators). */
+const reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
+
+/** Used to compose unicode character classes. */
+const rsComboMarksRange = '\\u0300-\\u036f\\ufe20-\\ufe23',
+	rsComboSymbolsRange = '\\u20d0-\\u20f0';
+
+/** Used to compose unicode capture groups. */
+const rsCombo = '[' + rsComboMarksRange + rsComboSymbolsRange + ']';
+
+/**
+ * Used to match [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) and
+ * [combining diacritical marks for symbols](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks_for_Symbols).
+ */
+const reComboMark = RegExp(rsCombo, 'g');
 
 /**
  * @desc Deburrs string by converting Latin-1 Supplement and Latin Extended-A letters to basic Latin letters and removing [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks).

@@ -9,5 +9,5 @@ npm i -g qrcode-terminal
 ### Execution
 
 ```bash
-bysquare --encode example.json | npx qrcode-terminal
+npx bysquare --encode example.json | npx qrcode-terminal
 ```

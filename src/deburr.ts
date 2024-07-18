@@ -72,11 +72,13 @@ const deburredLettersMap: {[key: string]: string} = {
 	'\u0149': "'n", '\u017f': 'ss'
 };
 
-export const deburrLetter = (key: string) => deburredLettersMap[key]
+export function deburrLetter(key: string) {
+	return deburredLettersMap[key]
+}
 
 /**
  * @desc Deburrs string by converting Latin-1 Supplement and Latin Extended-A letters to basic Latin letters and removing [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks).
  */
-export const deburr = (text: string): string => {
+export function deburr(text: string): string {
 	return text.replace(reLatin, deburrLetter).replace(reComboMark, '')
 }

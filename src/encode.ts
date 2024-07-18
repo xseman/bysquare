@@ -1,7 +1,7 @@
 import crc32 from "crc-32";
-import deburr from "lodash.deburr";
 import { compress } from "lzma1";
 import { base32hex } from "rfc4648";
+import {deburr} from "./deburr.js";
 import { DataModel, PaymentOptions } from "./types.js";
 
 /**

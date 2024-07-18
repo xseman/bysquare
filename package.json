@@ -28,12 +28,10 @@
 	},
 	"dependencies": {
 		"crc-32": "~1.2.0",
-		"lodash.deburr": "~4.1.0",
 		"lzma1": "0.0.2",
 		"rfc4648": "~1.5.0"
 	},
 	"devDependencies": {
-		"@types/lodash.deburr": "~4.1.0",
 		"@types/node": ">=18.18.2",
 		"dprint": "~0.43.0",
 		"ts-node": "~10.9.0",

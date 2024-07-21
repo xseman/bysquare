@@ -8,7 +8,10 @@
 		"binaryExpression.operatorPosition": "nextLine",
 		"ifStatement.nextControlFlowPosition": "maintain",
 		"semiColons": "always",
-		"trailingCommas": "onlyMultiLine"
+		"trailingCommas": "onlyMultiLine",
+		"quoteStyle": "preferDouble",
+		"quoteProps": "consistent",
+		"importDeclaration.forceMultiLine": "whenMultiple"
 	},
 	"prettier": {
 		"yml.tabWidth": 4,
@@ -24,9 +27,9 @@
 		"CHANGELOG.md"
 	],
 	"plugins": [
-		"https://plugins.dprint.dev/typescript-0.88.8.wasm",
-		"https://plugins.dprint.dev/json-0.19.1.wasm",
-		"https://plugins.dprint.dev/markdown-0.16.3.wasm",
-		"https://plugins.dprint.dev/prettier-0.32.1.json@19aa403ef0862ba8c41164e3dc6f84c0b7a66c2b11e42726b23dd25e6302ada9"
+		"https://plugins.dprint.dev/typescript-0.91.4.wasm",
+		"https://plugins.dprint.dev/json-0.19.3.wasm",
+		"https://plugins.dprint.dev/markdown-0.17.1.wasm",
+		"https://plugins.dprint.dev/prettier-0.40.0.json@68c668863ec834d4be0f6f5ccaab415df75336a992aceb7eeeb14fdf096a9e9c"
 	]
 }

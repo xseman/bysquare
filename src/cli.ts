@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 
-import { existsSync, readFileSync } from "node:fs";
+import {
+	existsSync,
+	readFileSync,
+} from "node:fs";
 import process from "node:process";
 import { parseArgs } from "node:util";
 

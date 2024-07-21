@@ -2,8 +2,17 @@ import assert from "node:assert";
 import test from "node:test";
 
 import { decode } from "./decode.js";
-import { addChecksum, encode, headerBysquare, serialize } from "./encode.js";
-import { CurrencyCode, DataModel, PaymentOptions } from "./types.js";
+import {
+	addChecksum,
+	encode,
+	headerBysquare,
+	serialize,
+} from "./encode.js";
+import {
+	CurrencyCode,
+	DataModel,
+	PaymentOptions,
+} from "./types.js";
 
 export const payload = {
 	invoiceId: "random-id",

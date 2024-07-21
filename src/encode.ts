@@ -1,8 +1,11 @@
 import crc32 from "crc-32";
 import { compress } from "lzma1";
 import { base32hex } from "rfc4648";
-import {deburr} from "./deburr.js";
-import { DataModel, PaymentOptions } from "./types.js";
+import { deburr } from "./deburr.js";
+import {
+	DataModel,
+	PaymentOptions,
+} from "./types.js";
 
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare

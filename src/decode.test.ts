@@ -1,9 +1,17 @@
 import assert from "node:assert";
 import test from "node:test";
 
-import { decode, deserialize, detect } from "./decode.js";
+import {
+	decode,
+	deserialize,
+	detect,
+} from "./decode.js";
 import { encode } from "./encode.js";
-import { CurrencyCode, DataModel, PaymentOptions } from "./types.js";
+import {
+	CurrencyCode,
+	DataModel,
+	PaymentOptions,
+} from "./types.js";
 
 export const payload = {
 	invoiceId: "random-id",

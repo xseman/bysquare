@@ -1,13 +1,5 @@
 ### How to run bysquare in the terminal
 
-Before running bysquare, make sure you have Node.js installed. If you're using `nvm` (Node Version Manager) to manage your Node.js versions, you can set the minimum required Node version for this project with the following command:
-
-```bash
-nvm use
-```
-
-This step is optional, but it ensures that you're using the correct version of Node.js as specified in the .nvmrc file.
-
 To encode data from example.json and print it as a string in the terminal, use the following command:
 
 ```bash

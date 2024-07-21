@@ -33,9 +33,9 @@
 	},
 	"devDependencies": {
 		"@types/node": ">=18.18.2",
-		"dprint": "~0.43.0",
+		"dprint": "~0.47.0",
 		"ts-node": "~10.9.0",
-		"typescript": "~5.3.0"
+		"typescript": "~5.5.0"
 	},
 	"type": "module",
 	"bin": "./dist/cli.js",

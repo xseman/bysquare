@@ -5,17 +5,20 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Document</title>
+		<script type="module" src="index.js"></script>
 	</head>
 	<body>
 		<div>
 			<div style="margin-right: 10px;">
+				<div></div>
 				<label style="display: block; margin-bottom: 5px;">
 					Ammount:
 					<br />
 					<input
 						style="width: 210px;"
 						type="number"
-						name="ammount"
+						name="amount"
+						value=""
 					/>
 				</label>
 				<label style="display: block; margin-bottom: 5px;">
@@ -34,7 +37,15 @@
 						name="variable"
 					/>
 				</label>
-				<pre>Produced string</pre>
+				<label style="display: block; margin-bottom: 5px;">
+					Produced string:
+					<br />
+					<input
+						style="width: 210px;"
+						name="producedString"
+						disabled
+					/>
+				</label>
 				<canvas
 					height="200"
 					width="200"
@@ -42,6 +53,4 @@
 			</div>
 		</div>
 	</body>
-
-	<script type="module" src="index.js"></script>
 </html>

@@ -30,7 +30,7 @@ function renderOnCanvas(canvasEl, encodedText) {
 }
 
 
-function initializeForm() {
+function init() {
 	const amountInput = document.querySelector('input[name="amount"]');
 	const ibanInput = document.querySelector('input[name="iban"]');
 	const variableInput = document.querySelector('input[name="variable"]');
@@ -41,19 +41,17 @@ function initializeForm() {
 	ibanInput.value = 'SK9611000000002918599669';
 	variableInput.value = '123';
 
-	const encodedText = getEncodedText(ibanInput.value, amountInput.value, variableInput.value);
-	encodedTextDiv.innerText = encodedText;
-	renderOnCanvas(canvasEl, encodedText);
-
-	function updateEncodedText() {
+	function render() {
 		const encodedText = getEncodedText(ibanInput.value, amountInput.value, variableInput.value);
 		encodedTextDiv.innerText = encodedText;
 		renderOnCanvas(canvasEl, encodedText);
 	}
 
-	amountInput.addEventListener('input', updateEncodedText);
-	ibanInput.addEventListener('input', updateEncodedText);
-	variableInput.addEventListener('input', updateEncodedText);
+	amountInput.addEventListener('input', render);
+	ibanInput.addEventListener('input', render);
+	variableInput.addEventListener('input', render);
+
+	render()
 }
 
-window.addEventListener('load', initializeForm);
+window.addEventListener('load', init);

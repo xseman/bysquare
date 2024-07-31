@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.9.0](https://github.com/xseman/bysquare/compare/v2.8.3...v2.9.0) (2024-07-31)
+
+
+### Features
+
+* remove lodash ([#32](https://github.com/xseman/bysquare/issues/32)) ([dfb2f26](https://github.com/xseman/bysquare/commit/dfb2f26151b0bcb4dbf753e17ddd675e29c9a16a))
+
+
+### Dependency updates
+
+* bump dev ([d94fc4a](https://github.com/xseman/bysquare/commit/d94fc4a20345fad066ef120e29b4e5decead5366))
+
+
+### Documentation
+
+* add basic html example ([#36](https://github.com/xseman/bysquare/issues/36)) ([032cb7a](https://github.com/xseman/bysquare/commit/032cb7a0b4ea2a6e31044410d761c627f82844ea))
+* outdated information in cli example ([#35](https://github.com/xseman/bysquare/issues/35)) ([4a0f060](https://github.com/xseman/bysquare/commit/4a0f0603b1299d1c000dbd8b6c26171c6922b565))
+
+
+### Maintenance
+
+* add release secret ([8f204bc](https://github.com/xseman/bysquare/commit/8f204bc9d486ba3d46604fe664d712513b72341c))
+* cleanup release config ([309f975](https://github.com/xseman/bysquare/commit/309f9753596ac1b3d6e25c2a4253ef1b5ef90b60))
+* update dprint ([70b03f6](https://github.com/xseman/bysquare/commit/70b03f6f84567b930af7c2b39a368172c358ed73))
+* update release config ([3d162d3](https://github.com/xseman/bysquare/commit/3d162d3e856d76490801df5669b417296ddc5fb0))
+
 ## [2.8.3](https://github.com/xseman/bysquare/compare/v2.8.2...v2.8.3) (2024-05-22)
 
 

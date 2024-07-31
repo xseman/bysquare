@@ -16,12 +16,12 @@
 		{ "type": "perf", "section": "Performance Improvements" },
 		{ "type": "deps", "section": "Dependency updates" },
 		{ "type": "docs", "section": "Documentation" },
+		{ "type": "ci", "section": "Maintenance" },
 		{ "type": "build", "section": "Maintenance" },
 		{ "type": "chore", "section": "Maintenance" },
-		{ "type": "ci", "section": "Maintenance" },
 		{ "type": "refactor", "section": "Refactors" },
-		{ "type": "style", "section": "Code Style" },
 		{ "type": "test", "section": "Tests" },
-		{ "type": "examples", "section": "Examples" }
+		{ "type": "style", "section": "Code Style", "hidden": true },
+		{ "type": "examples", "section": "Examples", "hidden": true }
 	]
 }

@@ -46,7 +46,10 @@ npm install --global bysquare
 Since `v1.28+` import from npm registry using `npm:` prefix.
 
 ```ts
-import { decode, encode } from "npm:bysquare@2.8.0";
+import {
+	decode,
+	encode,
+} from "npm:bysquare@2.8.0";
 ```
 
 ### Browser
@@ -68,7 +71,12 @@ import { decode, encode } from "npm:bysquare@2.8.0";
 ### Encode
 
 ```ts
-import { CurrencyCode, DataModel, encode, PaymentOptions } from "bysquare";
+import {
+	CurrencyCode,
+	DataModel,
+	encode,
+	PaymentOptions,
+} from "bysquare";
 
 // string ready to be encoded to QR
 const qrString = encode({

@@ -19,7 +19,7 @@
 	"scripts": {
 		"prebuild": "tsc --build --clean",
 		"build": "tsc --build",
-		"fmt": "dprint fmt ./src/**/*",
+		"fmt": "dprint fmt",
 		"typecheck": "tsc --noEmit",
 		"version": "git checkout develop && npm test",
 		"postversion": "echo 'Now run npm run build && npm publish'",

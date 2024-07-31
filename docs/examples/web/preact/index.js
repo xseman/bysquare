@@ -1,5 +1,14 @@
-import { CurrencyCode, encode, PaymentOptions } from "https://esm.sh/bysquare@2.7.1/";
-import { Component, createRef, h, render } from "https://esm.sh/preact@10.22.0";
+import {
+	CurrencyCode,
+	encode,
+	PaymentOptions,
+} from "https://esm.sh/bysquare@2.7.1/";
+import {
+	Component,
+	createRef,
+	h,
+	render,
+} from "https://esm.sh/preact@10.22.0";
 import { qrcanvas } from "https://esm.sh/qrcanvas@3.1.2/";
 
 /**
@@ -18,7 +27,7 @@ class App extends Component {
 		qrstring: "",
 		ammount: 100,
 		variable: "123",
-		iban: "SK9611000000002918599669"
+		iban: "SK9611000000002918599669",
 	};
 
 	#refCanvas = createRef();
@@ -38,8 +47,8 @@ class App extends Component {
 						type: "number",
 						name: "ammount",
 						value: this.state.ammount,
-						onInput: this.#handleChange
-					})
+						onInput: this.#handleChange,
+					}),
 				]),
 				h("label", { style: "display: block; margin-bottom: 5px;" }, [
 					"IBAN: ",
@@ -48,8 +57,8 @@ class App extends Component {
 						style: "width: 210px;",
 						name: "iban",
 						value: this.state.iban,
-						onInput: this.#handleChange
-					})
+						onInput: this.#handleChange,
+					}),
 				]),
 				h("label", { style: "display: block; margin-bottom: 5px;" }, [
 					"Variable: ",
@@ -58,19 +67,19 @@ class App extends Component {
 						style: "width: 210px;",
 						name: "variable",
 						value: this.state.variable,
-						onInput: this.#handleChange
-					})
+						onInput: this.#handleChange,
+					}),
 				]),
 				h("pre", null, this.state.qrstring),
-				h("canvas", { ref: this.#refCanvas, height: 200, width: 200 })
-			])
+				h("canvas", { ref: this.#refCanvas, height: 200, width: 200 }),
+			]),
 		]);
 	}
 
 	#handleChange = (event) => {
 		const { name, value } = event.target;
 		this.setState({
-			[name]: value
+			[name]: value,
 		}, this.#generateQrstring);
 	};
 
@@ -82,16 +91,16 @@ class App extends Component {
 					type: PaymentOptions.PaymentOrder,
 					amount: this.state.ammount,
 					bankAccounts: [{
-						iban: this.state.iban
+						iban: this.state.iban,
 					}],
 					currencyCode: CurrencyCode.EUR,
-					variableSymbol: this.state.variable
-				}
-			]
+					variableSymbol: this.state.variable,
+				},
+			],
 		});
 
 		this.setState({
-			qrstring: qrstring
+			qrstring: qrstring,
 		}, this.#setCanvas);
 	};
 
@@ -100,7 +109,7 @@ class App extends Component {
 		context.reset();
 		qrcanvas({
 			data: this.state.qrstring,
-			canvas: this.#refCanvas.current
+			canvas: this.#refCanvas.current,
 		});
 	};
 }

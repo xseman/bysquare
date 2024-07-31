@@ -1,5 +1,12 @@
-import { CurrencyCode, encode, PaymentOptions } from "https://esm.sh/bysquare@2.7.1/";
-import { html, LitElement } from "https://esm.sh/lit@3.0.0/";
+import {
+	CurrencyCode,
+	encode,
+	PaymentOptions,
+} from "https://esm.sh/bysquare@2.7.1/";
+import {
+	html,
+	LitElement,
+} from "https://esm.sh/lit@3.0.0/";
 import { qrcanvas } from "https://esm.sh/qrcanvas@3.1.2/";
 
 /**
@@ -10,7 +17,7 @@ class Bysquare extends LitElement {
 		_qrstring: { state: true },
 		_ammount: { state: true },
 		_variable: { state: true },
-		_iban: { state: true }
+		_iban: { state: true },
 	};
 
 	constructor() {
@@ -90,9 +97,9 @@ class Bysquare extends LitElement {
 					amount: this._ammount,
 					bankAccounts: [{ iban: this._iban }],
 					currencyCode: CurrencyCode.EUR,
-					variableSymbol: this._variable
-				}
-			]
+					variableSymbol: this._variable,
+				},
+			],
 		});
 
 		this._qrstring = qrstring;
@@ -106,7 +113,7 @@ class Bysquare extends LitElement {
 				ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
 				qrcanvas({
 					data: this._qrstring,
-					canvas: this.#canvas
+					canvas: this.#canvas,
 				});
 			}
 		}

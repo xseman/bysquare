@@ -1,13 +1,16 @@
-import { generate } from "npm:bysquare@2.1.0";
+import {
+	CurrencyCode,
+	encode,
+} from "npm:bysquare";
 
-const qr = await generate({
+const qr = await encode({
 	invoiceId: "random-id",
 	payments: [
 		{
 			type: 1,
 			amount: 100.0,
 			bankAccounts: [{ iban: "SK9611000000002918599669" }],
-			currencyCode: "EUR",
+			currencyCode: CurrencyCode.EUR,
 			variableSymbol: "123",
 		},
 	],

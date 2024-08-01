@@ -2,11 +2,11 @@ import {
 	CurrencyCode,
 	encode,
 	PaymentOptions,
-} from "https://esm.sh/bysquare@2.7.1/";
+} from "https://esm.sh/bysquare@latest/";
 import {
 	html,
 	LitElement,
-} from "https://esm.sh/lit@3.0.0/";
+} from "https://esm.sh/lit@3.1.0/";
 import { qrcanvas } from "https://esm.sh/qrcanvas@3.1.2/";
 
 /**

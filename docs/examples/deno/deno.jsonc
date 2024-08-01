@@ -1,5 +1,6 @@
 {
+	"lock": false,
 	"tasks": {
-		"dev": "deno run --watch --allow-all --reload --unstable ./main.ts"
+		"dev": "deno run --watch --allow-all --reload ./main.ts"
 	}
 }

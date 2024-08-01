@@ -2,7 +2,7 @@ import {
 	CurrencyCode,
 	encode,
 	PaymentOptions,
-} from "https://esm.sh/bysquare@2.7.1/";
+} from "https://esm.sh/bysquare@latest/";
 import {
 	Component,
 	createRef,

@@ -2,7 +2,7 @@ import {
 	CurrencyCode,
 	encode,
 	PaymentOptions,
-} from "https://esm.sh/bysquare@2.8.3/";
+} from "https://esm.sh/bysquare@latest/";
 import { qrcanvas } from "https://esm.sh/qrcanvas@3.1.2/";
 
 function getEncodedText(iban, amount, variable) {

@@ -49,14 +49,14 @@ Since `v1.28+` import from npm registry using `npm:` prefix.
 import {
 	decode,
 	encode,
-} from "npm:bysquare@2.8.0";
+} from "npm:bysquare@latest";
 ```
 
 ### Browser
 
 ```html
 <script type="module">
-	import { encode, decode } from "https://esm.sh/bysquare@2.8.0/";
+	import { encode, decode } from "https://esm.sh/bysquare@latest";
 </script>
 ```
 

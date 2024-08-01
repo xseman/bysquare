@@ -1,7 +1,7 @@
-// import { DataModel, generate, PaymentOptions } from "./../../../dist/index.js"
+// import { DataModel, encode, PaymentOptions } from "./../../../dist/index.js"
 import {
 	DataModel,
-	generate,
+	encode,
 	PaymentOptions,
 } from "bysquare";
 import express from "express";
@@ -32,12 +32,11 @@ const app = express();
 app.use("/", publicFolder);
 
 app.get("/qr", async (_req, res) => {
-	const qrstring = await generate(model);
+	const qrstring = await encode(model);
 	console.log(qrstring);
 	res.send(qrstring);
 });
 
-const port = 4_000;
-app.listen(port, () => {
-	console.log(`Example app listening at http://localhost:${port}`);
+app.listen(4_000, () => {
+	console.log(`Example app listening at http://localhost:${4_000}`);
 });

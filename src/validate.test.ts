@@ -2,6 +2,7 @@ import assert from "node:assert";
 import test, { describe } from "node:test";
 import { CurrencyCode } from "./types.js";
 import {
+	validateBankAccount,
 	validateBeneficiary,
 	validateBIC,
 	validateCurrencyCode,
@@ -10,6 +11,7 @@ import {
 } from "./validate.js";
 
 const aLongString = "A long string with lenght 71                                        end";
+const validIBAN = "LC14BOSL123456789012345678901234";
 
 describe("validate currency code", () => {
 	test("should pass for valid currency code", () => {
@@ -65,7 +67,7 @@ describe("validate beneficiary", () => {
 describe("validate IBAN", () => {
 	test("should pass for valid IBAN", () => {
 		assert.doesNotThrow(() => {
-			const expected = "LC14BOSL123456789012345678901234";
+			const expected = validIBAN;
 			const result = validateIBAN(expected);
 			assert.equal(result, expected);
 		});
@@ -90,5 +92,25 @@ describe("validate BIC", () => {
 	test("should throw an error for invalid BIC", () => {
 		assert.throws(() => validateBIC("Invalid length"));
 		assert.throws(() => validateBIC("1EUTDEFF"));
+	});
+});
+
+describe("validate bank account", () => {
+	test("should pass for valid bank account", () => {
+		assert.doesNotThrow(() => {
+			const expected = {
+				iban: validIBAN,
+			};
+			const result = validateBankAccount(expected);
+			assert.deepEqual(result, expected);
+		});
+	});
+	test("should throw an error for invalid bank account", () => {
+		assert.throws(() =>
+			validateBankAccount({
+				iban: "an invalid iban",
+			})
+		);
+		assert.throws(() => validateBankAccount({}));
 	});
 });

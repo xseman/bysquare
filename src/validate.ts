@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+	BankAccount,
 	Beneficiary,
 	CurrencyCode,
 } from "./types.js";
@@ -60,4 +61,12 @@ const BICSchema = z.string().regex(
 
 export function validateBIC(bic: unknown): string {
 	return BICSchema.parse(bic);
+}
+
+const BankAccountSchema = z.object({
+	iban: IBANSchema,
+	bic: BICSchema.optional(),
+});
+export function validateBankAccount(bankAccount: unknown): BankAccount {
+	return BankAccountSchema.parse(bankAccount);
 }

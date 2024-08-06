@@ -3,6 +3,7 @@ import test, { describe } from "node:test";
 import { CurrencyCode } from "./types.js";
 import {
 	validateBeneficiary,
+	validateBIC,
 	validateCurrencyCode,
 	validateIBAN,
 	validateVariableSymbol,
@@ -73,5 +74,21 @@ describe("validate IBAN", () => {
 		assert.throws(() => validateIBAN("Too short"));
 		assert.throws(() => validateIBAN(aLongString));
 		assert.throws(() => validateIBAN("1114BOSL123456789012345678901234"));
+	});
+});
+describe("validate BIC", () => {
+	test("should pass for valid BIC", () => {
+		assert.doesNotThrow(() => {
+			const expected = "DEUTDEFF";
+			const result = validateBIC(expected);
+			assert.equal(result, expected);
+			const expected2 = "DEUTDEFF500";
+			const result2 = validateBIC(expected2);
+			assert.equal(result2, expected2);
+		});
+	});
+	test("should throw an error for invalid BIC", () => {
+		assert.throws(() => validateBIC("Invalid length"));
+		assert.throws(() => validateBIC("1EUTDEFF"));
 	});
 });

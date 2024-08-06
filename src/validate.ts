@@ -52,3 +52,12 @@ const IBANSchema = z.string()
 export function validateIBAN(iban: unknown): string {
 	return IBANSchema.parse(iban);
 }
+
+const BICSchema = z.string().regex(
+	/^(?=[A-Z]{6}[A-Z0-9]{2}(?:[A-Z0-9]{3})?$)/,
+	"Invalid BIC format",
+);
+
+export function validateBIC(bic: unknown): string {
+	return BICSchema.parse(bic);
+}

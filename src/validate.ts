@@ -1,9 +1,12 @@
 import { z } from "zod";
-import { CurrencyCode } from "./types.js";
+import {
+	Beneficiary,
+	CurrencyCode,
+} from "./types.js";
 
 const CurrencyCodeSchema = z.nativeEnum(CurrencyCode);
 
-export function validateCurrencyCode(currencyCode: unknown) {
+export function validateCurrencyCode(currencyCode: unknown): CurrencyCode {
 	return CurrencyCodeSchema.parse(currencyCode);
 }
 
@@ -18,6 +21,23 @@ const VariableSymbolSchema2 = IntegerSchema.refine((num) => num >= 0 && num <= 9
 	message: "Variable symbol must be between 0 and 9999999999",
 });
 
-export function validateVariableSymbol(variableSymbol: unknown) {
+export function validateVariableSymbol(variableSymbol: unknown): number {
 	return VariableSymbolSchema2.parse(variableSymbol);
+}
+
+const BeneficiarySchema = z.object({
+	name: z.string().max(70).optional(),
+	street: z.string().max(70).optional(),
+	city: z.string().max(70).optional(),
+}).superRefine((data, ctx) => {
+	if (!data.name && !data.street && !data.city) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.custom,
+			message: "At least one of name, street, or city of beneficiary must be defined",
+		});
+	}
+});
+
+export function validateBeneficiary(beneficiary: unknown): Beneficiary {
+	return BeneficiarySchema.parse(beneficiary);
 }

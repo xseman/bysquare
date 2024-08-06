@@ -41,3 +41,14 @@ const BeneficiarySchema = z.object({
 export function validateBeneficiary(beneficiary: unknown): Beneficiary {
 	return BeneficiarySchema.parse(beneficiary);
 }
+const IBANSchema = z.string()
+	.min(15, "IBAN must be at least 15 characters long")
+	.max(34, "IBAN cannot be more than 34 characters long")
+	.regex(
+		/^[A-Z]{2}[0-9A-Z]{13,32}$/,
+		"IBAN must start with two uppercase letters followed by up to 32 alphanumeric characters",
+	);
+
+export function validateIBAN(iban: unknown): string {
+	return IBANSchema.parse(iban);
+}

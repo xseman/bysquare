@@ -4,6 +4,7 @@ import { CurrencyCode } from "./types.js";
 import {
 	validateBeneficiary,
 	validateCurrencyCode,
+	validateIBAN,
 	validateVariableSymbol,
 } from "./validate.js";
 
@@ -38,7 +39,7 @@ describe("validate variable symbol", () => {
 	});
 });
 
-describe("validate variable beneficiary", () => {
+describe("validate beneficiary", () => {
 	test("should pass for valid beneficiary", () => {
 		assert.doesNotThrow(() => {
 			const expected = {
@@ -57,5 +58,20 @@ describe("validate variable beneficiary", () => {
 				name: aLongString,
 			})
 		);
+	});
+});
+
+describe("validate IBAN", () => {
+	test("should pass for valid IBAN", () => {
+		assert.doesNotThrow(() => {
+			const expected = "LC14BOSL123456789012345678901234";
+			const result = validateIBAN(expected);
+			assert.equal(result, expected);
+		});
+	});
+	test("should throw an error for invalid IBAN", () => {
+		assert.throws(() => validateIBAN("Too short"));
+		assert.throws(() => validateIBAN(aLongString));
+		assert.throws(() => validateIBAN("1114BOSL123456789012345678901234"));
 	});
 });

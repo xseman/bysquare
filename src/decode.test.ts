@@ -10,14 +10,14 @@ import { encode } from "./encode.js";
 import {
 	CurrencyCode,
 	DataModel,
-	PaymentOptions,
+	PaymentOptionsFlag,
 } from "./types.js";
 
 export const payload = {
 	invoiceId: "random-id",
 	payments: [
 		{
-			type: PaymentOptions.PaymentOrder,
+			type: PaymentOptionsFlag.PaymentOrder,
 			amount: 100.0,
 			bankAccounts: [
 				{ iban: "SK9611000000002918599669" },
@@ -66,7 +66,7 @@ test("decode - serialization", () => {
 		invoiceId: "random-id",
 		payments: [
 			{
-				type: PaymentOptions.PaymentOrder,
+				type: PaymentOptionsFlag.PaymentOrder,
 				amount: 100,
 				currencyCode: CurrencyCode.EUR,
 				variableSymbol: "123",
@@ -105,7 +105,7 @@ test("decode - multiple data", () => {
 				payments: [{
 					amount: 25.30,
 					currencyCode: CurrencyCode.EUR,
-					type: PaymentOptions.PaymentOrder,
+					type: PaymentOptionsFlag.PaymentOrder,
 					bankAccounts: [{ iban: "SK4523585719461382368397" }],
 					beneficiary: { name: "John Doe" },
 				}],
@@ -118,7 +118,7 @@ test("decode - multiple data", () => {
 				payments: [{
 					amount: 45.55,
 					currencyCode: CurrencyCode.EUR,
-					type: PaymentOptions.PaymentOrder,
+					type: PaymentOptionsFlag.PaymentOrder,
 					bankAccounts: [{ iban: "SK2738545237537948273958" }],
 					beneficiary: { name: "Jane Doe" },
 					paymentNote: "bendzín",

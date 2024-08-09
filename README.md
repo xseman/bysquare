@@ -163,6 +163,12 @@ to use without additional setup, showing its improved maturity.
 
 The latest version of Chrome, Firefox, and Safari.
 
+## Troubleshooting & Recommendations
+
+### Encoded data are without diacritics
+
+The library removes all diacritics from the input data to ensure maximum compatibility, as not all banks support diacritics, which may lead to errors. If you need to retain diacritics, disable deburr option when encoding data - `encode(model, { deburr: false })`.
+
 ## Related
 
 - <https://bysquare.com/>

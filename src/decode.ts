@@ -8,7 +8,7 @@ import {
 	Day,
 	type DirectDebit,
 	Payment,
-	PaymentOptions,
+	PaymentOptionsFlag as PaymentFlag,
 	Periodicity,
 	type StandingOrder,
 	Version,
@@ -99,10 +99,10 @@ export function deserialize(qr: string): DataModel {
 
 		// narrowing payment type
 		switch (payment.type) {
-			case PaymentOptions.PaymentOrder:
+			case PaymentFlag.PaymentOrder:
 				break;
 
-			case PaymentOptions.StandingOrder:
+			case PaymentFlag.StandingOrder:
 				payment = {
 					...payment,
 					day: Number(data.shift()) as Day,
@@ -112,7 +112,7 @@ export function deserialize(qr: string): DataModel {
 				} satisfies StandingOrder;
 				break;
 
-			case PaymentOptions.DirectDebit:
+			case PaymentFlag.DirectDebit:
 				payment = {
 					...payment,
 					directDebitScheme: Number(data.shift()),
@@ -171,7 +171,7 @@ interface Header {
  * the input header array into four nibbles representing the bysquare header
  * values.
  *
- * @param header 2-bytes sie
+ * @param header 2-bytes size
  */
 function bysquareHeaderDecoder(header: Uint8Array): Header {
 	const bytes = (header[0] << 8) | header[1];
@@ -212,8 +212,9 @@ export function decode(qr: string): DataModel {
 	}
 
 	const bysquareHeader = bytes.slice(0, 2);
-	if ((bysquareHeaderDecoder(bysquareHeader).version > Version["1.1.0"])) {
-		throw new Error("Unsupported Bysquare version");
+	const decodedBysquareHeader = bysquareHeaderDecoder(bysquareHeader);
+	if ((decodedBysquareHeader.version > Version["1.1.0"])) {
+		throw new Error(`Unsupported Bysquare version '${decodedBysquareHeader.version}' in header detected. Only '0' and '1' are supported`);
 	}
 
 	/**

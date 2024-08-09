@@ -4,7 +4,8 @@ import { base32hex } from "rfc4648";
 import { deburr } from "./deburr.js";
 import {
 	DataModel,
-	PaymentOptions,
+	PaymentOptionsFlag,
+	Version,
 } from "./types.js";
 
 /**
@@ -32,9 +33,17 @@ export function headerBysquare(
 		0x00, 0x00
 	],
 ): Uint8Array {
-	const isValid = header.every((nibble) => 0 <= nibble && nibble <= 15);
-	if (!isValid) {
-		throw new Error("Invalid header byte value, valid range <0,15>");
+	if (header[0] < 0 || header[0] > 15) {
+		throw new Error("Invalid 'BySquareType' value in header, valid range <0,15>");
+	}
+	if (header[1] < 0 || header[1] > 15) {
+		throw new Error("Invalid 'Version' value in header, valid range <0,15>");
+	}
+	if (header[2] < 0 || header[2] > 15) {
+		throw new Error("Invalid 'DocumentType' value in header, valid range <0,15>");
+	}
+	if (header[3] < 0 || header[3] > 15) {
+		throw new Error("Invalid 'Reserved' value in header, valid range <0,15>");
 	}
 
 	const [
@@ -114,7 +123,7 @@ export function serialize(data: DataModel): string {
 			serialized.push(ba.bic);
 		}
 
-		if (p.type === PaymentOptions.StandingOrder) {
+		if (p.type === PaymentOptionsFlag.StandingOrder) {
 			serialized.push("1");
 			serialized.push(p.day?.toString());
 			serialized.push(p.month?.toString());
@@ -124,7 +133,7 @@ export function serialize(data: DataModel): string {
 			serialized.push("0");
 		}
 
-		if (p.type === PaymentOptions.DirectDebit) {
+		if (p.type === PaymentOptionsFlag.DirectDebit) {
 			serialized.push("1");
 			serialized.push(p.directDebitScheme?.toString());
 			serialized.push(p.directDebitType?.toString());
@@ -202,11 +211,10 @@ export function encode(
 	const lzmaBody = Uint8Array.from(compressed.subarray(13));
 
 	const output = Uint8Array.from([
-		// FIXME:
-		// for now other implementation of bysquare doesn't recognize header if
-		// version is specified like TatraBanka
+		// NOTE: Newer version 1.1.0 is not supported by all apps (e.g., TatraBanka).
+		// We recommend using version "1.0.0" for better compatibility.
 		// ...headerBysquare([0x00, Version["1.1.0"], 0x00, 0x00]),
-		...headerBysquare([0x00, 0x00, 0x00, 0x00]),
+		...headerBysquare([0x00, Version["1.0.0"], 0x00, 0x00]),
 		...headerDataLength(withChecksum.byteLength),
 		...lzmaBody,
 	]);

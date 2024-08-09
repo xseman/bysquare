@@ -1,5 +1,5 @@
-/** Used to map Latin Unicode letters to basic Latin letters. */
 /** dprint-ignore */
+/** Used to map Latin Unicode letters to basic Latin letters. */
 const deburredLettersMap: { [key: string]: string; } = {
 	// Latin-1 Supplement block.
 	'\xc0': 'A',  '\xc1': 'A', '\xc2': 'A', '\xc3': 'A', '\xc4': 'A', '\xc5': 'A',
@@ -61,14 +61,20 @@ export function deburrLetter(key: string) {
 	return deburredLettersMap[key];
 }
 
-/** Used to match Latin Unicode letters (excluding mathematical operators). */
+/**
+ * Used to match Latin Unicode letters (excluding mathematical operators).
+ */
 const reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
 
-/** Used to compose unicode character classes. */
+/**
+ * Used to compose unicode character classes.
+ */
 const rsComboMarksRange = "\\u0300-\\u036f\\ufe20-\\ufe23",
 	rsComboSymbolsRange = "\\u20d0-\\u20f0";
 
-/** Used to compose unicode capture groups. */
+/**
+ * Used to compose unicode capture groups.
+ */
 const rsCombo = "[" + rsComboMarksRange + rsComboSymbolsRange + "]";
 
 /**
@@ -78,7 +84,7 @@ const rsCombo = "[" + rsComboMarksRange + rsComboSymbolsRange + "]";
 const reComboMark = RegExp(rsCombo, "g");
 
 /**
- * @desc Deburrs string by converting Latin-1 Supplement and Latin Extended-A letters to basic Latin letters and removing [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks).
+ * Deburrs string by converting Latin-1 Supplement and Latin Extended-A letters to basic Latin letters and removing [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks).
  */
 export function deburr(text: string): string {
 	return text.replace(reLatin, deburrLetter).replace(reComboMark, "");

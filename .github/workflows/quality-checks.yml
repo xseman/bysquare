@@ -1,10 +1,12 @@
-name: tests
+name: quality checks
 
 on:
+    pull_request:
+        branches:
+            - master
     push:
         branches:
             - master
-            - master/*
         paths:
             - src/**.ts
             - package.json
@@ -22,3 +24,14 @@ jobs:
             - run: |
                   npm install --silent
                   npm test
+
+    fmt:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: ".nvmrc"
+            - run: |
+                  npm install --silent
+                  npm run fmt:check

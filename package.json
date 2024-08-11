@@ -20,6 +20,7 @@
 		"prebuild": "tsc --build --clean",
 		"build": "tsc --build",
 		"fmt": "dprint fmt",
+		"fmt:check": "dprint check",
 		"typecheck": "tsc --noEmit",
 		"version": "git checkout develop && npm test",
 		"postversion": "echo 'Now run npm run build && npm publish'",

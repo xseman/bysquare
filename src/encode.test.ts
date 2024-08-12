@@ -11,14 +11,14 @@ import {
 import {
 	CurrencyCode,
 	DataModel,
-	PaymentOptionsFlag,
+	PaymentOptions,
 } from "./types.js";
 
 export const payload = {
 	invoiceId: "random-id",
 	payments: [
 		{
-			type: PaymentOptionsFlag.PaymentOrder,
+			type: PaymentOptions.PaymentOrder,
 			amount: 100.0,
 			bankAccounts: [
 				{ iban: "SK9611000000002918599669" },

@@ -4,9 +4,11 @@ import { base32hex } from "rfc4648";
 import { deburr } from "./deburr.js";
 import {
 	DataModel,
-	PaymentOptionsFlag,
+	PaymentOptions,
 	Version,
 } from "./types.js";
+
+const MAX_COMPRESSED_SIZE = 131_072; // 2^17
 
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare
@@ -123,7 +125,7 @@ export function serialize(data: DataModel): string {
 			serialized.push(ba.bic);
 		}
 
-		if (p.type === PaymentOptionsFlag.StandingOrder) {
+		if (p.type === PaymentOptions.StandingOrder) {
 			serialized.push("1");
 			serialized.push(p.day?.toString());
 			serialized.push(p.month?.toString());
@@ -133,7 +135,7 @@ export function serialize(data: DataModel): string {
 			serialized.push("0");
 		}
 
-		if (p.type === PaymentOptionsFlag.DirectDebit) {
+		if (p.type === PaymentOptions.DirectDebit) {
 			serialized.push("1");
 			serialized.push(p.directDebitScheme?.toString());
 			serialized.push(p.directDebitType?.toString());

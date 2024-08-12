@@ -8,7 +8,7 @@ import {
 	Day,
 	type DirectDebit,
 	Payment,
-	PaymentOptionsFlag as PaymentFlag,
+	PaymentOptions,
 	Periodicity,
 	type StandingOrder,
 	Version,
@@ -99,10 +99,10 @@ export function deserialize(qr: string): DataModel {
 
 		// narrowing payment type
 		switch (payment.type) {
-			case PaymentFlag.PaymentOrder:
+			case PaymentOptions.PaymentOrder:
 				break;
 
-			case PaymentFlag.StandingOrder:
+			case PaymentOptions.StandingOrder:
 				payment = {
 					...payment,
 					day: Number(data.shift()) as Day,
@@ -112,7 +112,7 @@ export function deserialize(qr: string): DataModel {
 				} satisfies StandingOrder;
 				break;
 
-			case PaymentFlag.DirectDebit:
+			case PaymentOptions.DirectDebit:
 				payment = {
 					...payment,
 					directDebitScheme: Number(data.shift()),
@@ -214,7 +214,9 @@ export function decode(qr: string): DataModel {
 	const bysquareHeader = bytes.slice(0, 2);
 	const decodedBysquareHeader = bysquareHeaderDecoder(bysquareHeader);
 	if ((decodedBysquareHeader.version > Version["1.1.0"])) {
-		throw new Error(`Unsupported Bysquare version '${decodedBysquareHeader.version}' in header detected. Only '0' and '1' are supported`);
+		throw new Error(
+			`Unsupported Bysquare version '${decodedBysquareHeader.version}' in header detected. Only '0' and '1' are supported`,
+		);
 	}
 
 	/**

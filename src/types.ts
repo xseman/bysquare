@@ -101,7 +101,7 @@ export type Day =
  * - `StandingOrder`: trvalý príkaz, údaje sa vyplnia do StandingOrderExt
  * - `DirectDebit`: inkaso, údaje sa vyplnia do DirectDebitExt
  */
-export enum PaymentOptionsFlag {
+export enum PaymentOptions {
 	/**
 	 * Platobný príkaz
 	 */
@@ -160,7 +160,7 @@ export enum DirectDebitScheme {
 
 /**
  * Typ inkasa. Uvádza ja jedna z možností:
-*
+ *
  * Maximálna dĺžka 1
  *
  * - one-off - jednorázové inkaso
@@ -223,7 +223,7 @@ export type SimplePayment = {
 	 * Dátum splatnosti vo formáte [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) `"RRRR-MM-DD"`.
 	 * Vprípade trvalého príkazu označuje dátum prvej platby.
 	 *
-	 * Formát `YYYYMMDD`
+	 * Formát `YYYY-MM-DD`
 	 */
 	paymentDueDate?: string;
 	/**
@@ -268,14 +268,14 @@ export type SimplePayment = {
 };
 
 export type PaymentOrder = SimplePayment & {
-	type: PaymentOptionsFlag.PaymentOrder;
+	type: PaymentOptions.PaymentOrder;
 };
 
 /**
  * Rozšírenie platobných údajov o údaje pre nastavenie trvalého príkazu.
  */
 export type StandingOrder = SimplePayment & {
-	type: PaymentOptionsFlag.StandingOrder;
+	type: PaymentOptions.StandingOrder;
 	/**
 	 * Deň platby vyplývajúci z opakovania (Periodicity). Deň v mesiaci je číslo
 	 * medzi 1 a 31. Deň v týždni je číslo medzi 1 a 7 (1 = pondelok, 2 =utorok,
@@ -302,7 +302,7 @@ export type StandingOrder = SimplePayment & {
  * Rozšírenie platobných údajov o údaje pre nastavenie a identifikáciu inkasa.
  */
 export type DirectDebit = SimplePayment & {
-	type: PaymentOptionsFlag.DirectDebit;
+	type: PaymentOptions.DirectDebit;
 	directDebitScheme?: DirectDebitScheme;
 	directDebitType?: DirectDebitType;
 	/**

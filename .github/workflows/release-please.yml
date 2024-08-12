@@ -2,7 +2,8 @@ name: release-please
 
 on:
     workflow_run:
-        workflows: [tests]
+        workflows:
+            - "quality checks"
         types:
             - completed
     # manual

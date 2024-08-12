@@ -215,7 +215,7 @@ export function decode(qr: string): DataModel {
 	const decodedBysquareHeader = bysquareHeaderDecoder(bysquareHeader);
 	if ((decodedBysquareHeader.version > Version["1.1.0"])) {
 		throw new Error(
-			`Unsupported Bysquare version '${decodedBysquareHeader.version}' in header detected. Only '0' and '1' are supported`,
+			`Unsupported Bysquare version '${decodedBysquareHeader.version}' in header detected. Only '0' and '1' values are supported`,
 		);
 	}
 

@@ -69,8 +69,8 @@ export function headerBysquare(
  * combination with CRC32 in bytes.
  */
 export function headerDataLength(length: number): Uint8Array {
-	if (length >= 131072 /** 2^17 */) {
-		throw new Error("The maximum compressed data size has been reached");
+	if (length >= MAX_COMPRESSED_SIZE) {
+		throw new Error(`Data size ${length} exceeds limit of ${MAX_COMPRESSED_SIZE} bytes`);
 	}
 
 	const header = new ArrayBuffer(2);

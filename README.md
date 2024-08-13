@@ -60,12 +60,6 @@ import {
 </script>
 ```
 
-## How it works
-
-### Encoding sequence
-
-![logic](./docs/uml/logic.svg)
-
 ## Usage
 
 ### Encode
@@ -142,6 +136,12 @@ qrstring argument should be a valid QR code string.
 ```sh
 npx bysquare --decode <qrstring>
 ```
+
+## How it works
+
+### Encoding sequence
+
+![logic](./docs/uml/logic.svg)
 
 ## Platform support
 

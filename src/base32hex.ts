@@ -4,20 +4,21 @@ const base32Hex = {
 };
 
 export function encode(
-	uint8Array: Uint8Array,
+	input: Uint8Array,
 	addPadding: boolean = true,
 ): string {
 	const bitArray = Array<string>();
-	const hexBase32Array = Array<string>();
 
-	for (let i = 0; i < uint8Array.length; i++) {
+	for (let i = 0; i < input.length; i++) {
 		// Convert byte to binary and pad with leading zeros
-		const binaryString = uint8Array[i].toString(2).padStart(8, "0");
+		const binaryString = input[i].toString(2).padStart(8, "0");
 
 		bitArray.push(binaryString);
 	}
 
+	const hexBase32Array = Array<string>();
 	const bits = bitArray.join("");
+
 	for (let i = 0; i < bits.length; i += base32Hex.bits) {
 		const segment = bits.substring(i, i + base32Hex.bits);
 		const character = base32Hex.chars[parseInt(segment, 2)];
@@ -35,27 +36,27 @@ export function encode(
 }
 
 export function decode(
-	base32hex: string,
+	input: string,
 	isLoose: boolean = false,
 ): Uint8Array {
 	// If loose mode is enabled, fix lowercase and correct padding
 	if (isLoose) {
 		// Convert lowercase characters to uppercase
-		base32hex = base32hex.toUpperCase();
+		input = input.toUpperCase();
 
 		// Correct missing padding characters (=)
 		// Base32Hex strings should be a multiple of 8 characters
-		const paddingNeeded = (8 - (base32hex.length % 8)) % 8;
-		base32hex += "=".repeat(paddingNeeded);
+		const paddingNeeded = (8 - (input.length % 8)) % 8;
+		input += "=".repeat(paddingNeeded);
 	}
 
 	// Remove padding
-	base32hex = base32hex.replace(/=+$/, "");
+	input = input.replace(/=+$/, "");
 
 	const bitsArray = Array<string>();
 
-	for (let i = 0; i < base32hex.length; i++) {
-		const index = base32Hex.chars.indexOf(base32hex[i]);
+	for (let i = 0; i < input.length; i++) {
+		const index = base32Hex.chars.indexOf(input[i]);
 		if (index === -1) {
 			throw new Error("Invalid base32hex string");
 		}

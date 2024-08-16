@@ -137,6 +137,8 @@ export type BankAccount = {
 	 * Formát [ISO 9362](https://en.wikipedia.org/wiki/ISO_9362) (swift) 8 or 11 characters long
 	 *
 	 * Pattern: `[A-Z]{4}[A-Z]{2}[A-Z\d]{2}([A-Z\d]{3})?`
+	 *
+	 * @example "TATRSKBX"
 	 */
 	bic?: string;
 };
@@ -333,7 +335,7 @@ export type DirectDebit = SimplePayment & {
 	 * Dátum platnosti inkasa. Platnosť inkasa zaníka dňom tohto dátumu.
 	 *
 	 * Maximálna dĺžka 8
-	 * Formát YYYYMMDD
+	 * Formát `YYYYMMDD`
 	 */
 	validTillDate?: string;
 };

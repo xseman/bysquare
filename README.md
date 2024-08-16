@@ -22,9 +22,10 @@ transformed into images depends on how you implement it. See
 
 ## Installation
 
-**NOTE**: This package is native [ESM][mozzila-esm] and no longer provides a
-CommonJS export. If your project uses CommonJS, you will have to convert to ESM
-or use the dynamic [`import()`][mozzila-import] function.
+> [!NOTE]
+> This package is native [ESM][mozzila-esm] and no longer provides a
+> CommonJS export. If your project uses CommonJS, you will have to convert to ESM
+> or use the dynamic [`import()`][mozzila-import] function.
 
 [mozzila-esm]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
 [mozzila-import]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import

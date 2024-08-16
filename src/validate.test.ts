@@ -1,7 +1,9 @@
-import assert, { doesNotThrow } from "node:assert";
+import assert from "node:assert";
 import test, { describe } from "node:test";
+import { PaymentOptions } from "./types.js";
 import {
 	validateBankAccount,
+	validateDataModel,
 	validateSimplePayment,
 	ValidationError,
 	ValidationErrorMessage,
@@ -104,4 +106,28 @@ describe("validateSimplePayment", () => {
 			new ValidationError(ValidationErrorMessage.InvalidDate, `${path}.paymentDueDate`),
 		);
 	});
+});
+
+describe("validateDataModel", () => {
+	assert.doesNotThrow(() =>
+		validateDataModel({
+			payments: [{
+				type: PaymentOptions.PaymentOrder,
+				currencyCode: "EUR",
+				bankAccounts: [validBankAccount],
+			}],
+		})
+	);
+
+	assert.throws(
+		() =>
+			validateDataModel({
+				payments: [{
+					type: PaymentOptions.PaymentOrder,
+					currencyCode: "E",
+					bankAccounts: [validBankAccount],
+				}],
+			}),
+		new ValidationError(ValidationErrorMessage.InvalidCurrencyCode, `payments[0].currencyCode`),
+	);
 });

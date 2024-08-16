@@ -1,4 +1,4 @@
-import assert from "node:assert";
+import assert, { doesNotThrow } from "node:assert";
 import test, { describe } from "node:test";
 import {
 	validateBankAccount,
@@ -8,6 +8,9 @@ import {
 } from "./validate.js";
 
 const iban = "LC14BOSL123456789012345678901234";
+const validBankAccount = {
+	iban,
+};
 
 describe("validateBankAccount", () => {
 	const path = "payments[0].bankAccounts[0]";
@@ -19,11 +22,7 @@ describe("validateBankAccount", () => {
 				}, path),
 			new ValidationError(ValidationErrorMessage.InvalidIBAN, `${path}.iban`),
 		);
-		assert.doesNotThrow(() =>
-			validateBankAccount({
-				iban,
-			}, path)
-		);
+		assert.doesNotThrow(() => validateBankAccount(validBankAccount, path));
 	});
 
 	test("validate BIC", () => {
@@ -58,35 +57,48 @@ describe("validateSimplePayment", () => {
 		assert.throws(
 			() => {
 				validateSimplePayment({
-					bankAccounts: [{
-						iban,
-					}, {
+					bankAccounts: [validBankAccount, {
 						iban: "123",
 					}],
 					currencyCode: "EUR",
 				}, path);
 			},
-			new ValidationError(
-				ValidationErrorMessage.InvalidIBAN,
-				`${path}.bankAccounts[1].iban`,
-			),
+			new ValidationError(ValidationErrorMessage.InvalidIBAN, `${path}.bankAccounts[1].iban`),
 		);
 	});
 
 	test("validate currencyCode", () => {
 		assert.doesNotThrow(() =>
 			validateSimplePayment({
-				bankAccounts: [],
+				bankAccounts: [validBankAccount],
 				currencyCode: "EUR",
 			}, path)
 		);
 		assert.throws(
 			() =>
 				validateSimplePayment({
-					bankAccounts: [],
+					bankAccounts: [validBankAccount],
 					currencyCode: "e",
 				}, path),
 			new ValidationError(ValidationErrorMessage.InvalidCurrencyCode, `${path}.currencyCode`),
+		);
+	});
+
+	test("validate paymentDueDate", () => {
+		assert.doesNotThrow(() =>
+			validateSimplePayment({
+				bankAccounts: [validBankAccount],
+				currencyCode: "EUR",
+				paymentDueDate: "2024-08-08",
+			}, path)
+		);
+
+		assert.throws(() =>
+			validateSimplePayment({
+				bankAccounts: [validBankAccount],
+				currencyCode: "EUR",
+				paymentDueDate: "2024-08-52",
+			}, path)
 		);
 	});
 });

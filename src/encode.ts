@@ -5,7 +5,10 @@ import { deburr } from "./deburr.js";
 import {
 	DataModel,
 	PaymentOptions,
+	Version,
 } from "./types.js";
+
+const MAX_COMPRESSED_SIZE = 131_072; // 2^17
 
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare
@@ -32,9 +35,17 @@ export function headerBysquare(
 		0x00, 0x00
 	],
 ): Uint8Array {
-	const isValid = header.every((nibble) => 0 <= nibble && nibble <= 15);
-	if (!isValid) {
-		throw new Error("Invalid header byte value, valid range <0,15>");
+	if (header[0] < 0 || header[0] > 15) {
+		throw new Error(`Invalid BySquareType value '${header[0]}' in header, valid range <0,15>`);
+	}
+	if (header[1] < 0 || header[1] > 15) {
+		throw new Error(`Invalid Version value '${header[1]}' in header, valid range <0,15>`);
+	}
+	if (header[2] < 0 || header[2] > 15) {
+		throw new Error(`Invalid DocumentType value '${header[2]}' in header, valid range <0,15>`);
+	}
+	if (header[3] < 0 || header[3] > 15) {
+		throw new Error(`Invalid Reserved value '${header[3]}' in header, valid range <0,15>`);
 	}
 
 	const [
@@ -58,8 +69,8 @@ export function headerBysquare(
  * combination with CRC32 in bytes.
  */
 export function headerDataLength(length: number): Uint8Array {
-	if (length >= 131072 /** 2^17 */) {
-		throw new Error("The maximum compressed data size has been reached");
+	if (length >= MAX_COMPRESSED_SIZE) {
+		throw new Error(`Data size ${length} exceeds limit of ${MAX_COMPRESSED_SIZE} bytes`);
 	}
 
 	const header = new ArrayBuffer(2);
@@ -202,11 +213,10 @@ export function encode(
 	const lzmaBody = Uint8Array.from(compressed.subarray(13));
 
 	const output = Uint8Array.from([
-		// FIXME:
-		// for now other implementation of bysquare doesn't recognize header if
-		// version is specified like TatraBanka
+		// NOTE: Newer version 1.1.0 is not supported by all apps (e.g., TatraBanka).
+		// We recommend using version "1.0.0" for better compatibility.
 		// ...headerBysquare([0x00, Version["1.1.0"], 0x00, 0x00]),
-		...headerBysquare([0x00, 0x00, 0x00, 0x00]),
+		...headerBysquare([0x00, Version["1.0.0"], 0x00, 0x00]),
 		...headerDataLength(withChecksum.byteLength),
 		...lzmaBody,
 	]);

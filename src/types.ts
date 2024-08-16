@@ -6,13 +6,15 @@
  */
 export enum Version {
 	/**
-	 * 2013-02-22
-	 * Created this document from original by square specifications
+	 * Created this document from original by square specifications.
+	 *
+	 * **Released Date:** 2013-02-22
 	 */
 	"1.0.0" = 0x00,
 	/**
-	 * 2015-06-24
 	 * Added fields for beneficiary name and address
+	 *
+	 * **Released Date:** 2015-06-24
 	 */
 	"1.1.0" = 0x01,
 }
@@ -20,19 +22,19 @@ export enum Version {
 /**
  * Kalendárny mesiac.
  */
-export enum MonthClassifier {
-	January = 1,
-	February = 2,
-	March = 4,
-	April = 8,
-	May = 16,
-	June = 32,
-	July = 64,
-	August = 128,
-	September = 256,
-	October = 512,
-	November = 1_024,
-	December = 2_048,
+export enum MonthFlag {
+	January = 1 << 0,
+	February = 1 << 1,
+	March = 1 << 2,
+	April = 1 << 3,
+	May = 1 << 4,
+	June = 1 << 5,
+	July = 1 << 6,
+	August = 1 << 7,
+	September = 1 << 8,
+	October = 1 << 9,
+	November = 1 << 10,
+	December = 1 << 11,
 }
 
 /**
@@ -95,14 +97,23 @@ export type Day =
  * Možnosti platby sa dajú kombinovať. Oddeľujú sa medzerou a treba uviesť vždy
  * aspoň jednu z možností:
  *
- * - paymentorder: platobný príkaz
- * - standingorder: trvalý príkaz, údaje sa vyplnia do StandingOrderExt
- * - directdebit: inkaso, údaje sa vyplnia do DirectDebitExt
+ * - `PaymentOrder`: platobný príkaz
+ * - `StandingOrder`: trvalý príkaz, údaje sa vyplnia do StandingOrderExt
+ * - `DirectDebit`: inkaso, údaje sa vyplnia do DirectDebitExt
  */
 export enum PaymentOptions {
-	PaymentOrder = 1,
-	StandingOrder = 2,
-	DirectDebit = 4,
+	/**
+	 * Platobný príkaz
+	 */
+	PaymentOrder = 1 << 0,
+	/**
+	 * Trvalý príkaz, údaje sa vyplnia do StandingOrderExt
+	 */
+	StandingOrder = 1 << 1,
+	/**
+	 * Inkaso, údaje sa vyplnia do DirectDebitExt
+	 */
+	DirectDebit = 1 << 2,
 }
 
 /**
@@ -110,21 +121,24 @@ export enum PaymentOptions {
  */
 export type BankAccount = {
 	/**
-	 * Maximálna dĺžka 34
-	 * Pattern: [A-Z]{2}[0-9]{2}[A-Z0-9]{0,30}
-	 *
 	 * Medzinárodné číslo bankového účtu vo formáte IBAN. Príklad:
-	 * "SK8209000000000011424060". Viac na
-	 * http://www.sbaonline.sk/sk/projekty/financne-vzdelavanie/slovnik-bankovych-pojmov/iii/.
+	 *
+	 * Maximálna dĺžka 34
+	 *
+	 * Pattern: `[A-Z]{2}[0-9]{2}[A-Z0-9]{0,30}`
+	 *
+	 * @example `"SK8209000000000011424060"`
 	 */
 	iban: string;
 
 	/**
-	 * Formát ISO 9362 (swift) 8 or 11 characters long
-	 * Pattern: [A-Z]{4}[A-Z]{2}[A-Z\d]{2}([A-Z\d]{3})?
-	 *
 	 * Medzinárodný bankový identifikačný kód (z ang. Bank Identification Code).
-	 * Viac na http://www.sbaonline.sk/sk/projekty/financne-vzdelavanie/slovnik-bankovych-pojmov/bbb/bic
+	 *
+	 * Formát [ISO 9362](https://en.wikipedia.org/wiki/ISO_9362) (swift) 8 or 11 characters long
+	 *
+	 * Pattern: `[A-Z]{4}[A-Z]{2}[A-Z\d]{2}([A-Z\d]{3})?`
+	 *
+	 * @example "TATRSKBX"
 	 */
 	bic?: string;
 };
@@ -132,104 +146,120 @@ export type BankAccount = {
 /**
  * Inksaná schéma. Uvádza ja jedna z možností:
  *
- * SEPA - Inkaso zodpovedá schéme
- * SEPA. other - iné
+ * - SEPA - Inkaso zodpovedá schéme
+ * - SEPA. other - iné
  */
 export enum DirectDebitScheme {
+	/**
+	 * other - iné
+	 */
 	Other = 0,
+	/**
+	 * SEPA - Inkaso zodpovedá schéme
+	 */
 	Sepa = 1,
 }
 
 /**
- * Maximálna dĺžka 1
- *
  * Typ inkasa. Uvádza ja jedna z možností:
  *
- * one-off - jednorázové inkaso
- * recurrent - opakované inkaso
+ * Maximálna dĺžka 1
+ *
+ * - one-off - jednorázové inkaso
+ * - recurrent - opakované inkaso
  */
 export enum DirectDebitType {
+	/**
+	 * Jednorázové inkaso
+	 */
 	OneOff = 0,
+	/**
+	 * Opakované inkaso
+	 */
 	Recurrent = 1,
 }
 
 export type Beneficiary = {
 	/**
-	 * Maximálna dĺžka 70
-	 *
 	 * Rozšírenie o meno príjemcu
+	 *
+	 * Maximálna dĺžka 70
 	 */
 	name?: string;
 	/**
-	 * Maximálna dĺžka 70
-	 *
 	 * Rozšírenie o adresu príjemcu
+	 *
+	 * Maximálna dĺžka 70
 	 */
 	street?: string;
 	/**
-	 * Maximálna dĺžka 70
-	 *
 	 * Rozšírenie o adresu príjemcu (druhý riadok)
+	 *
+	 * Maximálna dĺžka 70
 	 */
 	city?: string;
 };
 
 export type SimplePayment = {
 	/**
-	 * Maximálna dĺžka 15
-	 *
 	 * Čiastka platby. Povolené sú len kladné hodnoty. Desatinná čast je
 	 * oddelená bodkou. Môže ostať nevyplnené, napríklad pre dobrovoľný
-	 * príspevok (donations). Príklad: Tisíc sa uvádza ako "1000". Jedna celá
-	 * deväťdesiatdeväť sa uvádza ako "1.99". Desať celých peťdesiat sa uvádza
-	 * ako "10.5". Nula celá nula osem sa uvádza ako "0.08".
+	 * príspevok (donations).
+	 *
+	 * Príklad: Tisíc sa uvádza ako `1000`. Jedna celá
+	 * deväťdesiatdeväť sa uvádza ako `1.99`. Desať celých peťdesiat sa uvádza
+	 * ako `10.5`. Nula celá nula osem sa uvádza ako `0.08`.
+	 *
+	 * Maximálna dĺžka 15
 	 */
 	amount?: number;
 	/**
+	 * Mena v [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) formáte (3 písmená).
+	 *
 	 * Pattern: [A-Z]{3}
 	 *
-	 * Mena v ISO 4217 formáte (3 písmená). Príklad: "EUR"
+	 * @example "EUR"
 	 */
 	currencyCode: string | CurrencyCode;
 	/**
-	 * Formát YYYYMMDD
+	 * Dátum splatnosti vo formáte [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) `"RRRR-MM-DD"`.
+	 * Vprípade trvalého príkazu označuje dátum prvej platby.
 	 *
-	 * Dátum splatnosti vo formáte ISO 8601 "RRRR-MM-DD". Nepovinný údaj. V
-	 * prípade trvalého príkazu označuje dátum prvej platby.
+	 * Formát `YYYY-MM-DD`
 	 */
 	paymentDueDate?: string;
 	/**
+	 * Variabilný symbol je maximálne 10 miestne číslo.
+	 *
 	 * Maximálna dĺžka 10
 	 * Pattern: [0-9]{0,10}
-	 *
-	 * Variabilný symbol je maximálne 10 miestne číslo. Nepovinný údaj.
 	 */
 	variableSymbol?: string;
 	/**
+	 * Konštantný symbol je 4 miestne identifikačné číslo.
+	 *
 	 * Maximálna dĺžka 4
 	 * Pattern: [0-9]{0,4}
-	 *
-	 * Konštantný symbol je 4 miestne identifikačné číslo. Nepovinný údaj.
 	 */
 	constantSymbol?: string;
 	/**
+	 * Špecifický symbol je maximálne 10 miestne číslo.
+	 *
 	 * Maximálna dĺžka 10
 	 * Pattern: [0-9]{0,10}
-	 *
-	 * Špecifický symbol je maximálne 10 miestne číslo. Nepovinný údaj.
 	 */
 	specificSymbol?: string;
 	/**
-	 * Maximálna dĺžka 35
-	 *
 	 * Referenčná informácia prijímateľa podľa SEPA.
+	 *
+	 * Maximálna dĺžka 35
 	 */
 	originatorsReferenceInformation?: string;
 	/**
-	 * Maximálna dĺžka 140
-	 *
 	 * Správa pre prijímateľa. Údaje o platbe, na základe ktorých príjemca bude
-	 * môcť platbu identifikovať. Odporúča sa maximálne 140 Unicode znakov.
+	 * môcť platbu identifikovať.
+	 *
+	 * Maximálna dĺžka 140
 	 */
 	paymentNote?: string;
 	/**
@@ -257,7 +287,7 @@ export type StandingOrder = SimplePayment & {
 	/**
 	 * Medzerou oddelený zoznam mesiacov, v ktoré sa má platba uskutočniť.
 	 */
-	month?: MonthClassifier;
+	month?: MonthFlag;
 	/**
 	 * Opakovanie (periodicita) trvalého príkazu.
 	 */
@@ -265,7 +295,7 @@ export type StandingOrder = SimplePayment & {
 	/**
 	 * Dátum poslednej platby v trvalom príkaze.
 	 *
-	 * Formát YYYYMMDD
+	 * Formát `YYYYMMDD`
 	 */
 	lastDate?: string;
 };
@@ -278,34 +308,34 @@ export type DirectDebit = SimplePayment & {
 	directDebitScheme?: DirectDebitScheme;
 	directDebitType?: DirectDebitType;
 	/**
-	 * Maximálna dĺžka 35
-	 *
 	 * Identifikácia mandátu medzi veriteľom a dlžníkom podľa SEPA.
+	 *
+	 * Maximálna dĺžka 35
 	 */
 	mandateId?: string;
 	/**
-	 * Maximálna dĺžka 35
-	 *
 	 * Identifikácia veriteľa podľa SEPA.
+	 *
+	 * Maximálna dĺžka 35
 	 */
 	creditorId?: string;
 	/**
-	 * Maximálna dĺžka 35
-	 *
 	 * Identifikácia zmluvy medzi veriteľom a dlžníkom podľa SEPA.
+	 *
+	 * Maximálna dĺžka 35
 	 */
 	contractId?: string;
 	/**
-	 * Maximálna dĺžka 15
-	 *
 	 * Maximálna čiastka inkasa.
+	 *
+	 * Maximálna dĺžka 15
 	 */
 	maxAmount?: number;
 	/**
-	 * Maximálna dĺžka 8
-	 * Formát YYYYMMDD
-	 *
 	 * Dátum platnosti inkasa. Platnosť inkasa zaníka dňom tohto dátumu.
+	 *
+	 * Maximálna dĺžka 8
+	 * Formát `YYYYMMDD`
 	 */
 	validTillDate?: string;
 };
@@ -317,10 +347,10 @@ export type Payment = PaymentOrder | StandingOrder | DirectDebit;
 
 export type DataModel = {
 	/**
-	 * Maximálna dĺžka 10
-	 *
 	 * Číslo faktúry v prípade, že údaje sú súčasťou faktúry, alebo
 	 * identifikátor pre intérne potreby vystavovateľa.
+	 *
+	 * Maximálna dĺžka 10
 	 */
 	invoiceId?: string;
 	/**
@@ -331,7 +361,7 @@ export type DataModel = {
 };
 
 /**
- * ISO-4217
+ * [ISO-4217](https://en.wikipedia.org/wiki/ISO_4217)
  */
 export enum CurrencyCode {
 	AED = "AED",

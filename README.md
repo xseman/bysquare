@@ -22,9 +22,10 @@ transformed into images depends on how you implement it. See
 
 ## Installation
 
-**NOTE**: This package is native [ESM][mozzila-esm] and no longer provides a
-CommonJS export. If your project uses CommonJS, you will have to convert to ESM
-or use the dynamic [`import()`][mozzila-import] function.
+> [!NOTE]
+> This package is native [ESM][mozzila-esm] and no longer provides a
+> CommonJS export. If your project uses CommonJS, you will have to convert to ESM
+> or use the dynamic [`import()`][mozzila-import] function.
 
 [mozzila-esm]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
 [mozzila-import]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import
@@ -59,12 +60,6 @@ import {
 	import { encode, decode } from "https://esm.sh/bysquare@latest";
 </script>
 ```
-
-## How it works
-
-### Encoding sequence
-
-![logic](./docs/uml/logic.svg)
 
 ## Usage
 
@@ -143,6 +138,12 @@ qrstring argument should be a valid QR code string.
 npx bysquare --decode <qrstring>
 ```
 
+## How it works
+
+### Encoding sequence
+
+![logic](./docs/uml/logic.svg)
+
 ## Platform support
 
 I mainly focus on LTS versions of Node.js and try to use the most idiomatic
@@ -162,6 +163,12 @@ to use without additional setup, showing its improved maturity.
 ### Browser
 
 The latest version of Chrome, Firefox, and Safari.
+
+## Troubleshooting & Recommendations
+
+### Encoded data are without diacritics
+
+The library removes all diacritics from the input data to ensure maximum compatibility, as not all banks support diacritics, which may lead to errors. If you need to retain diacritics, disable deburr option when encoding data - `encode(model, { deburr: false })`.
 
 ## Related
 

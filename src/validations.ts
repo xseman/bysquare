@@ -12,6 +12,9 @@ export enum ValidationErrorMessage {
 	InvalidDate = "Invalid date",
 }
 
+/**
+ * This error will be thrown in case of a validation issue. It provides message with error description and specific path to issue in dataModel object.
+ */
 export class ValidationError extends Error {
 	override name = "ValidationError";
 	path: string;
@@ -26,6 +29,12 @@ export class ValidationError extends Error {
 	}
 }
 
+/**
+ * validates bankAccount fields:
+ * - iban (ISO 13616)
+ * - bic (ISO 9362)
+ */
+
 export function validateBankAccount(bankAccount: BankAccount, path: string) {
 	if (!validator.isIBAN(bankAccount.iban)) {
 		throw new ValidationError(ValidationErrorMessage.InvalidIBAN, `${path}.iban`);
@@ -36,11 +45,13 @@ export function validateBankAccount(bankAccount: BankAccount, path: string) {
 }
 
 /**
- * validate simple payment function
-	- currencyCode CurrencyCode (ISO 4217)
-	- paymentDueDate Date (ISO 8601)
-	- bankAccount
-*/
+ * validate simple payment fields:
+ * - currencyCode (ISO 4217)
+ * - paymentDueDate (ISO 8601)
+ * - bankAccounts
+ *
+ * @see validateBankAccount
+ */
 export function validateSimplePayment(simplePayment: SimplePayment, path: string) {
 	for (const [index, bankAccount] of simplePayment.bankAccounts.entries()) {
 		// todo: question is empty array of bank accounts valid input?
@@ -66,6 +77,12 @@ export function validateSimplePayment(simplePayment: SimplePayment, path: string
 	}
 }
 
+/**
+ * Validate `payments` field of dataModel.
+ *
+ * @see validateSimplePayment
+ * @see ValidationError
+ */
 export function validateDataModel(dataModel: DataModel): DataModel {
 	for (const [index, payment] of dataModel.payments.entries()) {
 		// todo: question is empty array of payments valid input?

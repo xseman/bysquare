@@ -17,7 +17,7 @@ describe("validateBankAccount", () => {
 				validateBankAccount({
 					iban: "1234567890",
 				}, path),
-			new ValidationError(ValidationErrorMessage.InvalidIBAN, path.concat(".iban")),
+			new ValidationError(ValidationErrorMessage.InvalidIBAN, `${path}.iban`),
 		);
 		assert.doesNotThrow(() =>
 			validateBankAccount({
@@ -33,7 +33,7 @@ describe("validateBankAccount", () => {
 					iban,
 					bic: "123",
 				}, path),
-			new ValidationError(ValidationErrorMessage.InvalidBIC, path.concat(".bic")),
+			new ValidationError(ValidationErrorMessage.InvalidBIC, `${path}.bic`),
 		);
 		assert.throws(
 			() =>
@@ -41,7 +41,7 @@ describe("validateBankAccount", () => {
 					iban,
 					bic: "",
 				}, path),
-			new ValidationError(ValidationErrorMessage.InvalidBIC, path.concat(".bic")),
+			new ValidationError(ValidationErrorMessage.InvalidBIC, `${path}.bic`),
 		);
 		assert.doesNotThrow(() =>
 			validateBankAccount({

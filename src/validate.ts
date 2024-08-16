@@ -1,3 +1,4 @@
+import validator from "validator";
 import {
 	BankAccount,
 	DataModel,
@@ -8,31 +9,32 @@ import {
 // message: explains, what is wrong
 // path: points to the field, where problem occurred
 
+export enum ValidationErrorMessage {
+	InvalidIBAN = "Invalid IBAN",
+	InvalidBIC = "Invalid BIC",
+}
+
 export class ValidationError extends Error {
 	override name = "ValidationError";
 	path: string;
 
 	/**
 	 * @param message - explains, what is wrong on the specific field
-	 * @param path - navigates to the field in DataModel, where error occurred
+	 * @param path - navigates to the specific field in DataModel, where error occurred
 	 */
-	constructor(message: string, path: string) {
-		super(message);
+	constructor(message: ValidationErrorMessage, path: string) {
+		super(String(message));
 		this.path = path;
-
-		// Set the prototype explicitly to maintain the correct prototype chain
-		Object.setPrototypeOf(this, ValidationError.prototype);
 	}
 }
 
-/**
- * validateBankAccount
- * iban (ISO 13616:2003)
- * bic? (ISO 9362)
- */
-
 export function validateBankAccount(bankAccount: BankAccount, path: string) {
-	// todo validate
+	if (!validator.isIBAN(bankAccount.iban)) {
+		throw new ValidationError(ValidationErrorMessage.InvalidIBAN, `${path}.iban`);
+	}
+	if (bankAccount.bic === "" || (bankAccount.bic && !validator.isBIC(bankAccount.bic))) {
+		throw new ValidationError(ValidationErrorMessage.InvalidBIC, `${path}.bic`);
+	}
 }
 
 /**

@@ -5,10 +5,6 @@ import {
 	SimplePayment,
 } from "./types.js";
 
-// error should contain:
-// message: explains, what is wrong
-// path: points to the field, where problem occurred
-
 export enum ValidationErrorMessage {
 	InvalidIBAN = "Invalid IBAN",
 	InvalidBIC = "Invalid BIC",
@@ -69,12 +65,6 @@ export function validateSimplePayment(simplePayment: SimplePayment, path: string
 		);
 	}
 }
-
-// validate function
-// get data model return validated data model
-// check fields one by one
-// in case of failure, throw an error
-// in case of success, return dataModel
 
 export function validateDataModel(dataModel: DataModel): DataModel {
 	for (const [index, payment] of dataModel.payments.entries()) {

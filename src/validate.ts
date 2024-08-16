@@ -13,6 +13,7 @@ export enum ValidationErrorMessage {
 	InvalidIBAN = "Invalid IBAN",
 	InvalidBIC = "Invalid BIC",
 	InvalidCurrencyCode = "Invalid currency code",
+	InvalidDate = "Invalid date",
 }
 
 export class ValidationError extends Error {
@@ -46,6 +47,7 @@ export function validateBankAccount(bankAccount: BankAccount, path: string) {
 */
 export function validateSimplePayment(simplePayment: SimplePayment, path: string) {
 	for (const [index, bankAccount] of simplePayment.bankAccounts.entries()) {
+		// todo: question is empty array of bank accounts valid input?
 		validateBankAccount(bankAccount, `${path}.bankAccounts[${index}]`);
 	}
 	if (
@@ -57,6 +59,15 @@ export function validateSimplePayment(simplePayment: SimplePayment, path: string
 			`${path}.currencyCode`,
 		);
 	}
+	if (
+		simplePayment.paymentDueDate === ""
+		|| (simplePayment.paymentDueDate && !validator.isDate(simplePayment.paymentDueDate))
+	) {
+		throw new ValidationError(
+			ValidationErrorMessage.InvalidDate,
+			`${path}.paymentDueDate`,
+		);
+	}
 }
 
 // validate function
@@ -66,8 +77,9 @@ export function validateSimplePayment(simplePayment: SimplePayment, path: string
 // in case of success, return dataModel
 
 export function validate(dataModel: DataModel): DataModel {
-	for (const payment of dataModel.payments) {
-		validateSimplePayment(payment, "payments");
+	for (const [index, payment] of dataModel.payments.entries()) {
+		// todo: question is empty array of payments valid input?
+		validateSimplePayment(payment, `payments[${index}]`);
 	}
 	return dataModel;
 }

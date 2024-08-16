@@ -38,6 +38,7 @@ describe("validateBankAccount", () => {
 			() =>
 				validateBankAccount({
 					iban,
+					// todo: question is empty string valid input for arbitrary fields?
 					bic: "",
 				}, path),
 			new ValidationError(ValidationErrorMessage.InvalidBIC, `${path}.bic`),
@@ -93,12 +94,14 @@ describe("validateSimplePayment", () => {
 			}, path)
 		);
 
-		assert.throws(() =>
-			validateSimplePayment({
-				bankAccounts: [validBankAccount],
-				currencyCode: "EUR",
-				paymentDueDate: "2024-08-52",
-			}, path)
+		assert.throws(
+			() =>
+				validateSimplePayment({
+					bankAccounts: [validBankAccount],
+					currencyCode: "EUR",
+					paymentDueDate: "2024-08-52",
+				}, path),
+			new ValidationError(ValidationErrorMessage.InvalidDate, `${path}.paymentDueDate`),
 		);
 	});
 });

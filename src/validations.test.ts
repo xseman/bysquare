@@ -7,7 +7,7 @@ import {
 	validateSimplePayment,
 	ValidationError,
 	ValidationErrorMessage,
-} from "./validate.js";
+} from "./validations.js";
 
 const iban = "LC14BOSL123456789012345678901234";
 const validBankAccount = {

@@ -72,4 +72,21 @@ describe("validateSimplePayment", () => {
 			),
 		);
 	});
+
+	test("validate currencyCode", () => {
+		assert.doesNotThrow(() =>
+			validateSimplePayment({
+				bankAccounts: [],
+				currencyCode: "EUR",
+			}, path)
+		);
+		assert.throws(
+			() =>
+				validateSimplePayment({
+					bankAccounts: [],
+					currencyCode: "e",
+				}, path),
+			new ValidationError(ValidationErrorMessage.InvalidCurrencyCode, `${path}.currencyCode`),
+		);
+	});
 });

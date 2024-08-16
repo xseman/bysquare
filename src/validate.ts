@@ -12,6 +12,7 @@ import {
 export enum ValidationErrorMessage {
 	InvalidIBAN = "Invalid IBAN",
 	InvalidBIC = "Invalid BIC",
+	InvalidCurrencyCode = "Invalid currency code",
 }
 
 export class ValidationError extends Error {
@@ -46,6 +47,15 @@ export function validateBankAccount(bankAccount: BankAccount, path: string) {
 export function validateSimplePayment(simplePayment: SimplePayment, path: string) {
 	for (const [index, bankAccount] of simplePayment.bankAccounts.entries()) {
 		validateBankAccount(bankAccount, `${path}.bankAccounts[${index}]`);
+	}
+	if (
+		simplePayment.currencyCode === ""
+		|| (simplePayment.currencyCode && !validator.isISO4217(simplePayment.currencyCode))
+	) {
+		throw new ValidationError(
+			ValidationErrorMessage.InvalidCurrencyCode,
+			`${path}.currencyCode`,
+		);
 	}
 }
 

@@ -6,6 +6,7 @@ import {
 	DataModel,
 	PaymentOptions,
 } from "./types.js";
+import { validateDataModel } from "./validations.js";
 
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare
@@ -178,6 +179,13 @@ type Options = {
 	 * @default true
 	 */
 	deburr: boolean;
+
+	/**
+	 * If true, validates data model before encoding it.
+	 *
+	 * @default false
+	 */
+	validateModel: boolean;
 };
 
 /** @deprecated */
@@ -188,10 +196,13 @@ export const generate = encode;
  */
 export function encode(
 	model: DataModel,
-	options: Options = { deburr: true },
+	options: Options = { deburr: true, validateModel: false },
 ): string {
 	if (options.deburr) {
 		removeDiacritics(model);
+	}
+	if (options.validateModel) {
+		validateDataModel(model);
 	}
 
 	const payload = serialize(model);

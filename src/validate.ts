@@ -43,8 +43,10 @@ export function validateBankAccount(bankAccount: BankAccount, path: string) {
 	- paymentDueDate Date (ISO 8601)
 	- bankAccount
 */
-function validateSimplePayment(simplePayment: SimplePayment, path: string) {
-	// todo validate
+export function validateSimplePayment(simplePayment: SimplePayment, path: string) {
+	for (const [index, bankAccount] of simplePayment.bankAccounts.entries()) {
+		validateBankAccount(bankAccount, `${path}.bankAccounts[${index}]`);
+	}
 }
 
 // validate function

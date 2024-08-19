@@ -21,6 +21,14 @@ const args = parseArgs({
 			type: "boolean",
 			short: "e",
 		},
+		validate: {
+			type: "boolean",
+			short: "v",
+		},
+		deburr: {
+			type: "boolean",
+			short: "b",
+		},
 		help: {
 			type: "boolean",
 			short: "h",
@@ -61,7 +69,10 @@ if (process.stdin.isTTY) {
 			}
 
 			if (file.endsWith(".json")) {
-				console.log(encode(JSON.parse(data)));
+				console.log(encode(JSON.parse(data), {
+					validate: Boolean(args.values.validate),
+					deburr: Boolean(args.values.deburr),
+				}));
 			}
 
 			process.exit(0);
@@ -97,6 +108,12 @@ if (process.stdin.isTTY) {
 			"",
 			"	-e, --encode",
 			"		Encode JSON data from one or more files and print the corresponding QR code.",
+			"",
+			"	-v, --validate",
+			"		Validate JSON data from one or more files before encoding.",
+			"",
+			"	-b, --deburr",
+			"		Deburr JSON data from one or more files before encoding.",
 			"",
 			"	-h, --help",
 			"		Display the help message and exit.",

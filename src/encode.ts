@@ -178,14 +178,14 @@ type Options = {
 	 *
 	 * @default true
 	 */
-	deburr: boolean;
+	deburr?: boolean;
 
 	/**
 	 * If true, validates the data model before encoding it.
 	 *
 	 * @default true
 	 */
-	validate: boolean;
+	validate?: boolean;
 };
 
 /** @deprecated */
@@ -196,12 +196,13 @@ export const generate = encode;
  */
 export function encode(
 	model: DataModel,
-	options: Options = { deburr: true, validate: true },
+	options?: Options,
 ): string {
-	if (options.deburr) {
+	const { deburr = true, validate = true } = options ?? {};
+	if (deburr) {
 		removeDiacritics(model);
 	}
-	if (options.validate) {
+	if (validate) {
 		validateDataModel(model);
 	}
 

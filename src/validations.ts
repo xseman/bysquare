@@ -6,10 +6,10 @@ import {
 } from "./types.js";
 
 export enum ValidationErrorMessage {
-	InvalidIBAN = "Invalid IBAN",
-	InvalidBIC = "Invalid BIC",
-	InvalidCurrencyCode = "Invalid currency code",
-	InvalidDate = "Invalid date",
+	IBAN = "Invalid IBAN. Make sure ISO 13616 format is used.",
+	BIC = "Invalid BIC. Make sure ISO 9362 format is used.",
+	CurrencyCode = "Invalid currency code. Make sure ISO 4217 format is used.",
+	Date = "Invalid date. Make sure ISO 8601 format is used.",
 }
 
 /**
@@ -37,10 +37,10 @@ export class ValidationError extends Error {
 
 export function validateBankAccount(bankAccount: BankAccount, path: string) {
 	if (!validator.isIBAN(bankAccount.iban)) {
-		throw new ValidationError(ValidationErrorMessage.InvalidIBAN, `${path}.iban`);
+		throw new ValidationError(ValidationErrorMessage.IBAN, `${path}.iban`);
 	}
 	if (bankAccount.bic === "" || (bankAccount.bic && !validator.isBIC(bankAccount.bic))) {
-		throw new ValidationError(ValidationErrorMessage.InvalidBIC, `${path}.bic`);
+		throw new ValidationError(ValidationErrorMessage.BIC, `${path}.bic`);
 	}
 }
 
@@ -62,7 +62,7 @@ export function validateSimplePayment(simplePayment: SimplePayment, path: string
 		|| (simplePayment.currencyCode && !validator.isISO4217(simplePayment.currencyCode))
 	) {
 		throw new ValidationError(
-			ValidationErrorMessage.InvalidCurrencyCode,
+			ValidationErrorMessage.CurrencyCode,
 			`${path}.currencyCode`,
 		);
 	}
@@ -71,7 +71,7 @@ export function validateSimplePayment(simplePayment: SimplePayment, path: string
 		|| (simplePayment.paymentDueDate && !validator.isDate(simplePayment.paymentDueDate))
 	) {
 		throw new ValidationError(
-			ValidationErrorMessage.InvalidDate,
+			ValidationErrorMessage.Date,
 			`${path}.paymentDueDate`,
 		);
 	}

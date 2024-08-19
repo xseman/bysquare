@@ -22,7 +22,7 @@ describe("validateBankAccount", () => {
 				validateBankAccount({
 					iban: "1234567890",
 				}, path),
-			new ValidationError(ValidationErrorMessage.InvalidIBAN, `${path}.iban`),
+			new ValidationError(ValidationErrorMessage.IBAN, `${path}.iban`),
 		);
 		assert.doesNotThrow(() => validateBankAccount(validBankAccount, path));
 	});
@@ -34,7 +34,7 @@ describe("validateBankAccount", () => {
 					iban,
 					bic: "123",
 				}, path),
-			new ValidationError(ValidationErrorMessage.InvalidBIC, `${path}.bic`),
+			new ValidationError(ValidationErrorMessage.BIC, `${path}.bic`),
 		);
 		assert.throws(
 			() =>
@@ -43,7 +43,7 @@ describe("validateBankAccount", () => {
 					// todo: question is empty string valid input for arbitrary fields?
 					bic: "",
 				}, path),
-			new ValidationError(ValidationErrorMessage.InvalidBIC, `${path}.bic`),
+			new ValidationError(ValidationErrorMessage.BIC, `${path}.bic`),
 		);
 		assert.doesNotThrow(() =>
 			validateBankAccount({
@@ -66,7 +66,7 @@ describe("validateSimplePayment", () => {
 					currencyCode: "EUR",
 				}, path);
 			},
-			new ValidationError(ValidationErrorMessage.InvalidIBAN, `${path}.bankAccounts[1].iban`),
+			new ValidationError(ValidationErrorMessage.IBAN, `${path}.bankAccounts[1].iban`),
 		);
 	});
 
@@ -83,7 +83,7 @@ describe("validateSimplePayment", () => {
 					bankAccounts: [validBankAccount],
 					currencyCode: "e",
 				}, path),
-			new ValidationError(ValidationErrorMessage.InvalidCurrencyCode, `${path}.currencyCode`),
+			new ValidationError(ValidationErrorMessage.CurrencyCode, `${path}.currencyCode`),
 		);
 	});
 
@@ -103,7 +103,7 @@ describe("validateSimplePayment", () => {
 					currencyCode: "EUR",
 					paymentDueDate: "2024-08-52",
 				}, path),
-			new ValidationError(ValidationErrorMessage.InvalidDate, `${path}.paymentDueDate`),
+			new ValidationError(ValidationErrorMessage.Date, `${path}.paymentDueDate`),
 		);
 	});
 });
@@ -128,6 +128,6 @@ describe("validateDataModel", () => {
 					bankAccounts: [validBankAccount],
 				}],
 			}),
-		new ValidationError(ValidationErrorMessage.InvalidCurrencyCode, `payments[0].currencyCode`),
+		new ValidationError(ValidationErrorMessage.CurrencyCode, `payments[0].currencyCode`),
 	);
 });

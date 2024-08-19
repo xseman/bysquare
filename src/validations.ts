@@ -77,7 +77,6 @@ export function validateSimplePayment(simplePayment: SimplePayment, path: string
  */
 export function validateDataModel(dataModel: DataModel): DataModel {
 	for (const [index, payment] of dataModel.payments.entries()) {
-		// todo: question is empty array of payments valid input?
 		validateSimplePayment(payment, `payments[${index}]`);
 	}
 	return dataModel;

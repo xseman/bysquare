@@ -8,6 +8,7 @@ import {
 	PaymentOptions,
 	Version,
 } from "./types.js";
+import { validateDataModel } from "./validations.js";
 
 const MAX_COMPRESSED_SIZE = 131_072; // 2^17
 
@@ -189,7 +190,14 @@ type Options = {
 	 *
 	 * @default true
 	 */
-	deburr: boolean;
+	deburr?: boolean;
+
+	/**
+	 * If true, validates the data model before encoding it.
+	 *
+	 * @default true
+	 */
+	validate?: boolean;
 };
 
 /** @deprecated */
@@ -200,10 +208,14 @@ export const generate = encode;
  */
 export function encode(
 	model: DataModel,
-	options: Options = { deburr: true },
+	options?: Options,
 ): string {
-	if (options.deburr) {
+	const { deburr = true, validate = true } = options ?? {};
+	if (deburr) {
 		removeDiacritics(model);
+	}
+	if (validate) {
+		validateDataModel(model);
 	}
 
 	const payload = serialize(model);

@@ -34,7 +34,6 @@ export class ValidationError extends Error {
  * - iban (ISO 13616)
  * - bic (ISO 9362)
  */
-
 export function validateBankAccount(bankAccount: BankAccount, path: string) {
 	if (!validator.isIBAN(bankAccount.iban)) {
 		throw new ValidationError(ValidationErrorMessage.IBAN, `${path}.iban`);
@@ -54,7 +53,6 @@ export function validateBankAccount(bankAccount: BankAccount, path: string) {
  */
 export function validateSimplePayment(simplePayment: SimplePayment, path: string) {
 	for (const [index, bankAccount] of simplePayment.bankAccounts.entries()) {
-		// todo: question is empty array of bank accounts valid input?
 		validateBankAccount(bankAccount, `${path}.bankAccounts[${index}]`);
 	}
 	if (

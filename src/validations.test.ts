@@ -36,14 +36,12 @@ describe("validateBankAccount", () => {
 				}, path),
 			new ValidationError(ValidationErrorMessage.BIC, `${path}.bic`),
 		);
-		assert.throws(
+		assert.doesNotThrow(
 			() =>
 				validateBankAccount({
 					iban,
-					// todo: question is empty string valid input for arbitrary fields?
 					bic: "",
 				}, path),
-			new ValidationError(ValidationErrorMessage.BIC, `${path}.bic`),
 		);
 		assert.doesNotThrow(() =>
 			validateBankAccount({

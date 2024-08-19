@@ -38,7 +38,7 @@ export function validateBankAccount(bankAccount: BankAccount, path: string) {
 	if (!validator.isIBAN(bankAccount.iban)) {
 		throw new ValidationError(ValidationErrorMessage.IBAN, `${path}.iban`);
 	}
-	if (bankAccount.bic === "" || (bankAccount.bic && !validator.isBIC(bankAccount.bic))) {
+	if (bankAccount.bic && !validator.isBIC(bankAccount.bic)) {
 		throw new ValidationError(ValidationErrorMessage.BIC, `${path}.bic`);
 	}
 }
@@ -55,19 +55,13 @@ export function validateSimplePayment(simplePayment: SimplePayment, path: string
 	for (const [index, bankAccount] of simplePayment.bankAccounts.entries()) {
 		validateBankAccount(bankAccount, `${path}.bankAccounts[${index}]`);
 	}
-	if (
-		simplePayment.currencyCode === ""
-		|| (simplePayment.currencyCode && !validator.isISO4217(simplePayment.currencyCode))
-	) {
+	if (simplePayment.currencyCode && !validator.isISO4217(simplePayment.currencyCode)) {
 		throw new ValidationError(
 			ValidationErrorMessage.CurrencyCode,
 			`${path}.currencyCode`,
 		);
 	}
-	if (
-		simplePayment.paymentDueDate === ""
-		|| (simplePayment.paymentDueDate && !validator.isDate(simplePayment.paymentDueDate))
-	) {
+	if (simplePayment.paymentDueDate && !validator.isDate(simplePayment.paymentDueDate)) {
 		throw new ValidationError(
 			ValidationErrorMessage.Date,
 			`${path}.paymentDueDate`,

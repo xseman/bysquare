@@ -1,5 +1,6 @@
 // import { DataModel, encode, PaymentOptions } from "./../../../dist/index.js"
 import {
+	CurrencyCode,
 	DataModel,
 	encode,
 	PaymentOptions,
@@ -15,7 +16,7 @@ const model = {
 			bankAccounts: [
 				{ iban: "SK9611000000002918599669" },
 			],
-			currencyCode: "EUR",
+			currencyCode: CurrencyCode.EUR,
 			variableSymbol: "123",
 			beneficiary: {
 				name: "Filip",

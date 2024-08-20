@@ -66,6 +66,7 @@ class App extends Component {
 					h("input", {
 						style: "width: 210px;",
 						name: "variable",
+						type: "number",
 						value: this.state.variable,
 						onInput: this.#handleChange,
 					}),

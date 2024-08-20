@@ -67,6 +67,7 @@ class Bysquare extends LitElement {
 					<input
 						style="width: 210px;"
 						name="variable"
+						type="number"
 						value=${this._variable}
 						@input=${this.#handleChange}
 					/>

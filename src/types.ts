@@ -22,7 +22,7 @@ export enum Version {
 /**
  * Kalendárny mesiac.
  */
-export enum MonthFlag {
+export enum Month {
 	January = 1 << 0,
 	February = 1 << 1,
 	March = 1 << 2,
@@ -287,7 +287,7 @@ export type StandingOrder = SimplePayment & {
 	/**
 	 * Medzerou oddelený zoznam mesiacov, v ktoré sa má platba uskutočniť.
 	 */
-	month?: MonthFlag;
+	month?: Month;
 	/**
 	 * Opakovanie (periodicita) trvalého príkazu.
 	 */

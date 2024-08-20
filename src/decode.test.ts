@@ -31,11 +31,19 @@ export const payload = {
 test("decode", () => {
 	const encoded = encode(payload);
 	const decoded = decode(encoded);
+
 	assert.deepEqual(decoded, payload);
+});
+
+test("decode - invalid input (throw)", () => {
+	assert.throws(() => {
+		decode("aaaa");
+	}, { message: "Invalid base32hex string" });
 });
 
 test("decode - bidirectional", () => {
 	const qrString = encode(payload);
+
 	assert.deepEqual(payload, decode(qrString));
 });
 
@@ -83,17 +91,26 @@ test("decode - serialization", () => {
 	);
 });
 
-test("decode - header", () => {
+test("detect - header", () => {
 	const encoded = encode(payload);
 	const isBysquare = detect(encoded);
-	assert.equal(isBysquare, true);
 
-	const notBysquare = detect("EHIN6T0=" /** "hello" in base32hex */);
+	assert.equal(isBysquare, true);
+});
+
+test("detect - invalid header data", () => {
+	const notBysquare = detect("EHIN6T0=" /** "test" in base32hex */);
 	assert.equal(notBysquare, false);
 
-	/** invalid base32hex */
+	/** invalid header */
 	assert.equal(detect("aaaa"), false);
-	assert.equal(detect("XXXX"), false);
+
+	/** these throw an error in the base32hex decoder */
+	assert.equal(detect("á"), false);
+	assert.equal(detect("x"), false);
+	assert.equal(detect("y"), false);
+	assert.equal(detect("w"), false);
+	assert.equal(detect("z"), false);
 });
 
 test("decode - multiple data", () => {

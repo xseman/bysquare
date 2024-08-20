@@ -30,7 +30,6 @@
 	"dependencies": {
 		"crc-32": "~1.2.0",
 		"lzma1": "0.0.2",
-		"rfc4648": "~1.5.0",
 		"validator": "^13.12.0"
 	},
 	"devDependencies": {

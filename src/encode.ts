@@ -1,6 +1,7 @@
 import crc32 from "crc-32";
 import { compress } from "lzma1";
-import { base32hex } from "rfc4648";
+
+import * as base32hex from "./base32hex.js";
 import { deburr } from "./deburr.js";
 import {
 	DataModel,
@@ -233,7 +234,5 @@ export function encode(
 		...lzmaBody,
 	]);
 
-	return base32hex.stringify(output, {
-		pad: false,
-	});
+	return base32hex.encode(output, false);
 }

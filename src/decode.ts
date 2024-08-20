@@ -1,5 +1,6 @@
 import { decompress } from "lzma1";
-import { base32hex } from "rfc4648";
+
+import * as base32hex from "./base32hex.js";
 import {
 	BankAccount,
 	Beneficiary,
@@ -204,13 +205,7 @@ export const parse = decode;
  * @see 3.16.
  */
 export function decode(qr: string): DataModel {
-	let bytes: Uint8Array | undefined;
-	try {
-		bytes = base32hex.parse(qr, { loose: true });
-	} catch (error) {
-		throw new DecodeError(error, "Unable to decode QR string base32hex encoding");
-	}
-
+	const bytes = base32hex.decode(qr);
 	const bysquareHeader = bytes.slice(0, 2);
 	const decodedBysquareHeader = bysquareHeaderDecoder(bysquareHeader);
 	if ((decodedBysquareHeader.version > Version["1.1.0"])) {
@@ -274,18 +269,18 @@ export function decode(qr: string): DataModel {
  * not very reliable, there is room for improvement for the future.
  */
 export function detect(qr: string): boolean {
-	let parsed: Uint8Array | undefined;
+	let decoded: Uint8Array;
 	try {
-		parsed = base32hex.parse(qr, { loose: true });
-	} catch {
+		decoded = base32hex.decode(qr, true);
+	} catch (error) {
 		return false;
 	}
 
-	if (parsed.byteLength < 2) {
+	if (decoded.byteLength < 2) {
 		return false;
 	}
 
-	const bysquareHeader = parsed.subarray(0, 2);
+	const bysquareHeader = decoded.subarray(0, 2);
 	const header = bysquareHeaderDecoder(bysquareHeader);
 
 	const isValid = [

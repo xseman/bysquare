@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.10.0](https://github.com/xseman/bysquare/compare/v2.9.0...v2.10.0) (2024-08-20)
+
+
+### Features
+
+* add data model validation ([#43](https://github.com/xseman/bysquare/issues/43)) ([f969570](https://github.com/xseman/bysquare/commit/f9695706820308eeaf9b3dde6b97e4ad240d7c03))
+
+
+### Documentation
+
+* update examples ([f72c97c](https://github.com/xseman/bysquare/commit/f72c97c51f3077dd4f20c2c54f40cfca72386f02))
+
+
+### Maintenance
+
+* update quality checks ([af3e803](https://github.com/xseman/bysquare/commit/af3e803ae45169757da1d9caef3d76ed41f50e10))
+* update release ([0363513](https://github.com/xseman/bysquare/commit/0363513bc5cf65891d1ce7a50425246f27320fab))
+
+
+### Refactors
+
+* improve naming and jsdoc ([#39](https://github.com/xseman/bysquare/issues/39)) ([d08c57c](https://github.com/xseman/bysquare/commit/d08c57c2b31c756b6762db4cd3afc45d10014054))
+
 ## [2.9.0](https://github.com/xseman/bysquare/compare/v2.8.3...v2.9.0) (2024-07-31)
 
 

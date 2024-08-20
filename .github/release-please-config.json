@@ -19,6 +19,8 @@
 		{ "type": "ci", "section": "Maintenance" },
 		{ "type": "build", "section": "Maintenance" },
 		{ "type": "chore", "section": "Maintenance" },
+		{ "type": "revert", "section": "Maintenance" },
+		{ "type": "security", "section": "Security" },
 		{ "type": "refactor", "section": "Refactors" },
 		{ "type": "test", "section": "Tests" },
 		{ "type": "style", "section": "Code Style", "hidden": true },

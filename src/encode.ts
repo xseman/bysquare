@@ -1,7 +1,7 @@
-import crc32 from "crc-32";
 import { compress } from "lzma1";
 
 import * as base32hex from "./base32hex.js";
+import { crc32 } from "./crc32.js";
 import { deburr } from "./deburr.js";
 import {
 	DataModel,
@@ -88,7 +88,7 @@ export function headerDataLength(length: number): Uint8Array {
  */
 export function addChecksum(serialized: string): Uint8Array {
 	const checksum = new ArrayBuffer(4);
-	new DataView(checksum).setUint32(0, crc32.str(serialized), true);
+	new DataView(checksum).setUint32(0, crc32(serialized), true);
 
 	const byteArray = new TextEncoder().encode(serialized);
 

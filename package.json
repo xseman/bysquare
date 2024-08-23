@@ -28,7 +28,6 @@
 		"test:watch": "TS_NODE_TRANSPILE_ONLY=true node --test --watch --loader=ts-node/esm --no-warnings src/*.test.ts"
 	},
 	"dependencies": {
-		"crc-32": "~1.2.0",
 		"lzma1": "0.0.2",
 		"validator": "^13.12.0"
 	},

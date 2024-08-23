@@ -1,5 +1,37 @@
 # Changelog
 
+## [2.11.0](https://github.com/xseman/bysquare/compare/v2.10.0...v2.11.0) (2024-08-23)
+
+
+### Dependency updates
+
+* bump versions ([27a3da6](https://github.com/xseman/bysquare/commit/27a3da6ee6e92bd52c820f54dc270518e6f723c9))
+
+
+### Documentation
+
+* refactor examples ([194e280](https://github.com/xseman/bysquare/commit/194e280e61c65aca00b47dbf97a53f672b248410))
+* update examples ([9382ba3](https://github.com/xseman/bysquare/commit/9382ba3d3db008d8f11cd0d6ff9e950281036fde))
+
+
+### Maintenance
+
+* bump nvmrc ([19fb2df](https://github.com/xseman/bysquare/commit/19fb2dff28496d44cd3fee8cd9f9794c5ba6cd0f))
+* release 2.11.0 ([db7ec53](https://github.com/xseman/bysquare/commit/db7ec53347b59238b73203fbfac59edd0e3da025))
+* update minimal node version ([bdee2e1](https://github.com/xseman/bysquare/commit/bdee2e14f60f978a7839d76d8e3ad927a998ce5a))
+* update release conf ([9d3e24e](https://github.com/xseman/bysquare/commit/9d3e24ebcf49952f703eb1eb5fe40ea12250d280))
+
+
+### Refactors
+
+* remove crc32 dependency ([#45](https://github.com/xseman/bysquare/issues/45)) ([c0485a7](https://github.com/xseman/bysquare/commit/c0485a7a772b7440ddb376c8a410ed0973ed2eff))
+* remove dependency (rfc4648) ([#41](https://github.com/xseman/bysquare/issues/41)) ([f419215](https://github.com/xseman/bysquare/commit/f4192151240ec4b8f1e67112ccd6026604f327b0))
+
+
+### Tests
+
+* add experimental coverage ([880eb13](https://github.com/xseman/bysquare/commit/880eb13be6a587e8c111b6bd89484feb5cd5570e))
+
 ## [2.10.0](https://github.com/xseman/bysquare/compare/v2.9.0...v2.10.0) (2024-08-20)
 
 

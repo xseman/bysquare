@@ -1,0 +1,13 @@
+{
+	"author": "Filip Seman",
+	"type": "module",
+	"scripts": {
+		"start": "node --no-warnings --loader=ts-node/esm ./main.ts"
+	},
+	"dependencies": {
+		"bysquare": "latest"
+	},
+	"devDependencies": {
+		"ts-node": "~10.9.0"
+	}
+}

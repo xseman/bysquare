@@ -2,9 +2,15 @@ import {
 	CurrencyCode,
 	encode,
 	PaymentOptions,
-} from "npm:bysquare";
+} from "./../../../src/index.js";
+// import {
+// 	CurrencyCode,
+// 	DataModel,
+// 	encode,
+// 	PaymentOptions,
+// } from "bysquare";
 
-const qr = encode({
+const encoded = encode({
 	invoiceId: "random-id",
 	payments: [
 		{
@@ -15,8 +21,13 @@ const qr = encode({
 			],
 			currencyCode: CurrencyCode.EUR,
 			variableSymbol: "123",
+			beneficiary: {
+				name: "Filip",
+				city: "City",
+				street: "Street",
+			},
 		},
 	],
 });
 
-console.log(qr);
+console.log(encoded);

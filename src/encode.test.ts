@@ -116,7 +116,16 @@ describe("encode - headerDataLength", function() {
 			new Uint8Array(dataView.buffer),
 		);
 	});
-	test("throw, when length is too big", function() {
+	test("throw EncodeError, when allowed size of header is exceeded", function() {
+		assert.throws(
+			() => {
+				headerDataLength(MAX_COMPRESSED_SIZE);
+			},
+			new EncodeError(EncodeErrorMessage.HeaderDataSize, {
+				actualSize: MAX_COMPRESSED_SIZE,
+				allowedSize: MAX_COMPRESSED_SIZE,
+			}),
+		);
 	});
 });
 

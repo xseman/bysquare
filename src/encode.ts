@@ -28,6 +28,11 @@ export enum EncodeErrorMessage {
 	 * @description - find invalid value in extensions
 	 */
 	Reserved = `Invalid Reserved value in header, valid range <0,15>`,
+	/**
+	 * @description - find actual size of header in extensions
+	 * @see MAX_COMPRESSED_SIZE
+	 */
+	HeaderDataSize = `Allowed header data size exceeded`,
 }
 
 export class EncodeError extends Error {
@@ -107,7 +112,10 @@ export function headerBysquare(
  */
 export function headerDataLength(length: number): Uint8Array {
 	if (length >= MAX_COMPRESSED_SIZE) {
-		throw new Error(`Data size ${length} exceeds limit of ${MAX_COMPRESSED_SIZE} bytes`);
+		throw new EncodeError(EncodeErrorMessage.HeaderDataSize, {
+			actualSize: length,
+			allowedSize: MAX_COMPRESSED_SIZE,
+		});
 	}
 
 	const header = new ArrayBuffer(2);

@@ -8,6 +8,8 @@ import {
 	EncodeError,
 	EncodeErrorMessage,
 	headerBysquare,
+	headerDataLength,
+	MAX_COMPRESSED_SIZE,
 	serialize,
 } from "./encode.js";
 import {
@@ -101,6 +103,20 @@ describe("encode - headerBysquare", function() {
 		assert.throws(() => {
 			headerBysquare([0x00, 0x00, 0x00, invalidValue]);
 		}, new EncodeError(EncodeErrorMessage.Reserved, { invalidValue }));
+	});
+});
+
+describe("encode - headerDataLength", function() {
+	test("return encoded header data length", function() {
+		const length = MAX_COMPRESSED_SIZE - 1;
+		const dataView = new DataView(new ArrayBuffer(2));
+		dataView.setUint16(0, length, true);
+		assert.deepEqual(
+			headerDataLength(length),
+			new Uint8Array(dataView.buffer),
+		);
+	});
+	test("throw, when length is too big", function() {
 	});
 });
 

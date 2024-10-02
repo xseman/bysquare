@@ -42,7 +42,7 @@ export class EncodeError extends Error {
 	}
 }
 
-const MAX_COMPRESSED_SIZE = 131_072; // 2^17
+export const MAX_COMPRESSED_SIZE = 131_072; // 2^17
 
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare

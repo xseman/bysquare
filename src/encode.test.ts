@@ -1,10 +1,12 @@
 import assert from "node:assert";
-import test from "node:test";
+import test, { describe } from "node:test";
 
 import { decode } from "./decode.js";
 import {
 	addChecksum,
 	encode,
+	EncodeError,
+	EncodeErrorMessage,
 	headerBysquare,
 	serialize,
 } from "./encode.js";
@@ -12,6 +14,7 @@ import {
 	CurrencyCode,
 	DataModel,
 	PaymentOptions,
+	Version,
 } from "./types.js";
 
 export const payload = {
@@ -69,10 +72,18 @@ test("encode - create data with checksum", () => {
 	assert.deepEqual(checksum, expected);
 });
 
-test("encode - make bysquare header", () => {
-	const header = headerBysquare();
-	const expected = Uint8Array.from([0x00, 0x00]);
-	assert.deepEqual(header, expected);
+describe("encode - headerBysquare", function() {
+	test("make bysquare header", () => {
+		const header = headerBysquare();
+		const expected = Uint8Array.from([0x00, 0x00]);
+		assert.deepEqual(header, expected);
+	});
+	test("throw EncodeError when creating an bysquare header with invalid type", () => {
+		const invalidValue = 0x1F;
+		assert.throws(() => {
+			headerBysquare([invalidValue, Version["1.0.0"], 0x00, 0x00]);
+		}, new EncodeError(EncodeErrorMessage.BySquareType, { invalidValue }));
+	});
 });
 
 test("encode - binary header", () => {

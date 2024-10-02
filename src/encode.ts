@@ -10,6 +10,37 @@ import {
 } from "./types.js";
 import { validateDataModel } from "./validations.js";
 
+export enum EncodeErrorMessage {
+	/**
+	 * @description - find invalid value in extensions
+	 */
+	BySquareType = `Invalid BySquareType value in header, valid range <0,15>`,
+	/**
+	 * @description - find invalid value in extensions
+	 */
+	Version = `Invalid Version value in header, valid range <0,15>`,
+	/**
+	 * @description - find invalid value in extensions
+	 */
+	DocumentType = `Invalid DocumentType value in header, valid range <0,15>`,
+	/**
+	 * @description - find invalid value in extensions
+	 */
+	Reserved = `Invalid Reserved value in header, valid range <0,15>`,
+}
+
+export class EncodeError extends Error {
+	override name = "EncodeError";
+	public extensions?: { [name: string]: any; };
+
+	constructor(message: EncodeErrorMessage, extensions?: { [name: string]: any; }) {
+		super(message);
+		if (extensions) {
+			this.extensions = extensions;
+		}
+	}
+}
+
 const MAX_COMPRESSED_SIZE = 131_072; // 2^17
 
 /**
@@ -38,7 +69,7 @@ export function headerBysquare(
 	],
 ): Uint8Array {
 	if (header[0] < 0 || header[0] > 15) {
-		throw new Error(`Invalid BySquareType value '${header[0]}' in header, valid range <0,15>`);
+		throw new EncodeError(EncodeErrorMessage.BySquareType, { invalidValue: header[0] });
 	}
 	if (header[1] < 0 || header[1] > 15) {
 		throw new Error(`Invalid Version value '${header[1]}' in header, valid range <0,15>`);

@@ -84,6 +84,12 @@ describe("encode - headerBysquare", function() {
 			headerBysquare([invalidValue, Version["1.0.0"], 0x00, 0x00]);
 		}, new EncodeError(EncodeErrorMessage.BySquareType, { invalidValue }));
 	});
+	test("throw EncodeError when creating an bysquare header with invalid version", () => {
+		const invalidValue = 0xFF;
+		assert.throws(() => {
+			headerBysquare([0x00, invalidValue, 0x00, 0x00]);
+		}, new EncodeError(EncodeErrorMessage.Version, { invalidValue }));
+	});
 });
 
 test("encode - binary header", () => {

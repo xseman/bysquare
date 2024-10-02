@@ -17,8 +17,9 @@ export enum EncodeErrorMessage {
 	BySquareType = `Invalid BySquareType value in header, valid range <0,15>`,
 	/**
 	 * @description - find invalid value in extensions
+	 * @see {@link ./types#Version} for valid ranges
 	 */
-	Version = `Invalid Version value in header, valid range <0,15>`,
+	Version = `Invalid Version value in header`,
 	/**
 	 * @description - find invalid value in extensions
 	 */

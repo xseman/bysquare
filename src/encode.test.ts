@@ -90,6 +90,18 @@ describe("encode - headerBysquare", function() {
 			headerBysquare([0x00, invalidValue, 0x00, 0x00]);
 		}, new EncodeError(EncodeErrorMessage.Version, { invalidValue }));
 	});
+	test("throw EncodeError when creating an bysquare header with invalid document type", () => {
+		const invalidValue = 0xFF;
+		assert.throws(() => {
+			headerBysquare([0x00, 0x00, invalidValue, 0x00]);
+		}, new EncodeError(EncodeErrorMessage.DocumentType, { invalidValue }));
+	});
+	test("throw EncodeError when creating an bysquare header with invalid reserved nibble", () => {
+		const invalidValue = 0xFF;
+		assert.throws(() => {
+			headerBysquare([0x00, 0x00, 0x00, invalidValue]);
+		}, new EncodeError(EncodeErrorMessage.Reserved, { invalidValue }));
+	});
 });
 
 test("encode - binary header", () => {

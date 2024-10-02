@@ -60,26 +60,29 @@ const MAX_COMPRESSED_SIZE = 131_072; // 2^17
  * @see 3.5.
  */
 export function headerBysquare(
-	/** dprint-ignore */
 	header: [
-		bySquareType: number, version: number,
-		documentType: number, reserved: number
+		bySquareType: number,
+		version: number,
+		documentType: number,
+		reserved: number,
 	] = [
-		0x00, 0x00,
-		0x00, 0x00
+		0x00,
+		0x00,
+		0x00,
+		0x00,
 	],
 ): Uint8Array {
 	if (header[0] < 0 || header[0] > 15) {
 		throw new EncodeError(EncodeErrorMessage.BySquareType, { invalidValue: header[0] });
 	}
 	if (header[1] < 0 || header[1] > 15) {
-		throw new Error(`Invalid Version value '${header[1]}' in header, valid range <0,15>`);
+		throw new EncodeError(EncodeErrorMessage.Version, { invalidValue: header[1] });
 	}
 	if (header[2] < 0 || header[2] > 15) {
-		throw new Error(`Invalid DocumentType value '${header[2]}' in header, valid range <0,15>`);
+		throw new EncodeError(EncodeErrorMessage.DocumentType, { invalidValue: header[2] });
 	}
 	if (header[3] < 0 || header[3] > 15) {
-		throw new Error(`Invalid Reserved value '${header[3]}' in header, valid range <0,15>`);
+		throw new EncodeError(EncodeErrorMessage.Reserved, { invalidValue: header[3] });
 	}
 
 	const [

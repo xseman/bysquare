@@ -65,16 +65,13 @@ export const MAX_COMPRESSED_SIZE = 131_072; // 2^17
  * @see 3.5.
  */
 export function headerBysquare(
+	/** dprint-ignore */
 	header: [
-		bySquareType: number,
-		version: number,
-		documentType: number,
-		reserved: number,
+		bySquareType: number, version: number,
+		documentType: number, reserved: number
 	] = [
-		0x00,
-		0x00,
-		0x00,
-		0x00,
+		0x00, 0x00,
+		0x00, 0x00
 	],
 ): Uint8Array {
 	if (header[0] < 0 || header[0] > 15) {

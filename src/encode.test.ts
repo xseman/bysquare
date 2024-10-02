@@ -74,7 +74,7 @@ test("encode - create data with checksum", () => {
 	assert.deepEqual(checksum, expected);
 });
 
-describe("encode - headerBysquare", function() {
+describe("encode - headerBysquare", () => {
 	test("make bysquare header", () => {
 		const header = headerBysquare();
 		const expected = Uint8Array.from([0x00, 0x00]);
@@ -106,8 +106,8 @@ describe("encode - headerBysquare", function() {
 	});
 });
 
-describe("encode - headerDataLength", function() {
-	test("return encoded header data length", function() {
+describe("encode - headerDataLength", () => {
+	test("return encoded header data length", () => {
 		const length = MAX_COMPRESSED_SIZE - 1;
 		const dataView = new DataView(new ArrayBuffer(2));
 		dataView.setUint16(0, length, true);
@@ -116,7 +116,7 @@ describe("encode - headerDataLength", function() {
 			new Uint8Array(dataView.buffer),
 		);
 	});
-	test("throw EncodeError, when allowed size of header is exceeded", function() {
+	test("throw EncodeError, when allowed size of header is exceeded", () => {
 		assert.throws(
 			() => {
 				headerDataLength(MAX_COMPRESSED_SIZE);

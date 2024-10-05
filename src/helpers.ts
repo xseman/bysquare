@@ -2,16 +2,18 @@ import { encode } from "./encode.js";
 import {
 	type BankAccount,
 	CurrencyCode,
-	type Day,
 	PaymentOptions,
-	type Periodicity,
 	SimplePayment,
+	type StandingOrder,
 } from "./types.js";
 
 type PaymentInput =
 	& Pick<BankAccount, "iban">
 	& Pick<SimplePayment, "amount" | "currencyCode" | "variableSymbol">;
 
+/**
+ * Vytvorí QR pre jednorázovú platbu
+ */
 export function simplePayment(input: PaymentInput): string {
 	return encode({
 		payments: [
@@ -26,6 +28,9 @@ export function simplePayment(input: PaymentInput): string {
 	});
 }
 
+/**
+ * Vytvorí QR pre inkaso
+ */
 export function directDebit(input: PaymentInput): string {
 	return encode({
 		payments: [
@@ -40,11 +45,13 @@ export function directDebit(input: PaymentInput): string {
 	});
 }
 
-type StandingInput = PaymentInput & {
-	day: Day | number;
-	periodicity: Periodicity;
-};
+type StandingInput =
+	& PaymentInput
+	& Pick<StandingOrder, "day" | "periodicity">;
 
+/**
+ * Vytvorí QR pre trvalý príkaz
+ */
 export function standingOrder(input: StandingInput): string {
 	return encode({
 		payments: [

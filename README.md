@@ -63,59 +63,58 @@ import {
 
 ## Usage
 
-### Encode
+### Basic Usage
+
+Simple helper functions to wrap encoding for most common use cases.
+
+- `simplePayment` - Encode simple payment data.
+- `directDebit` - Encode direct debit data.
+- `standingOrder` - Encode standing order data.
+
+```typescript
+import { simplePayment } from "bysquare";
+
+const qrstring = simplePayment({
+	amount: 100,
+	variableSymbol: "123456",
+	currencyCode: CurrencyCode.EUR,
+	iban: "SK9611000000002918599669",
+});
+```
+
+### Adavanced usage
+
+For more complex data use `encode` and `decode` functions:
 
 ```ts
 import {
 	CurrencyCode,
 	DataModel,
+	decode,
 	encode,
 	PaymentOptions,
 } from "bysquare";
 
-// string ready to be encoded to QR
-const qrString = encode({
+const data = {
 	invoiceId: "random-id",
 	payments: [
 		{
 			type: PaymentOptions.PaymentOrder,
-			amount: 100.0,
-			bankAccounts: [
-				{
-					iban: "SK9611000000002918599669",
-				},
-			],
 			currencyCode: CurrencyCode.EUR,
+			amount: 100.0,
 			variableSymbol: "123",
+			paymentNote: "hello world",
+			bankAccounts: [{ iban: "SK9611000000002918599669" }],
+			// ...more fields
 		},
 	],
-});
-```
+} satisfies DataModel;
 
-### Decode
+// Encode data to a QR string
+const qrstring = encode(data);
 
-```ts
-import { decode } from "bysquare";
-
-const model = decode(
-	"0405QH8090IFU27IV0J6HGGLIOTIBVHNQQJQ6LAVGNBT363HR13JC6CB54HSI0KH9FCRASHNQBSKAQD2LJ4AU400UVKDNDPFRKLOBEVVVU0QJ000",
-);
-
-// {
-// 	invoiceId: "random-id",
-// 	payments: [
-// 		{
-// 			type: 1,
-// 			amount: 100.0,
-// 			bankAccounts: [
-// 				{ iban: "SK9611000000002918599669" },
-// 			],
-// 			currencyCode: "EUR",
-// 			variableSymbol: "123",
-// 		}
-// 	]
-// }
-//
+// Decode QR string back to the original data model
+const model = decode(qrstring);
 ```
 
 ## CLI

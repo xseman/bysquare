@@ -25,7 +25,7 @@ describe("helpers", () => {
 
 		const qrstring = simplePayment(input);
 
-		assert.deepEqual(
+		assert.equal(
 			qrstring,
 			"0003U00006N21P0493146TIU1LLOG3NUHM9AGHB75BR8RTSCFLRGUDIAQQC523GA26TB6TNEKPOG8K7MRJ1QE17P76JVVVVSVG600",
 		);
@@ -59,7 +59,7 @@ describe("helpers", () => {
 
 		const qrstring = standingOrder(input);
 
-		assert.deepEqual(
+		assert.equal(
 			qrstring,
 			"0004A000BGNH3FVNBR5UJOKTTUULHGVT2D3GM45EVMIEA183DE3QO3VGDA23R813CHG1PKT91T72KVD02SPT0JBTJVOG5GA17VG1RVVVVHE2000",
 		);

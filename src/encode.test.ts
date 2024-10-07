@@ -56,6 +56,47 @@ const serialized = /** dprint-ignore */ [
 	"\t",
 ].join("");
 
+const payloadWithStandingOrder = {
+	invoiceId: "random-id",
+	payments: [
+		{
+			type: PaymentOptions.StandingOrder,
+			amount: 100.0,
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+			currencyCode: CurrencyCode.EUR,
+			variableSymbol: "123",
+		},
+	],
+} satisfies DataModel;
+
+const serializedStandingOrder = /** dprint-ignore */ [
+	"random-id",
+	"\t", "1",
+	"\t", "2",
+	"\t", "100",
+	"\t", "EUR",
+	"\t",
+	"\t", "123",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t", "1",
+	"\t", "SK9611000000002918599669",
+	"\t",
+	"\t", "1",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t", "0",
+	"\t",
+	"\t",
+	"\t",
+].join("");
+
 test("encode", () => {
 	const encoded = encode(payload);
 	const decoded = decode(encoded);
@@ -68,46 +109,6 @@ describe("encode - serialize", () => {
 		assert.equal(created, serialized);
 	});
 	test("serializes a standing order", () => {
-		const payloadWithStandingOrder = {
-			invoiceId: "random-id",
-			payments: [
-				{
-					type: PaymentOptions.StandingOrder,
-					amount: 100.0,
-					bankAccounts: [
-						{ iban: "SK9611000000002918599669" },
-					],
-					currencyCode: CurrencyCode.EUR,
-					variableSymbol: "123",
-				},
-			],
-		} satisfies DataModel;
-
-		const serializedStandingOrder = /** dprint-ignore */ [
-			"random-id",
-			"\t", "1",
-			"\t", "2",
-			"\t", "100",
-			"\t", "EUR",
-			"\t",
-			"\t", "123",
-			"\t",
-			"\t",
-			"\t",
-			"\t",
-			"\t", "1",
-			"\t", "SK9611000000002918599669",
-			"\t",
-			"\t", "1",
-			"\t",
-			"\t",
-			"\t",
-			"\t",
-			"\t", "0",
-			"\t",
-			"\t",
-			"\t",
-		].join("");
 		const created = serialize(payloadWithStandingOrder);
 		assert.equal(created, serializedStandingOrder);
 	});

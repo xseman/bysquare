@@ -80,6 +80,18 @@ describe("encode - headerBysquare", () => {
 		const expected = Uint8Array.from([0x00, 0x00]);
 		assert.deepEqual(header, expected);
 	});
+	test("make bysquare header from binary data", () => {
+		assert.deepEqual(
+			headerBysquare(/** dprint-ignore */ [
+				0b0000_0001, 0b0000_0010,
+				0b0000_0011, 0b0000_0100,
+			]),
+			Uint8Array.from([
+				0b0001_0010,
+				0b0011_0100,
+			]),
+		);
+	});
 	test("throw EncodeError when creating an bysquare header with invalid type", () => {
 		const invalidValue = 0x1F;
 		assert.throws(() => {
@@ -127,17 +139,4 @@ describe("encode - headerDataLength", () => {
 			}),
 		);
 	});
-});
-
-test("encode - binary header", () => {
-	assert.deepEqual(
-		headerBysquare(/** dprint-ignore */ [
-				0b0000_0001, 0b0000_0010,
-				0b0000_0011, 0b0000_0100,
-			]),
-		Uint8Array.from([
-			0b0001_0010,
-			0b0011_0100,
-		]),
-	);
 });

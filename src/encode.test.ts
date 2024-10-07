@@ -10,6 +10,7 @@ import {
 	headerBysquare,
 	headerDataLength,
 	MAX_COMPRESSED_SIZE,
+	removeDiacritics,
 	serialize,
 } from "./encode.js";
 import {
@@ -236,5 +237,47 @@ describe("encode - headerDataLength", () => {
 				allowedSize: MAX_COMPRESSED_SIZE,
 			}),
 		);
+	});
+});
+
+describe("encode - removeDiacritics", function() {
+	const payloadWithDiacritics = {
+		invoiceId: "random-id",
+		payments: [
+			{
+				type: PaymentOptions.PaymentOrder,
+				amount: 100.0,
+				bankAccounts: [
+					{ iban: "SK9611000000002918599669" },
+				],
+				currencyCode: CurrencyCode.EUR,
+				variableSymbol: "123",
+				paymentNote: "Príspevok na kávu",
+				beneficiary: {
+					name: "Ján Kováč",
+					city: "Košice",
+					street: "Štúrova 27",
+				},
+			},
+		],
+	} satisfies DataModel;
+	test("Removes diacritics from payload", function() {
+		const input = Object.assign(
+			{},
+			JSON.parse(JSON.stringify(payloadWithDiacritics)),
+		) satisfies DataModel;
+		removeDiacritics(input);
+		assert.deepEqual(input, {
+			...payloadWithDiacritics,
+			payments: [{
+				...payloadWithDiacritics.payments[0],
+				paymentNote: "Prispevok na kavu",
+				beneficiary: {
+					name: "Jan Kovac",
+					city: "Kosice",
+					street: "Sturova 27",
+				},
+			}],
+		});
 	});
 });

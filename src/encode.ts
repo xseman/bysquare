@@ -203,7 +203,7 @@ export function serialize(data: DataModel): string {
 	return serialized.join("\t");
 }
 
-function removeDiacritics(model: DataModel): void {
+export function removeDiacritics(model: DataModel): void {
 	for (const payment of model.payments) {
 		if (payment.paymentNote) {
 			payment.paymentNote = deburr(payment.paymentNote);

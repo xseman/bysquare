@@ -97,6 +97,53 @@ const serializedStandingOrder = /** dprint-ignore */ [
 	"\t",
 ].join("");
 
+const payloadWithDirectDebit = {
+	invoiceId: "random-id",
+	payments: [
+		{
+			type: PaymentOptions.DirectDebit,
+			amount: 100.0,
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+			currencyCode: CurrencyCode.EUR,
+			variableSymbol: "123",
+		},
+	],
+} satisfies DataModel;
+
+const serializedDirectDebit = /** dprint-ignore */ [
+	"random-id",
+	"\t", "1",
+	"\t", "4",
+	"\t", "100",
+	"\t", "EUR",
+	"\t",
+	"\t", "123",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t", "1",
+	"\t", "SK9611000000002918599669",
+	"\t",
+	"\t", "0",
+	"\t", "1",
+	"\t",
+	"\t",
+	"\t", "123",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+].join("");
+
 test("encode", () => {
 	const encoded = encode(payload);
 	const decoded = decode(encoded);
@@ -111,6 +158,10 @@ describe("encode - serialize", () => {
 	test("serializes a standing order", () => {
 		const created = serialize(payloadWithStandingOrder);
 		assert.equal(created, serializedStandingOrder);
+	});
+	test("serializes a direct debit", () => {
+		const created = serialize(payloadWithDirectDebit);
+		assert.equal(created, serializedDirectDebit);
 	});
 });
 

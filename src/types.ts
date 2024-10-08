@@ -291,7 +291,7 @@ export type StandingOrder = SimplePayment & {
 	/**
 	 * Opakovanie (periodicita) trvalého príkazu.
 	 */
-	periodicity?: Periodicity;
+	periodicity: Periodicity;
 	/**
 	 * Dátum poslednej platby v trvalom príkaze.
 	 *

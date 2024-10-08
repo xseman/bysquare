@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.12.0](https://github.com/xseman/bysquare/compare/v2.11.0...v2.12.0) (2024-10-08)
+
+
+### Features
+
+* add helper functions ([#48](https://github.com/xseman/bysquare/issues/48)) ([447f939](https://github.com/xseman/bysquare/commit/447f9397ff557149d8bb606c4c13382fa9e9acf6))
+
+
+### Tests
+
+* improve test coverage for encode.ts file ([#47](https://github.com/xseman/bysquare/issues/47)) ([d14c887](https://github.com/xseman/bysquare/commit/d14c88778de4d498be68d2a1ab402ae3030135e8))
+
 ## [2.11.0](https://github.com/xseman/bysquare/compare/v2.10.0...v2.11.0) (2024-08-23)
 
 

@@ -1,17 +1,23 @@
 import assert from "node:assert";
-import test from "node:test";
+import test, { describe } from "node:test";
 
 import { decode } from "./decode.js";
 import {
 	addChecksum,
 	encode,
+	EncodeError,
+	EncodeErrorMessage,
 	headerBysquare,
+	headerDataLength,
+	MAX_COMPRESSED_SIZE,
+	removeDiacritics,
 	serialize,
 } from "./encode.js";
 import {
 	CurrencyCode,
 	DataModel,
 	PaymentOptions,
+	Version,
 } from "./types.js";
 
 export const payload = {
@@ -51,15 +57,113 @@ const serialized = /** dprint-ignore */ [
 	"\t",
 ].join("");
 
+const payloadWithStandingOrder = {
+	invoiceId: "random-id",
+	payments: [
+		{
+			type: PaymentOptions.StandingOrder,
+			amount: 100.0,
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+			currencyCode: CurrencyCode.EUR,
+			variableSymbol: "123",
+		},
+	],
+} satisfies DataModel;
+
+const serializedStandingOrder = /** dprint-ignore */ [
+	"random-id",
+	"\t", "1",
+	"\t", "2",
+	"\t", "100",
+	"\t", "EUR",
+	"\t",
+	"\t", "123",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t", "1",
+	"\t", "SK9611000000002918599669",
+	"\t",
+	"\t", "1",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t", "0",
+	"\t",
+	"\t",
+	"\t",
+].join("");
+
+const payloadWithDirectDebit = {
+	invoiceId: "random-id",
+	payments: [
+		{
+			type: PaymentOptions.DirectDebit,
+			amount: 100.0,
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+			currencyCode: CurrencyCode.EUR,
+			variableSymbol: "123",
+		},
+	],
+} satisfies DataModel;
+
+const serializedDirectDebit = /** dprint-ignore */ [
+	"random-id",
+	"\t", "1",
+	"\t", "4",
+	"\t", "100",
+	"\t", "EUR",
+	"\t",
+	"\t", "123",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t", "1",
+	"\t", "SK9611000000002918599669",
+	"\t",
+	"\t", "0",
+	"\t", "1",
+	"\t",
+	"\t",
+	"\t", "123",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+	"\t",
+].join("");
+
 test("encode", () => {
 	const encoded = encode(payload);
 	const decoded = decode(encoded);
 	assert.deepStrictEqual(payload, decoded);
 });
 
-test("encode - serialize", () => {
-	const created = serialize(payload);
-	assert.equal(created, serialized);
+describe("encode - serialize", () => {
+	test("serializes a payment order", () => {
+		const created = serialize(payload);
+		assert.equal(created, serialized);
+	});
+	test("serializes a standing order", () => {
+		const created = serialize(payloadWithStandingOrder);
+		assert.equal(created, serializedStandingOrder);
+	});
+	test("serializes a direct debit", () => {
+		const created = serialize(payloadWithDirectDebit);
+		assert.equal(created, serializedDirectDebit);
+	});
 });
 
 test("encode - create data with checksum", () => {
@@ -69,21 +173,111 @@ test("encode - create data with checksum", () => {
 	assert.deepEqual(checksum, expected);
 });
 
-test("encode - make bysquare header", () => {
-	const header = headerBysquare();
-	const expected = Uint8Array.from([0x00, 0x00]);
-	assert.deepEqual(header, expected);
-});
-
-test("encode - binary header", () => {
-	assert.deepEqual(
-		headerBysquare(/** dprint-ignore */ [
+describe("encode - headerBysquare", () => {
+	test("make bysquare header", () => {
+		const header = headerBysquare();
+		const expected = Uint8Array.from([0x00, 0x00]);
+		assert.deepEqual(header, expected);
+	});
+	test("make bysquare header from binary data", () => {
+		assert.deepEqual(
+			headerBysquare(/** dprint-ignore */ [
 				0b0000_0001, 0b0000_0010,
 				0b0000_0011, 0b0000_0100,
 			]),
-		Uint8Array.from([
-			0b0001_0010,
-			0b0011_0100,
-		]),
-	);
+			Uint8Array.from([
+				0b0001_0010,
+				0b0011_0100,
+			]),
+		);
+	});
+	test("throw EncodeError when creating an bysquare header with invalid type", () => {
+		const invalidValue = 0x1F;
+		assert.throws(() => {
+			headerBysquare([invalidValue, Version["1.0.0"], 0x00, 0x00]);
+		}, new EncodeError(EncodeErrorMessage.BySquareType, { invalidValue }));
+	});
+	test("throw EncodeError when creating an bysquare header with invalid version", () => {
+		const invalidValue = 0xFF;
+		assert.throws(() => {
+			headerBysquare([0x00, invalidValue, 0x00, 0x00]);
+		}, new EncodeError(EncodeErrorMessage.Version, { invalidValue }));
+	});
+	test("throw EncodeError when creating an bysquare header with invalid document type", () => {
+		const invalidValue = 0xFF;
+		assert.throws(() => {
+			headerBysquare([0x00, 0x00, invalidValue, 0x00]);
+		}, new EncodeError(EncodeErrorMessage.DocumentType, { invalidValue }));
+	});
+	test("throw EncodeError when creating an bysquare header with invalid reserved nibble", () => {
+		const invalidValue = 0xFF;
+		assert.throws(() => {
+			headerBysquare([0x00, 0x00, 0x00, invalidValue]);
+		}, new EncodeError(EncodeErrorMessage.Reserved, { invalidValue }));
+	});
+});
+
+describe("encode - headerDataLength", () => {
+	test("return encoded header data length", () => {
+		const length = MAX_COMPRESSED_SIZE - 1;
+		const dataView = new DataView(new ArrayBuffer(2));
+		dataView.setUint16(0, length, true);
+		assert.deepEqual(
+			headerDataLength(length),
+			new Uint8Array(dataView.buffer),
+		);
+	});
+	test("throw EncodeError, when allowed size of header is exceeded", () => {
+		assert.throws(
+			() => {
+				headerDataLength(MAX_COMPRESSED_SIZE);
+			},
+			new EncodeError(EncodeErrorMessage.HeaderDataSize, {
+				actualSize: MAX_COMPRESSED_SIZE,
+				allowedSize: MAX_COMPRESSED_SIZE,
+			}),
+		);
+	});
+});
+
+describe("encode - removeDiacritics", function() {
+	const payloadWithDiacritics = {
+		invoiceId: "random-id",
+		payments: [
+			{
+				type: PaymentOptions.PaymentOrder,
+				amount: 100.0,
+				bankAccounts: [
+					{ iban: "SK9611000000002918599669" },
+				],
+				currencyCode: CurrencyCode.EUR,
+				variableSymbol: "123",
+				paymentNote: "Príspevok na kávu",
+				beneficiary: {
+					name: "Ján Kováč",
+					city: "Košice",
+					street: "Štúrova 27",
+				},
+			},
+		],
+	} satisfies DataModel;
+	test("Removes diacritics from payload", function() {
+		const input = Object.assign(
+			{},
+			JSON.parse(JSON.stringify(payloadWithDiacritics)),
+		) satisfies DataModel;
+		removeDiacritics(input);
+		assert.deepEqual(input, {
+			...payloadWithDiacritics,
+			payments: [{
+				...payloadWithDiacritics.payments[0],
+				paymentNote: "Prispevok na kavu",
+				beneficiary: {
+					name: "Jan Kovac",
+					city: "Kosice",
+					street: "Sturova 27",
+				},
+			}],
+		});
+	});
 });

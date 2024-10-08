@@ -10,7 +10,44 @@ import {
 } from "./types.js";
 import { validateDataModel } from "./validations.js";
 
-const MAX_COMPRESSED_SIZE = 131_072; // 2^17
+export enum EncodeErrorMessage {
+	/**
+	 * @description - find invalid value in extensions
+	 */
+	BySquareType = `Invalid BySquareType value in header, valid range <0,15>`,
+	/**
+	 * @description - find invalid value in extensions
+	 * @see {@link ./types#Version} for valid ranges
+	 */
+	Version = `Invalid Version value in header`,
+	/**
+	 * @description - find invalid value in extensions
+	 */
+	DocumentType = `Invalid DocumentType value in header, valid range <0,15>`,
+	/**
+	 * @description - find invalid value in extensions
+	 */
+	Reserved = `Invalid Reserved value in header, valid range <0,15>`,
+	/**
+	 * @description - find actual size of header in extensions
+	 * @see MAX_COMPRESSED_SIZE
+	 */
+	HeaderDataSize = `Allowed header data size exceeded`,
+}
+
+export class EncodeError extends Error {
+	override name = "EncodeError";
+	public extensions?: { [name: string]: any; };
+
+	constructor(message: EncodeErrorMessage, extensions?: { [name: string]: any; }) {
+		super(message);
+		if (extensions) {
+			this.extensions = extensions;
+		}
+	}
+}
+
+export const MAX_COMPRESSED_SIZE = 131_072; // 2^17
 
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare
@@ -38,16 +75,16 @@ export function headerBysquare(
 	],
 ): Uint8Array {
 	if (header[0] < 0 || header[0] > 15) {
-		throw new Error(`Invalid BySquareType value '${header[0]}' in header, valid range <0,15>`);
+		throw new EncodeError(EncodeErrorMessage.BySquareType, { invalidValue: header[0] });
 	}
 	if (header[1] < 0 || header[1] > 15) {
-		throw new Error(`Invalid Version value '${header[1]}' in header, valid range <0,15>`);
+		throw new EncodeError(EncodeErrorMessage.Version, { invalidValue: header[1] });
 	}
 	if (header[2] < 0 || header[2] > 15) {
-		throw new Error(`Invalid DocumentType value '${header[2]}' in header, valid range <0,15>`);
+		throw new EncodeError(EncodeErrorMessage.DocumentType, { invalidValue: header[2] });
 	}
 	if (header[3] < 0 || header[3] > 15) {
-		throw new Error(`Invalid Reserved value '${header[3]}' in header, valid range <0,15>`);
+		throw new EncodeError(EncodeErrorMessage.Reserved, { invalidValue: header[3] });
 	}
 
 	const [
@@ -72,7 +109,10 @@ export function headerBysquare(
  */
 export function headerDataLength(length: number): Uint8Array {
 	if (length >= MAX_COMPRESSED_SIZE) {
-		throw new Error(`Data size ${length} exceeds limit of ${MAX_COMPRESSED_SIZE} bytes`);
+		throw new EncodeError(EncodeErrorMessage.HeaderDataSize, {
+			actualSize: length,
+			allowedSize: MAX_COMPRESSED_SIZE,
+		});
 	}
 
 	const header = new ArrayBuffer(2);
@@ -163,7 +203,7 @@ export function serialize(data: DataModel): string {
 	return serialized.join("\t");
 }
 
-function removeDiacritics(model: DataModel): void {
+export function removeDiacritics(model: DataModel): void {
 	for (const payment of model.payments) {
 		if (payment.paymentNote) {
 			payment.paymentNote = deburr(payment.paymentNote);

@@ -10,6 +10,10 @@ import {
 } from "./decode.js";
 import { encode } from "./encode.js";
 import {
+	payloadWithStandingOrder,
+	serializedStandingOrder,
+} from "./test_assets.js";
+import {
 	CurrencyCode,
 	DataModel,
 	PaymentOptions,
@@ -119,6 +123,12 @@ describe("decode - deserialize", () => {
 		assert.deepEqual(
 			deserialize(serialized),
 			payload,
+		);
+	});
+	test("return decoded standing order", () => {
+		assert.deepEqual(
+			deserialize(serializedStandingOrder),
+			payloadWithStandingOrder,
 		);
 	});
 });

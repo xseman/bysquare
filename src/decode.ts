@@ -15,6 +15,22 @@ import {
 	Version,
 } from "./index.js";
 
+export enum DecodeErrorMessage {
+	MissingIban = "IBAN is missing",
+}
+
+export class DecodeError extends Error {
+	override name = "DecodeError";
+	public extensions?: { [name: string]: any; };
+
+	constructor(message: DecodeErrorMessage, extensions?: { [name: string]: any; }) {
+		super(message);
+		if (extensions) {
+			this.extensions = extensions;
+		}
+	}
+}
+
 function cleanUndefined(obj: any): void {
 	Object.keys(obj).forEach((key) => {
 		if (typeof obj[key] === "undefined") {
@@ -81,7 +97,7 @@ export function deserialize(qr: string): DataModel {
 			const iban = data.shift();
 			if (iban === undefined || iban.length === 0) {
 				// todo: missing test
-				throw new Error("Missing IBAN");
+				throw new DecodeError(DecodeErrorMessage.MissingIban);
 			}
 
 			const bic = data.shift();
@@ -190,14 +206,6 @@ function bysquareHeaderDecoder(header: Uint8Array): Header {
 		documentType,
 		reserved,
 	};
-}
-
-export class DecodeError extends Error {
-	// todo: missing test
-	override name = "DecodeError";
-	constructor(public cause: Error, msg?: string) {
-		super(msg);
-	}
 }
 
 /** @deprecated */

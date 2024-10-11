@@ -17,7 +17,15 @@ import {
 
 export enum DecodeErrorMessage {
 	MissingIBAN = "IBAN is missing",
+	/**
+	 * @description - find original LZMA error in extensions
+	 */
 	LZMADecompressionFailed = "LZMA decompression failed",
+	/**
+	 * @description - find found version in extensions
+	 * @see {@link ./types#Version} for valid ranges
+	 */
+	UnsupportedVersion = "Unsupported version",
 }
 
 export class DecodeError extends Error {
@@ -223,9 +231,9 @@ export function decode(qr: string): DataModel {
 	const decodedBysquareHeader = bysquareHeaderDecoder(bysquareHeader);
 	if ((decodedBysquareHeader.version > Version["1.1.0"])) {
 		// todo: missing test
-		throw new Error(
-			`Unsupported Bysquare version '${decodedBysquareHeader.version}' in header detected. Only '0' and '1' values are supported`,
-		);
+		throw new DecodeError(DecodeErrorMessage.UnsupportedVersion, {
+			version: decodedBysquareHeader.version,
+		});
 	}
 
 	/**

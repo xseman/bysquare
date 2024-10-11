@@ -50,7 +50,35 @@ test("decode - bidirectional", () => {
 });
 
 describe("decode - deserialize", () => {
-	test("return decoded payload", () => {
+	test("throws missing IBAN error", () => {
+		const serialized = /** dprint-ignore */ [
+			"random-id",
+			"\t", "1",
+			"\t", "1",
+			"\t", "100",
+			"\t", "EUR",
+			"\t",
+			"\t", "123",
+			"\t",
+			"\t",
+			"\t",
+			"\t",
+			"\t", "1",
+			"\t", "",
+			"\t",
+			"\t", "0",
+			"\t", "0",
+			"\t",
+			"\t",
+			"\t",
+		].join("");
+
+		assert.throws(
+			() => deserialize(serialized),
+			new DecodeError(DecodeErrorMessage.MissingIBAN),
+		);
+	});
+	test("return decoded payment order", () => {
 		const serialized = /** dprint-ignore */ [
 			"random-id",
 			"\t", "1",
@@ -91,34 +119,6 @@ describe("decode - deserialize", () => {
 		assert.deepEqual(
 			deserialize(serialized),
 			payload,
-		);
-	});
-	test("throws missing IBAN error", () => {
-		const serialized = /** dprint-ignore */ [
-			"random-id",
-			"\t", "1",
-			"\t", "1",
-			"\t", "100",
-			"\t", "EUR",
-			"\t",
-			"\t", "123",
-			"\t",
-			"\t",
-			"\t",
-			"\t",
-			"\t", "1",
-			"\t", "",
-			"\t",
-			"\t", "0",
-			"\t", "0",
-			"\t",
-			"\t",
-			"\t",
-		].join("");
-
-		assert.throws(
-			() => deserialize(serialized),
-			new DecodeError(DecodeErrorMessage.MissingIBAN),
 		);
 	});
 });

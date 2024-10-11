@@ -292,12 +292,10 @@ export function detect(qr: string): boolean {
 	try {
 		decoded = base32hex.decode(qr, true);
 	} catch (error) {
-		// todo: missing test
 		return false;
 	}
 
 	if (decoded.byteLength < 2) {
-		// todo: missing test
 		return false;
 	}
 

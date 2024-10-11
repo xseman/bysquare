@@ -117,11 +117,18 @@ describe("decode - deserialize", () => {
 	});
 });
 
-test("detect - header", () => {
-	const encoded = encode(payloadWithPaymentOrder);
-	const isBysquare = detect(encoded);
+describe("decode - detect", () => {
+	test("detect invalid header", () => {
+		const isBysquare = detect("");
 
-	assert.equal(isBysquare, true);
+		assert.equal(isBysquare, false);
+	});
+	test("detect valid header", () => {
+		const encoded = encode(payloadWithPaymentOrder);
+		const isBysquare = detect(encoded);
+
+		assert.equal(isBysquare, true);
+	});
 });
 
 test("detect - invalid header data", () => {

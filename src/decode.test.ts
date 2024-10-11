@@ -11,8 +11,10 @@ import {
 import { encode } from "./encode.js";
 import {
 	payloadWithDirectDebit,
+	payloadWithPaymentOrder,
 	payloadWithStandingOrder,
 	serializedDirectDebit,
+	serializedPaymentOrder,
 	serializedStandingOrder,
 } from "./test_assets.js";
 import {
@@ -21,26 +23,11 @@ import {
 	PaymentOptions,
 } from "./types.js";
 
-export const payload = {
-	invoiceId: "random-id",
-	payments: [
-		{
-			type: PaymentOptions.PaymentOrder,
-			amount: 100.0,
-			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
-			],
-			currencyCode: CurrencyCode.EUR,
-			variableSymbol: "123",
-		},
-	],
-} satisfies DataModel;
-
 test("decode", () => {
-	const encoded = encode(payload);
+	const encoded = encode(payloadWithPaymentOrder);
 	const decoded = decode(encoded);
 
-	assert.deepEqual(decoded, payload);
+	assert.deepEqual(decoded, payloadWithPaymentOrder);
 });
 
 test("decode - invalid input (throw)", () => {
@@ -50,9 +37,9 @@ test("decode - invalid input (throw)", () => {
 });
 
 test("decode - bidirectional", () => {
-	const qrString = encode(payload);
+	const qrString = encode(payloadWithPaymentOrder);
 
-	assert.deepEqual(payload, decode(qrString));
+	assert.deepEqual(payloadWithPaymentOrder, decode(qrString));
 });
 
 describe("decode - deserialize", () => {
@@ -85,46 +72,9 @@ describe("decode - deserialize", () => {
 		);
 	});
 	test("return decoded payment order", () => {
-		const serialized = /** dprint-ignore */ [
-			"random-id",
-			"\t", "1",
-			"\t", "1",
-			"\t", "100",
-			"\t", "EUR",
-			"\t",
-			"\t", "123",
-			"\t",
-			"\t",
-			"\t",
-			"\t",
-			"\t", "1",
-			"\t", "SK9611000000002918599669",
-			"\t",
-			"\t", "0",
-			"\t", "0",
-			"\t",
-			"\t",
-			"\t",
-		].join("");
-
-		const payload = {
-			invoiceId: "random-id",
-			payments: [
-				{
-					type: PaymentOptions.PaymentOrder,
-					amount: 100,
-					currencyCode: CurrencyCode.EUR,
-					variableSymbol: "123",
-					bankAccounts: [
-						{ iban: "SK9611000000002918599669" },
-					],
-				},
-			],
-		} satisfies DataModel;
-
 		assert.deepEqual(
-			deserialize(serialized),
-			payload,
+			deserialize(serializedPaymentOrder),
+			payloadWithPaymentOrder,
 		);
 	});
 	test("return decoded standing order", () => {
@@ -142,7 +92,7 @@ describe("decode - deserialize", () => {
 });
 
 test("detect - header", () => {
-	const encoded = encode(payload);
+	const encoded = encode(payloadWithPaymentOrder);
 	const isBysquare = detect(encoded);
 
 	assert.equal(isBysquare, true);

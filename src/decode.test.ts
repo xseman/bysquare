@@ -1,8 +1,10 @@
 import assert from "node:assert";
-import test from "node:test";
+import test, { describe } from "node:test";
 
 import {
 	decode,
+	DecodeError,
+	DecodeErrorMessage,
 	deserialize,
 	detect,
 } from "./decode.js";
@@ -47,8 +49,9 @@ test("decode - bidirectional", () => {
 	assert.deepEqual(payload, decode(qrString));
 });
 
-test("decode - serialization", () => {
-	const serialized = /** dprint-ignore */ [
+describe("decode - deserialize", () => {
+	test("return decoded payload", () => {
+		const serialized = /** dprint-ignore */ [
 			"random-id",
 			"\t", "1",
 			"\t", "1",
@@ -70,25 +73,54 @@ test("decode - serialization", () => {
 			"\t",
 		].join("");
 
-	const payload = {
-		invoiceId: "random-id",
-		payments: [
-			{
-				type: PaymentOptions.PaymentOrder,
-				amount: 100,
-				currencyCode: CurrencyCode.EUR,
-				variableSymbol: "123",
-				bankAccounts: [
-					{ iban: "SK9611000000002918599669" },
-				],
-			},
-		],
-	} satisfies DataModel;
+		const payload = {
+			invoiceId: "random-id",
+			payments: [
+				{
+					type: PaymentOptions.PaymentOrder,
+					amount: 100,
+					currencyCode: CurrencyCode.EUR,
+					variableSymbol: "123",
+					bankAccounts: [
+						{ iban: "SK9611000000002918599669" },
+					],
+				},
+			],
+		} satisfies DataModel;
 
-	assert.deepEqual(
-		deserialize(serialized),
-		payload,
-	);
+		assert.deepEqual(
+			deserialize(serialized),
+			payload,
+		);
+	});
+	test("throws missing IBAN error", () => {
+		const serialized = /** dprint-ignore */ [
+			"random-id",
+			"\t", "1",
+			"\t", "1",
+			"\t", "100",
+			"\t", "EUR",
+			"\t",
+			"\t", "123",
+			"\t",
+			"\t",
+			"\t",
+			"\t",
+			"\t", "1",
+			"\t", "",
+			"\t",
+			"\t", "0",
+			"\t", "0",
+			"\t",
+			"\t",
+			"\t",
+		].join("");
+
+		assert.throws(
+			() => deserialize(serialized),
+			new DecodeError(DecodeErrorMessage.MissingIBAN),
+		);
+	});
 });
 
 test("detect - header", () => {

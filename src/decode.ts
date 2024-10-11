@@ -105,7 +105,6 @@ export function deserialize(qr: string): DataModel {
 		for (let j = 0; j < accountslen; j++) {
 			const iban = data.shift();
 			if (iban === undefined || iban.length === 0) {
-				// todo: missing test
 				throw new DecodeError(DecodeErrorMessage.MissingIBAN);
 			}
 

@@ -269,17 +269,11 @@ export function decode(qr: string): DataModel {
 
 	let decompressed: string | Int8Array | undefined;
 	try {
-		decompressed = decompress(body);
+		decompressed = decompress(body) as Int8Array;
 	} catch (error) {
 		// todo: missing test
 		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, { error });
 	}
-
-	if (typeof decompressed === "string") {
-		// todo: missing test
-		return deserialize(decompressed);
-	}
-
 	const _checksum = decompressed.slice(0, 4);
 	const decompressedBody = decompressed.slice(4);
 	const decoded = new TextDecoder("utf-8").decode(decompressedBody.buffer);

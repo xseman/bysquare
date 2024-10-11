@@ -49,6 +49,14 @@ function cleanUndefined(obj: any): void {
 	});
 }
 
+function decodeNumber(value: string | undefined): number | undefined {
+	return value?.length ? Number(value) : undefined;
+}
+
+function decodeString(value: string | undefined): string | undefined {
+	return value?.length ? value : undefined;
+}
+
 /**
  * Generating by square Code
  *
@@ -139,13 +147,16 @@ export function deserialize(qr: string): DataModel {
 		if (directDebitExt === "1" && payment.type === PaymentOptions.DirectDebit) {
 			payment = {
 				...payment,
-				directDebitScheme: Number(data.shift()),
-				directDebitType: Number(data.shift()),
-				mandateId: data.shift(),
-				creditorId: data.shift(),
-				contractId: data.shift(),
-				maxAmount: Number(data.shift()),
-				validTillDate: data.shift(),
+				directDebitScheme: decodeNumber(data.shift()),
+				directDebitType: decodeNumber(data.shift()),
+				variableSymbol: decodeString(data.shift()),
+				specificSymbol: decodeString(data.shift()),
+				originatorsReferenceInformation: decodeString(data.shift()),
+				mandateId: decodeString(data.shift()),
+				creditorId: decodeString(data.shift()),
+				contractId: decodeString(data.shift()),
+				maxAmount: decodeNumber(data.shift()),
+				validTillDate: decodeString(data.shift()),
 			} satisfies DirectDebit;
 		}
 

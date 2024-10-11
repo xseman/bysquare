@@ -10,7 +10,9 @@ import {
 } from "./decode.js";
 import { encode } from "./encode.js";
 import {
+	payloadWithDirectDebit,
 	payloadWithStandingOrder,
+	serializedDirectDebit,
 	serializedStandingOrder,
 } from "./test_assets.js";
 import {
@@ -53,7 +55,7 @@ test("decode - bidirectional", () => {
 	assert.deepEqual(payload, decode(qrString));
 });
 
-describe.only("decode - deserialize", () => {
+describe("decode - deserialize", () => {
 	test("throws missing IBAN error", () => {
 		const serialized = /** dprint-ignore */ [
 			"random-id",
@@ -129,6 +131,12 @@ describe.only("decode - deserialize", () => {
 		assert.deepEqual(
 			deserialize(serializedStandingOrder),
 			payloadWithStandingOrder,
+		);
+	});
+	test("return decoded direct debit", () => {
+		assert.deepEqual(
+			deserialize(serializedDirectDebit),
+			payloadWithDirectDebit,
 		);
 	});
 });

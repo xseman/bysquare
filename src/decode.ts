@@ -16,7 +16,8 @@ import {
 } from "./index.js";
 
 export enum DecodeErrorMessage {
-	MissingIban = "IBAN is missing",
+	MissingIBAN = "IBAN is missing",
+	LZMADecompressionFailed = "LZMA decompression failed",
 }
 
 export class DecodeError extends Error {
@@ -97,7 +98,7 @@ export function deserialize(qr: string): DataModel {
 			const iban = data.shift();
 			if (iban === undefined || iban.length === 0) {
 				// todo: missing test
-				throw new DecodeError(DecodeErrorMessage.MissingIban);
+				throw new DecodeError(DecodeErrorMessage.MissingIBAN);
 			}
 
 			const bic = data.shift();
@@ -262,7 +263,7 @@ export function decode(qr: string): DataModel {
 		decompressed = decompress(body);
 	} catch (error) {
 		// todo: missing test
-		throw new DecodeError(error, "LZMA decompression failed");
+		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, { error });
 	}
 
 	if (typeof decompressed === "string") {

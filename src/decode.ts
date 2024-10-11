@@ -8,6 +8,7 @@ import {
 	DataModel,
 	Day,
 	type DirectDebit,
+	Month,
 	Payment,
 	PaymentOptions,
 	Periodicity,
@@ -120,41 +121,32 @@ export function deserialize(qr: string): DataModel {
 			payment.bankAccounts.push(account);
 		}
 
-		data.shift(); // StandingOrderExt
-		data.shift(); // DirectDebitExt
-
-		// narrowing payment type
-		switch (payment.type) {
-			case PaymentOptions.PaymentOrder:
-				break;
-
-			case PaymentOptions.StandingOrder:
-				// todo: missing test
-				payment = {
-					...payment,
-					day: Number(data.shift()) as Day,
-					month: Number(data.shift()),
-					periodicity: data.shift() as Periodicity,
-					lastDate: data.shift(),
-				} satisfies StandingOrder;
-				break;
-
-			case PaymentOptions.DirectDebit:
-				// todo: missing test
-				payment = {
-					...payment,
-					directDebitScheme: Number(data.shift()),
-					directDebitType: Number(data.shift()),
-					mandateId: data.shift(),
-					creditorId: data.shift(),
-					contractId: data.shift(),
-					maxAmount: Number(data.shift()),
-					validTillDate: data.shift(),
-				} satisfies DirectDebit;
-				break;
-
-			default:
-				break;
+		const standingOrderExt = data.shift(); // StandingOrderExt
+		if (standingOrderExt === "1" && payment.type === PaymentOptions.StandingOrder) {
+			const day = data.shift();
+			const month = data.shift();
+			const periodicity = data.shift();
+			const lastDate = data.shift();
+			payment = {
+				...payment,
+				day: day ? Number(day) as Day : undefined,
+				month: month ? Number(month) as Month : undefined,
+				periodicity: periodicity ? periodicity as Periodicity : undefined,
+				lastDate: lastDate ? lastDate : undefined,
+			} satisfies StandingOrder;
+		}
+		const directDebitExt = data.shift(); // DirectDebitExt
+		if (directDebitExt === "1" && payment.type === PaymentOptions.DirectDebit) {
+			payment = {
+				...payment,
+				directDebitScheme: Number(data.shift()),
+				directDebitType: Number(data.shift()),
+				mandateId: data.shift(),
+				creditorId: data.shift(),
+				contractId: data.shift(),
+				maxAmount: Number(data.shift()),
+				validTillDate: data.shift(),
+			} satisfies DirectDebit;
 		}
 
 		cleanUndefined(payment);

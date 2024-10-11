@@ -53,7 +53,7 @@ test("decode - bidirectional", () => {
 	assert.deepEqual(payload, decode(qrString));
 });
 
-describe("decode - deserialize", () => {
+describe.only("decode - deserialize", () => {
 	test("throws missing IBAN error", () => {
 		const serialized = /** dprint-ignore */ [
 			"random-id",

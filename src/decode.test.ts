@@ -7,6 +7,7 @@ import {
 	DecodeErrorMessage,
 	deserialize,
 	detect,
+	safeDecompress,
 	validateBysquareHeader,
 } from "./decode.js";
 import { encode } from "./encode.js";
@@ -181,4 +182,18 @@ test("decode - multiple data", () => {
 		const decoded = decode(qr);
 		assert.deepEqual(decoded, encoded);
 	}
+});
+
+test("decode - safeDecompress", () => {
+	test("throws for invalid body", () => {
+		assert.throws(
+			() => safeDecompress(new Uint8Array([0])),
+			(err) => {
+				assert(err instanceof DecodeError);
+				assert(err.message, DecodeErrorMessage.LZMADecompressionFailed);
+				assert(err.extensions?.error);
+				return true;
+			},
+		);
+	});
 });

@@ -234,7 +234,6 @@ export function safeDecompress(body: Uint8Array): Int8Array {
 	try {
 		decompressed = decompress(body) as Int8Array;
 	} catch (error) {
-		// todo: missing test
 		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, { error });
 	}
 	return decompressed;

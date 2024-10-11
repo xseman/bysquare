@@ -7,6 +7,7 @@ import {
 	DecodeErrorMessage,
 	deserialize,
 	detect,
+	validateBysquareHeader,
 } from "./decode.js";
 import { encode } from "./encode.js";
 import {
@@ -21,6 +22,7 @@ import {
 	CurrencyCode,
 	DataModel,
 	PaymentOptions,
+	Version,
 } from "./types.js";
 
 test("decode", () => {
@@ -40,6 +42,30 @@ test("decode - bidirectional", () => {
 	const qrString = encode(payloadWithPaymentOrder);
 
 	assert.deepEqual(payloadWithPaymentOrder, decode(qrString));
+});
+
+describe("decode - validateBysquareHeader", () => {
+	test("throws for invalid version", () => {
+		const version = (Version["1.1.0"] + 1) as Version;
+		assert.throws(() => {
+			validateBysquareHeader({
+				bysquareType: 0,
+				documentType: 0,
+				reserved: 0,
+				version,
+			});
+		}, new DecodeError(DecodeErrorMessage.UnsupportedVersion, { version }));
+	});
+	test("passes for valid version", () => {
+		assert.doesNotThrow(() =>
+			validateBysquareHeader({
+				bysquareType: 0,
+				documentType: 0,
+				reserved: 0,
+				version: Version["1.1.0"],
+			})
+		);
+	});
 });
 
 describe("decode - deserialize", () => {

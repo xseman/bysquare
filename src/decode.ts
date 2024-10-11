@@ -131,16 +131,12 @@ export function deserialize(qr: string): DataModel {
 
 		const standingOrderExt = data.shift(); // StandingOrderExt
 		if (standingOrderExt === "1" && payment.type === PaymentOptions.StandingOrder) {
-			const day = data.shift();
-			const month = data.shift();
-			const periodicity = data.shift();
-			const lastDate = data.shift();
 			payment = {
 				...payment,
-				day: day ? Number(day) as Day : undefined,
-				month: month ? Number(month) as Month : undefined,
-				periodicity: periodicity ? periodicity as Periodicity : undefined,
-				lastDate: lastDate ? lastDate : undefined,
+				day: decodeNumber(data.shift()),
+				month: decodeNumber(data.shift()),
+				periodicity: decodeString(data.shift()) as Periodicity | undefined,
+				lastDate: decodeString(data.shift()),
 			} satisfies StandingOrder;
 		}
 		const directDebitExt = data.shift(); // DirectDebitExt

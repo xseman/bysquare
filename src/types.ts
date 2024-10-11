@@ -23,18 +23,18 @@ export enum Version {
  * Kalendárny mesiac.
  */
 export enum Month {
-	January = 1 << 0, // 1
-	February = 1 << 1, // 2
-	March = 1 << 2, // 4
-	April = 1 << 3, // 8
-	May = 1 << 4, // 16
-	June = 1 << 5, // 32
-	July = 1 << 6, // 64
-	August = 1 << 7, // 128
-	September = 1 << 8, // 256
-	October = 1 << 9, // 512
-	November = 1 << 10, // 1024
-	December = 1 << 11, // 2048
+	January = 1 << 0,
+	February = 1 << 1,
+	March = 1 << 2,
+	April = 1 << 3,
+	May = 1 << 4,
+	June = 1 << 5,
+	July = 1 << 6,
+	August = 1 << 7,
+	September = 1 << 8,
+	October = 1 << 9,
+	November = 1 << 10,
+	December = 1 << 11,
 }
 
 /**

@@ -80,6 +80,7 @@ export function deserialize(qr: string): DataModel {
 		for (let j = 0; j < accountslen; j++) {
 			const iban = data.shift();
 			if (iban === undefined || iban.length === 0) {
+				// todo: missing test
 				throw new Error("Missing IBAN");
 			}
 
@@ -104,6 +105,7 @@ export function deserialize(qr: string): DataModel {
 				break;
 
 			case PaymentOptions.StandingOrder:
+				// todo: missing test
 				payment = {
 					...payment,
 					day: Number(data.shift()) as Day,
@@ -114,6 +116,7 @@ export function deserialize(qr: string): DataModel {
 				break;
 
 			case PaymentOptions.DirectDebit:
+				// todo: missing test
 				payment = {
 					...payment,
 					directDebitScheme: Number(data.shift()),
@@ -190,6 +193,7 @@ function bysquareHeaderDecoder(header: Uint8Array): Header {
 }
 
 export class DecodeError extends Error {
+	// todo: missing test
 	override name = "DecodeError";
 	constructor(public cause: Error, msg?: string) {
 		super(msg);
@@ -209,6 +213,7 @@ export function decode(qr: string): DataModel {
 	const bysquareHeader = bytes.slice(0, 2);
 	const decodedBysquareHeader = bysquareHeaderDecoder(bysquareHeader);
 	if ((decodedBysquareHeader.version > Version["1.1.0"])) {
+		// todo: missing test
 		throw new Error(
 			`Unsupported Bysquare version '${decodedBysquareHeader.version}' in header detected. Only '0' and '1' values are supported`,
 		);
@@ -248,10 +253,12 @@ export function decode(qr: string): DataModel {
 	try {
 		decompressed = decompress(body);
 	} catch (error) {
+		// todo: missing test
 		throw new DecodeError(error, "LZMA decompression failed");
 	}
 
 	if (typeof decompressed === "string") {
+		// todo: missing test
 		return deserialize(decompressed);
 	}
 
@@ -273,10 +280,12 @@ export function detect(qr: string): boolean {
 	try {
 		decoded = base32hex.decode(qr, true);
 	} catch (error) {
+		// todo: missing test
 		return false;
 	}
 
 	if (decoded.byteLength < 2) {
+		// todo: missing test
 		return false;
 	}
 

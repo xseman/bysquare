@@ -227,19 +227,6 @@ export function validateBysquareHeader(header: Header): void {
 }
 
 /**
- * @description - extracted in order to increase test coverage
- */
-export function safeDecompress(body: Uint8Array): Int8Array {
-	let decompressed: Int8Array;
-	try {
-		decompressed = decompress(body) as Int8Array;
-	} catch (error) {
-		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, { error });
-	}
-	return decompressed;
-}
-
-/**
  * Decoding client data from QR Code 2005 symbol
  *
  * @see 3.16.
@@ -280,7 +267,17 @@ export function decode(qr: string): DataModel {
 		...payload,
 	]);
 
-	const decompressed = safeDecompress(body);
+	let decompressed: string | Int8Array | undefined;
+	try {
+		decompressed = decompress(body);
+	} catch (error) {
+		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, { error });
+	}
+
+	if (typeof decompressed === "string") {
+		return deserialize(decompressed);
+	}
+
 	const _checksum = decompressed.slice(0, 4);
 	const decompressedBody = decompressed.slice(4);
 	const decoded = new TextDecoder("utf-8").decode(decompressedBody.buffer);

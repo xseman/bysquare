@@ -8,6 +8,7 @@ import {
 	DataModel,
 	Day,
 	type DirectDebit,
+	Month,
 	Payment,
 	PaymentOptions,
 	Periodicity,
@@ -15,12 +16,45 @@ import {
 	Version,
 } from "./index.js";
 
+export enum DecodeErrorMessage {
+	MissingIBAN = "IBAN is missing",
+	/**
+	 * @description - find original LZMA error in extensions
+	 */
+	LZMADecompressionFailed = "LZMA decompression failed",
+	/**
+	 * @description - find found version in extensions
+	 * @see {@link ./types#Version} for valid ranges
+	 */
+	UnsupportedVersion = "Unsupported version",
+}
+
+export class DecodeError extends Error {
+	override name = "DecodeError";
+	public extensions?: { [name: string]: any; };
+
+	constructor(message: DecodeErrorMessage, extensions?: { [name: string]: any; }) {
+		super(message);
+		if (extensions) {
+			this.extensions = extensions;
+		}
+	}
+}
+
 function cleanUndefined(obj: any): void {
 	Object.keys(obj).forEach((key) => {
 		if (typeof obj[key] === "undefined") {
 			delete obj[key];
 		}
 	});
+}
+
+function decodeNumber(value: string | undefined): number | undefined {
+	return value?.length ? Number(value) : undefined;
+}
+
+function decodeString(value: string | undefined): string | undefined {
+	return value?.length ? value : undefined;
 }
 
 /**
@@ -80,7 +114,7 @@ export function deserialize(qr: string): DataModel {
 		for (let j = 0; j < accountslen; j++) {
 			const iban = data.shift();
 			if (iban === undefined || iban.length === 0) {
-				throw new Error("Missing IBAN");
+				throw new DecodeError(DecodeErrorMessage.MissingIBAN);
 			}
 
 			const bic = data.shift();
@@ -95,39 +129,31 @@ export function deserialize(qr: string): DataModel {
 			payment.bankAccounts.push(account);
 		}
 
-		data.shift(); // StandingOrderExt
-		data.shift(); // DirectDebitExt
-
-		// narrowing payment type
-		switch (payment.type) {
-			case PaymentOptions.PaymentOrder:
-				break;
-
-			case PaymentOptions.StandingOrder:
-				payment = {
-					...payment,
-					day: Number(data.shift()) as Day,
-					month: Number(data.shift()),
-					periodicity: data.shift() as Periodicity,
-					lastDate: data.shift(),
-				} satisfies StandingOrder;
-				break;
-
-			case PaymentOptions.DirectDebit:
-				payment = {
-					...payment,
-					directDebitScheme: Number(data.shift()),
-					directDebitType: Number(data.shift()),
-					mandateId: data.shift(),
-					creditorId: data.shift(),
-					contractId: data.shift(),
-					maxAmount: Number(data.shift()),
-					validTillDate: data.shift(),
-				} satisfies DirectDebit;
-				break;
-
-			default:
-				break;
+		const standingOrderExt = data.shift(); // StandingOrderExt
+		if (standingOrderExt === "1" && payment.type === PaymentOptions.StandingOrder) {
+			payment = {
+				...payment,
+				day: decodeNumber(data.shift()),
+				month: decodeNumber(data.shift()),
+				periodicity: decodeString(data.shift()) as Periodicity | undefined,
+				lastDate: decodeString(data.shift()),
+			} satisfies StandingOrder;
+		}
+		const directDebitExt = data.shift(); // DirectDebitExt
+		if (directDebitExt === "1" && payment.type === PaymentOptions.DirectDebit) {
+			payment = {
+				...payment,
+				directDebitScheme: decodeNumber(data.shift()),
+				directDebitType: decodeNumber(data.shift()),
+				variableSymbol: decodeString(data.shift()),
+				specificSymbol: decodeString(data.shift()),
+				originatorsReferenceInformation: decodeString(data.shift()),
+				mandateId: decodeString(data.shift()),
+				creditorId: decodeString(data.shift()),
+				contractId: decodeString(data.shift()),
+				maxAmount: decodeNumber(data.shift()),
+				validTillDate: decodeString(data.shift()),
+			} satisfies DirectDebit;
 		}
 
 		cleanUndefined(payment);
@@ -189,13 +215,6 @@ function bysquareHeaderDecoder(header: Uint8Array): Header {
 	};
 }
 
-export class DecodeError extends Error {
-	override name = "DecodeError";
-	constructor(public cause: Error, msg?: string) {
-		super(msg);
-	}
-}
-
 /** @deprecated */
 export const parse = decode;
 
@@ -209,9 +228,9 @@ export function decode(qr: string): DataModel {
 	const bysquareHeader = bytes.slice(0, 2);
 	const decodedBysquareHeader = bysquareHeaderDecoder(bysquareHeader);
 	if ((decodedBysquareHeader.version > Version["1.1.0"])) {
-		throw new Error(
-			`Unsupported Bysquare version '${decodedBysquareHeader.version}' in header detected. Only '0' and '1' values are supported`,
-		);
+		throw new DecodeError(DecodeErrorMessage.UnsupportedVersion, {
+			version: decodedBysquareHeader.version,
+		});
 	}
 
 	/**
@@ -248,7 +267,7 @@ export function decode(qr: string): DataModel {
 	try {
 		decompressed = decompress(body);
 	} catch (error) {
-		throw new DecodeError(error, "LZMA decompression failed");
+		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, { error });
 	}
 
 	if (typeof decompressed === "string") {

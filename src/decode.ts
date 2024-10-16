@@ -218,14 +218,6 @@ function bysquareHeaderDecoder(header: Uint8Array): Header {
 /** @deprecated */
 export const parse = decode;
 
-export function validateBysquareHeader(header: Header): void {
-	if ((header.version > Version["1.1.0"])) {
-		throw new DecodeError(DecodeErrorMessage.UnsupportedVersion, {
-			version: header.version,
-		});
-	}
-}
-
 /**
  * Decoding client data from QR Code 2005 symbol
  *
@@ -235,7 +227,11 @@ export function decode(qr: string): DataModel {
 	const bytes = base32hex.decode(qr);
 	const bysquareHeader = bytes.slice(0, 2);
 	const decodedBysquareHeader = bysquareHeaderDecoder(bysquareHeader);
-	validateBysquareHeader(decodedBysquareHeader);
+	if ((decodedBysquareHeader.version > Version["1.1.0"])) {
+		throw new DecodeError(DecodeErrorMessage.UnsupportedVersion, {
+			version: decodedBysquareHeader.version,
+		});
+	}
 
 	/**
 	 * The process of decompressing data requires the addition of an LZMA header

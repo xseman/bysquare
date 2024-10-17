@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.12.0](https://github.com/xseman/bysquare/compare/v2.11.0...v2.12.0) (2024-10-17)
+
+
+### Features
+
+* add helper functions ([#48](https://github.com/xseman/bysquare/issues/48)) ([447f939](https://github.com/xseman/bysquare/commit/447f9397ff557149d8bb606c4c13382fa9e9acf6))
+
+
+### Refactors
+
+* naming, deps & fmt ([#51](https://github.com/xseman/bysquare/issues/51)) ([4f73964](https://github.com/xseman/bysquare/commit/4f73964e8193b9c5a82b2d6191b7e5e0f63685e3))
+
+
+### Tests
+
+* improve test coverage for encode.ts file ([#47](https://github.com/xseman/bysquare/issues/47)) ([d14c887](https://github.com/xseman/bysquare/commit/d14c88778de4d498be68d2a1ab402ae3030135e8))
+* refactor & improve test coverage for decode.ts file ([#50](https://github.com/xseman/bysquare/issues/50)) ([6443f57](https://github.com/xseman/bysquare/commit/6443f572ce7a27c50d0a284a32299b32e03dd82b))
+
 ## [2.11.0](https://github.com/xseman/bysquare/compare/v2.10.0...v2.11.0) (2024-08-23)
 
 

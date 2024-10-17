@@ -53,7 +53,6 @@ describe("encode - serialize", () => {
 
 test("encode - create data with checksum", () => {
 	const checksum = addChecksum(serializedPaymentOrder);
-	// TODO: spytat sa na dprint issiue
 	/** dprint-ignore */
 	const expected = Uint8Array.from([
 		0x90, 0x94, 0x19, 0x21, 0x72, 0x61, 0x6e, 0x64, 0x6f, 0x6d, 0x2d, 0x69,

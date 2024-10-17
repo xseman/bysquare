@@ -9,7 +9,7 @@ import {
 	type DirectDebit,
 	Payment,
 	PaymentOptions,
-	Periodicity,
+	type Periodicity,
 	type StandingOrder,
 	Version,
 } from "./index.js";
@@ -75,9 +75,9 @@ export function deserialize(qr: string): DataModel {
 		const ammount = data.shift();
 		const currency = data.shift();
 		const dueDate = data.shift();
-		const variables = data.shift();
-		const constants = data.shift();
-		const specifics = data.shift();
+		const variableSymbol = data.shift();
+		const constantSymbol = data.shift();
+		const specificSymbol = data.shift();
 		const originatorRefInfo = data.shift();
 		const paymentNote = data.shift();
 
@@ -85,31 +85,18 @@ export function deserialize(qr: string): DataModel {
 			bankAccounts: [],
 			type: Number(paymentOptions),
 			currencyCode: currency ?? CurrencyCode.EUR,
-			amount: ammount?.length
-				? Number(ammount)
-				: undefined,
-			paymentDueDate: dueDate?.length
-				? dueDate
-				: undefined,
-			variableSymbol: variables?.length
-				? variables
-				: undefined,
-			constantSymbol: constants?.length
-				? constants
-				: undefined,
-			specificSymbol: specifics?.length
-				? specifics
-				: undefined,
-			originatorsReferenceInformation: originatorRefInfo?.length
-				? originatorRefInfo
-				: undefined,
-			paymentNote: paymentNote?.length
-				? paymentNote
-				: undefined,
+			amount: Number(ammount),
+			paymentDueDate: dueDate || undefined,
+			variableSymbol: variableSymbol || undefined,
+			constantSymbol: constantSymbol || undefined,
+			specificSymbol: specificSymbol || undefined,
+			originatorsReferenceInformation: originatorRefInfo || undefined,
+			paymentNote: paymentNote || undefined,
 		} as Payment;
 
-		const accountslen = Number(data.shift());
-		for (let j = 0; j < accountslen; j++) {
+		const numberOfAccounts = Number(data.shift());
+
+		for (let j = 0; j < numberOfAccounts; j++) {
 			const iban = data.shift();
 			if (iban === undefined || iban.length === 0) {
 				throw new DecodeError(DecodeErrorMessage.MissingIBAN);
@@ -118,9 +105,7 @@ export function deserialize(qr: string): DataModel {
 			const bic = data.shift();
 			const account = {
 				iban: iban,
-				bic: bic?.length
-					? bic
-					: undefined,
+				bic: bic || undefined,
 			} satisfies BankAccount;
 
 			cleanUndefined(account);
@@ -166,15 +151,9 @@ export function deserialize(qr: string): DataModel {
 
 		if (Boolean(name) || Boolean(addressLine1) || Boolean(addressLine2)) {
 			const beneficiary = {
-				name: name?.length
-					? name
-					: undefined,
-				street: addressLine1?.length
-					? addressLine1
-					: undefined,
-				city: addressLine2?.length
-					? addressLine2
-					: undefined,
+				name: name || undefined,
+				street: addressLine1 || undefined,
+				city: addressLine2 || undefined,
 			} satisfies Beneficiary;
 
 			cleanUndefined(beneficiary);
@@ -238,16 +217,18 @@ export function decode(qr: string): DataModel {
 	 * algorithm to properly interpret and extract the original uncompressed
 	 * data. Bysquare only store properties
 	 *
-	 * <----------------------- 13-bytes ----------------------->
+	 * @see https://docs.fileformat.com/compression/lzma/
 	 *
-	 * +------------+----+----+----+----+--+--+--+--+--+--+--+--+
-	 * | Properties |  Dictionary Size  |   Uncompressed Size   |
-	 * +------------+----+----+----+----+--+--+--+--+--+--+--+--+
+	 * +---------------+---------------------------+-------------------+
+	 * |      1B       |           4B              |         8B        |
+	 * +---------------+---------------------------+-------------------+
+	 * | Properties    | Dictionary Size           | Uncompressed Size |
+	 * +---------------+---------------------------+-------------------+
 	 */
 	const defaultProperties = [0x5D]; // lc=3, lp=0, pb=2
 	const defaultDictionarySize = [0x00, 0x02, 0x00, 0x00]; // 2^17
-
 	const uncompressedSize = new Uint8Array(8);
+
 	uncompressedSize.set(bytes.slice(2, 4));
 
 	const header = new Uint8Array([
@@ -283,8 +264,8 @@ export function decode(qr: string): DataModel {
 /**
  * Detect if qr string contains bysquare header.
  *
- * Bysquare header does not have too much information, therefore it is
- * not very reliable, there is room for improvement for the future.
+ * There is not magic header in the bysquare specification.
+ * Version is just 4 bites, so it is possible to have false positives.
  */
 export function detect(qr: string): boolean {
 	let decoded: Uint8Array;

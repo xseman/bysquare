@@ -1,24 +1,18 @@
 # bysquare
 
-Simple JavaScript library to encode and decode "PAY by square" string.
+"PAY by square" is a national standard for QR code payments that was adopted by
+the Slovak Banking Association in 2013. It is incorporated into a variety of
+invoices, reminders and other payment regulations.
 
-**What is `PAY by square`?**
+## What it is
 
-It's a national standard for QR code payments that was adopted by the Slovak
-Banking Association in 2013. It is incorporated into a variety of invoices,
-reminders and other payment regulations.
+- Simple JavaScript library to encode and decode "PAY by square" string.
+- Aim to support simpe programming interface to encode and decode data for QR.
 
-**Can I generate an image?**
+## What it is not
 
-This library doesn't have a specific opinion and how the QR code string is
-transformed into images depends on how you implement it. See
-[examples](./docs/examples/).
-
-## Features
-
-- Encode data to qr string
-- Decode data to json
-- Detect bysquare from qr string
+- Generating QR code images.
+- Parsing QR code images.
 
 ## Installation
 

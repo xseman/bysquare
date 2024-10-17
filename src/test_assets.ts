@@ -2,6 +2,7 @@ import {
 	CurrencyCode,
 	DataModel,
 	PaymentOptions,
+	Periodicity,
 } from "./types.js";
 
 export const payloadWithPaymentOrder = {
@@ -50,6 +51,7 @@ export const payloadWithStandingOrder = {
 			bankAccounts: [
 				{ iban: "SK9611000000002918599669" },
 			],
+			periodicity: Periodicity.Monthly,
 			currencyCode: CurrencyCode.EUR,
 			variableSymbol: "123",
 			lastDate: "20241011",
@@ -76,7 +78,7 @@ export const serializedStandingOrder = /** dprint-ignore */ [
 	"\t", "1",
 	"\t", "1",
 	"\t",
-	"\t",
+	"\t", "m",
 	"\t", "20241011",
 	"\t", "0",
 	"\t",

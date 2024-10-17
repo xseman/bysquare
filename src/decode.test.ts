@@ -21,7 +21,6 @@ import {
 	CurrencyCode,
 	DataModel,
 	PaymentOptions,
-	Version,
 } from "./types.js";
 
 test("decode", () => {
@@ -38,9 +37,8 @@ test("decode - invalid input (throw)", () => {
 });
 
 test("decode - bidirectional", () => {
-	const qrString = encode(payloadWithPaymentOrder);
-
-	assert.deepEqual(payloadWithPaymentOrder, decode(qrString));
+	const qrstring = encode(payloadWithPaymentOrder);
+	assert.deepEqual(payloadWithPaymentOrder, decode(qrstring));
 });
 
 describe("decode - deserialize", () => {
@@ -72,12 +70,14 @@ describe("decode - deserialize", () => {
 			new DecodeError(DecodeErrorMessage.MissingIBAN),
 		);
 	});
+
 	test("return decoded payment order", () => {
 		assert.deepEqual(
 			deserialize(serializedPaymentOrder),
 			payloadWithPaymentOrder,
 		);
 	});
+
 	test("return decoded standing order", () => {
 		assert.deepEqual(
 			deserialize(serializedStandingOrder),
@@ -98,6 +98,7 @@ describe("decode - detect", () => {
 
 		assert.equal(isBysquare, false);
 	});
+
 	test("detect valid header", () => {
 		const encoded = encode(payloadWithPaymentOrder);
 		const isBysquare = detect(encoded);

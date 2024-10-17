@@ -259,18 +259,30 @@ export function encode(
 	}
 
 	const payload = serialize(model);
-	const withChecksum = addChecksum(payload);
-	const compressed = Uint8Array.from(compress(withChecksum));
+	const payloadChecked = addChecksum(payload);
+	const payloadCompressed = Uint8Array.from(compress(payloadChecked));
 
-	const _lzmaHeader = Uint8Array.from(compressed.subarray(0, 13));
-	const lzmaBody = Uint8Array.from(compressed.subarray(13));
+	/**
+	 * The LZMA files has a 13-byte header that is followed by the LZMA
+	 * compressed data.
+	 *
+	 * @see https://docs.fileformat.com/compression/lzma/
+	 *
+	 * +---------------+---------------------------+-------------------+
+	 * |      1B       |           4B              |         8B        |
+	 * +---------------+---------------------------+-------------------+
+	 * | Properties    | Dictionary Size           | Uncompressed Size |
+	 * +---------------+---------------------------+-------------------+
+	 */
+	const _lzmaHeader = Uint8Array.from(payloadCompressed.subarray(0, 13));
+	const lzmaBody = Uint8Array.from(payloadCompressed.subarray(13));
 
 	const output = Uint8Array.from([
 		// NOTE: Newer version 1.1.0 is not supported by all apps (e.g., TatraBanka).
 		// We recommend using version "1.0.0" for better compatibility.
 		// ...headerBysquare([0x00, Version["1.1.0"], 0x00, 0x00]),
 		...headerBysquare([0x00, Version["1.0.0"], 0x00, 0x00]),
-		...headerDataLength(withChecksum.byteLength),
+		...headerDataLength(payloadChecked.byteLength),
 		...lzmaBody,
 	]);
 

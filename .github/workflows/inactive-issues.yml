@@ -1,4 +1,4 @@
-name: Close inactive issues
+name: check & close inactive issues
 
 on:
     schedule:
@@ -13,16 +13,20 @@ jobs:
             DAYS_BEFORE_STALE: 90
             DAYS_BEFORE_CLOSE: 30
         steps:
-            - uses: actions/stale@v8
+            - uses: actions/stale@v9
               with:
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
                   days-before-issue-stale: ${{ env.DAYS_BEFORE_STALE }}
                   days-before-issue-close: ${{ env.DAYS_BEFORE_CLOSE }}
+                  remove-stale-when-updated: true
+                  exempt-all-assignees: true
                   exempt-issue-labels: good first issue,help wanted
                   stale-issue-label: stale
+
                   stale-issue-message: >
-                      This issue is stale because it has been open for
-                      ${{ env.DAYS_BEFORE_STALE }} days with no activity.
+                      Hey! 👋 This issue has been inactive for
+                      ${{ env.DAYS_BEFORE_STALE }} days. We'd love your input!
+
                   close-issue-message: >
-                      This issue was closed because it has been inactive
-                      for ${{ env.DAYS_BEFORE_CLOSE }} days since being marked as stale.
-                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                      Thanks for your input! This issue is closed due to inactivity for
+                      ${{ env.DAYS_BEFORE_CLOSE }} days. Reopen anytime! ✌️

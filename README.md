@@ -4,15 +4,17 @@
 the Slovak Banking Association in 2013. It is incorporated into a variety of
 invoices, reminders and other payment regulations.
 
-## What it is
+## Why
 
-- Simple JavaScript library to encode and decode "PAY by square" string.
-- Aim to support simpe programming interface to encode and decode data for QR.
+It's simple, I couldn't find any implementation of "PAY by square" standard for
+JavaScript, so I decided to create one and share it with the community to help
+individuals and businesses to create QR codes for their invoices.
 
-## What it is not
+## Features
 
-- Generating QR code images.
-- Parsing QR code images.
+- TypeScript support
+- Compatible with Slovak banking apps
+- Runtime-independent JavaScript implementation
 
 ## Installation
 
@@ -24,30 +26,13 @@ invoices, reminders and other payment regulations.
 [mozzila-esm]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
 [mozzila-import]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import
 
-### npm registry
+### npm
 
 ```sh
-npm install bysquare
+$ npm install bysquare
 ```
 
-### CLI Node `v18+`
-
-```sh
-npm install --global bysquare
-```
-
-### deno
-
-Since `v1.28+` import from npm registry using `npm:` prefix.
-
-```ts
-import {
-	decode,
-	encode,
-} from "npm:bysquare@latest";
-```
-
-### Browser
+### browser
 
 ```html
 <script type="module">
@@ -79,6 +64,14 @@ const qrstring = simplePayment({
 ### Adavanced usage
 
 For more complex data use `encode` and `decode` functions:
+
+> [!NOTE]
+> Encoded data are without diacritics
+>
+> The library removes all diacritics from the input data to ensure maximum
+> compatibility, as not all banks support diacritics, which may lead to errors.
+> If you need to retain diacritics, disable deburr option when encoding data -
+> `encode(model, { deburr: false })`.
 
 ```ts
 import {
@@ -113,13 +106,17 @@ const model = decode(qrstring);
 
 ## CLI
 
+```sh
+$ npm install --global bysquare
+```
+
 ### Encode
 
 Encode JSON or JSONL data from files and print the corresponding QR code.
 
 ```sh
-npx bysquare --encode file1.json file2.json...
-npx bysquare --encode file.jsonl
+$ bysquare --encode file1.json file2.json...
+$ bysquare --encode file.jsonl
 ```
 
 ### Decode
@@ -128,40 +125,14 @@ Decode the specified QR code string and print the corresponding JSON data. The
 qrstring argument should be a valid QR code string.
 
 ```sh
-npx bysquare --decode <qrstring>
+$ bysquare --decode <qrstring>
 ```
 
 ## How it works
 
 ### Encoding sequence
 
-![logic](./docs/uml/logic.svg)
-
-## Platform support
-
-I mainly focus on LTS versions of Node.js and try to use the most idiomatic
-ECMAScript possible to avoid specific runtime coupling.
-
-This doesn't mean that the library won't work on older versions, but it might
-not be as reliable.
-
-As of `v1.28`, Deno now includes built-in support for npm modules and is ready
-to use without additional setup, showing its improved maturity.
-
-### Node.js & Deno
-
-- Node.js `v18` and later.
-- Deno `v1.28` and later.
-
-### Browser
-
-The latest version of Chrome, Firefox, and Safari.
-
-## Troubleshooting & Recommendations
-
-### Encoded data are without diacritics
-
-The library removes all diacritics from the input data to ensure maximum compatibility, as not all banks support diacritics, which may lead to errors. If you need to retain diacritics, disable deburr option when encoding data - `encode(model, { deburr: false })`.
+<image src="./docs/logic.svg" alt="encode" width="500px">
 
 ## Related
 

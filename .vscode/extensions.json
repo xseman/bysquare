@@ -1,7 +1,8 @@
 {
 	"recommendations": [
 		"dprint.dprint",
+		"editorconfig.editorconfig",
 		"hediet.vscode-drawio",
-		"editorconfig.editorconfig"
+		"pomdtr.excalidraw-editor"
 	]
 }

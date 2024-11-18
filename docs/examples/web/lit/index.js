@@ -1,3 +1,4 @@
+import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
 import {
 	CurrencyCode,
 	encode,
@@ -7,7 +8,6 @@ import {
 	html,
 	LitElement,
 } from "https://esm.sh/lit@3.1.0/";
-import { qrcanvas } from "https://esm.sh/qrcanvas@3.1.2/";
 
 /**
  * @extends {LitElement}
@@ -30,10 +30,6 @@ class Bysquare extends LitElement {
 
 	firstUpdated() {
 		this.#generateQrstring();
-	}
-
-	get #canvas() {
-		return this.shadowRoot?.querySelector("canvas");
 	}
 
 	render() {
@@ -73,11 +69,7 @@ class Bysquare extends LitElement {
 					/>
 				</label>
 				<pre>${this._qrstring}</pre>
-				<canvas
-					@click=${this.#setCanvas}
-					height="200"
-					width="200"
-				></canvas>
+				<div style="width: 200px" id="qrcode" @updated=${this.#updateQr}></div>
 			</div>
 		</div>
 		`;
@@ -104,19 +96,14 @@ class Bysquare extends LitElement {
 		});
 
 		this._qrstring = qrstring;
-		this.#setCanvas();
+		this.#updateQr();
 	}
 
-	#setCanvas() {
-		if (this.#canvas) {
-			const ctx = this.#canvas.getContext("2d");
-			if (ctx) {
-				ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
-				qrcanvas({
-					data: this._qrstring,
-					canvas: this.#canvas,
-				});
-			}
+	#updateQr() {
+		const container = this.shadowRoot?.querySelector("#qrcode");
+		if (container) {
+			container.innerHTML = "";
+			container.appendChild(QRCode.generateSVG(this._qrstring));
 		}
 	}
 }

@@ -1,3 +1,4 @@
+import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
 import {
 	CurrencyCode,
 	encode,
@@ -9,7 +10,6 @@ import {
 	h,
 	render,
 } from "https://esm.sh/preact@10.22.0";
-import { qrcanvas } from "https://esm.sh/qrcanvas@3.1.2/";
 
 /**
  * @typedef {Object} State
@@ -23,6 +23,8 @@ import { qrcanvas } from "https://esm.sh/qrcanvas@3.1.2/";
  * @extends {Component<{}, State>}
  */
 class App extends Component {
+	#qrRef = createRef();
+
 	state = {
 		qrstring: "",
 		ammount: 100,
@@ -30,10 +32,15 @@ class App extends Component {
 		iban: "SK9611000000002918599669",
 	};
 
-	#refCanvas = createRef();
-
 	componentDidMount() {
 		this.#generateQrstring();
+	}
+
+	componentDidUpdate() {
+		if (this.#qrRef.current) {
+			this.#qrRef.current.innerHTML = "";
+			this.#qrRef.current.appendChild(QRCode.generateSVG(this.state.qrstring));
+		}
 	}
 
 	render() {
@@ -72,7 +79,10 @@ class App extends Component {
 					}),
 				]),
 				h("pre", null, this.state.qrstring),
-				h("canvas", { ref: this.#refCanvas, height: 200, width: 200 }),
+				h("div", {
+					style: "width: 200px",
+					ref: this.#qrRef,
+				}),
 			]),
 		]);
 	}
@@ -102,15 +112,6 @@ class App extends Component {
 
 		this.setState({
 			qrstring: qrstring,
-		}, this.#setCanvas);
-	};
-
-	#setCanvas = () => {
-		const context = this.#refCanvas.current.getContext("2d");
-		context.reset();
-		qrcanvas({
-			data: this.state.qrstring,
-			canvas: this.#refCanvas.current,
 		});
 	};
 }

@@ -1,49 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8"/>
-	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	<title>bysquare example</title>
-	<script type="module" src="index.js"></script>
-</head>
-<body>
-<div>
-	<div style="margin-right: 10px;">
-		<label style="display: block; margin-bottom: 5px;">
-			Amount:
-			<br/>
-			<input
-				style="width: 210px;"
-				type="number"
-				name="amount"
-				value=""
-			/>
-		</label>
-		<label style="display: block; margin-bottom: 5px;">
-			IBAN:
-			<br/>
-			<input
-				style="width: 210px;"
-				name="iban"
-			/>
-		</label>
-		<label style="display: block; margin-bottom: 5px;">
-			Variable:
-			<br/>
-			<input
-				style="width: 210px;"
-				type="number"
-				name="variable"
-			/>
-		</label>
-		<pre id="encodedText"></pre>
-		<canvas
-			height="200"
-			width="200"
-			id="canvas"
-		></canvas>
-	</div>
-</div>
-</body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>bysquare example</title>
+
+		<script type="module" src="index.js"></script>
+	</head>
+
+	<body>
+		<div>
+			<div style="margin-right: 10px">
+				<label style="display: block; margin-bottom: 5px">
+					Amount:
+					<br />
+					<input
+						style="width: 210px"
+						type="number"
+						name="amount"
+						value=""
+					/>
+				</label>
+				<label style="display: block; margin-bottom: 5px">
+					IBAN:
+					<br />
+					<input style="width: 210px" name="iban" />
+				</label>
+				<label style="display: block; margin-bottom: 5px">
+					Variable:
+					<br />
+					<input style="width: 210px" type="number" name="variable" />
+				</label>
+				<pre id="encodedText"></pre>
+				<div style="width: 200px" id="qrcode"></div>
+			</div>
+		</div>
+	</body>
 </html>

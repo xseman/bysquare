@@ -1,5 +1,6 @@
 {
 	"$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+	"last-release-sha": "9ccbc45e4b5e848f4df06cdb0a7614db615c4506",
 	"packages": {
 		".": {
 			"release-type": "node",
@@ -7,7 +8,10 @@
 			"include-component-in-tag": false,
 			"pull-request-title-pattern": "v${version}",
 			"pull-request-header": "",
-			"pull-request-footer": ""
+			"pull-request-footer": "",
+			"prerelease": true,
+			"prerelease-type": "next",
+			"versioning": "prerelease"
 		}
 	},
 	"changelog-sections": [
@@ -16,9 +20,9 @@
 		{ "type": "perf", "section": "Performance Improvements" },
 		{ "type": "deps", "section": "Dependency Updates" },
 		{ "type": "docs", "section": "Documentation" },
-		{ "type": "ci", "section": "Continuous Integration" },
 		{ "type": "ops", "section": "Operations" },
 		{ "type": "build", "section": "Build System" },
+		{ "type": "ci", "section": "Maintenance" },
 		{ "type": "chore", "section": "Maintenance" },
 		{ "type": "config", "section": "Maintenance" },
 		{ "type": "refactor", "section": "Maintenance" },

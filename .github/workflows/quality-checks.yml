@@ -14,16 +14,24 @@ on:
             - .github/workflows/**.yml
 
 jobs:
-    test:
+    checks:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-node@v4
               with:
                   node-version-file: ".nvmrc"
+                  cache: npm
             - run: |
                   npm install --silent
-                  npm test
+
+            - name: typecheck
+              run: |
+                  node --run typecheck
+
+            - name: test
+              run: |
+                  node --run test
 
     fmt:
         runs-on: ubuntu-latest
@@ -32,6 +40,7 @@ jobs:
             - uses: actions/setup-node@v4
               with:
                   node-version-file: ".nvmrc"
+                  cache: npm
             - run: |
                   npm install --silent
-                  npm run fmt:check
+                  node --run fmt:check

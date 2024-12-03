@@ -65,6 +65,14 @@ const qrstring = simplePayment({
 
 For more complex data use `encode` and `decode` functions:
 
+> [!NOTE]
+> Encoded data are without diacritics
+>
+> The library removes all diacritics from the input data to ensure maximum
+> compatibility, as not all banks support diacritics, which may lead to errors.
+> If you need to retain diacritics, disable deburr option when encoding data -
+> `encode(model, { deburr: false })`.
+
 ```ts
 import {
 	CurrencyCode,
@@ -124,16 +132,7 @@ $ bysquare --decode <qrstring>
 
 ### Encoding sequence
 
-![logic](./docs/uml/logic.svg)
-
-## Troubleshooting & Recommendations
-
-### Encoded data are without diacritics
-
-The library removes all diacritics from the input data to ensure maximum
-compatibility, as not all banks support diacritics, which may lead to errors. If
-you need to retain diacritics, disable deburr option when encoding data -
-`encode(model, { deburr: false })`.
+![logic](./docs/logic.svg)
 
 ## Related
 

@@ -1,6 +1,9 @@
 name: release-please
 
 on:
+    push:
+        branches:
+            - master
     workflow_dispatch:
         inputs:
             tag:

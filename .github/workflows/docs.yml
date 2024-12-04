@@ -1,4 +1,4 @@
-name: Static Pages
+name: static pages
 
 on:
     push:

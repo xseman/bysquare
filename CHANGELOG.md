@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.12.1](https://github.com/xseman/bysquare/compare/v2.12.0...v2.12.1) (2024-12-06)
+
+
+### Documentation
+
+* update examples ([1d99572](https://github.com/xseman/bysquare/commit/1d9957272fbac98f13d02aa9cc690e1a34e49a1e))
+* update readme & diagrams ([ae37781](https://github.com/xseman/bysquare/commit/ae3778191acb66f43e7eb1327bb7a62bc7f74a85))
+* update README, clarify goals ([a2cac47](https://github.com/xseman/bysquare/commit/a2cac473e6a3dbf71c07e585b56408eb2e9bd23b))
+
+
+### Maintenance
+
+* add license header ([fcdc4e4](https://github.com/xseman/bysquare/commit/fcdc4e4e1980f07cf3a9fb075c70aad4170aa476))
+* update config ([0a6f042](https://github.com/xseman/bysquare/commit/0a6f04216f9a7b9e0d0c0871eead0a8973d5cc2a))
+* update workflows & configs ([8edd5c6](https://github.com/xseman/bysquare/commit/8edd5c66f453b34b43c303cde8b5b948d22ae5ca))
+* update workflows & tsconfig ([9e3e6a4](https://github.com/xseman/bysquare/commit/9e3e6a4b4d3d9b3f3997b2fce824a094e59d5853))
+
 ## [2.12.0](https://github.com/xseman/bysquare/compare/v2.11.0...v2.12.0) (2024-10-17)
 
 

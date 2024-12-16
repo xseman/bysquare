@@ -1,0 +1,12 @@
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence
+*   @xseman
+
+# Source code
+/src/   @xseman
+
+# Package files
+package.json        @xseman
+
+# Docs
+/docs/examples      @xseman @lukasbicus

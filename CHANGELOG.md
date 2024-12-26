@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.12.1](https://github.com/xseman/bysquare/compare/v2.12.0...v2.12.1) (2024-12-26)
+
+
+### Dependency Updates
+
+* bump deps & cleanup config ([eb827d9](https://github.com/xseman/bysquare/commit/eb827d902ec7cb5af9e2a34bd48c1ba9b9701882))
+
+
+### Documentation
+
+* update readme, examples & diagrams ([702cc30](https://github.com/xseman/bysquare/commit/702cc304c4275dc8c119c17dec0e628b9bbcdf24))
+
+
+### Maintenance
+
+* add license header ([a330084](https://github.com/xseman/bysquare/commit/a33008434ac5beeff655ed580d2f7b0f1893d970))
+* **github:** add CODEOWNERS ([3d68c94](https://github.com/xseman/bysquare/commit/3d68c941c2683e0a14eb289a24403c40fdd7db23))
+* update workflows & configs ([312b59d](https://github.com/xseman/bysquare/commit/312b59d2f3d95476075de8785b7a73f2842dda8b))
+* update workflows & tsconfig ([9e3e6a4](https://github.com/xseman/bysquare/commit/9e3e6a4b4d3d9b3f3997b2fce824a094e59d5853))
+
 ## [2.12.0](https://github.com/xseman/bysquare/compare/v2.11.0...v2.12.0) (2024-10-17)
 
 

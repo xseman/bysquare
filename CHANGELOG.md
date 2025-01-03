@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.2](https://github.com/xseman/bysquare/compare/v2.12.1...v2.12.2) (2025-01-03)
+
+
+### Documentation
+
+* cleanup & add PDF QR code extractor example ([99acb67](https://github.com/xseman/bysquare/commit/99acb674cca8b25157ec042c331905ea1c95470e))
+
 ## [2.12.1](https://github.com/xseman/bysquare/compare/v2.12.0...v2.12.1) (2024-12-26)
 
 

@@ -1,6 +1,7 @@
 {
 	"name": "bysquare",
 	"description": "It's a national standard for payment QR codes adopted by Slovak Banking Association (SBA)",
+	"type": "module",
 	"version": "2.12.1",
 	"license": "Apache-2.0",
 	"funding": "https://github.com/sponsors/xseman",
@@ -21,7 +22,7 @@
 		"fmt": "dprint fmt",
 		"fmt:check": "dprint check",
 		"typecheck": "tsc --noEmit",
-		"test": "TS_NODE_TRANSPILE_ONLY=true node --test --experimental-test-coverage --loader=ts-node/esm --no-warnings src/*.test.ts",
+		"test": "TS_NODE_TRANSPILE_ONLY=true node --test --experimental-test-coverage --test-coverage-exclude=src/**/*.test.ts --loader=ts-node/esm --no-warnings src/*.test.ts",
 		"test:watch": "TS_NODE_TRANSPILE_ONLY=true node --test --watch --loader=ts-node/esm --no-warnings src/*.test.ts"
 	},
 	"dependencies": {
@@ -33,18 +34,18 @@
 		"@types/validator": "^13.12.0",
 		"dprint": "~0.47.0",
 		"ts-node": "~10.9.0",
-		"typescript": "~5.6.0"
+		"typescript": "~5.8.0"
 	},
-	"type": "module",
 	"bin": "./dist/cli.js",
-	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"import": "./dist/index.js"
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
 		}
 	},
 	"files": [
-		"dist",
+		"dist/*.js",
+		"dist/*.d.ts",
 		"!dist/*.test.*"
 	]
 }

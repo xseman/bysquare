@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.12.2](https://github.com/xseman/bysquare/compare/v2.12.1...v2.12.2) (2025-03-15)
+
+
+### Dependency Updates
+
+* update typescript & scripts ([7b6abff](https://github.com/xseman/bysquare/commit/7b6abff52b9ea1be21c65ef046d74ee43804dcfe))
+
+
+### Documentation
+
+* cleanup & add PDF QR code extractor example ([ed9c7c6](https://github.com/xseman/bysquare/commit/ed9c7c64cef078aa7b1db1a1fa1004f6aa28c644))
+* update examples section ([77a08da](https://github.com/xseman/bysquare/commit/77a08da1c26118aed50574e50dd6739f8374ca9c))
+* update README ([576051d](https://github.com/xseman/bysquare/commit/576051d535795782b39ebf9295a4d02a4668b73d))
+
+
+### Maintenance
+
+* enums to const & other improvements ([c1f96b1](https://github.com/xseman/bysquare/commit/c1f96b1621b6abc12efdbb4448d5aa699b3ffc9c))
+* update github, vscode ([692fa39](https://github.com/xseman/bysquare/commit/692fa39a8cf2cd89eb30be6f058cf8527b3dd1e5))
+
 ## [2.12.1](https://github.com/xseman/bysquare/compare/v2.12.0...v2.12.1) (2024-12-26)
 
 

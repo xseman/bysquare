@@ -8,6 +8,9 @@
 	"editor.codeActionsOnSave": {
 		"source.organizeImports": "explicit"
 	},
+	"workbench.editorAssociations": {
+		"*.svg": "editor.excalidraw"
+	},
 	"[typescript][javascript][markdown][json][yaml][yml][github-actions-workflow]": {
 		"editor.defaultFormatter": "dprint.dprint",
 		"editor.formatOnSave": true

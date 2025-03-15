@@ -26,7 +26,7 @@ individuals and businesses to create QR codes for their invoices.
 [mozzila-esm]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
 [mozzila-import]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import
 
-### npm
+### [npm](https://npmjs.com/bysquare)
 
 ```sh
 $ npm install bysquare
@@ -40,25 +40,92 @@ $ npm install bysquare
 </script>
 ```
 
-## Usage
+## Quick start
 
-### Basic Usage
+There are helper functions for the most common use cases, such as simple payment,
+direct debit, and standing order. Also you can use `encode` and `decode` functions
+to work with the data model directly.
 
-Simple helper functions to wrap encoding for most common use cases.
+### Simple Payment
 
-- `simplePayment` - Encode simple payment data.
-- `directDebit` - Encode direct debit data.
-- `standingOrder` - Encode standing order data.
-
-```typescript
-import { simplePayment } from "bysquare";
+```js
+import {
+	CurrencyCode,
+	simplePayment,
+} from "bysquare";
 
 const qrstring = simplePayment({
-	amount: 100,
+	amount: 50.75,
+	iban: "SK9611000000002918599669",
 	variableSymbol: "123456",
 	currencyCode: CurrencyCode.EUR,
-	iban: "SK9611000000002918599669",
 });
+```
+
+### Direct Debit
+
+```js
+import {
+	CurrencyCode,
+	directDebit,
+} from "bysquare";
+
+const qrstring = directDebit({
+	amount: 25.00,
+	iban: "SK9611000000002918599669",
+	variableSymbol: "789012",
+	currencyCode: CurrencyCode.EUR,
+});
+```
+
+### Standing Order
+
+```js
+import {
+	CurrencyCode,
+	Periodicity,
+	standingOrder,
+} from "bysquare";
+
+const qrstring = standingOrder({
+	amount: 100.00,
+	iban: "SK9611000000002918599669",
+	variableSymbol: "654321",
+	day: 15,
+	periodicity: Periodicity.Monthly,
+});
+```
+
+### HTML example
+
+This example shows how to generate a payment QR code and display it in a web
+page:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment QR Code</title>
+</head>
+<body>
+  <div id="qrcode" style="width: 200px"></div>
+
+  <script type="module">
+    import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
+    import { simplePayment } from "https://esm.sh/bysquare@latest";
+
+    const qrstring = simplePayment({
+      amount: 123.45,
+      iban: "SK9611000000002918599669",
+      variableSymbol: "987654",
+    });
+
+    const qrElement = document.getElementById('qrcode');
+    qrElement.appendChild(QRCode.generateSVG(qrstring));
+  </script>
+</body>
+</html>
 ```
 
 ### Adavanced usage
@@ -91,9 +158,13 @@ const data = {
 			amount: 100.0,
 			variableSymbol: "123",
 			paymentNote: "hello world",
-			bankAccounts: [{ iban: "SK9611000000002918599669" }],
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+				// ...more bank accounts
+			],
 			// ...more fields
 		},
+		// ...more payments
 	],
 } satisfies DataModel;
 
@@ -130,7 +201,9 @@ $ bysquare --decode <qrstring>
 
 ## How it works
 
-### Encoding sequence
+### Data Flow
+
+### Encoding/Decoding Architecture
 
 <image src="./docs/logic.svg" alt="encode" width="500px">
 

@@ -10,37 +10,41 @@ import {
 } from "./types.js";
 import { validateDataModel } from "./validations.js";
 
-export enum EncodeErrorMessage {
+export const EncodeErrorMessage = {
 	/**
 	 * @description - find invalid value in extensions
 	 */
-	BySquareType = `Invalid BySquareType value in header, valid range <0,15>`,
+	BySquareType: "Invalid BySquareType value in header, valid range <0,15>",
 	/**
 	 * @description - find invalid value in extensions
 	 * @see {@link ./types#Version} for valid ranges
 	 */
-	Version = `Invalid Version value in header`,
+	Version: "Invalid Version value in header",
 	/**
 	 * @description - find invalid value in extensions
 	 */
-	DocumentType = `Invalid DocumentType value in header, valid range <0,15>`,
+	DocumentType: "Invalid DocumentType value in header, valid range <0,15>",
 	/**
 	 * @description - find invalid value in extensions
 	 */
-	Reserved = `Invalid Reserved value in header, valid range <0,15>`,
+	Reserved: "Invalid Reserved value in header, valid range <0,15>",
 	/**
 	 * @description - find actual size of header in extensions
 	 * @see MAX_COMPRESSED_SIZE
 	 */
-	HeaderDataSize = `Allowed header data size exceeded`,
-}
+	HeaderDataSize: "Allowed header data size exceeded",
+} as const;
 
 export class EncodeError extends Error {
-	override name = "EncodeError";
 	public extensions?: { [name: string]: any; };
 
-	constructor(message: EncodeErrorMessage, extensions?: { [name: string]: any; }) {
+	constructor(
+		message: string,
+		extensions?: { [name: string]: any; },
+	) {
 		super(message);
+		this.name = this.constructor.name;
+
 		if (extensions) {
 			this.extensions = extensions;
 		}

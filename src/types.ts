@@ -4,54 +4,67 @@
  * It's a bit silly to limit the version number to 4-bit, if they keep
  * increasing the version number, the latest possible mapped value is 16
  */
-export enum Version {
+export const Version = {
 	/**
 	 * Created this document from original by square specifications.
 	 *
 	 * **Released Date:** 2013-02-22
 	 */
-	"1.0.0" = 0x00,
+	"1.0.0": 0x00,
 	/**
 	 * Added fields for beneficiary name and address
 	 *
 	 * **Released Date:** 2015-06-24
 	 */
-	"1.1.0" = 0x01,
-}
+	"1.1.0": 0x01,
+} as const;
+
+// Add type for enum-like usage
+export type Version = typeof Version[keyof typeof Version];
 
 /**
  * Kalendárny mesiac.
+ *
+ * @dprint-ignore
  */
-export enum Month {
-	January = 1 << 0,
-	February = 1 << 1,
-	March = 1 << 2,
-	April = 1 << 3,
-	May = 1 << 4,
-	June = 1 << 5,
-	July = 1 << 6,
-	August = 1 << 7,
-	September = 1 << 8,
-	October = 1 << 9,
-	November = 1 << 10,
-	December = 1 << 11,
-}
+export const Month = {
+	January:   0b00000000000001,
+	February:  0b00000000000010,
+	March:     0b00000000000100,
+	April:     0b00000000001000,
+	May:       0b00000000010000,
+	June:      0b00000000100000,
+	July:      0b00000001000000,
+	August:    0b00000010000000,
+	September: 0b00000100000000,
+	October:   0b00001000000000,
+	November:  0b00010000000000,
+	December:  0b00100000000000,
+} as const;
+
+// Add type for enum-like usage
+export type Month = typeof Month[keyof typeof Month];
 
 /**
  * Deň platby vyplývajúci z opakovania (Periodicity). Deň v mesiaci je číslo
  * medzi 1 a 31. Deň v týždni je číslo medzi 1 a 7 (1 = pondelok, 2=utorok, …, 7
  * = nedeľa).
+ *
+ * @dprint-ignore
  */
-export enum Periodicity {
-	Daily = "d",
-	Weekly = "w",
-	Biweekly = "b",
-	Monthly = "m",
-	Bimonthly = "B",
-	Quarterly = "q",
-	Semiannually = "s",
-	Annually = "a",
-}
+export const Periodicity = {
+	Daily:        "d",
+	Weekly:       "w",
+	Biweekly:     "b",
+	Monthly:      "m",
+	Bimonthly:    "B",
+	Quarterly:    "q",
+	Semiannually: "s",
+	Annually:     "a",
+} as const;
+
+// Add type for enum-like usage
+export type Periodicity = typeof Periodicity[keyof typeof Periodicity];
 
 /**
  * This is the payment day. It‘s meaning depends on the periodicity, meaning
@@ -101,20 +114,23 @@ export type Day =
  * - `StandingOrder`: trvalý príkaz, údaje sa vyplnia do StandingOrderExt
  * - `DirectDebit`: inkaso, údaje sa vyplnia do DirectDebitExt
  */
-export enum PaymentOptions {
+export const PaymentOptions = {
 	/**
 	 * Platobný príkaz
 	 */
-	PaymentOrder = 1 << 0,
+	PaymentOrder: 0b00000001,
 	/**
 	 * Trvalý príkaz, údaje sa vyplnia do StandingOrderExt
 	 */
-	StandingOrder = 1 << 1,
+	StandingOrder: 0b00000010,
 	/**
 	 * Inkaso, údaje sa vyplnia do DirectDebitExt
 	 */
-	DirectDebit = 1 << 2,
-}
+	DirectDebit: 0b00000100,
+} as const;
+
+// Add type for enum-like usage
+export type PaymentOptions = typeof PaymentOptions[keyof typeof PaymentOptions];
 
 /**
  * Údaje bankového účtu prijímateľa platby.
@@ -149,16 +165,19 @@ export type BankAccount = {
  * - SEPA - Inkaso zodpovedá schéme
  * - SEPA. other - iné
  */
-export enum DirectDebitScheme {
+export const DirectDebitScheme = {
 	/**
 	 * other - iné
 	 */
-	Other = 0,
+	Other: 0x00,
 	/**
 	 * SEPA - Inkaso zodpovedá schéme
 	 */
-	Sepa = 1,
-}
+	Sepa: 0x01,
+} as const;
+
+// Add type for enum-like usage
+export type DirectDebitScheme = typeof DirectDebitScheme[keyof typeof DirectDebitScheme];
 
 /**
  * Typ inkasa. Uvádza ja jedna z možností:
@@ -168,16 +187,19 @@ export enum DirectDebitScheme {
  * - one-off - jednorázové inkaso
  * - recurrent - opakované inkaso
  */
-export enum DirectDebitType {
+export const DirectDebitType = {
 	/**
 	 * Jednorázové inkaso
 	 */
-	OneOff = 0,
+	OneOff: 0x00,
 	/**
 	 * Opakované inkaso
 	 */
-	Recurrent = 1,
-}
+	Recurrent: 0x01,
+} as const;
+
+// Add type for enum-like usage
+export type DirectDebitType = typeof DirectDebitType[keyof typeof DirectDebitType];
 
 export type Beneficiary = {
 	/**
@@ -220,7 +242,7 @@ export type SimplePayment = {
 	 *
 	 * @example "EUR"
 	 */
-	currencyCode: string | CurrencyCode;
+	currencyCode: string | keyof typeof CurrencyCode;
 	/**
 	 * Dátum splatnosti vo formáte [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) `"RRRR-MM-DD"`.
 	 * Vprípade trvalého príkazu označuje dátum prvej platby.
@@ -270,14 +292,14 @@ export type SimplePayment = {
 };
 
 export type PaymentOrder = SimplePayment & {
-	type: PaymentOptions.PaymentOrder;
+	type: typeof PaymentOptions.PaymentOrder;
 };
 
 /**
  * Rozšírenie platobných údajov o údaje pre nastavenie trvalého príkazu.
  */
 export type StandingOrder = SimplePayment & {
-	type: PaymentOptions.StandingOrder;
+	type: typeof PaymentOptions.StandingOrder;
 	/**
 	 * Deň platby vyplývajúci z opakovania (Periodicity). Deň v mesiaci je číslo
 	 * medzi 1 a 31. Deň v týždni je číslo medzi 1 a 7 (1 = pondelok, 2 =utorok,
@@ -287,11 +309,11 @@ export type StandingOrder = SimplePayment & {
 	/**
 	 * Medzerou oddelený zoznam mesiacov, v ktoré sa má platba uskutočniť.
 	 */
-	month?: Month;
+	month?: keyof typeof Month | number;
 	/**
 	 * Opakovanie (periodicita) trvalého príkazu.
 	 */
-	periodicity: Periodicity;
+	periodicity: keyof typeof Periodicity | string;
 	/**
 	 * Dátum poslednej platby v trvalom príkaze.
 	 *
@@ -304,9 +326,9 @@ export type StandingOrder = SimplePayment & {
  * Rozšírenie platobných údajov o údaje pre nastavenie a identifikáciu inkasa.
  */
 export type DirectDebit = SimplePayment & {
-	type: PaymentOptions.DirectDebit;
-	directDebitScheme?: DirectDebitScheme;
-	directDebitType?: DirectDebitType;
+	type: typeof PaymentOptions.DirectDebit;
+	directDebitScheme?: keyof typeof DirectDebitScheme | number;
+	directDebitType?: keyof typeof DirectDebitType | number;
 	/**
 	 * Identifikácia mandátu medzi veriteľom a dlžníkom podľa SEPA.
 	 *
@@ -363,162 +385,165 @@ export type DataModel = {
 /**
  * [ISO-4217](https://en.wikipedia.org/wiki/ISO_4217)
  */
-export enum CurrencyCode {
-	AED = "AED",
-	AFN = "AFN",
-	ALL = "ALL",
-	AMD = "AMD",
-	ANG = "ANG",
-	AOA = "AOA",
-	ARS = "ARS",
-	AUD = "AUD",
-	AWG = "AWG",
-	AZN = "AZN",
-	BAM = "BAM",
-	BBD = "BBD",
-	BDT = "BDT",
-	BGN = "BGN",
-	BHD = "BHD",
-	BIF = "BIF",
-	BMD = "BMD",
-	BND = "BND",
-	BOB = "BOB",
-	BRL = "BRL",
-	BSD = "BSD",
-	BTN = "BTN",
-	BWP = "BWP",
-	BYN = "BYN",
-	BZD = "BZD",
-	CAD = "CAD",
-	CDF = "CDF",
-	CHF = "CHF",
-	CLP = "CLP",
-	CNY = "CNY",
-	COP = "COP",
-	CRC = "CRC",
-	CUC = "CUC",
-	CUP = "CUP",
-	CVE = "CVE",
-	CZK = "CZK",
-	DJF = "DJF",
-	DKK = "DKK",
-	DOP = "DOP",
-	DZD = "DZD",
-	EGP = "EGP",
-	ERN = "ERN",
-	ETB = "ETB",
-	EUR = "EUR",
-	FJD = "FJD",
-	FKP = "FKP",
-	GBP = "GBP",
-	GEL = "GEL",
-	GHS = "GHS",
-	GIP = "GIP",
-	GMD = "GMD",
-	GNF = "GNF",
-	GTQ = "GTQ",
-	GYD = "GYD",
-	HKD = "HKD",
-	HNL = "HNL",
-	HRK = "HRK",
-	HTG = "HTG",
-	HUF = "HUF",
-	IDR = "IDR",
-	ILS = "ILS",
-	INR = "INR",
-	IQD = "IQD",
-	IRR = "IRR",
-	ISK = "ISK",
-	JMD = "JMD",
-	JOD = "JOD",
-	JPY = "JPY",
-	KES = "KES",
-	KGS = "KGS",
-	KHR = "KHR",
-	KMF = "KMF",
-	KPW = "KPW",
-	KRW = "KRW",
-	KWD = "KWD",
-	KYD = "KYD",
-	KZT = "KZT",
-	LAK = "LAK",
-	LBP = "LBP",
-	LKR = "LKR",
-	LRD = "LRD",
-	LSL = "LSL",
-	LYD = "LYD",
-	MAD = "MAD",
-	MDL = "MDL",
-	MGA = "MGA",
-	MKD = "MKD",
-	MMK = "MMK",
-	MNT = "MNT",
-	MOP = "MOP",
-	MRU = "MRU",
-	MUR = "MUR",
-	MVR = "MVR",
-	MWK = "MWK",
-	MXN = "MXN",
-	MYR = "MYR",
-	MZN = "MZN",
-	NAD = "NAD",
-	NGN = "NGN",
-	NIO = "NIO",
-	NOK = "NOK",
-	NPR = "NPR",
-	NZD = "NZD",
-	OMR = "OMR",
-	PAB = "PAB",
-	PEN = "PEN",
-	PGK = "PGK",
-	PHP = "PHP",
-	PKR = "PKR",
-	PLN = "PLN",
-	PYG = "PYG",
-	QAR = "QAR",
-	RON = "RON",
-	RSD = "RSD",
-	RUB = "RUB",
-	RWF = "RWF",
-	SAR = "SAR",
-	SBD = "SBD",
-	SCR = "SCR",
-	SDG = "SDG",
-	SEK = "SEK",
-	SGD = "SGD",
-	SHP = "SHP",
-	SLL = "SLL",
-	SOS = "SOS",
-	SRD = "SRD",
-	SSP = "SSP",
-	STN = "STN",
-	SVC = "SVC",
-	SYP = "SYP",
-	SZL = "SZL",
-	THB = "THB",
-	TJS = "TJS",
-	TMT = "TMT",
-	TND = "TND",
-	TOP = "TOP",
-	TRY = "TRY",
-	TTD = "TTD",
-	TWD = "TWD",
-	TZS = "TZS",
-	UAH = "UAH",
-	UGX = "UGX",
-	USD = "USD",
-	UYU = "UYU",
-	UZS = "UZS",
-	VES = "VES",
-	VND = "VND",
-	VUV = "VUV",
-	WST = "WST",
-	XAF = "XAF",
-	XCD = "XCD",
-	XOF = "XOF",
-	XPF = "XPF",
-	YER = "YER",
-	ZAR = "ZAR",
-	ZMW = "ZMW",
-	ZWL = "ZWL",
-}
+export const CurrencyCode = {
+	AED: "AED",
+	AFN: "AFN",
+	ALL: "ALL",
+	AMD: "AMD",
+	ANG: "ANG",
+	AOA: "AOA",
+	ARS: "ARS",
+	AUD: "AUD",
+	AWG: "AWG",
+	AZN: "AZN",
+	BAM: "BAM",
+	BBD: "BBD",
+	BDT: "BDT",
+	BGN: "BGN",
+	BHD: "BHD",
+	BIF: "BIF",
+	BMD: "BMD",
+	BND: "BND",
+	BOB: "BOB",
+	BRL: "BRL",
+	BSD: "BSD",
+	BTN: "BTN",
+	BWP: "BWP",
+	BYN: "BYN",
+	BZD: "BZD",
+	CAD: "CAD",
+	CDF: "CDF",
+	CHF: "CHF",
+	CLP: "CLP",
+	CNY: "CNY",
+	COP: "COP",
+	CRC: "CRC",
+	CUC: "CUC",
+	CUP: "CUP",
+	CVE: "CVE",
+	CZK: "CZK",
+	DJF: "DJF",
+	DKK: "DKK",
+	DOP: "DOP",
+	DZD: "DZD",
+	EGP: "EGP",
+	ERN: "ERN",
+	ETB: "ETB",
+	EUR: "EUR",
+	FJD: "FJD",
+	FKP: "FKP",
+	GBP: "GBP",
+	GEL: "GEL",
+	GHS: "GHS",
+	GIP: "GIP",
+	GMD: "GMD",
+	GNF: "GNF",
+	GTQ: "GTQ",
+	GYD: "GYD",
+	HKD: "HKD",
+	HNL: "HNL",
+	HRK: "HRK",
+	HTG: "HTG",
+	HUF: "HUF",
+	IDR: "IDR",
+	ILS: "ILS",
+	INR: "INR",
+	IQD: "IQD",
+	IRR: "IRR",
+	ISK: "ISK",
+	JMD: "JMD",
+	JOD: "JOD",
+	JPY: "JPY",
+	KES: "KES",
+	KGS: "KGS",
+	KHR: "KHR",
+	KMF: "KMF",
+	KPW: "KPW",
+	KRW: "KRW",
+	KWD: "KWD",
+	KYD: "KYD",
+	KZT: "KZT",
+	LAK: "LAK",
+	LBP: "LBP",
+	LKR: "LKR",
+	LRD: "LRD",
+	LSL: "LSL",
+	LYD: "LYD",
+	MAD: "MAD",
+	MDL: "MDL",
+	MGA: "MGA",
+	MKD: "MKD",
+	MMK: "MMK",
+	MNT: "MNT",
+	MOP: "MOP",
+	MRU: "MRU",
+	MUR: "MUR",
+	MVR: "MVR",
+	MWK: "MWK",
+	MXN: "MXN",
+	MYR: "MYR",
+	MZN: "MZN",
+	NAD: "NAD",
+	NGN: "NGN",
+	NIO: "NIO",
+	NOK: "NOK",
+	NPR: "NPR",
+	NZD: "NZD",
+	OMR: "OMR",
+	PAB: "PAB",
+	PEN: "PEN",
+	PGK: "PGK",
+	PHP: "PHP",
+	PKR: "PKR",
+	PLN: "PLN",
+	PYG: "PYG",
+	QAR: "QAR",
+	RON: "RON",
+	RSD: "RSD",
+	RUB: "RUB",
+	RWF: "RWF",
+	SAR: "SAR",
+	SBD: "SBD",
+	SCR: "SCR",
+	SDG: "SDG",
+	SEK: "SEK",
+	SGD: "SGD",
+	SHP: "SHP",
+	SLL: "SLL",
+	SOS: "SOS",
+	SRD: "SRD",
+	SSP: "SSP",
+	STN: "STN",
+	SVC: "SVC",
+	SYP: "SYP",
+	SZL: "SZL",
+	THB: "THB",
+	TJS: "TJS",
+	TMT: "TMT",
+	TND: "TND",
+	TOP: "TOP",
+	TRY: "TRY",
+	TTD: "TTD",
+	TWD: "TWD",
+	TZS: "TZS",
+	UAH: "UAH",
+	UGX: "UGX",
+	USD: "USD",
+	UYU: "UYU",
+	UZS: "UZS",
+	VES: "VES",
+	VND: "VND",
+	VUV: "VUV",
+	WST: "WST",
+	XAF: "XAF",
+	XCD: "XCD",
+	XOF: "XOF",
+	XPF: "XPF",
+	YER: "YER",
+	ZAR: "ZAR",
+	ZMW: "ZMW",
+	ZWL: "ZWL",
+} as const;
+
+// Add type for enum-like usage
+export type CurrencyCode = typeof CurrencyCode[keyof typeof CurrencyCode];

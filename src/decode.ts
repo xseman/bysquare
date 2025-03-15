@@ -14,25 +14,29 @@ import {
 	Version,
 } from "./index.js";
 
-export enum DecodeErrorMessage {
-	MissingIBAN = "IBAN is missing",
+export const DecodeErrorMessage = {
+	MissingIBAN: "IBAN is missing",
 	/**
 	 * @description - find original LZMA error in extensions
 	 */
-	LZMADecompressionFailed = "LZMA decompression failed",
+	LZMADecompressionFailed: "LZMA decompression failed",
 	/**
 	 * @description - find found version in extensions
 	 * @see {@link ./types#Version} for valid ranges
 	 */
-	UnsupportedVersion = "Unsupported version",
-}
+	UnsupportedVersion: "Unsupported version",
+} as const;
 
 export class DecodeError extends Error {
-	override name = "DecodeError";
 	public extensions?: { [name: string]: any; };
 
-	constructor(message: DecodeErrorMessage, extensions?: { [name: string]: any; }) {
+	constructor(
+		message: string,
+		extensions?: { [name: string]: any; },
+	) {
 		super(message);
+		this.name = this.constructor.name;
+
 		if (extensions) {
 			this.extensions = extensions;
 		}

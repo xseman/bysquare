@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.3](https://github.com/xseman/bysquare/compare/v2.12.2...v2.12.3) (2025-03-21)
+
+
+### Maintenance
+
+* cleanup published artefacts ([5d508e0](https://github.com/xseman/bysquare/commit/5d508e0a0e426ff666bf9f9054fcf965d767baef))
+
 ## [2.12.2](https://github.com/xseman/bysquare/compare/v2.12.1...v2.12.2) (2025-03-15)
 
 

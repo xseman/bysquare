@@ -46,6 +46,6 @@
 	"files": [
 		"dist/*.js",
 		"dist/*.d.ts",
-		"!dist/*.test.*"
+		"!dist/*test*"
 	]
 }

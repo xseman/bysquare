@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.5](https://github.com/xseman/bysquare/compare/v2.12.4...v2.12.5) (2025-05-12)
+
+
+### Maintenance
+
+* remove .nvmrc file ([d819c86](https://github.com/xseman/bysquare/commit/d819c86437c1c5244b295a75862194a01b6fd052))
+
 ## [2.12.4](https://github.com/xseman/bysquare/compare/v2.12.3...v2.12.4) (2025-05-12)
 
 

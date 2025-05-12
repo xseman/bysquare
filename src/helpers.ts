@@ -12,6 +12,12 @@ type PaymentInput =
 	& Pick<SimplePayment, "amount" | "currencyCode" | "variableSymbol">;
 
 /**
+ * @deprecated Will be removed as of v3.
+ * This was intended to simplify the main API, but it has complicated it
+ * instead, serving only as a limited wrapper. The main goal should be to
+ * enhance documentation for the main API, enabling users to create their own
+ * wrappers.
+ *
  * Vytvorí QR pre jednorázovú platbu
  */
 export function simplePayment(input: PaymentInput): string {
@@ -29,6 +35,12 @@ export function simplePayment(input: PaymentInput): string {
 }
 
 /**
+ * @deprecated Will be removed as of v3.
+ * This was intended to simplify the main API, but it has complicated it
+ * instead, serving only as a limited wrapper. The main goal should be to
+ * enhance documentation for the main API, enabling users to create their own
+ * wrappers.
+ *
  * Vytvorí QR pre inkaso
  */
 export function directDebit(input: PaymentInput): string {
@@ -50,6 +62,12 @@ type StandingInput =
 	& Pick<StandingOrder, "day" | "periodicity">;
 
 /**
+ * @deprecated Will be removed as of v3.
+ * This was intended to simplify the main API, but it has complicated it
+ * instead, serving only as a limited wrapper. The main goal should be to
+ * enhance documentation for the main API, enabling users to create their own
+ * wrappers.
+ *
  * Vytvorí QR pre trvalý príkaz
  */
 export function standingOrder(input: StandingInput): string {

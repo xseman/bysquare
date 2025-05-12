@@ -42,57 +42,86 @@ $ npm install bysquare
 
 ## Quick start
 
-There are helper functions for the most common use cases, such as simple payment,
-direct debit, and standing order. Also you can use `encode` and `decode` functions
-to work with the data model directly.
+This library provides `encode` and `decode` functions to work with the data
+model directly, allowing you to create customized payment solutions.
 
-### Simple Payment
+### Creating Payment QR Codes
+
+To generate QR codes for different payment types, use the `encode` function with
+the appropriate payment configuration:
+
+#### Simple Payment (Payment Order)
 
 ```js
 import {
 	CurrencyCode,
-	simplePayment,
+	encode,
+	PaymentOptions,
 } from "bysquare";
 
-const qrstring = simplePayment({
-	amount: 50.75,
-	iban: "SK9611000000002918599669",
-	variableSymbol: "123456",
-	currencyCode: CurrencyCode.EUR,
+const qrstring = encode({
+	payments: [
+		{
+			type: PaymentOptions.PaymentOrder, // 1
+			amount: 50.75,
+			variableSymbol: "123456",
+			currencyCode: CurrencyCode.EUR, // "EUR"
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+		},
+	],
 });
 ```
 
-### Direct Debit
+#### Direct Debit
 
 ```js
 import {
 	CurrencyCode,
-	directDebit,
+	encode,
+	PaymentOptions,
 } from "bysquare";
 
-const qrstring = directDebit({
-	amount: 25.00,
-	iban: "SK9611000000002918599669",
-	variableSymbol: "789012",
-	currencyCode: CurrencyCode.EUR,
+const qrstring = encode({
+	payments: [
+		{
+			type: PaymentOptions.DirectDebit, // 2
+			amount: 25.0,
+			variableSymbol: "789012",
+			currencyCode: CurrencyCode.EUR, // "EUR"
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+		},
+	],
 });
 ```
 
-### Standing Order
+#### Standing Order
 
 ```js
 import {
 	CurrencyCode,
+	encode,
+	PaymentOptions,
 	Periodicity,
-	standingOrder,
 } from "bysquare";
 
-const qrstring = standingOrder({
-	amount: 100.00,
-	iban: "SK9611000000002918599669",
-	variableSymbol: "654321",
-	day: 15,
-	periodicity: Periodicity.Monthly,
+const qrstring = encode({
+	payments: [
+		{
+			type: PaymentOptions.StandingOrder, // 3
+			amount: 100.0,
+			variableSymbol: "654321",
+			currencyCode: CurrencyCode.EUR, // "EUR"
+			day: 15,
+			periodicity: Periodicity.Monthly, // "m"
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+		},
+	],
 });
 ```
 
@@ -104,33 +133,41 @@ page:
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Payment QR Code</title>
-</head>
-<body>
-  <div id="qrcode" style="width: 200px"></div>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Payment QR Code</title>
+	</head>
+	<body>
+		<div id="qrcode" style="width: 200px"></div>
 
-  <script type="module">
-    import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
-    import { simplePayment } from "https://esm.sh/bysquare@latest";
+		<script type="module">
+			import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
+			import { encode, PaymentOptions, CurrencyCode } from "https://esm.sh/bysquare@latest";
 
-    const qrstring = simplePayment({
-      amount: 123.45,
-      iban: "SK9611000000002918599669",
-      variableSymbol: "987654",
-    });
+			const qrstring = encode({
+				payments: [
+					{
+						type: PaymentOptions.PaymentOrder,
+						amount: 123.45,
+						variableSymbol: "987654",
+						rrencyCode: CurrencyCode.EUR,
+						bankAccounts: [
+							{ iban: "SK9611000000002918599669" }
+						],
+					},
+				],
+			});
 
-    const qrElement = document.getElementById('qrcode');
-    qrElement.appendChild(QRCode.generateSVG(qrstring));
-  </script>
-</body>
+			const qrElement = document.getElementById("qrcode");
+			qrElement.appendChild(QRCode.generateSVG(qrstring));
+		</script>
+	</body>
 </html>
 ```
 
-### Adavanced usage
+### Advanced usage
 
-For more complex data use `encode` and `decode` functions:
+For more complex data with multiple payments and additional fields:
 
 > [!NOTE]
 > Encoded data are without diacritics

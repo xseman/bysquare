@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.12.4](https://github.com/xseman/bysquare/compare/v2.12.3...v2.12.4) (2025-05-12)
+
+
+### Bug Fixes
+
+* LZMA compression/decompression critical issue [#55](https://github.com/xseman/bysquare/issues/55) ([#57](https://github.com/xseman/bysquare/issues/57)) ([927454b](https://github.com/xseman/bysquare/commit/927454b0095578e7a862a28ccc87d1ed77a89d8a))
+
+
+### Documentation
+
+* update README and deprecate payment helper functions ([a853c65](https://github.com/xseman/bysquare/commit/a853c65a629d4b70742a1c73b9ad9b7d8ec76c01))
+
+
+### Maintenance
+
+* update dependencies, configs & speedup tests using bun runtime ([1093f82](https://github.com/xseman/bysquare/commit/1093f8286d73b6765beb461c240f38b0627a8bb1))
+
 ## [2.12.3](https://github.com/xseman/bysquare/compare/v2.12.2...v2.12.3) (2025-03-21)
 
 

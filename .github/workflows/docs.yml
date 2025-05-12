@@ -15,7 +15,7 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Upload pages artifact
-              uses: actions/upload-pages-artifact@v2
+              uses: actions/upload-pages-artifact@v3
               with:
                   name: github-pages
                   path: docs
@@ -33,7 +33,7 @@ jobs:
 
         steps:
             - name: Deploy pages
-              uses: actions/deploy-pages@v2
+              uses: actions/deploy-pages@v4
               id: deployment
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}

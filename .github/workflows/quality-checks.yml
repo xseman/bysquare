@@ -14,33 +14,28 @@ on:
             - .github/workflows/**.yml
 
 jobs:
-    checks:
+    test:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
+            - uses: oven-sh/setup-bun@v2
               with:
-                  node-version-file: ".nvmrc"
-                  cache: npm
-            - run: |
-                  npm install --silent
+                  bun-version: canary
+
+            - name: install
+              run: bun install
 
             - name: typecheck
-              run: |
-                  node --run typecheck
+              run: bun run typecheck
 
             - name: test
-              run: |
-                  node --run test
+              run: bun test
 
     fmt:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
-              with:
-                  node-version-file: ".nvmrc"
-                  cache: npm
+            - uses: oven-sh/setup-bun@v2
             - run: |
-                  npm install --silent
-                  node --run fmt:check
+                  bun install
+                  bun fmt:check

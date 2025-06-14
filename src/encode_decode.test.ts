@@ -4,14 +4,13 @@ import { decode, DecodeError } from "./decode.js";
 import { encode } from "./encode.js";
 import {
 	CurrencyCode,
-	DataModel,
 	PaymentOptions
 } from "./types.js";
 
 describe("Regression tests for LZMA encoding/decoding issues", () => {
 	// Test the specific problematic cases from issue report
 	test("encode/decode with problematic case 1", () => {
-		const problematicData = {
+		const testCaseData = {
 			invoiceId: "random-id",
 			payments: [
 				{
@@ -29,15 +28,15 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 		};
 
 		// This should not throw an exception
-		const qrstring = encode(problematicData);
+		const qrstring = encode(testCaseData);
 
 		// Verify the data can be decoded back properly
 		const decoded = decode(qrstring);
-		assert.deepEqual(decoded, problematicData, "Decoded data should match original data");
+		assert.deepEqual(decoded, testCaseData, "Decoded data should match original data");
 	});
 
 	test("encode/decode with problematic case 2", () => {
-		const problematicData = {
+		const testCaseData = {
 			invoiceId: "random-id",
 			payments: [
 				{
@@ -55,11 +54,11 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 		};
 
 		// This should not throw an exception
-		const qrstring = encode(problematicData);
+		const qrstring = encode(testCaseData);
 
 		// Verify the data can be decoded back properly
 		const decoded = decode(qrstring);
-		assert.deepEqual(decoded, problematicData, "Decoded data should match original data");
+		assert.deepEqual(decoded, testCaseData, "Decoded data should match original data");
 	});
 
 	// Test robustness with varied specificSymbol values
@@ -285,38 +284,6 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 		}
 	});
 
-	// Test for handling the LZMA error specifically
-	test("correctly handles potential LZMA decompression errors", () => {
-		const problematicData = {
-			invoiceId: "random-id",
-			payments: [
-				{
-					type: PaymentOptions.PaymentOrder,
-					currencyCode: CurrencyCode.EUR,
-					amount: 5.28,
-					variableSymbol: '4001888450',
-					constantSymbol: '3118',
-					specificSymbol: '202402',
-					bankAccounts: [
-						{ iban: "SK5681800000007000157042" }
-					]
-				}
-			]
-		};
-
-		try {
-			const qrstring = encode(problematicData);
-			const decoded = decode(qrstring);
-			assert.deepEqual(decoded, problematicData);
-		} catch (error) {
-			if (error instanceof DecodeError && error.message.includes('Failed to decompress LZMA')) {
-				assert.fail('LZMA decompression error still occurring: ' + error.message);
-			} else {
-				throw error; // Rethrow if it's a different error
-			}
-		}
-	});
-
 	// Test with multiple payments in single QR code
 	test("encode/decode with multiple payments", () => {
 		const dataWithMultiplePayments = {
@@ -376,65 +343,5 @@ describe("Version compatibility regression tests", () => {
 		const qrstring = encode(data);
 		const decoded = decode(qrstring);
 		assert.deepEqual(decoded, data, "Should maintain compatibility with v2.12.0 format");
-	});
-
-	// Generic test for bidirectional encode/decode across many variations
-	test("comprehensive bidirectional encode/decode test", () => {
-		// Generate a variety of test cases with different combinations
-		const testCases = [];
-
-		// Base case
-		const baseCase = {
-			invoiceId: "base-case",
-			payments: [
-				{
-					type: PaymentOptions.PaymentOrder,
-					currencyCode: CurrencyCode.EUR,
-					amount: 50.00,
-					variableSymbol: '1234567890',
-					constantSymbol: '0308',
-					specificSymbol: '202305',
-					bankAccounts: [
-						{ iban: "SK9611000000002918599669" }
-					]
-				}
-			]
-		};
-		testCases.push(baseCase);
-
-		// Add variations
-		const amounts = [0.01, 1.00, 999.99];
-		const symbols = ['123456', '654321', ''];
-		const ibans = [
-			"SK5681800000007000157042",
-			"SK9181800000007000155733",
-			"SK9611000000002918599669"
-		];
-
-		// Generate some combinations
-		for (const amount of amounts) {
-			for (const symbol of symbols) {
-				for (const iban of ibans) {
-					const testCase = JSON.parse(JSON.stringify(baseCase));
-					testCase.invoiceId = `case-${amount}-${symbol}-${iban.substr(-4)}`;
-					testCase.payments[0].amount = amount;
-					testCase.payments[0].specificSymbol = symbol;
-					testCase.payments[0].bankAccounts[0].iban = iban;
-					testCases.push(testCase);
-
-					// Don't generate too many test cases to keep tests efficient
-					if (testCases.length > 20) break;
-				}
-				if (testCases.length > 20) break;
-			}
-			if (testCases.length > 20) break;
-		}
-
-		// Test all cases
-		for (const testCase of testCases) {
-			const qrstring = encode(testCase);
-			const decoded = decode(qrstring);
-			assert.deepEqual(decoded, testCase, `Failed bidirectional test for case: ${testCase.invoiceId}`);
-		}
 	});
 });

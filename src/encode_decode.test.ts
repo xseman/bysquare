@@ -1,11 +1,8 @@
 import assert from "node:assert";
-import test, { describe } from "node:test";
-import { decode, DecodeError } from "./decode.js";
-import { encode } from "./encode.js";
-import {
-	CurrencyCode,
-	PaymentOptions
-} from "./types.js";
+import test, {describe} from "node:test";
+import {decode} from "./decode.js";
+import {encode} from "./encode.js";
+import {CurrencyCode, PaymentOptions} from "./types.js";
 
 describe("Regression tests for LZMA encoding/decoding issues", () => {
 	// Test the specific problematic cases from issue report
@@ -21,7 +18,7 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 					constantSymbol: '3118',
 					specificSymbol: '202402',
 					bankAccounts: [
-						{ iban: "SK5681800000007000157042" }
+						{iban: "SK5681800000007000157042"}
 					]
 				}
 			]
@@ -47,7 +44,7 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 					constantSymbol: '3118',
 					specificSymbol: '202306',
 					bankAccounts: [
-						{ iban: "SK9181800000007000155733" }
+						{iban: "SK9181800000007000155733"}
 					]
 				}
 			]
@@ -74,7 +71,7 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 					constantSymbol: '3118',
 					specificSymbol: '202402', // Will be modified in test
 					bankAccounts: [
-						{ iban: "SK5681800000007000157042" }
+						{iban: "SK5681800000007000157042"}
 					]
 				}
 			]
@@ -105,7 +102,7 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 					constantSymbol: '3118',
 					specificSymbol: '202402',
 					bankAccounts: [
-						{ iban: "SK5681800000007000157042" } // Will be modified
+						{iban: "SK5681800000007000157042"} // Will be modified
 					]
 				}
 			]
@@ -140,7 +137,7 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 					constantSymbol: '3118', // Will be modified
 					specificSymbol: '202402',
 					bankAccounts: [
-						{ iban: "SK5681800000007000157042" }
+						{iban: "SK5681800000007000157042"}
 					]
 				}
 			]
@@ -172,7 +169,7 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 					constantSymbol: '3118',
 					specificSymbol: '202402',
 					bankAccounts: [
-						{ iban: "SK5681800000007000157042" }
+						{iban: "SK5681800000007000157042"}
 					]
 				}
 			]
@@ -230,7 +227,7 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 					constantSymbol: '3118',
 					specificSymbol: '202402',
 					bankAccounts: [
-						{ iban: "SK5681800000007000157042" }
+						{iban: "SK5681800000007000157042"}
 					]
 				}
 			]
@@ -263,8 +260,8 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 					constantSymbol: '0308',
 					specificSymbol: '999999',
 					bankAccounts: [
-						{ iban: "SK5681800000007000157042" },
-						{ iban: "SK9181800000007000155733" }
+						{iban: "SK5681800000007000157042"},
+						{iban: "SK9181800000007000155733"}
 					],
 					paymentNote: "This is a stress test with a longer note to test LZMA compression",
 					beneficiary: {
@@ -297,7 +294,7 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 					constantSymbol: '3118',
 					specificSymbol: '202402',
 					bankAccounts: [
-						{ iban: "SK5681800000007000157042" }
+						{iban: "SK5681800000007000157042"}
 					]
 				},
 				{
@@ -308,7 +305,7 @@ describe("Regression tests for LZMA encoding/decoding issues", () => {
 					constantSymbol: '3118',
 					specificSymbol: '202306',
 					bankAccounts: [
-						{ iban: "SK9181800000007000155733" }
+						{iban: "SK9181800000007000155733"}
 					]
 				}
 			]
@@ -334,7 +331,7 @@ describe("Version compatibility regression tests", () => {
 					variableSymbol: '1234567890',
 					constantSymbol: '0308',
 					bankAccounts: [
-						{ iban: "SK9611000000002918599669" }
+						{iban: "SK9611000000002918599669"}
 					]
 				}
 			]

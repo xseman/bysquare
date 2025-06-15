@@ -2,8 +2,6 @@ name: quality checks
 
 on:
     pull_request:
-        branches:
-            - master
     push:
         branches:
             - master
@@ -36,6 +34,11 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - uses: oven-sh/setup-bun@v2
-            - run: |
-                  bun install
-                  bun fmt:check
+              with:
+                  bun-version: canary
+
+            - name: install
+              run: bun install
+
+            - name: format check
+              run: bun fmt:check

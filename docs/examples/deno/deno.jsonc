@@ -1,6 +1,0 @@
-{
-	"lock": false,
-	"tasks": {
-		"dev": "deno run --watch --allow-all --reload --unstable-sloppy-imports ./main.ts"
-	}
-}

@@ -8,36 +8,40 @@
 	<script type="module" src="index.js"></script>
 </head>
 <body>
-<div>
-	<div style="margin-right: 10px;">
-		<label style="display: block; margin-bottom: 5px;">
-			Amount:
-			<br/>
-			<input
-				style="width: 210px;"
-				type="number"
-				name="amount"
-				value=""
-			/>
-		</label>
-		<label style="display: block; margin-bottom: 5px;">
-			IBAN:
-			<br/>
-			<input
-				style="width: 210px;"
-				name="iban"
-			/>
-		</label>
-		<label style="display: block; margin-bottom: 5px;">
-			Variable:
-			<br/>
-			<input
-				style="width: 210px;"
-				type="number"
-				name="variable"
-			/>
-		</label>
-		<pre id="encodedText"></pre>
+<div style="display: grid; grid-template-columns: 1fr 1fr;">
+	<div id="payment-inputs">
+		<div style="margin-right: 10px;">
+			<label style="display: block; margin-bottom: 5px;">
+				Amount:
+				<br/>
+				<input
+					style="width: 210px;"
+					type="number"
+					name="amount"
+					value=""
+				/>
+			</label>
+			<label style="display: block; margin-bottom: 5px;">
+				IBAN:
+				<br/>
+				<input
+					style="width: 210px;"
+					name="iban"
+				/>
+			</label>
+			<label style="display: block; margin-bottom: 5px;">
+				Variable:
+				<br/>
+				<input
+					style="width: 210px;"
+					type="number"
+					name="variable"
+				/>
+			</label>
+		</div>
+	</div>
+	<div id="result">
+		<pre id="encodedText" style="word-wrap: break-word; text-wrap: auto;"></pre>
 		<canvas
 			height="200"
 			width="200"

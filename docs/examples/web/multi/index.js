@@ -5,7 +5,7 @@ import {
 } from "https://esm.sh/bysquare@latest/";
 import { qrcanvas } from "https://esm.sh/qrcanvas@3.1.2/";
 
-function addPaymentInput(values = { amount: "", iban: "", variable: "" }) {
+function addPaymentInput(values = { amount: "", iban: "", variable: "" }, render) {
 	const paymentInputs = document.getElementById("payment-inputs");
 	if (!paymentInputs) return;
 
@@ -68,10 +68,10 @@ function addPaymentInput(values = { amount: "", iban: "", variable: "" }) {
 				amount: amountInput.value,
 				iban: ibanInput.value,
 				variable: variableInput.value,
-			});
+			}, render);
 
 			// Render after cloning
-			if (typeof render === 'function') {
+			if (typeof render === "function") {
 				render();
 			}
 		});
@@ -83,7 +83,7 @@ function addPaymentInput(values = { amount: "", iban: "", variable: "" }) {
 			inputContainer.remove();
 
 			// Render after deletion
-			if (typeof render === 'function') {
+			if (typeof render === "function") {
 				render();
 			}
 		});
@@ -94,7 +94,7 @@ function addPaymentInput(values = { amount: "", iban: "", variable: "" }) {
 	inputs.forEach((input) => {
 		input.addEventListener("input", function() {
 			// Render when input changes
-			if (typeof render === 'function') {
+			if (typeof render === "function") {
 				render();
 			}
 		});
@@ -131,13 +131,6 @@ function renderOnCanvas(canvasEl, encodedText) {
 }
 
 function init() {
-	// Create the first input container with default values
-	const firstContainer = addPaymentInput({
-		amount: "100",
-		iban: "SK9611000000002918599669",
-		variable: "123",
-	});
-
 	const encodedTextDiv = document.querySelector("#encodedText");
 	const canvasEl = document.querySelector("#canvas");
 
@@ -149,7 +142,7 @@ function init() {
 		const paymentData = [];
 
 		// Collect data from all input containers
-		containers.forEach(container => {
+		containers.forEach((container) => {
 			const amountInput = container.querySelector('input[name="amount"]');
 			const ibanInput = container.querySelector('input[name="iban"]');
 			const variableInput = container.querySelector('input[name="variable"]');
@@ -170,16 +163,12 @@ function init() {
 		renderOnCanvas(canvasEl, encodedText);
 	}
 
-	// Set up a mutation observer to detect when input containers are added or removed
-	const paymentInputs = document.getElementById("payment-inputs");
-	if (paymentInputs) {
-		const observer = new MutationObserver(function(mutations) {
-			// Re-render when the DOM changes
-			render();
-		});
-
-		observer.observe(paymentInputs, { childList: true, subtree: true });
-	}
+	// Create the first input container with default values
+	const firstContainer = addPaymentInput({
+		amount: "100",
+		iban: "SK9611000000002918599669",
+		variable: "123",
+	}, render);
 
 	// Initial render
 	render();

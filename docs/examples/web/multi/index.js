@@ -69,6 +69,11 @@ function addPaymentInput(values = { amount: "", iban: "", variable: "" }) {
 				iban: ibanInput.value,
 				variable: variableInput.value,
 			});
+
+			// Render after cloning
+			if (typeof render === 'function') {
+				render();
+			}
 		});
 	}
 
@@ -76,8 +81,24 @@ function addPaymentInput(values = { amount: "", iban: "", variable: "" }) {
 	if (deleteButton) {
 		deleteButton.addEventListener("click", function() {
 			inputContainer.remove();
+
+			// Render after deletion
+			if (typeof render === 'function') {
+				render();
+			}
 		});
 	}
+
+	// Add input event listeners to all inputs in this container
+	const inputs = inputContainer.querySelectorAll("input");
+	inputs.forEach((input) => {
+		input.addEventListener("input", function() {
+			// Render when input changes
+			if (typeof render === 'function') {
+				render();
+			}
+		});
+	});
 
 	paymentInputs.appendChild(inputContainer);
 	return inputContainer;
@@ -120,23 +141,31 @@ function init() {
 	const encodedTextDiv = document.querySelector("#encodedText");
 	const canvasEl = document.querySelector("#canvas");
 
-	// Function to render QR code based on the first input container's values
+	// Function to render QR code based on all input containers' values
 	function render() {
-		// Always use the first input container for rendering
-		const firstContainer = document.querySelector("#payment-inputs > div");
-		if (!firstContainer) return;
+		const containers = document.querySelectorAll("#payment-inputs > div");
+		if (!containers.length) return;
 
-		const amountInput = firstContainer.querySelector('input[name="amount"]');
-		const ibanInput = firstContainer.querySelector('input[name="iban"]');
-		const variableInput = firstContainer.querySelector('input[name="variable"]');
+		const paymentData = [];
 
-		if (!amountInput || !ibanInput || !variableInput) return;
+		// Collect data from all input containers
+		containers.forEach(container => {
+			const amountInput = container.querySelector('input[name="amount"]');
+			const ibanInput = container.querySelector('input[name="iban"]');
+			const variableInput = container.querySelector('input[name="variable"]');
 
-		const encodedText = getEncodedText([{
-			iban: ibanInput.value,
-			amount: amountInput.value,
-			variable: variableInput.value,
-		}]);
+			if (amountInput && ibanInput && variableInput) {
+				paymentData.push({
+					iban: ibanInput.value,
+					amount: amountInput.value,
+					variable: variableInput.value,
+				});
+			}
+		});
+
+		if (paymentData.length === 0) return;
+
+		const encodedText = getEncodedText(paymentData);
 		encodedTextDiv.innerText = encodedText;
 		renderOnCanvas(canvasEl, encodedText);
 	}
@@ -147,28 +176,10 @@ function init() {
 		const observer = new MutationObserver(function(mutations) {
 			// Re-render when the DOM changes
 			render();
-
-			// Add input event listeners to all inputs in the first container
-			const firstContainer = document.querySelector("#payment-inputs > div");
-			if (firstContainer) {
-				const inputs = firstContainer.querySelectorAll("input");
-				inputs.forEach((input) => {
-					// Remove existing listeners to avoid duplicates
-					input.removeEventListener("input", render);
-					// Add new listener
-					input.addEventListener("input", render);
-				});
-			}
 		});
 
 		observer.observe(paymentInputs, { childList: true, subtree: true });
 	}
-
-	// Add input event listeners to all inputs in the first container
-	const inputs = firstContainer.querySelectorAll("input");
-	inputs.forEach((input) => {
-		input.addEventListener("input", render);
-	});
 
 	// Initial render
 	render();

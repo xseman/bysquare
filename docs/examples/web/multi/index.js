@@ -158,9 +158,18 @@ function init() {
 
 		if (paymentData.length === 0) return;
 
-		const encodedText = getEncodedText(paymentData);
-		encodedTextDiv.innerText = encodedText;
-		renderOnCanvas(canvasEl, encodedText);
+		try {
+			const encodedText = getEncodedText(paymentData);
+			encodedTextDiv.innerText = encodedText;
+			renderOnCanvas(canvasEl, encodedText);
+		} catch (error) {
+			console.error("error", error);
+			encodedTextDiv.innerText = error.message;
+			const ctx = canvasEl.getContext("2d");
+			if (ctx) {
+				ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+			}
+		}
 	}
 
 	// Create the first input container with default values

@@ -130,6 +130,15 @@ function renderOnCanvas(canvasEl, encodedText) {
 	}
 }
 
+function updateDeleteButtons() {
+	const containers = document.querySelectorAll("#payment-inputs > div");
+	const deleteButtons = document.querySelectorAll(".delete-btn");
+
+	deleteButtons.forEach((button) => {
+		button.disabled = containers.length <= 1;
+	});
+}
+
 function init() {
 	const encodedTextDiv = document.querySelector("#encodedText");
 	const canvasEl = document.querySelector("#canvas");
@@ -170,6 +179,7 @@ function init() {
 				ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
 			}
 		}
+		updateDeleteButtons();
 	}
 
 	// Create the first input container with default values

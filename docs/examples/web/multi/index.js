@@ -9,7 +9,10 @@ function addPaymentInput() {
 	const paymentInputs = document.getElementById("payment-inputs");
 	if (!paymentInputs) return;
 
+	const id = crypto.randomUUID();
+
 	const inputContainer = document.createElement("div");
+	inputContainer.id = `payment-input-${id}`;
 	inputContainer.style.margin = "10px";
 	inputContainer.style.padding = "10px";
 	inputContainer.style.border = "1px solid";

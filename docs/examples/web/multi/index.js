@@ -173,7 +173,7 @@ function init() {
 	}
 
 	// Create the first input container with default values
-	const firstContainer = addPaymentInput({
+	addPaymentInput({
 		amount: "100",
 		iban: "SK9611000000002918599669",
 		variable: "123",

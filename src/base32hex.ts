@@ -5,7 +5,7 @@ const base32Hex = {
 };
 
 export function encode(
-	input: Uint8Array,
+	input: ArrayLike<number>,
 	addPadding: boolean = true,
 ): string {
 	const output = Array<string>();

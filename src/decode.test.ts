@@ -1,5 +1,8 @@
-import assert from "node:assert";
-import test, { describe } from "node:test";
+import {
+	describe,
+	expect,
+	test,
+} from "bun:test";
 
 import {
 	decode,
@@ -10,35 +13,52 @@ import {
 } from "./decode.js";
 import { encode } from "./encode.js";
 import {
+	invalidBase32HexStrings,
 	payloadWithDirectDebit,
 	payloadWithPaymentOrder,
 	payloadWithStandingOrder,
 	serializedDirectDebit,
 	serializedPaymentOrder,
 	serializedStandingOrder,
-} from "./test_assets.js";
+} from "./testdata/index.js";
 import {
 	CurrencyCode,
 	DataModel,
 	PaymentOptions,
 } from "./types.js";
 
-test("decode", () => {
-	const encoded = encode(payloadWithPaymentOrder);
-	const decoded = decode(encoded);
+describe("decode", () => {
+	test("round trip encode/decode", () => {
+		const data = {
+			invoiceId: "2015001",
+			payments: [{
+				amount: 45.55,
+				currencyCode: CurrencyCode.EUR,
+				type: PaymentOptions.PaymentOrder,
+				bankAccounts: [{ iban: "SK2738545237537948273958" }],
+				beneficiary: { name: "Jane Doe" },
+				paymentNote: "bendzín",
+			}],
+		} satisfies DataModel;
 
-	assert.deepEqual(decoded, payloadWithPaymentOrder);
-});
+		const qrstring = encode(data);
+		const model = decode(qrstring);
 
-test("decode - invalid input (throw)", () => {
-	assert.throws(() => {
-		decode("aaaa");
-	}, { message: "Invalid base32hex string" });
-});
+		expect(model).toEqual(data);
+	});
 
-test("decode - bidirectional", () => {
-	const qrstring = encode(payloadWithPaymentOrder);
-	assert.deepEqual(payloadWithPaymentOrder, decode(qrstring));
+	test("invalid input should throw", () => {
+		const invalidInput = "aaaa";
+		expect(() => {
+			decode(invalidInput);
+		}).toThrow("Invalid base32hex string");
+	});
+
+	test("bidirectional encode/decode", () => {
+		const qrstring = encode(payloadWithPaymentOrder);
+		const decoded = decode(qrstring);
+		expect(decoded).toEqual(payloadWithPaymentOrder);
+	});
 });
 
 describe("decode - deserialize", () => {
@@ -65,61 +85,46 @@ describe("decode - deserialize", () => {
 			"\t",
 		].join("");
 
-		assert.throws(
-			() => deserialize(serialized),
+		expect(() => deserialize(serialized)).toThrow(
 			new DecodeError(DecodeErrorMessage.MissingIBAN),
 		);
 	});
 
 	test("return decoded payment order", () => {
-		assert.deepEqual(
-			deserialize(serializedPaymentOrder),
-			payloadWithPaymentOrder,
-		);
+		const result = deserialize(serializedPaymentOrder);
+		expect(result).toEqual(payloadWithPaymentOrder);
 	});
 
 	test("return decoded standing order", () => {
-		assert.deepEqual(
-			deserialize(serializedStandingOrder),
-			payloadWithStandingOrder,
-		);
+		const result = deserialize(serializedStandingOrder);
+		expect(result).toEqual(payloadWithStandingOrder);
 	});
+
 	test("return decoded direct debit", () => {
-		assert.deepEqual(
-			deserialize(serializedDirectDebit),
-			payloadWithDirectDebit,
-		);
+		const result = deserialize(serializedDirectDebit);
+		expect(result).toEqual(payloadWithDirectDebit);
 	});
 });
 
 describe("decode - detect", () => {
 	test("detect invalid header", () => {
-		const isBysquare = detect("");
-
-		assert.equal(isBysquare, false);
+		const invalidHeader = "";
+		const isBysquare = detect(invalidHeader);
+		expect(isBysquare).toBe(false);
 	});
 
 	test("detect valid header", () => {
 		const encoded = encode(payloadWithPaymentOrder);
 		const isBysquare = detect(encoded);
-
-		assert.equal(isBysquare, true);
+		expect(isBysquare).toBe(true);
 	});
-});
 
-test("detect - invalid header data", () => {
-	const notBysquare = detect("EHIN6T0=" /** "test" in base32hex */);
-	assert.equal(notBysquare, false);
-
-	/** invalid header */
-	assert.equal(detect("aaaa"), false);
-
-	/** these throw an error in the base32hex decoder */
-	assert.equal(detect("á"), false);
-	assert.equal(detect("x"), false);
-	assert.equal(detect("y"), false);
-	assert.equal(detect("w"), false);
-	assert.equal(detect("z"), false);
+	test("detect various invalid inputs", () => {
+		for (const testCase of invalidBase32HexStrings) {
+			const result = detect(testCase);
+			expect(result).toBe(false);
+		}
+	});
 });
 
 test("decode - multiple data", () => {
@@ -155,6 +160,6 @@ test("decode - multiple data", () => {
 
 	for (const [qr, encoded] of data) {
 		const decoded = decode(qr);
-		assert.deepEqual(decoded, encoded);
+		expect(decoded).toEqual(encoded);
 	}
 });

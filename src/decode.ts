@@ -86,7 +86,6 @@ export function deserialize(qr: string): DataModel {
 		const paymentNote = data.shift();
 
 		let payment = {
-			bankAccounts: [],
 			type: Number(paymentOptions),
 			currencyCode: currency ?? CurrencyCode.EUR,
 			amount: Number(ammount),
@@ -96,6 +95,7 @@ export function deserialize(qr: string): DataModel {
 			specificSymbol: specificSymbol || undefined,
 			originatorsReferenceInformation: originatorRefInfo || undefined,
 			paymentNote: paymentNote || undefined,
+			bankAccounts: [],
 		} as Payment;
 
 		const numberOfAccounts = Number(data.shift());
@@ -204,14 +204,16 @@ export const parse = decode;
  * Decoding client data from QR Code 2005 symbol
  *
  * @see 3.16.
+ * @param qr base32hex encoded bysqaure binary data
  */
 export function decode(qr: string): DataModel {
 	const bytes = base32hex.decode(qr);
-	const bysquareHeader = bytes.slice(0, 2);
-	const decodedBysquareHeader = bysquareHeaderDecoder(bysquareHeader);
-	if ((decodedBysquareHeader.version > Version["1.1.0"])) {
+	const headerBytes = bytes.slice(0, 2);
+	const headerData = bysquareHeaderDecoder(headerBytes);
+
+	if ((headerData.version > Version["1.1.0"])) {
 		throw new DecodeError(DecodeErrorMessage.UnsupportedVersion, {
-			version: decodedBysquareHeader.version,
+			version: headerData.version,
 		});
 	}
 
@@ -230,26 +232,35 @@ export function decode(qr: string): DataModel {
 	 * +---------------+---------------------------+-------------------+
 	 */
 	const defaultProperties = [0x5D]; // lc=3, lp=0, pb=2
-	const defaultDictionarySize = [0x00, 0x02, 0x00, 0x00]; // 2^17
+	const defaultDictionarySize = [0x00, 0x00, 0x20, 0x00]; // 2^21 = 2097152
+
+	// Parse the payload length from bytes 2-3 and properly expand to 8-byte uncompressed size
+	const payloadLengthBytes = bytes.slice(2, 4);
+	const payloadLength = payloadLengthBytes[0] | (payloadLengthBytes[1] << 8);
+
 	const uncompressedSize = new Uint8Array(8);
+	// Set the full 32-bit value in little-endian format
+	uncompressedSize[0] = payloadLength & 0xFF;
+	uncompressedSize[1] = (payloadLength >> 8) & 0xFF;
+	uncompressedSize[2] = (payloadLength >> 16) & 0xFF;
+	uncompressedSize[3] = (payloadLength >> 24) & 0xFF;
+	// Bytes 4-7 remain 0 for sizes < 2^32
 
-	uncompressedSize.set(bytes.slice(2, 4));
-
-	const header = new Uint8Array([
+	const header = [
 		...defaultProperties,
 		...defaultDictionarySize,
 		...uncompressedSize,
-	]);
+	];
 
 	const payload = bytes.slice(4);
-	const body = new Uint8Array([
+	const body = [
 		...header,
 		...payload,
-	]);
+	];
 
-	let decompressed: string | Int8Array | undefined;
+	let decompressed: string | Uint8Array | undefined;
 	try {
-		decompressed = decompress(body);
+		decompressed = decompress(new Uint8Array(body)) as string | Uint8Array;
 	} catch (error) {
 		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, { error });
 	}
@@ -258,6 +269,13 @@ export function decode(qr: string): DataModel {
 		return deserialize(decompressed);
 	}
 
+	if (!decompressed) {
+		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, {
+			error: "Decompression returned undefined",
+		});
+	}
+
+	// Extract checksum and body
 	const _checksum = decompressed.slice(0, 4);
 	const decompressedBody = decompressed.slice(4);
 	const decoded = new TextDecoder("utf-8").decode(decompressedBody.buffer);
@@ -270,6 +288,8 @@ export function decode(qr: string): DataModel {
  *
  * There is not magic header in the bysquare specification.
  * Version is just 4 bites, so it is possible to have false positives.
+ *
+ * @deprecated Will be removed as of v3.
  */
 export function detect(qr: string): boolean {
 	let decoded: Uint8Array;

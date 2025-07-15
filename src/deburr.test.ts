@@ -1,9 +1,21 @@
-import assert from "node:assert";
-import test from "node:test";
+import {
+	expect,
+	test,
+} from "bun:test";
 
 import { deburr } from "./deburr.js";
 
-test("deburr", () => {
-	const deburred = deburr("Pôvodná faktúra");
-	assert.equal(deburred, "Povodna faktura");
+const deburrTestCases = [
+	{
+		name: "Slovak diacritics",
+		input: "Pôvodná faktúra",
+		expected: "Povodna faktura",
+	},
+];
+
+deburrTestCases.forEach(({ name, input, expected }) => {
+	test(`deburr - ${name}`, () => {
+		const result = deburr(input);
+		expect(result).toBe(expected);
+	});
 });

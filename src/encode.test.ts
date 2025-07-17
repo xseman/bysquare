@@ -128,36 +128,33 @@ describe("encode - buildBysquareHeader", () => {
 		expect(result).toEqual(expected);
 	});
 
-	test("throw EncodeError when creating an bysquare header with invalid type", () => {
-		const invalidValue = 0xFF;
-
+	test.each([
+		{
+			name: "invalid type",
+			input: [0xFF, Version["1.0.0"], 0x00, 0x00],
+			error: EncodeErrorMessage.BySquareType,
+		},
+		{
+			name: "invalid version",
+			input: [0x00, 0xFF, 0x00, 0x00],
+			error: EncodeErrorMessage.Version,
+		},
+		{
+			name: "invalid document type",
+			input: [0x00, 0x00, 0xFF, 0x00],
+			error: EncodeErrorMessage.DocumentType,
+		},
+		{
+			name: "invalid reserved nibble",
+			input: [0x00, 0x00, 0x00, 0xFF],
+			error: EncodeErrorMessage.Reserved,
+		},
+	])("throw EncodeError when creating an bysquare header with $name", ({ input, error }) => {
 		expect(() => {
-			buildBysquareHeader([invalidValue, Version["1.0.0"], 0x00, 0x00]);
-		}).toThrow(new EncodeError(EncodeErrorMessage.BySquareType, { invalidValue }));
-	});
-
-	test("throw EncodeError when creating an bysquare header with invalid version", () => {
-		const invalidValue = 0xFF;
-
-		expect(() => {
-			buildBysquareHeader([0x00, invalidValue, 0x00, 0x00]);
-		}).toThrow(new EncodeError(EncodeErrorMessage.Version, { invalidValue }));
-	});
-
-	test("throw EncodeError when creating an bysquare header with invalid document type", () => {
-		const invalidValue = 0xFF;
-
-		expect(() => {
-			buildBysquareHeader([0x00, 0x00, invalidValue, 0x00]);
-		}).toThrow(new EncodeError(EncodeErrorMessage.DocumentType, { invalidValue }));
-	});
-
-	test("throw EncodeError when creating an bysquare header with invalid reserved nibble", () => {
-		const invalidValue = 0xFF;
-
-		expect(() => {
-			buildBysquareHeader([0x00, 0x00, 0x00, invalidValue]);
-		}).toThrow(new EncodeError(EncodeErrorMessage.Reserved, { invalidValue }));
+			buildBysquareHeader(input as [number, number, number, number]);
+		}).toThrow(
+			new EncodeError(error, { invalidValue: input[input.findIndex((v, i) => v === 0xFF)] }),
+		);
 	});
 });
 

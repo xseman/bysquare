@@ -17,21 +17,27 @@ import {
 } from "./testdata/index.js";
 
 describe("helpers", () => {
-	test("simplePayment", () => {
-		const input = simplePaymentInputData;
-		const qrstring = simplePayment(input);
-		expect(qrstring).toBe(expectedQrStrings.simplePayment);
-	});
-
-	test("directDebit", () => {
-		const input = directDebitInputData;
-		const qrstring = directDebit(input);
-		expect(qrstring).toBe(expectedQrStrings.directDebit);
-	});
-
-	test("standingOrder", () => {
-		const input = standingOrderInputData;
-		const qrstring = standingOrder(input);
-		expect(qrstring).toBe(expectedQrStrings.standingOrder);
+	test.each([
+		{
+			name: "simplePayment",
+			input: simplePaymentInputData,
+			expected: expectedQrStrings.simplePayment,
+			fn: simplePayment,
+		},
+		{
+			name: "directDebit",
+			input: directDebitInputData,
+			expected: expectedQrStrings.directDebit,
+			fn: directDebit,
+		},
+		{
+			name: "standingOrder",
+			input: standingOrderInputData,
+			expected: expectedQrStrings.standingOrder,
+			fn: standingOrder,
+		},
+	])("$name", ({ input, expected, fn }) => {
+		const qrstring = fn(input as any);
+		expect(qrstring).toBe(expected);
 	});
 });

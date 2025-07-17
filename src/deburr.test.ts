@@ -13,9 +13,7 @@ const deburrTestCases = [
 	},
 ];
 
-deburrTestCases.forEach(({ name, input, expected }) => {
-	test(`deburr - ${name}`, () => {
-		const result = deburr(input);
-		expect(result).toBe(expected);
-	});
+test.each(deburrTestCases)("deburr - $name", ({ input, expected }) => {
+	const result = deburr(input);
+	expect(result).toBe(expected);
 });

@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.12.5](https://github.com/xseman/bysquare/compare/v2.12.4...v2.12.5) (2025-07-24)
+
+
+### Documentation
+
+* **examples:** cleanup ([ce1efc1](https://github.com/xseman/bysquare/commit/ce1efc18eef002fefa6ed54dea19ea2bc0088c44))
+* **examples:** multi payments ([#61](https://github.com/xseman/bysquare/issues/61)) ([4ca9b4e](https://github.com/xseman/bysquare/commit/4ca9b4e0e4f19bd2c34f9e28224816dab94aabe3))
+
+
+### Maintenance
+
+* add fmt steps names, enable checks on pr ([197af85](https://github.com/xseman/bysquare/commit/197af85539e56e375af60592e35e4c714c8e7fb4))
+* pull triggers on master branch ([d3b3cb3](https://github.com/xseman/bysquare/commit/d3b3cb32bac0715299771f24c18dc05ff2a67eeb))
+* remove .nvmrc file ([d819c86](https://github.com/xseman/bysquare/commit/d819c86437c1c5244b295a75862194a01b6fd052))
+
+
+### Testing
+
+* add regresion data ([#59](https://github.com/xseman/bysquare/issues/59)) ([c3faa7e](https://github.com/xseman/bysquare/commit/c3faa7e6ad8fc86a0d704a558e0b91e3ff9a8d11))
+* use Bun as runner and assertion , refactor test assets and data, other improvements ([#62](https://github.com/xseman/bysquare/issues/62)) ([f609a31](https://github.com/xseman/bysquare/commit/f609a315f96d5638979df980b343b3400f1648ec))
+
 ## [2.12.4](https://github.com/xseman/bysquare/compare/v2.12.3...v2.12.4) (2025-05-12)
 
 

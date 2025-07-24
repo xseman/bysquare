@@ -253,20 +253,16 @@ export function decode(qr: string): DataModel {
 	];
 
 	const payload = bytes.slice(4);
-	const body = [
+	const body = new Uint8Array([
 		...header,
 		...payload,
-	];
+	]);
 
-	let decompressed: string | Uint8Array | undefined;
+	let decompressed: Uint8Array | undefined;
 	try {
-		decompressed = decompress(new Uint8Array(body)) as string | Uint8Array;
+		decompressed = decompress(body);
 	} catch (error) {
 		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, { error });
-	}
-
-	if (typeof decompressed === "string") {
-		return deserialize(decompressed);
 	}
 
 	if (!decompressed) {

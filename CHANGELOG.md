@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.6](https://github.com/xseman/bysquare/compare/v2.12.5...v2.12.6) (2025-07-24)
+
+
+### Bug Fixes
+
+* **ci:** update node setup in release workflow ([1f7600a](https://github.com/xseman/bysquare/commit/1f7600a703127d994f1ed18839493f686eeb6671))
+
 ## [2.12.5](https://github.com/xseman/bysquare/compare/v2.12.4...v2.12.5) (2025-07-24)
 
 

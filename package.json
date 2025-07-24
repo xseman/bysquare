@@ -22,18 +22,19 @@
 		"fmt": "dprint fmt",
 		"fmt:check": "dprint check",
 		"typecheck": "tsc --noEmit",
-		"test": "bun test --coverage ./src/*.test.ts",
-		"test:watch": "bun test --watch --coverage ./src/*.test.ts"
+		"test": "bun test --coverage .",
+		"test:watch": "bun test --watch --coverage ."
 	},
 	"dependencies": {
-		"lzma1": "0.0.3",
+		"lzma1": "0.1.2",
 		"validator": "^13.12.0"
 	},
 	"devDependencies": {
-		"@types/node": "^22.7.0",
-		"@types/validator": "^13.12.0",
-		"dprint": "~0.49.0",
-		"typescript": "~5.8.0"
+		"@types/bun": "^1.2.19",
+		"@types/node": "^24.1.0",
+		"@types/validator": "^13.15.2",
+		"dprint": "~0.50.0",
+		"typescript": "~5.8.3"
 	},
 	"bin": "./lib/cli.js",
 	"exports": {

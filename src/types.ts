@@ -71,7 +71,7 @@ export type Periodicity = typeof Periodicity[keyof typeof Periodicity];
  * either day of the month (number between 1 and 31) or day of the week
  * (1=Monday,2=Tuesday, …, 7=Sunday).
  *
- * Maximálna dĺžka 2
+ * @maximum 2
  */
 export type Day =
 	| 1
@@ -139,11 +139,9 @@ export type BankAccount = {
 	/**
 	 * Medzinárodné číslo bankového účtu vo formáte IBAN. Príklad:
 	 *
-	 * Maximálna dĺžka 34
-	 *
-	 * Pattern: `[A-Z]{2}[0-9]{2}[A-Z0-9]{0,30}`
-	 *
 	 * @example `"SK8209000000000011424060"`
+	 * @maximum 34
+	 * @pattern [A-Z]{2}[0-9]{2}[A-Z0-9]{0,30}
 	 */
 	iban: string;
 
@@ -152,9 +150,8 @@ export type BankAccount = {
 	 *
 	 * Formát [ISO 9362](https://en.wikipedia.org/wiki/ISO_9362) (swift) 8 or 11 characters long
 	 *
-	 * Pattern: `[A-Z]{4}[A-Z]{2}[A-Z\d]{2}([A-Z\d]{3})?`
-	 *
 	 * @example "TATRSKBX"
+	 * @pattern [A-Z]{4}[A-Z]{2}[A-Z\d]{2}([A-Z\d]{3})?
 	 */
 	bic?: string;
 };
@@ -182,7 +179,7 @@ export type DirectDebitScheme = typeof DirectDebitScheme[keyof typeof DirectDebi
 /**
  * Typ inkasa. Uvádza ja jedna z možností:
  *
- * Maximálna dĺžka 1
+ * @maximum 1
  *
  * - one-off - jednorázové inkaso
  * - recurrent - opakované inkaso
@@ -205,19 +202,19 @@ export type Beneficiary = {
 	/**
 	 * Rozšírenie o meno príjemcu
 	 *
-	 * Maximálna dĺžka 70
+	 * @maximum 70
 	 */
 	name?: string;
 	/**
 	 * Rozšírenie o adresu príjemcu
 	 *
-	 * Maximálna dĺžka 70
+	 * @maximum 70
 	 */
 	street?: string;
 	/**
 	 * Rozšírenie o adresu príjemcu (druhý riadok)
 	 *
-	 * Maximálna dĺžka 70
+	 * @maximum 70
 	 */
 	city?: string;
 };
@@ -232,15 +229,14 @@ export type SimplePayment = {
 	 * deväťdesiatdeväť sa uvádza ako `1.99`. Desať celých peťdesiat sa uvádza
 	 * ako `10.5`. Nula celá nula osem sa uvádza ako `0.08`.
 	 *
-	 * Maximálna dĺžka 15
+	 * @maximum 15
 	 */
 	amount?: number;
 	/**
 	 * Mena v [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) formáte (3 písmená).
 	 *
-	 * Pattern: [A-Z]{3}
-	 *
 	 * @example "EUR"
+	 * @pattern [A-Z]{3}
 	 */
 	currencyCode: string | keyof typeof CurrencyCode;
 	/**
@@ -253,35 +249,35 @@ export type SimplePayment = {
 	/**
 	 * Variabilný symbol je maximálne 10 miestne číslo.
 	 *
-	 * Maximálna dĺžka 10
-	 * Pattern: [0-9]{0,10}
+	 * @maximum 10
+	 * @pattern [0-9]{0,10}
 	 */
 	variableSymbol?: string;
 	/**
 	 * Konštantný symbol je 4 miestne identifikačné číslo.
 	 *
-	 * Maximálna dĺžka 4
-	 * Pattern: [0-9]{0,4}
+	 * @maximum 4
+	 * @pattern [0-9]{0,4}
 	 */
 	constantSymbol?: string;
 	/**
 	 * Špecifický symbol je maximálne 10 miestne číslo.
 	 *
-	 * Maximálna dĺžka 10
-	 * Pattern: [0-9]{0,10}
+	 * @maximum 10
+	 * @pattern [0-9]{0,10}
 	 */
 	specificSymbol?: string;
 	/**
 	 * Referenčná informácia prijímateľa podľa SEPA.
 	 *
-	 * Maximálna dĺžka 35
+	 * @maximum 35
 	 */
 	originatorsReferenceInformation?: string;
 	/**
 	 * Správa pre prijímateľa. Údaje o platbe, na základe ktorých príjemca bude
 	 * môcť platbu identifikovať.
 	 *
-	 * Maximálna dĺžka 140
+	 * @maximum 140
 	 */
 	paymentNote?: string;
 	/**
@@ -332,31 +328,31 @@ export type DirectDebit = SimplePayment & {
 	/**
 	 * Identifikácia mandátu medzi veriteľom a dlžníkom podľa SEPA.
 	 *
-	 * Maximálna dĺžka 35
+	 * @maximum 35
 	 */
 	mandateId?: string;
 	/**
 	 * Identifikácia veriteľa podľa SEPA.
 	 *
-	 * Maximálna dĺžka 35
+	 * @maximum 35
 	 */
 	creditorId?: string;
 	/**
 	 * Identifikácia zmluvy medzi veriteľom a dlžníkom podľa SEPA.
 	 *
-	 * Maximálna dĺžka 35
+	 * @maximum 35
 	 */
 	contractId?: string;
 	/**
 	 * Maximálna čiastka inkasa.
 	 *
-	 * Maximálna dĺžka 15
+	 * @maximum 15
 	 */
 	maxAmount?: number;
 	/**
 	 * Dátum platnosti inkasa. Platnosť inkasa zaníka dňom tohto dátumu.
 	 *
-	 * Maximálna dĺžka 8
+	 * @maximum 8
 	 * Formát `YYYYMMDD`
 	 */
 	validTillDate?: string;
@@ -372,7 +368,7 @@ export type DataModel = {
 	 * Číslo faktúry v prípade, že údaje sú súčasťou faktúry, alebo
 	 * identifikátor pre intérne potreby vystavovateľa.
 	 *
-	 * Maximálna dĺžka 10
+	 * @maximum 10
 	 */
 	invoiceId?: string;
 	/**

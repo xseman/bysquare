@@ -1,5 +1,8 @@
-import assert from "node:assert";
-import test, { describe } from "node:test";
+import {
+	describe,
+	expect,
+	test,
+} from "bun:test";
 
 import { PaymentOptions } from "./types.js";
 import {
@@ -10,104 +13,128 @@ import {
 	ValidationErrorMessage,
 } from "./validations.js";
 
-const iban = "LC14BOSL123456789012345678901234";
-
 const validBankAccount = {
-	iban: iban,
+	iban: "SK9611000000002918599669",
 };
 
 describe("validateBankAccount", () => {
 	const path = "payments[0].bankAccounts[0]";
-	test("validate IBAN", () => {
-		assert.throws(() => {
-			validateBankAccount({ iban: "1234567890" }, path);
-		}, new ValidationError(ValidationErrorMessage.IBAN, `${path}.iban`));
 
-		assert.doesNotThrow(() => {
+	test("validate IBAN", () => {
+		const invalidIban = "1234567890";
+
+		expect(() => {
+			validateBankAccount({ iban: invalidIban }, path);
+		}).toThrow(new ValidationError(ValidationErrorMessage.IBAN, `${path}.iban`));
+
+		expect(() => {
 			validateBankAccount(validBankAccount, path);
-		});
+		}).not.toThrow();
 	});
 
 	test("validate BIC", () => {
-		assert.throws(() => {
-			validateBankAccount({ iban, bic: "123" }, path);
-		}, new ValidationError(ValidationErrorMessage.BIC, `${path}.bic`));
+		const invalidBic = "123";
+		const validBic = "DEUTDEFF500";
 
-		assert.doesNotThrow(() => {
-			validateBankAccount({ iban, bic: "" }, path);
-		});
+		expect(() => {
+			validateBankAccount({ iban: validBankAccount.iban, bic: invalidBic }, path);
+		}).toThrow(new ValidationError(ValidationErrorMessage.BIC, `${path}.bic`));
 
-		assert.doesNotThrow(() => {
-			validateBankAccount({ iban, bic: "DEUTDEFF500" }, path);
-		});
+		expect(() => {
+			validateBankAccount({ iban: validBankAccount.iban, bic: "" }, path);
+		}).not.toThrow();
+
+		expect(() => {
+			validateBankAccount({ iban: validBankAccount.iban, bic: validBic }, path);
+		}).not.toThrow();
 	});
 });
 
 describe("validateSimplePayment", () => {
 	const path = "payments[0]";
+
 	test("validate bankAccounts", () => {
-		assert.throws(() => {
+		const invalidBankAccounts = [validBankAccount, { iban: "123" }];
+
+		expect(() => {
 			validateSimplePayment({
-				bankAccounts: [validBankAccount, { iban: "123" }],
+				bankAccounts: invalidBankAccounts,
 				currencyCode: "EUR",
 			}, path);
-		}, new ValidationError(ValidationErrorMessage.IBAN, `${path}.bankAccounts[1].iban`));
+		}).toThrow(
+			new ValidationError(ValidationErrorMessage.IBAN, `${path}.bankAccounts[1].iban`),
+		);
 	});
 
 	test("validate currencyCode", () => {
-		assert.doesNotThrow(() =>
+		const validCurrency = "EUR";
+		const invalidCurrency = "e";
+
+		expect(() =>
 			validateSimplePayment({
 				bankAccounts: [validBankAccount],
-				currencyCode: "EUR",
+				currencyCode: validCurrency,
 			}, path)
-		);
-		assert.throws(
-			() =>
-				validateSimplePayment({
-					bankAccounts: [validBankAccount],
-					currencyCode: "e",
-				}, path),
-			new ValidationError(ValidationErrorMessage.CurrencyCode, `${path}.currencyCode`),
-		);
+		).not.toThrow();
+
+		expect(() =>
+			validateSimplePayment({
+				bankAccounts: [validBankAccount],
+				currencyCode: invalidCurrency,
+			}, path)
+		).toThrow(new ValidationError(ValidationErrorMessage.CurrencyCode, `${path}.currencyCode`));
 	});
 
 	test("validate paymentDueDate", () => {
-		assert.doesNotThrow(() => {
-			validateSimplePayment({
-				bankAccounts: [validBankAccount],
-				currencyCode: "EUR",
-				paymentDueDate: "2024-08-08",
-			}, path);
-		});
+		const validDate = "2024-08-08";
+		const invalidDate = "2024-08-52";
 
-		assert.throws(() => {
+		expect(() => {
 			validateSimplePayment({
 				bankAccounts: [validBankAccount],
 				currencyCode: "EUR",
-				paymentDueDate: "2024-08-52",
+				paymentDueDate: validDate,
 			}, path);
-		}, new ValidationError(ValidationErrorMessage.Date, `${path}.paymentDueDate`));
+		}).not.toThrow();
+
+		expect(() => {
+			validateSimplePayment({
+				bankAccounts: [validBankAccount],
+				currencyCode: "EUR",
+				paymentDueDate: invalidDate,
+			}, path);
+		}).toThrow(new ValidationError(ValidationErrorMessage.Date, `${path}.paymentDueDate`));
 	});
 });
 
 describe("validateDataModel", () => {
-	assert.doesNotThrow(() => {
-		validateDataModel({
+	test("valid data model", () => {
+		const validDataModel = {
 			payments: [{
 				type: PaymentOptions.PaymentOrder,
 				currencyCode: "EUR",
 				bankAccounts: [validBankAccount],
 			}],
-		});
+		};
+
+		expect(() => {
+			validateDataModel(validDataModel);
+		}).not.toThrow();
 	});
 
-	assert.throws(() => {
-		validateDataModel({
+	test("invalid data model", () => {
+		const invalidDataModel = {
 			payments: [{
 				type: PaymentOptions.PaymentOrder,
 				currencyCode: "E",
 				bankAccounts: [validBankAccount],
 			}],
-		});
-	}, new ValidationError(ValidationErrorMessage.CurrencyCode, `payments[0].currencyCode`));
+		};
+
+		expect(() => {
+			validateDataModel(invalidDataModel);
+		}).toThrow(
+			new ValidationError(ValidationErrorMessage.CurrencyCode, `payments[0].currencyCode`),
+		);
+	});
 });

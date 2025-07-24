@@ -68,7 +68,7 @@ export const MAX_COMPRESSED_SIZE = 131_072; // 2^17
  *
  * @see 3.5.
  */
-export function headerBysquare(
+export function buildBysquareHeader(
 	/** dprint-ignore */
 	header: [
 		bySquareType: number, version: number,
@@ -77,7 +77,7 @@ export function headerBysquare(
 		0x00, 0x00,
 		0x00, 0x00
 	],
-): Uint8Array {
+): number[] {
 	if (header[0] < 0 || header[0] > 15) {
 		throw new EncodeError(EncodeErrorMessage.BySquareType, { invalidValue: header[0] });
 	}
@@ -99,19 +99,19 @@ export function headerBysquare(
 	] = header;
 
 	// Combine 4-nibbles to 2-bytes
-	const mergedNibbles = Uint8Array.from([
+	const mergedNibbles = [
 		(bySquareType << 4) | (version << 0),
 		(documentType << 4) | (reserved << 0),
-	]);
+	];
 
 	return mergedNibbles;
 }
 
 /**
- * Creates a one-byte array that represents the length of compressed data in
+ * Creates a 2-byte array that represents the length of compressed data in
  * combination with CRC32 in bytes.
  */
-export function headerDataLength(length: number): Uint8Array {
+export function buildPayloadLength(length: number): Uint8Array {
 	if (length >= MAX_COMPRESSED_SIZE) {
 		throw new EncodeError(EncodeErrorMessage.HeaderDataSize, {
 			actualSize: length,
@@ -130,11 +130,11 @@ export function headerDataLength(length: number): Uint8Array {
  *
  * @see 3.10.
  */
-export function addChecksum(serialized: string): Uint8Array {
+export function addChecksum(tabbedPayload: string): Uint8Array {
 	const checksum = new ArrayBuffer(4);
-	new DataView(checksum).setUint32(0, crc32(serialized), true);
+	new DataView(checksum).setUint32(0, crc32(tabbedPayload), true);
 
-	const byteArray = new TextEncoder().encode(serialized);
+	const byteArray = new TextEncoder().encode(tabbedPayload);
 
 	return Uint8Array.from([
 		...new Uint8Array(checksum),
@@ -249,26 +249,38 @@ export const generate = encode;
 
 /**
  * Generate QR string ready for encoding into text QR code
+ *
+ * @param model - Data model to encode
+ * @param options - Options for encoding
+ *
+ * @default options.deburr - true
+ * @default options.validate - true
  */
 export function encode(
 	model: DataModel,
-	options?: Options,
+	options: Options = { deburr: true, validate: true },
 ): string {
-	const { deburr = true, validate = true } = options ?? {};
-	if (deburr) {
+	if (options.deburr) {
 		removeDiacritics(model);
 	}
-	if (validate) {
+
+	if (options.validate) {
 		validateDataModel(model);
 	}
 
-	const payload = serialize(model);
-	const payloadChecked = addChecksum(payload);
-	const payloadCompressed = Uint8Array.from(compress(payloadChecked));
+	const payloadTabbed = serialize(model);
+	const payloadChecked = addChecksum(payloadTabbed);
+	const payloadCompressed = compress(payloadChecked);
 
 	/**
+	 * Header is ommited, the bysquare doesn't include it in the output
+	 *
+	 * ---
 	 * The LZMA files has a 13-byte header that is followed by the LZMA
 	 * compressed data.
+	 *
+	 * NOTE: We use a custom compression function that sets dictionary size to 2^17
+	 * This is required for compatibility with existing QR codes
 	 *
 	 * @see https://docs.fileformat.com/compression/lzma/
 	 *
@@ -278,15 +290,16 @@ export function encode(
 	 * | Properties    | Dictionary Size           | Uncompressed Size |
 	 * +---------------+---------------------------+-------------------+
 	 */
-	const _lzmaHeader = Uint8Array.from(payloadCompressed.subarray(0, 13));
-	const lzmaBody = Uint8Array.from(payloadCompressed.subarray(13));
+	const _lzmaHeader = payloadCompressed.subarray(0, 13);
+	const lzmaBody = payloadCompressed.subarray(13);
 
-	const output = Uint8Array.from([
+	const output = new Uint8Array([
 		// NOTE: Newer version 1.1.0 is not supported by all apps (e.g., TatraBanka).
 		// We recommend using version "1.0.0" for better compatibility.
 		// ...headerBysquare([0x00, Version["1.1.0"], 0x00, 0x00]),
-		...headerBysquare([0x00, Version["1.0.0"], 0x00, 0x00]),
-		...headerDataLength(payloadChecked.byteLength),
+
+		...buildBysquareHeader([0x00, Version["1.0.0"], 0x00, 0x00]),
+		...buildPayloadLength(payloadChecked.byteLength),
 		...lzmaBody,
 	]);
 

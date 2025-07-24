@@ -1,77 +1,160 @@
-import assert from "node:assert";
-import test, { describe } from "node:test";
+import {
+	describe,
+	expect,
+	test,
+} from "bun:test";
 
 import {
 	decode,
 	encode,
 } from "./base32hex.js";
 
+const base32hexTestCases = [
+	{
+		name: "empty string",
+		input: new Uint8Array([]),
+		expectedEncoded: "",
+	},
+	{
+		name: "single byte",
+		input: new Uint8Array([102]),
+		expectedEncoded: "CO======",
+	},
+	{
+		name: "two bytes",
+		input: new Uint8Array([102, 111]),
+		expectedEncoded: "CPNG====",
+	},
+	{
+		name: "three bytes",
+		input: new Uint8Array([102, 111, 111]),
+		expectedEncoded: "CPNMU===",
+	},
+	{
+		name: "four bytes",
+		input: new Uint8Array([102, 111, 111, 98]),
+		expectedEncoded: "CPNMUOG=",
+	},
+	{
+		name: "five bytes",
+		input: new Uint8Array([102, 111, 111, 98, 97]),
+		expectedEncoded: "CPNMUOJ1",
+	},
+	{
+		name: "six bytes",
+		input: new Uint8Array([102, 111, 111, 98, 97, 114]),
+		expectedEncoded: "CPNMUOJ1E8======",
+	},
+];
+
+const base32hexNoPaddingTestCases = [
+	{ name: "single byte no padding", input: new Uint8Array([102]), expectedEncoded: "CO" },
+	{ name: "two bytes no padding", input: new Uint8Array([102, 111]), expectedEncoded: "CPNG" },
+	{
+		name: "three bytes no padding",
+		input: new Uint8Array([102, 111, 111]),
+		expectedEncoded: "CPNMU",
+	},
+	{
+		name: "four bytes no padding",
+		input: new Uint8Array([102, 111, 111, 98]),
+		expectedEncoded: "CPNMUOG",
+	},
+	{
+		name: "five bytes no padding",
+		input: new Uint8Array([102, 111, 111, 98, 97]),
+		expectedEncoded: "CPNMUOJ1",
+	},
+	{
+		name: "six bytes no padding",
+		input: new Uint8Array([102, 111, 111, 98, 97, 114]),
+		expectedEncoded: "CPNMUOJ1E8",
+	},
+];
+
 describe("base32hex encoding", () => {
-	test("empty input", () => {
-		const input = new Uint8Array([]);
+	test.each(base32hexTestCases)("$name", ({ input, expectedEncoded }) => {
 		const output = encode(input);
-		assert.equal(output, ""); // No padding in empty input
+		expect(output).toBe(expectedEncoded);
 	});
 
-	test("'f' (0x66)", () => {
-		const input = new Uint8Array([0x66]);
-		const output = encode(input);
-		assert.equal(output, "CO======"); // 0x66 -> 1100110 -> CO with padding
-	});
-
-	test("'foobar' string", () => {
-		const input = new Uint8Array([0x66, 0x6f, 0x6f, 0x62, 0x61, 0x72]);
-		const output = encode(input);
-		assert.equal(output, "CPNMUOJ1E8======"); // Encoded base32hex with padding
-	});
-
-	test("with no padding", () => {
-		const input = new Uint8Array([0x66, 0x6f]);
-		const output = encode(input, false);
-		assert.equal(output, "CPNG"); // No padding
-	});
-
-	test("longer input", () => {
-		const input = new Uint8Array([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06]);
-		const output = encode(input);
-		assert.equal(output, "000G40O40K30===="); // Encoded base32hex with padding
+	test.each(base32hexNoPaddingTestCases)("$name", ({ input, expectedEncoded }) => {
+		const withPadding = false;
+		const output = encode(input, withPadding);
+		expect(output).toBe(expectedEncoded);
 	});
 });
 
+const base32hexDecodeTestCases = [
+	{
+		name: "decode empty string",
+		input: "",
+		expected: new Uint8Array([]),
+	},
+	{
+		name: "decode single byte",
+		input: "CO======",
+		expected: new Uint8Array([102]),
+	},
+	{
+		name: "decode two bytes",
+		input: "CPNG====",
+		expected: new Uint8Array([102, 111]),
+	},
+	{
+		name: "decode three bytes",
+		input: "CPNMU===",
+		expected: new Uint8Array([102, 111, 111]),
+	},
+	{
+		name: "decode four bytes",
+		input: "CPNMUOG=",
+		expected: new Uint8Array([102, 111, 111, 98]),
+	},
+	{
+		name: "decode five bytes",
+		input: "CPNMUOJ1",
+		expected: new Uint8Array([102, 111, 111, 98, 97]),
+	},
+	{
+		name: "decode six bytes",
+		input: "CPNMUOJ1E8======",
+		expected: new Uint8Array([102, 111, 111, 98, 97, 114]),
+	},
+];
+
+const base32hexLooseModeTestCases = [
+	{
+		name: "decode with lowercase",
+		input: "cpnmu===",
+		expected: new Uint8Array([102, 111, 111]),
+	},
+	{
+		name: "decode with mixed case",
+		input: "CpNmU===",
+		expected: new Uint8Array([102, 111, 111]),
+	},
+	{
+		name: "decode without padding",
+		input: "CPNMU",
+		expected: new Uint8Array([102, 111, 111]),
+	},
+];
+
 describe("base32hex decoding", () => {
-	test("empty string", () => {
-		const input = "";
+	test.each(base32hexDecodeTestCases)("$name", ({ input, expected }) => {
 		const output = decode(input);
-		assert.deepEqual(output, new Uint8Array([])); // Empty array for empty input
+		expect(output).toEqual(expected);
 	});
 
-	test("'CO======'", () => {
-		const input = "CO======";
-		const output = decode(input);
-		assert.deepEqual(output, new Uint8Array([0x66])); // 0x66 -> 1100110 -> CO
-	});
-
-	test("'foobar' string", () => {
-		const input = "CPNMUOJ1E8======";
-		const output = decode(input);
-		assert.deepEqual(output, new Uint8Array([0x66, 0x6f, 0x6f, 0x62, 0x61, 0x72])); // Decoded to 'foobar'
-	});
-
-	test("with no padding", () => {
-		const input = "CPNM";
-		const output = decode(input);
-		assert.deepEqual(output, new Uint8Array([0x66, 0x6f])); // Correct decoding with no padding
-	});
-
-	test("with loose mode (lowercase and no padding)", () => {
-		const input = "cpnm";
-		const output = decode(input, true);
-		assert.deepEqual(output, new Uint8Array([0x66, 0x6f])); // Loose decoding allows lowercase and auto-padding
+	test.each(base32hexLooseModeTestCases)("$name", ({ input, expected }) => {
+		const looseMode = true;
+		const output = decode(input, looseMode);
+		expect(output).toEqual(expected);
 	});
 
 	test("invalid character", () => {
-		assert.throws(() => {
-			decode("CPNM!");
-		}, { message: "Invalid base32hex string" }); // Invalid character should throw error
+		const invalidInput = "CPNM!";
+		expect(() => decode(invalidInput)).toThrow("Invalid base32hex string");
 	});
 });

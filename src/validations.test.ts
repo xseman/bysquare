@@ -4,7 +4,6 @@ import {
 	test,
 } from "bun:test";
 
-import { validBankAccount } from "./testdata/index.js";
 import { PaymentOptions } from "./types.js";
 import {
 	validateBankAccount,
@@ -13,6 +12,10 @@ import {
 	ValidationError,
 	ValidationErrorMessage,
 } from "./validations.js";
+
+const validBankAccount = {
+	iban: "SK9611000000002918599669",
+};
 
 describe("validateBankAccount", () => {
 	const path = "payments[0].bankAccounts[0]";

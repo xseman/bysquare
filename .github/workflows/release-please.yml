@@ -40,9 +40,9 @@ jobs:
             - uses: actions/setup-node@v4
               if: ${{ steps.release.outputs.release_created || github.event.inputs.tag}}
               with:
-                  node-version-file: ".nvmrc"
-                  registry-url: "https://registry.npmjs.org"
                   cache: npm
+                  node-version: 24
+                  registry-url: "https://registry.npmjs.org"
 
             - if: ${{ steps.release.outputs.release_created || github.event.inputs.tag }}
               env:

@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.13.0](https://github.com/xseman/bysquare/compare/v2.12.5...v2.13.0) (2025-07-27)
+
+
+### Features
+
+* **classifier:** add support for multiple month classifiers ([b047047](https://github.com/xseman/bysquare/commit/b0470475fe155c442d6723cbe79edd0fd78d70fe))
+
+
+### Bug Fixes
+
+* **ci:** update node setup in release workflow ([1f7600a](https://github.com/xseman/bysquare/commit/1f7600a703127d994f1ed18839493f686eeb6671))
+
+
+### Documentation
+
+* **types:** improve type documentation and descriptions ([81a1366](https://github.com/xseman/bysquare/commit/81a13663003c9628d3d2fa084f2aafd4fb25db18))
+
 ## [2.12.5](https://github.com/xseman/bysquare/compare/v2.12.4...v2.12.5) (2025-07-24)
 
 

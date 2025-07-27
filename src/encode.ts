@@ -5,6 +5,7 @@ import { crc32 } from "./crc32.js";
 import { deburr } from "./deburr.js";
 import {
 	DataModel,
+	Month,
 	PaymentOptions,
 	Version,
 } from "./types.js";
@@ -171,16 +172,31 @@ export function serialize(data: DataModel): string {
 			serialized.push(ba.bic);
 		}
 
+		// Handle standing order extension
+		// check if payment type is standing order
 		if (p.type === PaymentOptions.StandingOrder) {
 			serialized.push("1");
 			serialized.push(p.day?.toString());
-			serialized.push(p.month?.toString());
+
+			// Handle month classifier
+			// check if it's a number, use it directly, otherwise convert key to number
+			const monthValue = p.month;
+			if (typeof monthValue === "string") {
+				// Convert month key to its numeric value
+				serialized.push(Month[monthValue as keyof typeof Month]?.toString());
+			} else {
+				// Use numeric value directly (already encoded classifier sum)
+				serialized.push(monthValue?.toString());
+			}
+
 			serialized.push(p.periodicity);
 			serialized.push(p.lastDate);
 		} else {
 			serialized.push("0");
 		}
 
+		// Handle direct debit extension
+		// check if payment type is direct debit
 		if (p.type === PaymentOptions.DirectDebit) {
 			serialized.push("1");
 			serialized.push(p.directDebitScheme?.toString());

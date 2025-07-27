@@ -104,6 +104,7 @@ const qrstring = encode({
 import {
 	CurrencyCode,
 	encode,
+	Month,
 	PaymentOptions,
 	Periodicity,
 } from "bysquare";
@@ -116,7 +117,65 @@ const qrstring = encode({
 			variableSymbol: "654321",
 			currencyCode: CurrencyCode.EUR, // "EUR"
 			day: 15,
+			month: Month.January, // Single month
 			periodicity: Periodicity.Monthly, // "m"
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+		},
+	],
+});
+```
+
+#### Standing Order with Multiple Months
+
+For standing orders that should execute in specific months, you can combine
+multiple months using bitwise OR operators:
+
+```js
+import {
+	CurrencyCode,
+	encode,
+	encodeOptions,
+	Month,
+	PaymentOptions,
+	Periodicity,
+} from "bysquare";
+
+const qrstring = encode({
+	payments: [
+		{
+			type: PaymentOptions.StandingOrder,
+			amount: 100.0,
+			variableSymbol: "654321",
+			currencyCode: CurrencyCode.EUR,
+			day: 15,
+			// Execute in January, July, and October only
+			month: Month.January | Month.July | Month.October, // Results in 577
+			periodicity: Periodicity.Monthly,
+			lastDate: "20251231",
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+		},
+	],
+});
+
+// Alternative: Use the utility function to encode multiple months
+const monthsToEncode = [Month.January, Month.July, Month.October];
+const encodedMonths = encodeOptions(monthsToEncode);
+
+const qrstring2 = encode({
+	payments: [
+		{
+			type: PaymentOptions.StandingOrder,
+			amount: 100.0,
+			variableSymbol: "654321",
+			currencyCode: CurrencyCode.EUR,
+			day: 15,
+			month: encodedMonths, // Same result: 577
+			periodicity: Periodicity.Monthly,
+			lastDate: "20251231",
 			bankAccounts: [
 				{ iban: "SK9611000000002918599669" },
 			],
@@ -150,7 +209,7 @@ page:
 						type: PaymentOptions.PaymentOrder,
 						amount: 123.45,
 						variableSymbol: "987654",
-						rrencyCode: CurrencyCode.EUR,
+						currencyCode: CurrencyCode.EUR,
 						bankAccounts: [
 							{ iban: "SK9611000000002918599669" }
 						],
@@ -210,6 +269,29 @@ const qrstring = encode(data);
 
 // Decode QR string back to the original data model
 const model = decode(qrstring);
+```
+
+## Classifier Utilities
+
+The library provides utility functions for working with multiple classifier
+options as specified in the PAY by Square standard. These functions are
+particularly useful for handling multiple month selections in standing orders.
+
+### Encoding Multiple Options
+
+```ts
+import {
+	encodeOptions,
+	Month,
+} from "bysquare";
+
+// Encode multiple months into a single value
+const monthsArray = [Month.January, Month.July, Month.October];
+const encoded = encodeOptions(monthsArray);
+console.log(encoded); // 577 (1 + 64 + 512)
+
+// This matches the specification example:
+// January=1, July=64, October=512, sum=577
 ```
 
 ## CLI

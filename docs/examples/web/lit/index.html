@@ -4,11 +4,32 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Document</title>
+		<title>Lit Web Components Example - Bysquare</title>
+		<link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+		<style>
+			body { font-size: 0.8rem; }
+			h1 { font-size: 1.3rem; }
+		</style>
+		<script type="module" src="index.js"></script>
 	</head>
-	<body>
-		<app-bysquare></app-bysquare>
-	</body>
 
-	<script type="module" src="index.js"></script>
+	<body>
+		<h1>Bysquare - Lit Web Components Example</h1>
+		
+		<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+			<div>
+				<bysquare-form></bysquare-form>
+			</div>
+			
+			<div>
+				<div style="width: 200px">
+					<bysquare-qr></bysquare-qr>
+				</div>
+			</div>
+		</div>
+		
+		<pre style="word-wrap: break-word; white-space: pre-wrap;">
+			<bysquare-text></bysquare-text>
+		</pre>
+	</body>
 </html>

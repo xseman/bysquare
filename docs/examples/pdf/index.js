@@ -59,11 +59,7 @@ class PDFQRExtractor {
 			return;
 		}
 
-		console.log("QR Code data:", qrCode.data);
-
 		const parsedData = decode(qrCode.data);
-		console.log("Parsed data:", parsedData);
-
 		this._renderOutputData(parsedData);
 	};
 

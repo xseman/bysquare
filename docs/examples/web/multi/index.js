@@ -3,7 +3,7 @@ import {
 	encode,
 	PaymentOptions,
 } from "https://esm.sh/bysquare@latest/";
-import { qrcanvas } from "https://esm.sh/qrcanvas@3.1.2/";
+import { qrcanvas } from "https://esm.sh/qrcanvas@latest/";
 
 function addPaymentInput(values = { amount: "", iban: "", variable: "" }, render) {
 	const paymentInputs = document.getElementById("payment-inputs");
@@ -15,44 +15,47 @@ function addPaymentInput(values = { amount: "", iban: "", variable: "" }, render
 	inputContainer.id = `payment-input-${id}`;
 	inputContainer.style.margin = "10px";
 	inputContainer.style.padding = "10px";
-	inputContainer.style.border = "1px solid";
+	inputContainer.style.border = "1px solid var(--border)";
+	inputContainer.style.borderRadius = "4px";
 	inputContainer.style.display = "inline-block";
+	inputContainer.style.verticalAlign = "top";
+	inputContainer.style.minWidth = "250px";
 
 	inputContainer.innerHTML = `
-        <div style="display: flex; gap: 5px; justify-content: flex-end;">
-            <button class="clone-btn">Clone</button>
-            <button class="delete-btn">Delete</button>
-        </div>
-        <label style="display: block; margin-bottom: 5px;">
-            Amount:
-            <br/>
-            <input
-                style="width: 210px;"
-                type="number"
-                name="amount"
-                value="${values.amount}"
-            />
-        </label>
-        <label style="display: block; margin-bottom: 5px;">
-            IBAN:
-            <br/>
-            <input
-                style="width: 210px;"
-                name="iban"
-                value="${values.iban}"
-            />
-        </label>
-        <label style="display: block; margin-bottom: 5px;">
-            Variable:
-            <br/>
-            <input
-                style="width: 210px;"
-                type="number"
-                name="variable"
-                value="${values.variable}"
-            />
-        </label>
-    `;
+		<div style="display: flex; gap: 5px; justify-content: flex-end;">
+			<button class="clone-btn">Clone</button>
+			<button class="delete-btn">Delete</button>
+		</div>
+		<label style="display: block; margin-bottom: 5px;">
+			Amount:
+			<br/>
+			<input
+				style="width: 210px;"
+				type="number"
+				name="amount"
+				value="${values.amount}"
+			/>
+		</label>
+		<label style="display: block; margin-bottom: 5px;">
+			IBAN:
+			<br/>
+			<input
+				style="width: 210px;"
+				name="iban"
+				value="${values.iban}"
+			/>
+		</label>
+		<label style="display: block; margin-bottom: 5px;">
+			Variable:
+			<br/>
+			<input
+				style="width: 210px;"
+				type="number"
+				name="variable"
+				value="${values.variable}"
+			/>
+		</label>
+	`;
 
 	// Add event listeners for the Clone and Delete buttons
 	const cloneButton = inputContainer.querySelector(".clone-btn");

@@ -4,22 +4,35 @@
 	<meta charset="UTF-8"/>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	<title>bysquare multi example</title>
+	<title>Multiple Payments Example - Bysquare</title>
+	<link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+	<style>
+		body { font-size: 0.8rem; }
+		h1 { font-size: 1.3rem; }
+	</style>
 	<script type="module" src="index.js"></script>
 </head>
 <body>
-<div style="display: grid; grid-template-columns: 1fr 1fr;">
-	<div id="payment-inputs">
-
+	<h1>Multiple Payments Example</h1>
+	<p>Create and manage multiple payment QR codes in batch</p>
+	
+	<div id="payment-inputs" style="
+		overflow-x: auto; 
+		white-space: nowrap; 
+		padding: 10px 0; 
+		margin-bottom: 2rem;
+		border: 1px solid var(--border);
+		border-radius: 4px;
+	">
 	</div>
-	<div id="result">
-		<pre id="encodedText" style="word-wrap: break-word; text-wrap: auto; max-width: 300px;"></pre>
+	
+	<div id="result" style="text-align: center;">
+		<pre id="encodedText" style="word-wrap: break-word; text-wrap: auto; max-width: 100%; margin-bottom: 1rem;"></pre>
 		<canvas
 			height="200"
 			width="200"
 			id="canvas"
 		></canvas>
 	</div>
-</div>
 </body>
 </html>

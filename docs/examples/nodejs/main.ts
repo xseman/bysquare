@@ -4,13 +4,7 @@ import {
 	encode,
 	PaymentOptions,
 	Periodicity,
-} from "./../../../src/index.js";
-// import {
-// 	CurrencyCode,
-// 	DataModel,
-// 	encode,
-// 	PaymentOptions,
-// } from "bysquare";
+} from "bysquare";
 
 const data = {
 	invoiceId: "random-id",
@@ -36,7 +30,4 @@ const data = {
 	],
 } satisfies DataModel;
 
-console.log(JSON.stringify(data, null, 4));
-
 const encoded = encode(data);
-console.log(encoded);

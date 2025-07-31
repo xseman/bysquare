@@ -4,37 +4,44 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>bysquare example</title>
-
+		<title>Native JavaScript Example - Bysquare</title>
+		<link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+		<style>
+			body { font-size: 0.8rem; }
+			h1 { font-size: 1.3rem; }
+		</style>
 		<script type="module" src="index.js"></script>
 	</head>
 
 	<body>
-		<div>
-			<div style="margin-right: 10px">
-				<label style="display: block; margin-bottom: 5px">
+		<h1>Bysquare - Native JavaScript Example</h1>
+		
+		<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+			<div>
+				<label style="display: block; margin-bottom: 1rem">
 					Amount:
-					<br />
 					<input
-						style="width: 210px"
+						style="width: 100%; margin-top: 0.5rem"
 						type="number"
 						name="amount"
 						value=""
 					/>
 				</label>
-				<label style="display: block; margin-bottom: 5px">
+				<label style="display: block; margin-bottom: 1rem">
 					IBAN:
-					<br />
-					<input style="width: 210px" name="iban" />
+					<input style="width: 100%; margin-top: 0.5rem" name="iban" />
 				</label>
-				<label style="display: block; margin-bottom: 5px">
+				<label style="display: block; margin-bottom: 1rem">
 					Variable:
-					<br />
-					<input style="width: 210px" type="number" name="variable" />
+					<input style="width: 100%; margin-top: 0.5rem" type="number" name="variable" />
 				</label>
-				<pre id="encodedText"></pre>
+			</div>
+			
+			<div>
 				<div style="width: 200px" id="qrcode"></div>
 			</div>
 		</div>
+		
+		<pre id="encodedText" style="word-wrap: break-word; white-space: pre-wrap;"></pre>
 	</body>
 </html>

@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.1](https://github.com/xseman/bysquare/compare/v2.13.0...v2.13.1) (2025-07-31)
+
+
+### Documentation
+
+* update example styles and deps ([f6e6069](https://github.com/xseman/bysquare/commit/f6e6069112fec35bef9a7e60df2df9b4c56cd832))
+
 ## [2.13.0](https://github.com/xseman/bysquare/compare/v2.12.5...v2.13.0) (2025-07-27)
 
 

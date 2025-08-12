@@ -1,0 +1,47 @@
+name: coverage report
+
+on:
+    pull_request:
+        types:
+            - opened
+            - synchronize
+            - reopened
+
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    coverage:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: install
+              run: bun install
+
+            - name: Run tests (lcov reporter)
+              shell: bash
+              run: bun test:lcov
+
+            - name: Build PR comment body from lcov-summary
+              shell: bash
+              run: |
+                  if [ ! -s "${GITHUB_WORKSPACE}/coverage/lcov.info" ]; then
+                    printf '%s\n' 'Coverage report not found' > "${RUNNER_TEMP}/comment.md"
+                    exit 0
+                  fi
+
+                  # Output directly as the comment body
+                  npx -y lcov-summary "${GITHUB_WORKSPACE}/coverage/lcov.info" > "${RUNNER_TEMP}/comment.md"
+
+            - name: Post or update sticky PR comment
+              uses: marocchino/sticky-pull-request-comment@v2
+              with:
+                  header: Coverage Report
+                  path: ${{ runner.temp }}/comment.md

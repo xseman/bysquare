@@ -14,6 +14,7 @@ permissions:
 jobs:
     coverage:
         runs-on: ubuntu-latest
+        if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please')
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4

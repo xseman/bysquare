@@ -23,6 +23,7 @@
 		"fmt:check": "dprint check",
 		"typecheck": "tsc --noEmit",
 		"test": "bun test --coverage .",
+		"test:lcov": "bun test --coverage --coverage-reporter lcov .",
 		"test:watch": "bun test --watch --coverage ."
 	},
 	"dependencies": {

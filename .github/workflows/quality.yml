@@ -44,7 +44,7 @@ jobs:
                   EOF
 
             - name: test
-              run: bun test
+              run: bun run test
 
             - name: upload coverage artifact
               if: github.event_name == 'pull_request'

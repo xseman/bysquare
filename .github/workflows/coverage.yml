@@ -1,48 +1,54 @@
 name: coverage report
 
 on:
-    pull_request:
+    workflow_run:
+        workflows:
+            - quality checks
         types:
-            - opened
-            - synchronize
-            - reopened
+            - completed
 
 permissions:
     contents: read
     pull-requests: write
+    actions: read
 
 jobs:
     coverage:
         runs-on: ubuntu-latest
-        if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please')
+        if: ${{ github.event.workflow_run.event == 'pull_request' && !startsWith(github.event.workflow_run.head_branch, 'release-please') }}
         steps:
-            - name: Check out repository code
-              uses: actions/checkout@v4
+            - uses: actions/checkout@v5
 
-            - uses: oven-sh/setup-bun@v2
+            - name: Download coverage artifact
+              uses: actions/download-artifact@v5
+              with:
+                  name: coverage
+                  path: coverage
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  run-id: ${{ github.event.workflow_run.id }}
+
+            - name: Setup Bun
+              uses: oven-sh/setup-bun@v2
               with:
                   bun-version: latest
 
-            - name: install
-              run: bun install
-
-            - name: Run tests (lcov reporter)
-              shell: bash
-              run: bun test:lcov
-
-            - name: Build PR comment body from lcov-summary
+            - name: coverage output
+              id: coverage
               shell: bash
               run: |
-                  if [ ! -s "${GITHUB_WORKSPACE}/coverage/lcov.info" ]; then
-                    printf '%s\n' 'Coverage report not found' > "${RUNNER_TEMP}/comment.md"
-                    exit 0
-                  fi
+                  {
+                      echo "body<<EOF"
+                      bunx lcov-summary "${GITHUB_WORKSPACE}/coverage/lcov.info"
+                      echo "EOF"
+                  } >> "$GITHUB_OUTPUT"
 
-                  # Output directly as the comment body
-                  npx -y lcov-summary "${GITHUB_WORKSPACE}/coverage/lcov.info" > "${RUNNER_TEMP}/comment.md"
-
-            - name: Post or update sticky PR comment
+            - name: coverage report
               uses: marocchino/sticky-pull-request-comment@v2
               with:
                   header: Coverage Report
-                  path: ${{ runner.temp }}/comment.md
+                  message: |
+                      ### Coverage Report
+
+                      ```
+                      ${{ steps.coverage.outputs.body }}
+                      ```

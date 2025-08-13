@@ -13,11 +13,16 @@ on:
             - tsconfig.json
             - .github/workflows/**.yml
 
+permissions:
+    contents: read
+    pull-requests: write
+    actions: write
+
 jobs:
     test:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - uses: oven-sh/setup-bun@v2
               with:
                   bun-version: latest
@@ -28,13 +33,31 @@ jobs:
             - name: typecheck
               run: bun run typecheck
 
+            - name: bunfig.toml
+              shell: bash
+              run: |
+                  cat > "${GITHUB_WORKSPACE}/bunfig.toml" <<'EOF'
+                  [test]
+                  coveragePathIgnorePatterns = [
+                      "src/testdata/**",
+                  ]
+                  EOF
+
             - name: test
               run: bun test
+
+            - name: upload coverage artifact
+              if: github.event_name == 'pull_request'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: coverage
+                  path: coverage/lcov.info
+                  if-no-files-found: warn
 
     fmt:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - uses: oven-sh/setup-bun@v2
               with:
                   bun-version: latest

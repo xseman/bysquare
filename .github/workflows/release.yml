@@ -32,7 +32,7 @@ jobs:
                   config-file: ${{ github.event.inputs.release_next == 'true' && '.github/.release-config.next.json' || '.github/.release-config.json' }}
                   token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
               if: ${{ steps.release.outputs.release_created || github.event.inputs.tag }}
               with:
                   ref: ${{ github.event.inputs.tag || 'master' }}

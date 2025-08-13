@@ -20,6 +20,7 @@
 		{ "type": "ops", "section": "Operations" },
 		{ "type": "build", "section": "Build System" },
 		{ "type": "ci", "section": "Maintenance" },
+		{ "type": "qol", "section": "Quality of life" },
 		{ "type": "chore", "section": "Maintenance" },
 		{ "type": "config", "section": "Maintenance" },
 		{ "type": "refactor", "section": "Maintenance" },

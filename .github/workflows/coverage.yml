@@ -57,7 +57,7 @@ jobs:
                   number: ${{ steps.merge-request.outputs.number }}
                   header: Coverage Report
                   message: |
-                      ### Coverage Report
+                      ### Coverage Report `${{ github.event.workflow_run.head_sha }}`
 
                       ```
                       ${{ steps.coverage.outputs.body }}

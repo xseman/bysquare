@@ -42,9 +42,19 @@ jobs:
                       echo "EOF"
                   } >> "$GITHUB_OUTPUT"
 
+            - name: merge request id
+              id: merge-request
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  id=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }} --jq '.pull_requests[0].number')
+                  echo "number=$id" >> "$GITHUB_OUTPUT"
+
             - name: coverage report
               uses: marocchino/sticky-pull-request-comment@v2
               with:
+                  number: ${{ steps.merge-request.outputs.number }}
                   header: Coverage Report
                   message: |
                       ### Coverage Report

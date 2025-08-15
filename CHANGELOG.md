@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.13.1](https://github.com/xseman/bysquare/compare/v2.13.0...v2.13.1) (2025-08-15)
+
+
+### Dependency Updates
+
+* update lzma1 to version 0.2.0 ([#67](https://github.com/xseman/bysquare/issues/67)) ([0e2a791](https://github.com/xseman/bysquare/commit/0e2a7913d85ab71f6945555f748ac5c85bb9e81c))
+
+
+### Documentation
+
+* refactor styles to use shared stylesheet ([507cdaa](https://github.com/xseman/bysquare/commit/507cdaae1c76568756f52b45f5a71f6d5653f559))
+* update example styles and deps ([f6e6069](https://github.com/xseman/bysquare/commit/f6e6069112fec35bef9a7e60df2df9b4c56cd832))
+
+
+### Maintenance
+
+* add coverage PR comment workflow ([#65](https://github.com/xseman/bysquare/issues/65)) ([1c8b97f](https://github.com/xseman/bysquare/commit/1c8b97f711b88b435eccc6455a35f4567fedf62a))
+* add merge request id retrieval to coverage workflow ([aea9095](https://github.com/xseman/bysquare/commit/aea9095af355cd2d19cf6bd700a25181d7d70377))
+* update coverage job condition ([f1ea26b](https://github.com/xseman/bysquare/commit/f1ea26b0684e8ee02f2290440d791d818bf48872))
+* update dependencies and add qol section ([#66](https://github.com/xseman/bysquare/issues/66)) ([66e1066](https://github.com/xseman/bysquare/commit/66e106663ccd8239e09328f7f4e0a102e55359ec))
+* update test command to use bun run ([603920a](https://github.com/xseman/bysquare/commit/603920ad0c90f82aa4975d8ad4fca271e5ae5f7d))
+* update workflows ([3a69d01](https://github.com/xseman/bysquare/commit/3a69d01c902005eb7377468b8219deb7cf6ffdde))
+
 ## [2.13.0](https://github.com/xseman/bysquare/compare/v2.12.5...v2.13.0) (2025-07-27)
 
 

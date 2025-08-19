@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.2](https://github.com/xseman/bysquare/compare/v2.13.1...v2.13.2) (2025-08-19)
+
+
+### Documentation
+
+* update stylesheet paths in examples ([b8d58b9](https://github.com/xseman/bysquare/commit/b8d58b9c282d500e165afe295f64e81c61a1ca0c))
+
 ## [2.13.1](https://github.com/xseman/bysquare/compare/v2.13.0...v2.13.1) (2025-08-15)
 
 

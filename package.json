@@ -1,12 +1,11 @@
 {
-	"name": "bysquare",
-	"description": "It's a national standard for payment QR codes adopted by Slovak Banking Association (SBA)",
+	"name": "bysquare-forked-by-bart",
+	"description": "It's a national standard for payment QR codes adopted by Slovak Banking Association (SBA) - Forked version so we can use new version without type module",
 	"type": "module",
-	"version": "2.13.3",
+	"version": "2.13.4",
 	"license": "Apache-2.0",
-	"funding": "https://github.com/sponsors/xseman",
-	"homepage": "https://github.com/xseman/bysquare#readme",
-	"author": "Filip Seman <filip.seman@pm.me>",
+	"homepage": "https://github.com/daaAd1/bysquare",
+	"author": "Samuel Sepesi <sepesi@bart.sk>",
 	"keywords": [
 		"pay by square",
 		"qr string",
@@ -15,7 +14,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/xseman/bysquare.git"
+		"url": "git+https://github.com/daaAd1/bysquare.git"
 	},
 	"scripts": {
 		"build": "tsc --build",

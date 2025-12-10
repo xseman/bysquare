@@ -60,6 +60,28 @@ function decodeString(value: string | undefined): string | undefined {
 }
 
 /**
+ * Prevedie dátum z formátu YYYYMMDD na ISO 8601 formát (YYYY-MM-DD)
+ * podľa požiadavky Pay by Square špecifikácie sekcia 3.7.
+ *
+ * Poznámka: Táto konverzia sa podľa špecifikácie používa len pre paymentDueDate.
+ * lastDate ostáva vo formáte YYYYMMDD.
+ *
+ * @param input - Dátum vo formáte YYYYMMDD
+ * @returns Dátum vo formáte ISO 8601 (YYYY-MM-DD) | undefined
+ */
+function deserializeDate(input?: string): string | undefined {
+	if (!input || input.length !== 8) {
+		return undefined;
+	}
+
+	const year = input.slice(0, 4);
+	const month = input.slice(4, 6);
+	const day = input.slice(6, 8);
+
+	return year + "-" + month + "-" + day;
+}
+
+/**
  * Generating by square Code
  *
  * @see 3.14.
@@ -89,7 +111,7 @@ export function deserialize(qr: string): DataModel {
 			type: Number(paymentOptions),
 			currencyCode: currency ?? CurrencyCode.EUR,
 			amount: Number(ammount),
-			paymentDueDate: dueDate || undefined,
+			paymentDueDate: deserializeDate(dueDate),
 			variableSymbol: variableSymbol || undefined,
 			constantSymbol: constantSymbol || undefined,
 			specificSymbol: specificSymbol || undefined,
@@ -123,6 +145,7 @@ export function deserialize(qr: string): DataModel {
 				day: decodeNumber(data.shift()),
 				month: decodeNumber(data.shift()),
 				periodicity: decodeString(data.shift()) as Periodicity,
+				// lastDate stays in YYYYMMDD format (not converted per specification)
 				lastDate: decodeString(data.shift()),
 			} satisfies StandingOrder;
 		}

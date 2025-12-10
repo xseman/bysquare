@@ -11,6 +11,24 @@ import {
 } from "./types.js";
 import { validateDataModel } from "./validations.js";
 
+/**
+ * Prevedie dátum z ISO 8601 formátu (YYYY-MM-DD) na formát YYYYMMDD
+ * podľa požiadavky Pay by Square špecifikácie sekcia 3.7.
+ *
+ * Poznámka: Táto konverzia sa podľa špecifikácie používa len pre paymentDueDate.
+ * lastDate očakáva priamo formát YYYYMMDD.
+ *
+ * @param input - Dátum vo formáte ISO 8601 (YYYY-MM-DD)
+ * @returns Dátum vo formáte YYYYMMDD | undefined
+ */
+function serializeDate(input?: string): string | undefined {
+	if (!input) {
+		return undefined;
+	}
+
+	return input.split("-").join("");
+}
+
 export const EncodeErrorMessage = {
 	/**
 	 * @description - find invalid value in extensions
@@ -159,7 +177,7 @@ export function serialize(data: DataModel): string {
 		serialized.push(p.type.toString());
 		serialized.push(p.amount?.toString());
 		serialized.push(p.currencyCode);
-		serialized.push(p.paymentDueDate);
+		serialized.push(serializeDate(p.paymentDueDate));
 		serialized.push(p.variableSymbol);
 		serialized.push(p.constantSymbol);
 		serialized.push(p.specificSymbol);

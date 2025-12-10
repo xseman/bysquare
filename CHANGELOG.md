@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.3](https://github.com/xseman/bysquare/compare/v2.13.2...v2.13.3) (2025-12-10)
+
+
+### Bug Fixes
+
+* paymentDueDate serialization/deserialization specification logic ([#73](https://github.com/xseman/bysquare/issues/73)) ([8b6e5f7](https://github.com/xseman/bysquare/commit/8b6e5f7734ffc0d71fa6339077a9cd4483a0f87e))
+
 ## [2.13.2](https://github.com/xseman/bysquare/compare/v2.13.1...v2.13.2) (2025-11-04)
 
 

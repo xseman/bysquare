@@ -1,8 +1,10 @@
-# bysquare
+<h1 align="center">bysquare</h1>
 
-"PAY by square" is a national standard for QR code payments that was adopted by
-the Slovak Banking Association in 2013. It is incorporated into a variety of
-invoices, reminders and other payment regulations.
+<p align="center">
+"PAY by square" is a national standard for QR code payments that was adopted
+by the Slovak Banking Association in 2013. It is incorporated into a variety
+of invoices, reminders and other payment regulations.
+</p>
 
 ## Why
 
@@ -324,7 +326,48 @@ $ bysquare --decode <qrstring>
 
 ### Encoding/Decoding Architecture
 
-<image src="./docs/logic.svg" alt="encode" width="500px">
+<image src="./docs/logic.excalidraw.svg" alt="encode" width="500px">
+
+## Validation
+
+This library uses **permissive validation** to ensure maximum compatibility with
+various Slovak banking applications. The validation does not strictly enforce
+all XSD schema restrictions.
+
+### Validation Behavior
+
+| Aspect        | Behavior                                                        |
+| ------------- | --------------------------------------------------------------- |
+| IBAN          | Validated (format + checksum via ISO 13616)                     |
+| BIC           | Validated (format via ISO 9362)                                 |
+| Currency      | Validated (ISO 4217, case-insensitive, includes XXX)            |
+| Date          | Validated (ISO 8601 format)                                     |
+| Symbols       | Permissive (accepts letters, spaces - XSD pattern not enforced) |
+| Amounts       | Permissive (accepts negative values)                            |
+| Field lengths | Not enforced                                                    |
+
+### XSD Field Constraints Reference
+
+<https://www.bsqr.co/schema/>
+
+For reference, the official XSD schema defines these constraints (not enforced
+by this library):
+
+| Field                             | Max Length | Pattern       |
+| --------------------------------- | ---------- | ------------- |
+| `variableSymbol`                  | 10         | `[0-9]{0,10}` |
+| `constantSymbol`                  | 4          | `[0-9]{0,4}`  |
+| `specificSymbol`                  | 10         | `[0-9]{0,10}` |
+| `paymentNote`                     | 140        | -             |
+| `originatorsReferenceInformation` | 35         | -             |
+| `invoiceId`                       | 10         | -             |
+| `beneficiary.name`                | 70         | -             |
+| `beneficiary.street`              | 70         | -             |
+| `beneficiary.city`                | 70         | -             |
+| `mandateId`                       | 35         | -             |
+| `creditorId`                      | 35         | -             |
+| `contractId`                      | 35         | -             |
+| `amount`                          | 15         | `>= 0`        |
 
 ## Related
 

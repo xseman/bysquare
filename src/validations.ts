@@ -6,7 +6,7 @@ import {
 	SimplePayment,
 } from "./types.js";
 
-export const ValidationErrorMessage = {
+const ErrorMessages = {
 	IBAN: "Invalid IBAN. Make sure ISO 13616 format is used.",
 	BIC: "Invalid BIC. Make sure ISO 9362 format is used.",
 	CurrencyCode: "Invalid currency code. Make sure ISO 4217 format is used.",
@@ -43,11 +43,11 @@ export function validateBankAccount(
 	path: string,
 ): void {
 	if (!validator.isIBAN(bankAccount.iban)) {
-		throw new ValidationError(ValidationErrorMessage.IBAN, `${path}.iban`);
+		throw new ValidationError(ErrorMessages.IBAN, `${path}.iban`);
 	}
 
 	if (bankAccount.bic && !validator.isBIC(bankAccount.bic)) {
-		throw new ValidationError(ValidationErrorMessage.BIC, `${path}.bic`);
+		throw new ValidationError(ErrorMessages.BIC, `${path}.bic`);
 	}
 }
 
@@ -69,14 +69,14 @@ export function validateSimplePayment(
 
 	if (simplePayment.currencyCode && !validator.isISO4217(simplePayment.currencyCode)) {
 		throw new ValidationError(
-			ValidationErrorMessage.CurrencyCode,
+			ErrorMessages.CurrencyCode,
 			`${path}.currencyCode`,
 		);
 	}
 
 	if (simplePayment.paymentDueDate && !validator.isDate(simplePayment.paymentDueDate)) {
 		throw new ValidationError(
-			ValidationErrorMessage.Date,
+			ErrorMessages.Date,
 			`${path}.paymentDueDate`,
 		);
 	}

@@ -7,6 +7,6 @@
 export { decodeOptions, encodeOptions } from "./classifier.js";
 export { decode } from "./decode.js";
 export { encode } from "./encode.js";
-export { validateDataModel, ValidationErrorMessage } from "./validations.js";
+export { validateDataModel } from "./validations.js";
 
 export * from "./types.js";

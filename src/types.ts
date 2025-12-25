@@ -263,7 +263,7 @@ export type SimplePayment = {
 	/**
 	 * Termín splatnosti platby.
 	 *
-	 * Vprípade trvalého príkazu označuje dátum prvej platby.
+	 * V prípade trvalého príkazu označuje dátum prvej platby.
 	 * Dátum bude prevedený na formát YYYYMMDD počas kódovania podľa špecifikácie sekcia 3.7.
 	 *
 	 * @format date

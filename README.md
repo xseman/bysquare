@@ -16,17 +16,9 @@ individuals and businesses to create QR codes for their invoices.
 
 - TypeScript support
 - Compatible with Slovak banking apps
-- Isomorfic Browser & Runtime-independent implementation
+- Isomorphic Browser & Runtime-independent implementation
 
 ## Installation
-
-> [!NOTE]
-> This package is native [ESM][mozzila-esm] and no longer provides a
-> CommonJS export. If your project uses CommonJS, you will have to convert to ESM
-> or use the dynamic [`import()`][mozzila-import] function.
-
-[mozzila-esm]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
-[mozzila-import]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import
 
 ### [npm](https://npmjs.com/bysquare)
 
@@ -47,20 +39,62 @@ $ npm install bysquare
 This library provides `encode` and `decode` functions to work with the data
 model directly, allowing you to create customized payment solutions.
 
+### Guides
+
+### HTML example
+
+This example shows how to generate a payment QR code and display it in a web
+page:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Payment QR Code</title>
+	</head>
+	<body>
+		<div id="qrcode" style="width: 200px"></div>
+
+		<script type="module">
+			import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
+			import { encode, PaymentOptions, CurrencyCode } from "https://esm.sh/bysquare@latest";
+
+			const qrstring = encode({
+				payments: [
+					{
+						type: PaymentOptions.PaymentOrder,
+						amount: 123.45,
+						variableSymbol: "987654",
+						currencyCode: CurrencyCode.EUR,
+						bankAccounts: [
+							{ iban: "SK9611000000002918599669" }
+						],
+					},
+				],
+			});
+
+			const qrElement = document.getElementById("qrcode");
+			qrElement.appendChild(QRCode.generateSVG(qrstring));
+		</script>
+	</body>
+</html>
+```
+
 ### Creating Payment QR Codes
 
 To generate QR codes for different payment types, use the `encode` function with
 the appropriate payment configuration:
-
-#### Simple Payment (Payment Order)
 
 ```js
 import {
 	CurrencyCode,
 	encode,
 	PaymentOptions,
+	Periodicity,
 } from "bysquare";
 
+// Simple Payment (Payment Order)
 const qrstring = encode({
 	payments: [
 		{
@@ -74,43 +108,8 @@ const qrstring = encode({
 		},
 	],
 });
-```
 
-#### Direct Debit
-
-```js
-import {
-	CurrencyCode,
-	encode,
-	PaymentOptions,
-} from "bysquare";
-
-const qrstring = encode({
-	payments: [
-		{
-			type: PaymentOptions.DirectDebit, // 2
-			amount: 25.0,
-			variableSymbol: "789012",
-			currencyCode: CurrencyCode.EUR, // "EUR"
-			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
-			],
-		},
-	],
-});
-```
-
-#### Standing Order
-
-```js
-import {
-	CurrencyCode,
-	encode,
-	Month,
-	PaymentOptions,
-	Periodicity,
-} from "bysquare";
-
+// Standing Order
 const qrstring = encode({
 	payments: [
 		{
@@ -121,6 +120,21 @@ const qrstring = encode({
 			day: 15,
 			month: Month.January, // Single month
 			periodicity: Periodicity.Monthly, // "m"
+			bankAccounts: [
+				{ iban: "SK9611000000002918599669" },
+			],
+		},
+	],
+});
+
+// Direct Debit
+const qrstring = encode({
+	payments: [
+		{
+			type: PaymentOptions.DirectDebit, // 2
+			amount: 25.0,
+			variableSymbol: "789012",
+			currencyCode: CurrencyCode.EUR, // "EUR"
 			bankAccounts: [
 				{ iban: "SK9611000000002918599669" },
 			],
@@ -186,45 +200,10 @@ const qrstring2 = encode({
 });
 ```
 
-### HTML example
-
-This example shows how to generate a payment QR code and display it in a web
-page:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<title>Payment QR Code</title>
-	</head>
-	<body>
-		<div id="qrcode" style="width: 200px"></div>
-
-		<script type="module">
-			import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
-			import { encode, PaymentOptions, CurrencyCode } from "https://esm.sh/bysquare@latest";
-
-			const qrstring = encode({
-				payments: [
-					{
-						type: PaymentOptions.PaymentOrder,
-						amount: 123.45,
-						variableSymbol: "987654",
-						currencyCode: CurrencyCode.EUR,
-						bankAccounts: [
-							{ iban: "SK9611000000002918599669" }
-						],
-					},
-				],
-			});
-
-			const qrElement = document.getElementById("qrcode");
-			qrElement.appendChild(QRCode.generateSVG(qrstring));
-		</script>
-	</body>
-</html>
-```
+> [!NOTE]
+> **Date Format:** Provide date inputs (e.g., `paymentDueDate`, `lastDate`)
+> in ISO 8601 format (`YYYY-MM-DD`). They are automatically converted to
+> `YYYYMMDD` during encoding to match the Pay by Square specification.
 
 ### Advanced usage
 
@@ -374,6 +353,5 @@ by this library):
 - <https://bysquare.com/>
 - <https://devel.cz/otazka/qr-kod-pay-by-square>
 - <https://github.com/matusf/pay-by-square>
-- <https://www.bsqr.co/schema/>
 - <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>
 - <https://www.vutbr.cz/studenti/zav-prace/detail/78439>

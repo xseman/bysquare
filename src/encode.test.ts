@@ -86,7 +86,6 @@ describe("encode basic functionality", () => {
 
 	test("encodes with Version 1.0.0 by default", () => {
 		const result = encode(MINIMAL_PAYMENT);
-		const decoded = decode(result);
 
 		expect(result).toBeDefined();
 		expect(result.startsWith("00")).toBe(true);

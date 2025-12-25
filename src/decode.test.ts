@@ -154,12 +154,6 @@ describe("decode deserialization", () => {
 		const encoded = encode(MINIMAL_PAYMENT);
 
 		const decoded_base32 = base32hex.decode(encoded, true);
-		const header = decoded_base32.slice(0, 2);
-		const payloadLength = new DataView(
-			decoded_base32.buffer,
-			decoded_base32.byteOffset + 2,
-			2,
-		).getUint16(0, false);
 		const compressed = decoded_base32.slice(4);
 
 		const lzmaHeader = new Uint8Array(13);

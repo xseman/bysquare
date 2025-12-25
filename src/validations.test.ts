@@ -1,15 +1,15 @@
 /**
- * Testy pre validations modul.
+ * Tests for the validations module.
  *
- * Pokrýva:
- * - IBAN validáciu (formát, checksum, country codes)
- * - BIC validáciu
- * - Currency code validáciu
- * - Payment a DataModel validáciu
- * - ValidationError správu a path verifikáciu
+ * Covers:
+ * - IBAN validation (format, checksum, country codes)
+ * - BIC validation
+ * - Currency code validation
+ * - Payment and DataModel validation
+ * - ValidationError handling and path verification
  *
- * NOTE: Validácia používa `validator` knižnicu, ktorá je case-insensitive
- * pre currency codes a akceptuje ISO 4217 kódy ako "XXX" (žiadna mena).
+ * NOTE: Validation uses the `validator` library, which is case-insensitive
+ * for currency codes and accepts ISO 4217 codes like "XXX" (no currency).
  */
 
 import {
@@ -196,16 +196,16 @@ describe("ValidationError", () => {
 });
 
 /**
- * Testy dokumentujúce permissive správanie validator knižnice.
+ * Tests documenting the permissive behavior of the validator library.
  *
- * Tieto testy slúžia ako regression guards - validator knižnica akceptuje:
- * - Case-insensitive currency codes (eur, EUR, Eur všetky platné)
- * - ISO 4217 "no currency" kód XXX
+ * These tests serve as regression guards - the validator library accepts:
+ * - Case-insensitive currency codes (eur, EUR, Eur are all valid)
+ * - ISO 4217 "no currency" code XXX
  *
- * Polia NEVALIDOVANÉ (permissive by design):
- * - variableSymbol, constantSymbol, specificSymbol (žiadna pattern check)
- * - amount (žiadna range check)
- * - field lengths (žiadna maxLength check)
+ * Fields NOT VALIDATED (permissive by design):
+ * - variableSymbol, constantSymbol, specificSymbol (no pattern check)
+ * - amount (no range check)
+ * - field lengths (no maxLength check)
  */
 describe("permissive validation behavior", () => {
 	test("accepts lowercase currency codes (validator is case-insensitive)", () => {

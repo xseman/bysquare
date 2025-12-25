@@ -1,12 +1,12 @@
 /**
- * Testy pre decode modul.
+ * Tests for the decode module.
  *
- * Pokrýva:
- * - Základné decodovanie encodovaných QR stringov
- * - Deserializáciu z tab-separated formátu
- * - Round-trip encode/decode overenie
- * - Error handling pre neplatné vstupy
- * - Property-based testy pre konzistenciu decodovania
+ * Covers:
+ * - Basic decoding of encoded QR strings
+ * - Deserialization from tab-separated format
+ * - Round-trip encode/decode verification
+ * - Error handling for invalid inputs
+ * - Property-based tests for decoding consistency
  */
 
 import {

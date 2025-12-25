@@ -1,13 +1,13 @@
 /**
- * Testy pre encode modul.
+ * Tests for the encode module.
  *
- * Pokrýva:
- * - Základné encodovanie payment orders, standing orders a direct debits
- * - Serializáciu do tab-separated formátu
- * - Vytvorenie header a výpočet checksum
- * - Odstránenie diakritiky (deburr)
- * - Error handling pre neplatné vstupy
- * - Property-based testy pre konzistenciu encodovania
+ * Covers:
+ * - Basic encoding of payment orders, standing orders, and direct debits
+ * - Serialization to tab-separated format
+ * - Header creation and checksum calculation
+ * - Diacritics removal (deburr)
+ * - Error handling for invalid inputs
+ * - Property-based tests for encoding consistency
  */
 
 import {

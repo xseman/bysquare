@@ -1,9 +1,9 @@
 /**
- * Testy pre classifier (bitfield options) modul.
+ * Tests for the classifier (bitfield options) module.
  *
- * Classifiers encoduje viacero možností do jediného čísla pomocou bitwise OR.
- * Používa sa primárne pre výber mesiacov v trvalých príkazoch.
- * Príklad: January(1) + July(64) + October(512) = 577
+ * Classifiers encode multiple options into a single number using bitwise OR.
+ * Used primarily for month selection in standing orders.
+ * Example: January(1) + July(64) + October(512) = 577
  */
 
 import {
@@ -36,13 +36,13 @@ describe("classifier", () => {
 
 		test("encodes multiple months", () => {
 			const result = encodeOptions([Month.January, Month.July, Month.October]);
-			expect(result).toBe(577); // 1 + 64 + 512 (príklad zo špecifikácie)
+			expect(result).toBe(577); // 1 + 64 + 512 (example from specification)
 		});
 
 		test("encodes all months", () => {
 			const allMonths = Object.values(Month);
 			const result = encodeOptions(allMonths);
-			expect(result).toBe(4095); // 2^12 - 1 (všetky mesiace)
+			expect(result).toBe(4095); // 2^12 - 1 (all months)
 		});
 
 		test("handles empty array", () => {
@@ -56,7 +56,7 @@ describe("classifier", () => {
 			test("decodes specification example: 577 = January + July + October", () => {
 				// January=1, July=64, October=512 = 577
 				const result = decodeOptions(577);
-				expect(result).toEqual([512, 64, 1]); // October, July, January (zostupne)
+				expect(result).toEqual([512, 64, 1]); // October, July, January (descending)
 			});
 		});
 

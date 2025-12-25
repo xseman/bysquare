@@ -23,7 +23,7 @@ export const Version = {
 export type Version = typeof Version[keyof typeof Version];
 
 /**
- * Kalendárny mesiac.
+ * Calendar month.
  *
  * @dprint-ignore
  */
@@ -46,9 +46,9 @@ export const Month = {
 export type Month = typeof Month[keyof typeof Month];
 
 /**
- * Deň platby vyplývajúci z opakovania (Periodicity). Deň v mesiaci je číslo
- * medzi 1 a 31. Deň v týždni je číslo medzi 1 a 7 (1 = pondelok, 2=utorok, …, 7
- * = nedeľa).
+ * Payment day derived from the periodicity. Day of the month is a number
+ * between 1 and 31. Day of the week is a number between 1 and 7 (1 = Monday,
+ * 2 = Tuesday, …, 7 = Sunday).
  *
  * @dprint-ignore
  */
@@ -109,26 +109,25 @@ export type Day =
 	| 31;
 
 /**
- * Možnosti platby sa dajú kombinovať. Oddeľujú sa medzerou a treba uviesť vždy
- * aspoň jednu z možností:
+ * Payment options can be combined. At least one option must be specified:
  *
- * - `PaymentOrder`: platobný príkaz
- * - `StandingOrder`: trvalý príkaz, údaje sa vyplnia do StandingOrderExt
- * - `DirectDebit`: inkaso, údaje sa vyplnia do DirectDebitExt
+ * - `PaymentOrder`: Single payment order
+ * - `StandingOrder`: Standing order (recurring payment), details in StandingOrderExt
+ * - `DirectDebit`: Direct debit, details in DirectDebitExt
  */
 export const PaymentOptions = {
 	/**
-	 * Platobný príkaz
+	 * Single payment order
 	 */
 	PaymentOrder: 0b00000001,
 
 	/**
-	 * Trvalý príkaz, údaje sa vyplnia do StandingOrderExt
+	 * Standing order (recurring payment), details filled in StandingOrderExt
 	 */
 	StandingOrder: 0b00000010,
 
 	/**
-	 * Inkaso, údaje sa vyplnia do DirectDebitExt
+	 * Direct debit, details filled in DirectDebitExt
 	 */
 	DirectDebit: 0b00000100,
 } as const;
@@ -137,13 +136,12 @@ export const PaymentOptions = {
 export type PaymentOptions = typeof PaymentOptions[keyof typeof PaymentOptions];
 
 /**
- * Údaje bankového účtu prijímateľa platby.
+ * Bank account data of the payment recipient.
  */
 export type BankAccount = {
 	/**
-	 * Medzinárodné číslo bankového účtu vo formáte IBAN.
+	 * International Bank Account Number in IBAN format.
 	 *
-	 * @description International Bank Account Number in IBAN format
 	 * @example "SK8209000000000011424060"
 	 * @pattern [A-Z]{2}[0-9]{2}[A-Z0-9]{0,30}
 	 * @minLength 15
@@ -152,9 +150,8 @@ export type BankAccount = {
 	iban: string;
 
 	/**
-	 * Medzinárodný bankový identifikačný kód (z ang. Bank Identification Code).
+	 * Bank Identification Code (BIC) in ISO 9362 format (SWIFT).
 	 *
-	 * @description Bank Identification Code in ISO 9362 format (SWIFT)
 	 * @example "TATRSKBX"
 	 * @pattern [A-Z]{4}[A-Z]{2}[A-Z\d]{2}([A-Z\d]{3})?
 	 * @minLength 8
@@ -164,19 +161,19 @@ export type BankAccount = {
 };
 
 /**
- * Inksaná schéma. Uvádza ja jedna z možností:
+ * Direct debit scheme. One of the following options:
  *
- * - SEPA - Inkaso zodpovedá schéme
- * - SEPA. other - iné
+ * - SEPA - Direct debit follows the SEPA scheme
+ * - Other - Other scheme
  */
 export const DirectDebitScheme = {
 	/**
-	 * other - iné
+	 * Other scheme
 	 */
 	Other: 0x00,
 
 	/**
-	 * SEPA - Inkaso zodpovedá schéme
+	 * SEPA - Direct debit follows the SEPA scheme
 	 */
 	Sepa: 0x01,
 } as const;
@@ -185,21 +182,21 @@ export const DirectDebitScheme = {
 export type DirectDebitScheme = typeof DirectDebitScheme[keyof typeof DirectDebitScheme];
 
 /**
- * Typ inkasa. Uvádza ja jedna z možností:
+ * Direct debit type. One of the following options:
  *
  * @maximum 1
  *
- * - one-off - jednorázové inkaso
- * - recurrent - opakované inkaso
+ * - one-off: One-time direct debit
+ * - recurrent: Recurring direct debit
  */
 export const DirectDebitType = {
 	/**
-	 * Jednorázové inkaso
+	 * One-time direct debit
 	 */
 	OneOff: 0x00,
 
 	/**
-	 * Opakované inkaso
+	 * Recurring direct debit
 	 */
 	Recurrent: 0x01,
 } as const;
@@ -209,25 +206,22 @@ export type DirectDebitType = typeof DirectDebitType[keyof typeof DirectDebitTyp
 
 export type Beneficiary = {
 	/**
-	 * Rozšírenie o meno príjemcu
+	 * Beneficiary name.
 	 *
-	 * @description Beneficiary name
 	 * @maxLength 70
 	 */
 	name?: string;
 
 	/**
-	 * Rozšírenie o adresu príjemcu
+	 * Beneficiary street address.
 	 *
-	 * @description Beneficiary street address
 	 * @maxLength 70
 	 */
 	street?: string;
 
 	/**
-	 * Rozšírenie o adresu príjemcu (druhý riadok)
+	 * Beneficiary city.
 	 *
-	 * @description Beneficiary city
 	 * @maxLength 70
 	 */
 	city?: string;
@@ -235,11 +229,9 @@ export type Beneficiary = {
 
 export type SimplePayment = {
 	/**
-	 * Čiastka platby. Povolené sú len kladné hodnoty. Desatinná čast je
-	 * oddelená bodkou. Môže ostať nevyplnené, napríklad pre dobrovoľný
-	 * príspevok (donations).
+	 * Payment amount. Only positive values are allowed. The decimal part is
+	 * separated by a dot. Can be left empty, e.g., for voluntary donations.
 	 *
-	 * @description Payment amount in decimal format
 	 * @example 1000
 	 * @example 1.99
 	 * @example 10.5
@@ -250,9 +242,8 @@ export type SimplePayment = {
 	amount?: number;
 
 	/**
-	 * Mena v [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) formáte (3 písmená).
+	 * Currency code in [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) format (3 letters).
 	 *
-	 * @description Currency code in ISO 4217 format
 	 * @example "EUR"
 	 * @pattern [A-Z]{3}
 	 * @minLength 3
@@ -261,10 +252,10 @@ export type SimplePayment = {
 	currencyCode: string | keyof typeof CurrencyCode;
 
 	/**
-	 * Termín splatnosti platby.
+	 * Payment due date.
 	 *
-	 * V prípade trvalého príkazu označuje dátum prvej platby.
-	 * Dátum bude prevedený na formát YYYYMMDD počas kódovania podľa špecifikácie sekcia 3.7.
+	 * For standing orders, this indicates the first payment date.
+	 * The date will be converted to YYYYMMDD format during encoding per specification section 3.7.
 	 *
 	 * @format date
 	 * @example "2024-12-31"
@@ -273,53 +264,47 @@ export type SimplePayment = {
 	paymentDueDate?: string;
 
 	/**
-	 * Variabilný symbol je maximálne 10 miestne číslo.
+	 * Variable symbol, up to 10 digits.
 	 *
-	 * @description Variable symbol up to 10 digits
 	 * @pattern [0-9]{0,10}
 	 * @maxLength 10
 	 */
 	variableSymbol?: string;
 
 	/**
-	 * Konštantný symbol je 4 číselný identifikátor platby definovaný NBS.
+	 * Constant symbol, a 4-digit payment identifier defined by NBS (National Bank of Slovakia).
 	 *
-	 * @description Constant symbol - 4 digit payment identifier defined by NBS
 	 * @pattern [0-9]{0,4}
 	 * @maxLength 4
 	 */
 	constantSymbol?: string;
 
 	/**
-	 * Špecifický symbol je maximálne 10 miestne číslo.
+	 * Specific symbol, up to 10 digits.
 	 *
-	 * @description Specific symbol up to 10 digits
 	 * @pattern [0-9]{0,10}
 	 * @maxLength 10
 	 */
 	specificSymbol?: string;
 
 	/**
-	 * Referenčná informácia prijímateľa podľa SEPA.
+	 * Originator's reference information according to SEPA.
 	 *
-	 * @description Originator's reference information according to SEPA
 	 * @maxLength 35
 	 */
 	originatorsReferenceInformation?: string;
 
 	/**
-	 * Správa pre prijímateľa. Údaje o platbe, na základe ktorých príjemca bude
-	 * môcť platbu identifikovať.
+	 * Payment note for the recipient. Contains payment details that help the
+	 * recipient identify the payment.
 	 *
-	 * @description Payment note for beneficiary identification
 	 * @maxLength 140
 	 */
 	paymentNote?: string;
 
 	/**
-	 * Zoznam bankových účtov.
+	 * List of bank accounts.
 	 *
-	 * @description List of bank accounts
 	 * @minItems 1
 	 */
 	bankAccounts: BankAccount[];
@@ -331,25 +316,23 @@ export type PaymentOrder = SimplePayment & {
 };
 
 /**
- * Rozšírenie platobných údajov o údaje pre nastavenie trvalého príkazu.
+ * Extension of payment data with standing order (recurring payment) settings.
  */
 export type StandingOrder = SimplePayment & {
 	type: typeof PaymentOptions.StandingOrder;
 	/**
-	 * Určuje deň, v ktorom bude trvalý platobný príkaz spracovaný v určených
-	 * mesiacoch.
+	 * Specifies the day on which the standing order will be processed in the
+	 * specified months.
 	 *
-	 * @description Payment day for standing order execution
 	 * @minimum 1
 	 * @maximum 31
 	 */
 	day?: number | Day;
 
 	/**
-	 * Určuje mesiace, v ktorých sa má vykonať platba trvalého platobného
-	 * príkazu.
+	 * Specifies the months in which the standing order payment should be
+	 * executed.
 	 *
-	 * @description Months for standing order execution
 	 * @example Month.January
 	 * @example Month.January | Month.July | Month.October
 	 * @example 577
@@ -357,16 +340,13 @@ export type StandingOrder = SimplePayment & {
 	month?: keyof typeof Month | number;
 
 	/**
-	 * Opakovanie (periodicita) trvalého príkazu.
-	 *
-	 * @description Standing order periodicity
+	 * Periodicity (frequency) of the standing order.
 	 */
 	periodicity: keyof typeof Periodicity | string;
 
 	/**
-	 * Dátum poslednej platby v rámci trvalého platobného príkazu.
+	 * Last payment date within the standing order.
 	 *
-	 * @description Last payment date for standing order
 	 * @format date
 	 * @pattern \d{8}
 	 * @example "20241231"
@@ -375,64 +355,57 @@ export type StandingOrder = SimplePayment & {
 };
 
 /**
- * Rozšírenie platobných údajov o údaje pre nastavenie a identifikáciu inkasa.
+ * Extension of payment data with direct debit settings and identification.
  */
 export type DirectDebit = SimplePayment & {
 	type: typeof PaymentOptions.DirectDebit;
 
 	/**
-	 * Inkasná schéma.
+	 * Direct debit scheme.
 	 *
-	 * @description Direct debit scheme (Other=0, SEPA=1)
 	 * @example DirectDebitScheme.Sepa
 	 */
 	directDebitScheme?: keyof typeof DirectDebitScheme | number;
 
 	/**
-	 * Typ inkasa.
+	 * Direct debit type.
 	 *
-	 * @description Direct debit type (OneOff=0, Recurrent=1)
 	 * @example DirectDebitType.Recurrent
 	 */
 	directDebitType?: keyof typeof DirectDebitType | number;
 
 	/**
-	 * Identifikácia mandátu medzi veriteľom a dlžníkom podľa SEPA.
+	 * Mandate identification between creditor and debtor according to SEPA.
 	 *
-	 * @description Mandate identification between creditor and debtor according to SEPA
 	 * @maxLength 35
 	 */
 	mandateId?: string;
 
 	/**
-	 * Identifikácia veriteľa podľa SEPA.
+	 * Creditor identification according to SEPA.
 	 *
-	 * @description Creditor identification according to SEPA
 	 * @maxLength 35
 	 */
 	creditorId?: string;
 
 	/**
-	 * Identifikácia zmluvy medzi veriteľom a dlžníkom podľa SEPA.
+	 * Contract identification between creditor and debtor according to SEPA.
 	 *
-	 * @description Contract identification between creditor and debtor according to SEPA
 	 * @maxLength 35
 	 */
 	contractId?: string;
 
 	/**
-	 * Maximálna čiastka inkasa.
+	 * Maximum direct debit amount.
 	 *
-	 * @description Maximum direct debit amount
 	 * @minimum 0
 	 * @maximum 999999999999999
 	 */
 	maxAmount?: number;
 
 	/**
-	 * Dátum platnosti inkasa. Platnosť inkasa zaníka dňom tohto dátumu.
+	 * Direct debit validity date. The direct debit expires on this date.
 	 *
-	 * @description Direct debit validity date
 	 * @format date
 	 * @pattern \d{8}
 	 * @maxLength 8
@@ -442,25 +415,23 @@ export type DirectDebit = SimplePayment & {
 };
 
 /**
- * Údaje pre jeden platobný príkaz.
+ * Data for a single payment order.
  */
 export type Payment = PaymentOrder | StandingOrder | DirectDebit;
 
 export type DataModel = {
 	/**
-	 * Číslo faktúry v prípade, že údaje sú súčasťou faktúry, alebo
-	 * identifikátor pre intérne potreby vystavovateľa.
+	 * Invoice number if the data is part of an invoice, or an identifier for
+	 * the issuer's internal purposes.
 	 *
-	 * @description Invoice ID or internal identifier
 	 * @maxLength 10
 	 */
 	invoiceId?: string;
 
 	/**
-	 * Zoznam jednej alebo viacerých platieb v prípade hromadného príkazu.
-	 * Hlavná (preferovaná) platba sa uvádza ako prvá.
+	 * List of one or more payments for batch payment orders.
+	 * The main (preferred) payment should be listed first.
 	 *
-	 * @description List of payments (preferred payment should be first)
 	 * @minItems 1
 	 */
 	payments: Payment[];

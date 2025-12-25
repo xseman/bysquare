@@ -12,14 +12,14 @@ import {
 import { validateDataModel } from "./validations.js";
 
 /**
- * Prevedie dátum z ISO 8601 formátu (YYYY-MM-DD) na formát YYYYMMDD
- * podľa požiadavky Pay by Square špecifikácie sekcia 3.7.
+ * Converts date from ISO 8601 format (YYYY-MM-DD) to YYYYMMDD format
+ * per Pay by Square specification section 3.7.
  *
- * Poznámka: Táto konverzia sa podľa špecifikácie používa len pre paymentDueDate.
- * lastDate očakáva priamo formát YYYYMMDD.
+ * Note: This conversion is only used for paymentDueDate per specification.
+ * lastDate expects YYYYMMDD format directly.
  *
- * @param input - Dátum vo formáte ISO 8601 (YYYY-MM-DD)
- * @returns Dátum vo formáte YYYYMMDD | undefined
+ * @param input - Date in ISO 8601 format (YYYY-MM-DD)
+ * @returns Date in YYYYMMDD format | undefined
  */
 function serializeDate(input?: string): string | undefined {
 	if (!input) {
@@ -194,20 +194,20 @@ export function serialize(data: DataModel): string {
 			serialized.push(ba.bic);
 		}
 
-		// rozšírenie "Standing Order"
-		// skontrolujte, či je typ platby Standing Order
+		// Standing Order extension
+		// Check if payment type is Standing Order
 		if (p.type === PaymentOptions.StandingOrder) {
 			serialized.push("1");
 			serialized.push(p.day?.toString());
 
-			// month classifier
-			// skontrolujte, či je to číslo, použite ho priamo, inak konvertujte kľúč na číslo
+			// Month classifier
+			// Check if it's a number, use it directly, otherwise convert key to number
 			const monthValue = p.month;
 			if (typeof monthValue === "string") {
-				// Mesiac na číselnú hodnotu
+				// Convert month key to numeric value
 				serialized.push(Month[monthValue as keyof typeof Month]?.toString());
 			} else {
-				// Použite číselnú hodnotu priamo (už zakódovaný classifier sum)
+				// Use numeric value directly (already encoded classifier sum)
 				serialized.push(monthValue?.toString());
 			}
 
@@ -217,8 +217,8 @@ export function serialize(data: DataModel): string {
 			serialized.push("0");
 		}
 
-		// rozšírenie "Direct Debit"
-		// skontrolujte, či je typ platby Direct Debit
+		// Direct Debit extension
+		// Check if payment type is Direct Debit
 		if (p.type === PaymentOptions.DirectDebit) {
 			serialized.push("1");
 			serialized.push(p.directDebitScheme?.toString());

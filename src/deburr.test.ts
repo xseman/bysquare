@@ -1,8 +1,8 @@
 /**
- * Testy pre deburr (odstránenie diakritiky) modul.
+ * Tests for the deburr (diacritics removal) module.
  *
- * BySquare formát vyžaduje iba ASCII text, takže diakritika
- * musí byť konvertovaná na základné znaky (napr. "á" -> "a").
+ * BySquare format requires ASCII-only text, so diacritics
+ * must be converted to basic characters (e.g., "á" -> "a").
  */
 
 import {
@@ -15,8 +15,8 @@ import { deburr } from "./deburr.js";
 
 describe("deburr", () => {
 	/**
-	 * Test cases pre odstránenie diakritiky.
-	 * Stredoeurópska diakritika je bežná v BySquare platobných dátach.
+	 * Test cases for diacritics removal.
+	 * Central European diacritics are common in BySquare payment data.
 	 */
 	const deburrTestCases = [
 		{

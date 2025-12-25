@@ -52,14 +52,14 @@ function decodeString(value: string | undefined): string | undefined {
 }
 
 /**
- * Prevedie dátum z formátu YYYYMMDD na ISO 8601 formát (YYYY-MM-DD)
- * podľa požiadavky Pay by Square špecifikácie sekcia 3.7.
+ * Converts date from YYYYMMDD format to ISO 8601 format (YYYY-MM-DD)
+ * per Pay by Square specification section 3.7.
  *
- * Poznámka: Táto konverzia sa podľa špecifikácie používa len pre paymentDueDate.
- * lastDate ostáva vo formáte YYYYMMDD.
+ * Note: This conversion is only used for paymentDueDate per specification.
+ * lastDate remains in YYYYMMDD format.
  *
- * @param input - Dátum vo formáte YYYYMMDD
- * @returns Dátum vo formáte ISO 8601 (YYYY-MM-DD) | undefined
+ * @param input - Date in YYYYMMDD format
+ * @returns Date in ISO 8601 format (YYYY-MM-DD) | undefined
  */
 function deserializeDate(input?: string): string | undefined {
 	if (!input || input.length !== 8) {

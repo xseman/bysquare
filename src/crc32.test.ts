@@ -1,8 +1,8 @@
 /**
- * Testy pre CRC32 checksum modul.
+ * Tests for the CRC32 checksum module.
  *
- * CRC32 sa používa na overenie integrity dát v BySquare formáte.
- * Testy overujú správny výpočet checksum pre rôzne vstupy.
+ * CRC32 is used to verify data integrity in the BySquare format.
+ * Tests verify correct checksum calculation for various inputs.
  */
 
 import {
@@ -14,8 +14,8 @@ import {
 import { crc32 } from "./crc32.js";
 
 /**
- * Test cases so známymi CRC32 hodnotami.
- * Hodnoty overené podľa štandardných CRC32 implementácií.
+ * Test cases with known CRC32 values.
+ * Values verified against standard CRC32 implementations.
  */
 const crc32TestCases = [
 	{ name: "empty string", input: "", expected: 0 },

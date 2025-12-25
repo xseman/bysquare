@@ -34,19 +34,23 @@ export const EncodeErrorMessage = {
 	 * @description - find invalid value in extensions
 	 */
 	BySquareType: "Invalid BySquareType value in header, valid range <0,15>",
+
 	/**
 	 * @description - find invalid value in extensions
 	 * @see {@link ./types#Version} for valid ranges
 	 */
 	Version: "Invalid Version value in header",
+
 	/**
 	 * @description - find invalid value in extensions
 	 */
 	DocumentType: "Invalid DocumentType value in header, valid range <0,15>",
+
 	/**
 	 * @description - find invalid value in extensions
 	 */
 	Reserved: "Invalid Reserved value in header, valid range <0,15>",
+
 	/**
 	 * @description - find actual size of header in extensions
 	 * @see MAX_COMPRESSED_SIZE
@@ -190,20 +194,20 @@ export function serialize(data: DataModel): string {
 			serialized.push(ba.bic);
 		}
 
-		// Handle standing order extension
-		// check if payment type is standing order
+		// rozšírenie "Standing Order"
+		// skontrolujte, či je typ platby Standing Order
 		if (p.type === PaymentOptions.StandingOrder) {
 			serialized.push("1");
 			serialized.push(p.day?.toString());
 
-			// Handle month classifier
-			// check if it's a number, use it directly, otherwise convert key to number
+			// month classifier
+			// skontrolujte, či je to číslo, použite ho priamo, inak konvertujte kľúč na číslo
 			const monthValue = p.month;
 			if (typeof monthValue === "string") {
-				// Convert month key to its numeric value
+				// Mesiac na číselnú hodnotu
 				serialized.push(Month[monthValue as keyof typeof Month]?.toString());
 			} else {
-				// Use numeric value directly (already encoded classifier sum)
+				// Použite číselnú hodnotu priamo (už zakódovaný classifier sum)
 				serialized.push(monthValue?.toString());
 			}
 
@@ -213,8 +217,8 @@ export function serialize(data: DataModel): string {
 			serialized.push("0");
 		}
 
-		// Handle direct debit extension
-		// check if payment type is direct debit
+		// rozšírenie "Direct Debit"
+		// skontrolujte, či je typ platby Direct Debit
 		if (p.type === PaymentOptions.DirectDebit) {
 			serialized.push("1");
 			serialized.push(p.directDebitScheme?.toString());
@@ -276,10 +280,18 @@ type Options = {
 	 * @default true
 	 */
 	validate?: boolean;
-};
 
-/** @deprecated */
-export const generate = encode;
+	/**
+	 * Version of the BySquare format to use.
+	 *
+	 * Note: Version 1.1.0 adds beneficiary name and address fields but is not
+	 * supported by all banking apps (e.g., TatraBanka). Use 1.0.0 for better
+	 * compatibility.
+	 *
+	 * @default Version["1.0.0"]
+	 */
+	version?: Version;
+};
 
 /**
  * Generate QR string ready for encoding into text QR code
@@ -327,12 +339,10 @@ export function encode(
 	const _lzmaHeader = payloadCompressed.subarray(0, 13);
 	const lzmaBody = payloadCompressed.subarray(13);
 
-	const output = new Uint8Array([
-		// NOTE: Newer version 1.1.0 is not supported by all apps (e.g., TatraBanka).
-		// We recommend using version "1.0.0" for better compatibility.
-		// ...headerBysquare([0x00, Version["1.1.0"], 0x00, 0x00]),
+	const version = options.version ?? Version["1.0.0"];
 
-		...buildBysquareHeader([0x00, Version["1.0.0"], 0x00, 0x00]),
+	const output = new Uint8Array([
+		...buildBysquareHeader([0x00, version, 0x00, 0x00]),
 		...buildPayloadLength(payloadChecked.byteLength),
 		...lzmaBody,
 	]);

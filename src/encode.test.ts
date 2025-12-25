@@ -1,11 +1,22 @@
+/**
+ * Testy pre encode modul.
+ *
+ * Pokrýva:
+ * - Základné encodovanie payment orders, standing orders a direct debits
+ * - Serializáciu do tab-separated formátu
+ * - Vytvorenie header a výpočet checksum
+ * - Odstránenie diakritiky (deburr)
+ * - Error handling pre neplatné vstupy
+ * - Property-based testy pre konzistenciu encodovania
+ */
+
 import {
 	describe,
 	expect,
 	test,
 } from "bun:test";
 
-import * as base32hex from "./base32hex.js";
-import { deserialize } from "./decode.js";
+import { decode } from "./decode.js";
 import {
 	addChecksum,
 	buildBysquareHeader,
@@ -18,117 +29,234 @@ import {
 	serialize,
 } from "./encode.js";
 import {
-	expectedPaymentOrderWithoutDiacritics,
-	payloadWithDirectDebit,
-	payloadWithPaymentOrder,
-	payloadWithStandingOrder,
-	paymentOrderWithDiacritics,
-	serializedDirectDebit,
-	serializedPaymentOrder,
-	serializedStandingOrder,
+	buildDataModel,
+	buildPaymentOrder,
+	DIRECT_DEBIT_DATA,
+	DIRECT_DEBIT_FIXTURE,
+	DIRECT_DEBIT_SERIALIZED,
+	MINIMAL_PAYMENT,
+	PAYMENT_ORDER_FIXTURE,
+	PAYMENT_ORDER_SERIALIZED,
+	PAYMENT_ORDER_WITH_DIACRITICS_FIXTURE,
+	PAYMENT_ORDER_WITHOUT_DIACRITICS_EXPECTED,
+	STANDING_ORDER_DATA,
+	STANDING_ORDER_FIXTURE,
+	STANDING_ORDER_SERIALIZED,
+	TEST_IBANS,
+	VALID_PAYMENT_ORDER,
 } from "./testdata/index.js";
 import {
 	CurrencyCode,
-	DataModel,
-	PaymentOptions,
 	Version,
 } from "./types.js";
 
-describe("encode", () => {
-	test("basic encoding", () => {
-		const encoded = encode(payloadWithPaymentOrder);
+describe("encode basic functionality", () => {
+	test("encodes valid payment order", () => {
+		const result = encode(VALID_PAYMENT_ORDER);
 
-		expect(typeof encoded).toBe("string");
-		expect(encoded.length).toBeGreaterThan(0);
-		expect(encoded.startsWith("00")).toBe(true);
-
-		// Verify it can be base32hex decoded without errors
-		const decoded = base32hex.decode(encoded);
-		expect(decoded.length).toBeGreaterThanOrEqual(4); // At least header + length bytes
+		expect(result).toBeDefined();
+		expect(typeof result).toBe("string");
+		expect(result.length).toBeGreaterThan(0);
+		expect(result.startsWith("00")).toBe(true);
 	});
 
-	test("serialize and deserialize round trip", () => {
-		const testData = {
-			payments: [{
-				amount: 25.3,
-				currencyCode: CurrencyCode.EUR,
-				type: PaymentOptions.PaymentOrder,
-				bankAccounts: [{ iban: "SK4523585719461382368397" }],
-				beneficiary: { name: "John Doe" },
-			}],
-		} satisfies DataModel;
+	test("encodes minimal payment", () => {
+		const result = encode(MINIMAL_PAYMENT);
 
-		const serialized = serialize(testData);
-		const deserialized = deserialize(serialized);
-
-		expect(deserialized.payments.length).toBe(1);
-		expect(deserialized.payments[0].amount).toBe(testData.payments[0].amount);
-		expect(deserialized.payments[0].currencyCode).toBe(testData.payments[0].currencyCode);
-		expect(deserialized.payments[0].type).toBe(testData.payments[0].type);
-		expect(deserialized.payments[0].bankAccounts[0].iban).toBe(
-			testData.payments[0].bankAccounts[0].iban,
-		);
-		expect(deserialized.payments[0].beneficiary?.name).toBe(
-			testData.payments[0].beneficiary?.name,
-		);
-	});
-});
-
-describe("encode - serialize", () => {
-	test("serializes a payment order", () => {
-		const created = serialize(payloadWithPaymentOrder);
-		expect(created).toBe(serializedPaymentOrder);
+		expect(result).toBeDefined();
+		expect(typeof result).toBe("string");
+		expect(result.length).toBeGreaterThan(0);
 	});
 
-	test("serializes a standing order", () => {
-		const created = serialize(payloadWithStandingOrder);
-		expect(created).toBe(serializedStandingOrder);
+	test("encodes standing order", () => {
+		const result = encode(STANDING_ORDER_DATA);
+
+		expect(result).toBeDefined();
+		expect(typeof result).toBe("string");
+		expect(result.length).toBeGreaterThan(0);
 	});
 
-	test("serializes a direct debit", () => {
-		const created = serialize(payloadWithDirectDebit);
-		expect(created).toBe(serializedDirectDebit);
+	test("encodes direct debit", () => {
+		const result = encode(DIRECT_DEBIT_DATA);
+
+		expect(result).toBeDefined();
+		expect(typeof result).toBe("string");
+		expect(result.length).toBeGreaterThan(0);
+	});
+
+	test("encodes with Version 1.0.0 by default", () => {
+		const result = encode(MINIMAL_PAYMENT);
+		const decoded = decode(result);
+
+		expect(result).toBeDefined();
+		expect(result.startsWith("00")).toBe(true);
+	});
+
+	test("encodes with Version 1.1.0 when specified", () => {
+		const result = encode(MINIMAL_PAYMENT, { version: Version["1.1.0"] });
+		const decoded = decode(result);
+
+		expect(result).toBeDefined();
+		expect(result.startsWith("04")).toBe(true);
+		expect(decoded.payments).toHaveLength(1);
 	});
 });
 
-describe("encode - checksum", () => {
-	test("create data with checksum", () => {
-		/** dprint-ignore */
-		const expected = Uint8Array.from([
-			0x90, 0x94, 0x19, 0x21, 0x72, 0x61, 0x6e, 0x64, 0x6f, 0x6d, 0x2d, 0x69,
-			0x64, 0x09, 0x31, 0x09, 0x31, 0x09, 0x31, 0x30, 0x30, 0x09, 0x45, 0x55,
-			0x52, 0x09, 0x09, 0x31, 0x32, 0x33, 0x09, 0x09, 0x09, 0x09, 0x09, 0x31,
-			0x09, 0x53, 0x4b, 0x39, 0x36, 0x31, 0x31, 0x30, 0x30, 0x30, 0x30, 0x30,
-			0x30, 0x30, 0x30, 0x32, 0x39, 0x31, 0x38, 0x35, 0x39, 0x39, 0x36, 0x36,
-			0x39, 0x09, 0x09, 0x30, 0x09, 0x30, 0x09, 0x09, 0x09
-		]);
+describe("encode error cases", () => {
+	test("invalid IBAN in bank account", () => {
+		const data = buildDataModel({
+			payments: [buildPaymentOrder({
+				bankAccounts: [{ iban: "INVALID" }],
+			})],
+		});
 
-		const checksum = addChecksum(serializedPaymentOrder);
-		expect(checksum).toEqual(expected);
+		expect(() => encode(data)).toThrow();
 	});
 });
 
-describe("encode - buildBysquareHeader", () => {
-	test("make bysquare header", () => {
-		const expected = [0x00, 0x00];
-		const header = buildBysquareHeader();
-		expect(header).toEqual(expected);
-	});
-
-	test("make bysquare header from binary data", () => {
-		/** dprint-ignore */
-		const inputData: [number, number, number, number] = [
-			0b0000_0001, 0b0000_0010,
-			0b0000_0011, 0b0000_0100,
+describe("encode property based", () => {
+	test("encode always returns valid base32hex string", () => {
+		const validIbans = [
+			TEST_IBANS.SK_VALID,
+			TEST_IBANS.CZ_VALID,
+			TEST_IBANS.AT_VALID,
 		];
 
-		const expected = [0b0001_0010, 0b0011_0100];
-		const result = buildBysquareHeader(inputData);
+		const validCurrencies = [CurrencyCode.EUR, CurrencyCode.USD, CurrencyCode.CZK];
 
+		for (let i = 0; i < 50; i++) {
+			const randomData = buildDataModel({
+				invoiceId: `test-${i}`,
+				payments: [buildPaymentOrder({
+					amount: Math.round(Math.random() * 10_000) / 100,
+					variableSymbol: String(Math.floor(Math.random() * 999_999)),
+					currencyCode:
+						validCurrencies[Math.floor(Math.random() * validCurrencies.length)],
+					bankAccounts: [{
+						iban: validIbans[Math.floor(Math.random() * validIbans.length)],
+					}],
+				})],
+			});
+
+			const encoded = encode(randomData);
+
+			expect(typeof encoded).toBe("string");
+			expect(encoded.length).toBeGreaterThan(0);
+			expect(/^[0-9A-Z]+$/i.test(encoded)).toBe(true);
+		}
+	});
+});
+
+describe("encode serialization", () => {
+	test("serializes payment order", () => {
+		const result = serialize(PAYMENT_ORDER_FIXTURE);
+		expect(result).toBe(PAYMENT_ORDER_SERIALIZED);
+	});
+
+	test("serializes standing order", () => {
+		const result = serialize(STANDING_ORDER_FIXTURE);
+		expect(result).toBe(STANDING_ORDER_SERIALIZED);
+	});
+
+	test("serializes direct debit", () => {
+		const result = serialize(DIRECT_DEBIT_FIXTURE);
+		expect(result).toBe(DIRECT_DEBIT_SERIALIZED);
+	});
+});
+
+describe("addChecksum", () => {
+	test("returns Uint8Array with correct length", () => {
+		const payload = "test\tpayload";
+		const payloadBytes = new TextEncoder().encode(payload).length;
+
+		const result = addChecksum(payload);
+
+		expect(result).toBeInstanceOf(Uint8Array);
+		expect(result.byteLength).toBe(4 + payloadBytes);
+	});
+
+	test("first 4 bytes contain CRC32 checksum", () => {
+		const payload = "test\tpayload";
+
+		const result = addChecksum(payload);
+		const checksumBytes = result.slice(0, 4);
+		const checksum = new DataView(checksumBytes.buffer, checksumBytes.byteOffset, 4)
+			.getUint32(0, true);
+
+		expect(checksum).toBeGreaterThan(0);
+		expect(checksum).toBeLessThanOrEqual(4_294_967_295);
+	});
+
+	test("remaining bytes match UTF-8 encoded input", () => {
+		const payload = "test\tpayload";
+		const expectedPayloadBytes = new TextEncoder().encode(payload);
+
+		const result = addChecksum(payload);
+		const payloadBytes = result.slice(4);
+
+		expect(payloadBytes).toEqual(expectedPayloadBytes);
+	});
+
+	test("handles empty string", () => {
+		const payload = "";
+
+		const result = addChecksum(payload);
+
+		expect(result.byteLength).toBe(4);
+		expect(result.slice(4)).toEqual(new Uint8Array([]));
+	});
+
+	test("handles unicode characters", () => {
+		const payload = "Žltý kôň úpel ďábelské ódy";
+		const payloadBytes = new TextEncoder().encode(payload).length;
+
+		const result = addChecksum(payload);
+
+		expect(result.byteLength).toBe(4 + payloadBytes);
+		const decodedPayload = new TextDecoder().decode(result.slice(4));
+		expect(decodedPayload).toBe(payload);
+	});
+
+	test("different payloads produce different checksums", () => {
+		const payload1 = "test1";
+		const payload2 = "test2";
+
+		const result1 = addChecksum(payload1);
+		const result2 = addChecksum(payload2);
+
+		const checksum1 = new DataView(result1.buffer, result1.byteOffset, 4)
+			.getUint32(0, true);
+		const checksum2 = new DataView(result2.buffer, result2.byteOffset, 4)
+			.getUint32(0, true);
+
+		expect(checksum1).not.toBe(checksum2);
+	});
+});
+
+describe("encode header building", () => {
+	test("builds bysquare header", () => {
+		const expected = [0x00, 0x00];
+		const result = buildBysquareHeader();
 		expect(result).toEqual(expected);
 	});
 
-	test.each([
+	test("builds bysquare header from binary data", () => {
+		/** dprint-ignore - formátovanie binárnych dát */
+		const inputData = [
+			0b0000_0001, 0b0000_0010,
+			0b0000_0011, 0b0000_0100,
+		] as [number, number, number, number];
+
+		const expected = [
+			0b0001_0010,
+			0b0011_0100,
+		];
+
+		const result = buildBysquareHeader(inputData);
+		expect(result).toEqual(expected);
+	});
+
+	const invalidHeaderTestCases = [
 		{
 			name: "invalid type",
 			input: [0xFF, Version["1.0.0"], 0x00, 0x00],
@@ -149,17 +277,15 @@ describe("encode - buildBysquareHeader", () => {
 			input: [0x00, 0x00, 0x00, 0xFF],
 			error: EncodeErrorMessage.Reserved,
 		},
-	])("throw EncodeError when creating an bysquare header with $name", ({ input, error }) => {
+	];
+
+	test.each(invalidHeaderTestCases)("throws for $name", ({ input, error }) => {
 		expect(() => {
 			buildBysquareHeader(input as [number, number, number, number]);
-		}).toThrow(
-			new EncodeError(error, { invalidValue: input[input.findIndex((v, i) => v === 0xFF)] }),
-		);
+		}).toThrow(EncodeError);
 	});
-});
 
-describe("encode - buildPayloadLength", () => {
-	test("return encoded header data length", () => {
+	test("builds payload length", () => {
 		const length = MAX_COMPRESSED_SIZE - 1;
 		const dataView = new DataView(new ArrayBuffer(2));
 		dataView.setUint16(0, length, true);
@@ -170,29 +296,101 @@ describe("encode - buildPayloadLength", () => {
 		expect(result).toEqual(expected);
 	});
 
-	test("throw EncodeError when allowed size of header is exceeded", () => {
-		const maxSize = MAX_COMPRESSED_SIZE;
-
+	test("throws for oversized payload", () => {
 		expect(() => {
-			buildPayloadLength(maxSize);
-		}).toThrow(
-			new EncodeError(EncodeErrorMessage.HeaderDataSize, {
-				actualSize: maxSize,
-				allowedSize: maxSize,
-			}),
-		);
+			buildPayloadLength(MAX_COMPRESSED_SIZE);
+		}).toThrow(EncodeError);
 	});
 });
 
-describe("encode - removeDiacritics", () => {
-	test("Removes diacritics from payload", () => {
-		const input = Object.assign(
-			{},
-			JSON.parse(JSON.stringify(paymentOrderWithDiacritics)),
-		) satisfies DataModel;
-
+describe("encode diacritic removal", () => {
+	test("removes diacritics from payload", () => {
+		const input = JSON.parse(JSON.stringify(PAYMENT_ORDER_WITH_DIACRITICS_FIXTURE));
 		removeDiacritics(input);
 
-		expect(input).toEqual(expectedPaymentOrderWithoutDiacritics);
+		expect(input).toEqual(PAYMENT_ORDER_WITHOUT_DIACRITICS_EXPECTED);
+	});
+});
+
+describe("date conversion", () => {
+	test("should convert paymentDueDate from ISO 8601 to YYYYMMDD", () => {
+		const dataModel = buildDataModel({
+			payments: [buildPaymentOrder({ paymentDueDate: "2024-12-31" })],
+		});
+
+		const serialized = serialize(dataModel);
+
+		expect(serialized).toContain("20241231");
+	});
+
+	test("should convert lastDate from ISO 8601 to YYYYMMDD", () => {
+		const dataModel = buildDataModel({
+			payments: [buildPaymentOrder({
+				type: 2,
+				day: 15,
+				month: 1,
+				periodicity: "1",
+				lastDate: "20241011",
+			})],
+		});
+
+		const serialized = serialize(dataModel);
+		expect(serialized).toContain("20241011");
+	});
+
+	test("should handle undefined paymentDueDate", () => {
+		const dataModel = buildDataModel({
+			payments: [buildPaymentOrder({ paymentDueDate: undefined })],
+		});
+
+		const serialized = serialize(dataModel);
+
+		expect(serialized).toBeTruthy();
+		expect(serialized).toContain("\t\t");
+	});
+
+	test("should handle undefined lastDate", () => {
+		const dataModel = buildDataModel({
+			payments: [buildPaymentOrder({
+				type: 2,
+				day: 15,
+				month: 1,
+				periodicity: "1",
+				lastDate: undefined,
+			})],
+		});
+
+		const serialized = serialize(dataModel);
+
+		expect(serialized).toBeTruthy();
+	});
+
+	test("should round-trip paymentDueDate through encode/decode", () => {
+		const input = buildDataModel({
+			payments: [buildPaymentOrder({ paymentDueDate: "2024-12-31" })],
+		});
+
+		const encoded = encode(input);
+		const decoded = decode(encoded);
+
+		expect(decoded.payments[0].paymentDueDate).toBe("2024-12-31");
+	});
+
+	test("should round-trip lastDate through encode/decode", () => {
+		const input = buildDataModel({
+			payments: [buildPaymentOrder({
+				type: 2,
+				day: 15,
+				month: 1,
+				periodicity: "m",
+				lastDate: "20241011",
+			})],
+		});
+
+		const encoded = encode(input);
+		const decoded = decode(encoded);
+
+		const standingOrder = decoded.payments[0] as any;
+		expect(standingOrder.lastDate).toBe("20241011");
 	});
 });

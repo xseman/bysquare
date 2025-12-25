@@ -1,29 +1,60 @@
+/**
+ * Standing order test fixtures.
+ *
+ * Contains standing order data structures for testing recurring payments
+ * with periodicity, execution day, and end date fields.
+ */
+
 import {
 	CurrencyCode,
 	DataModel,
 	PaymentOptions,
 	Periodicity,
 } from "../types.js";
+import {
+	TEST_IBANS,
+	TEST_SYMBOLS,
+} from "./constants.js";
 
-export const payloadWithStandingOrder = {
+/**
+ * Standing order fixture for encode/decode serialization tests.
+ */
+export const STANDING_ORDER_FIXTURE = {
 	invoiceId: "random-id",
 	payments: [
 		{
 			type: PaymentOptions.StandingOrder,
 			amount: 100.0,
 			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
+				{ iban: TEST_IBANS.SK_VALID },
 			],
 			periodicity: Periodicity.Monthly,
 			currencyCode: CurrencyCode.EUR,
-			variableSymbol: "123",
+			variableSymbol: TEST_SYMBOLS.SIMPLE,
 			lastDate: "20241011",
 			day: 1,
 		},
 	],
 } satisfies DataModel;
 
-export const serializedStandingOrder = /** dprint-ignore */ [
+/**
+ * Standing order with basic required fields for testing.
+ */
+export const STANDING_ORDER_DATA: DataModel = {
+	payments: [{
+		type: PaymentOptions.StandingOrder,
+		amount: 50.0,
+		currencyCode: CurrencyCode.EUR,
+		bankAccounts: [{ iban: TEST_IBANS.SK_VALID }],
+		beneficiary: { name: "Test Beneficiary" },
+		periodicity: "m",
+	}],
+};
+
+/**
+ * Tab-separated serialized representation of STANDING_ORDER_FIXTURE.
+ */
+export const STANDING_ORDER_SERIALIZED = /** dprint-ignore */ [
 	"random-id",
 	"\t", "1",
 	"\t", "2",
@@ -36,7 +67,7 @@ export const serializedStandingOrder = /** dprint-ignore */ [
 	"\t",
 	"\t",
 	"\t", "1",
-	"\t", "SK9611000000002918599669",
+	"\t", TEST_IBANS.SK_VALID,
 	"\t",
 	"\t", "1",
 	"\t", "1",

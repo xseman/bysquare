@@ -1,26 +1,75 @@
+/**
+ * Payment order test fixtures.
+ *
+ * Contains various payment order data structures for testing:
+ * - Basic payment orders with common fields
+ * - Minimal payments with only required fields
+ * - Payments with diacritics for deburr testing
+ * - Serialized representations for serialize/deserialize testing
+ */
+
 import {
 	CurrencyCode,
 	DataModel,
 	PaymentOptions,
 } from "../types.js";
+import {
+	TEST_IBANS,
+	TEST_SYMBOLS,
+} from "./constants.js";
 
-// Main payment order fixture - used by encode/decode tests
-export const payloadWithPaymentOrder = {
+/**
+ * Payment order fixture for encode/decode serialization tests.
+ * Used primarily in encode.test.ts and decode.test.ts.
+ */
+export const PAYMENT_ORDER_FIXTURE = {
 	invoiceId: "random-id",
 	payments: [
 		{
 			type: PaymentOptions.PaymentOrder,
 			amount: 100.0,
 			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
+				{ iban: TEST_IBANS.SK_VALID },
 			],
 			currencyCode: CurrencyCode.EUR,
-			variableSymbol: "123",
+			variableSymbol: TEST_SYMBOLS.SIMPLE,
 		},
 	],
 } satisfies DataModel;
 
-export const serializedPaymentOrder = /** dprint-ignore */ [
+/**
+ * Standard payment order with all common fields populated.
+ * Used for basic encode/decode round-trip tests and validation.
+ */
+export const VALID_PAYMENT_ORDER: DataModel = {
+	invoiceId: "test-001",
+	payments: [{
+		type: PaymentOptions.PaymentOrder,
+		amount: 100.0,
+		currencyCode: CurrencyCode.EUR,
+		bankAccounts: [{ iban: TEST_IBANS.SK_VALID }],
+		variableSymbol: TEST_SYMBOLS.SIMPLE,
+	}],
+};
+
+/**
+ * Minimal payment with only required fields.
+ * Tests that the system handles payments with no optional fields.
+ */
+export const MINIMAL_PAYMENT: DataModel = {
+	payments: [{
+		type: PaymentOptions.PaymentOrder,
+		amount: 0, // Add explicit amount to match encode/decode behavior
+		currencyCode: CurrencyCode.EUR,
+		bankAccounts: [{ iban: TEST_IBANS.SK_VALID }],
+	}],
+};
+
+/**
+ * Tab-separated serialized representation of PAYMENT_ORDER_FIXTURE.
+ * Used to test the serialize/deserialize functions.
+ */
+export const PAYMENT_ORDER_SERIALIZED = /** dprint-ignore */ [
 	"random-id",
 	"\t", "1",
 	"\t", "1",
@@ -33,7 +82,7 @@ export const serializedPaymentOrder = /** dprint-ignore */ [
 	"\t",
 	"\t",
 	"\t", "1",
-	"\t", "SK9611000000002918599669",
+	"\t", TEST_IBANS.SK_VALID,
 	"\t",
 	"\t", "0",
 	"\t", "0",
@@ -42,41 +91,21 @@ export const serializedPaymentOrder = /** dprint-ignore */ [
 	"\t",
 ].join("");
 
-// Additional test data for round-trip testing
-export const roundTripPaymentOrderData = {
-	invoiceId: "2015001",
-	payments: [{
-		amount: 45.55,
-		currencyCode: CurrencyCode.EUR,
-		type: PaymentOptions.PaymentOrder,
-		bankAccounts: [{ iban: "SK2738545237537948273958" }],
-		beneficiary: { name: "Jane Doe" },
-		paymentNote: "bendzín",
-	}],
-} satisfies DataModel;
-
-export const simplePaymentOrderData = {
-	payments: [{
-		amount: 25.3,
-		currencyCode: CurrencyCode.EUR,
-		type: PaymentOptions.PaymentOrder,
-		bankAccounts: [{ iban: "SK4523585719461382368397" }],
-		beneficiary: { name: "John Doe" },
-	}],
-} satisfies DataModel;
-
-// Data with diacritics for testing diacritics removal
-export const paymentOrderWithDiacritics = {
+/**
+ * Payment order fixture with diacritics for testing diacritics removal (deburr).
+ * This fixture should be encoded with diacritics converted to ASCII.
+ */
+export const PAYMENT_ORDER_WITH_DIACRITICS_FIXTURE = {
 	invoiceId: "random-id",
 	payments: [
 		{
 			type: PaymentOptions.PaymentOrder,
 			amount: 100.0,
 			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
+				{ iban: TEST_IBANS.SK_VALID },
 			],
 			currencyCode: CurrencyCode.EUR,
-			variableSymbol: "123",
+			variableSymbol: TEST_SYMBOLS.SIMPLE,
 			paymentNote: "Príspevok na kávu",
 			beneficiary: {
 				name: "Ján Kováč",
@@ -87,17 +116,21 @@ export const paymentOrderWithDiacritics = {
 	],
 } satisfies DataModel;
 
-export const expectedPaymentOrderWithoutDiacritics = {
+/**
+ * Expected result after removing diacritics from PAYMENT_ORDER_WITH_DIACRITICS_FIXTURE.
+ * Used to verify the deburr function works correctly.
+ */
+export const PAYMENT_ORDER_WITHOUT_DIACRITICS_EXPECTED = {
 	invoiceId: "random-id",
 	payments: [
 		{
 			type: PaymentOptions.PaymentOrder,
 			amount: 100.0,
 			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
+				{ iban: TEST_IBANS.SK_VALID },
 			],
 			currencyCode: CurrencyCode.EUR,
-			variableSymbol: "123",
+			variableSymbol: TEST_SYMBOLS.SIMPLE,
 			paymentNote: "Prispevok na kavu",
 			beneficiary: {
 				name: "Jan Kovac",

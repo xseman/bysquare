@@ -10,6 +10,7 @@ export const Version = {
 	 * **Released Date:** 2013-02-22
 	 */
 	"1.0.0": 0x00,
+
 	/**
 	 * Added fields for beneficiary name and address
 	 *
@@ -120,10 +121,12 @@ export const PaymentOptions = {
 	 * Platobný príkaz
 	 */
 	PaymentOrder: 0b00000001,
+
 	/**
 	 * Trvalý príkaz, údaje sa vyplnia do StandingOrderExt
 	 */
 	StandingOrder: 0b00000010,
+
 	/**
 	 * Inkaso, údaje sa vyplnia do DirectDebitExt
 	 */
@@ -171,6 +174,7 @@ export const DirectDebitScheme = {
 	 * other - iné
 	 */
 	Other: 0x00,
+
 	/**
 	 * SEPA - Inkaso zodpovedá schéme
 	 */
@@ -193,6 +197,7 @@ export const DirectDebitType = {
 	 * Jednorázové inkaso
 	 */
 	OneOff: 0x00,
+
 	/**
 	 * Opakované inkaso
 	 */
@@ -210,6 +215,7 @@ export type Beneficiary = {
 	 * @maxLength 70
 	 */
 	name?: string;
+
 	/**
 	 * Rozšírenie o adresu príjemcu
 	 *
@@ -217,6 +223,7 @@ export type Beneficiary = {
 	 * @maxLength 70
 	 */
 	street?: string;
+
 	/**
 	 * Rozšírenie o adresu príjemcu (druhý riadok)
 	 *
@@ -241,6 +248,7 @@ export type SimplePayment = {
 	 * @maximum 999999999999999
 	 */
 	amount?: number;
+
 	/**
 	 * Mena v [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) formáte (3 písmená).
 	 *
@@ -251,16 +259,19 @@ export type SimplePayment = {
 	 * @maxLength 3
 	 */
 	currencyCode: string | keyof typeof CurrencyCode;
+
 	/**
-	 * Dátum splatnosti vo formáte [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) `"RRRR-MM-DD"`.
-	 * Vprípade trvalého príkazu označuje dátum prvej platby.
+	 * Termín splatnosti platby.
 	 *
-	 * @description Payment due date in ISO 8601 format
+	 * Vprípade trvalého príkazu označuje dátum prvej platby.
+	 * Dátum bude prevedený na formát YYYYMMDD počas kódovania podľa špecifikácie sekcia 3.7.
+	 *
 	 * @format date
 	 * @example "2024-12-31"
 	 * @pattern \d{4}-\d{2}-\d{2}
 	 */
 	paymentDueDate?: string;
+
 	/**
 	 * Variabilný symbol je maximálne 10 miestne číslo.
 	 *
@@ -269,6 +280,7 @@ export type SimplePayment = {
 	 * @maxLength 10
 	 */
 	variableSymbol?: string;
+
 	/**
 	 * Konštantný symbol je 4 číselný identifikátor platby definovaný NBS.
 	 *
@@ -277,6 +289,7 @@ export type SimplePayment = {
 	 * @maxLength 4
 	 */
 	constantSymbol?: string;
+
 	/**
 	 * Špecifický symbol je maximálne 10 miestne číslo.
 	 *
@@ -285,6 +298,7 @@ export type SimplePayment = {
 	 * @maxLength 10
 	 */
 	specificSymbol?: string;
+
 	/**
 	 * Referenčná informácia prijímateľa podľa SEPA.
 	 *
@@ -292,6 +306,7 @@ export type SimplePayment = {
 	 * @maxLength 35
 	 */
 	originatorsReferenceInformation?: string;
+
 	/**
 	 * Správa pre prijímateľa. Údaje o platbe, na základe ktorých príjemca bude
 	 * môcť platbu identifikovať.
@@ -300,6 +315,7 @@ export type SimplePayment = {
 	 * @maxLength 140
 	 */
 	paymentNote?: string;
+
 	/**
 	 * Zoznam bankových účtov.
 	 *
@@ -328,6 +344,7 @@ export type StandingOrder = SimplePayment & {
 	 * @maximum 31
 	 */
 	day?: number | Day;
+
 	/**
 	 * Určuje mesiace, v ktorých sa má vykonať platba trvalého platobného
 	 * príkazu.
@@ -338,12 +355,14 @@ export type StandingOrder = SimplePayment & {
 	 * @example 577
 	 */
 	month?: keyof typeof Month | number;
+
 	/**
 	 * Opakovanie (periodicita) trvalého príkazu.
 	 *
 	 * @description Standing order periodicity
 	 */
 	periodicity: keyof typeof Periodicity | string;
+
 	/**
 	 * Dátum poslednej platby v rámci trvalého platobného príkazu.
 	 *
@@ -360,8 +379,23 @@ export type StandingOrder = SimplePayment & {
  */
 export type DirectDebit = SimplePayment & {
 	type: typeof PaymentOptions.DirectDebit;
+
+	/**
+	 * Inkasná schéma.
+	 *
+	 * @description Direct debit scheme (Other=0, SEPA=1)
+	 * @example DirectDebitScheme.Sepa
+	 */
 	directDebitScheme?: keyof typeof DirectDebitScheme | number;
+
+	/**
+	 * Typ inkasa.
+	 *
+	 * @description Direct debit type (OneOff=0, Recurrent=1)
+	 * @example DirectDebitType.Recurrent
+	 */
 	directDebitType?: keyof typeof DirectDebitType | number;
+
 	/**
 	 * Identifikácia mandátu medzi veriteľom a dlžníkom podľa SEPA.
 	 *
@@ -369,6 +403,7 @@ export type DirectDebit = SimplePayment & {
 	 * @maxLength 35
 	 */
 	mandateId?: string;
+
 	/**
 	 * Identifikácia veriteľa podľa SEPA.
 	 *
@@ -376,6 +411,7 @@ export type DirectDebit = SimplePayment & {
 	 * @maxLength 35
 	 */
 	creditorId?: string;
+
 	/**
 	 * Identifikácia zmluvy medzi veriteľom a dlžníkom podľa SEPA.
 	 *
@@ -383,6 +419,7 @@ export type DirectDebit = SimplePayment & {
 	 * @maxLength 35
 	 */
 	contractId?: string;
+
 	/**
 	 * Maximálna čiastka inkasa.
 	 *
@@ -391,6 +428,7 @@ export type DirectDebit = SimplePayment & {
 	 * @maximum 999999999999999
 	 */
 	maxAmount?: number;
+
 	/**
 	 * Dátum platnosti inkasa. Platnosť inkasa zaníka dňom tohto dátumu.
 	 *
@@ -417,6 +455,7 @@ export type DataModel = {
 	 * @maxLength 10
 	 */
 	invoiceId?: string;
+
 	/**
 	 * Zoznam jednej alebo viacerých platieb v prípade hromadného príkazu.
 	 * Hlavná (preferovaná) platba sa uvádza ako prvá.

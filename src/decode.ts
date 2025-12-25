@@ -43,14 +43,6 @@ export class DecodeError extends Error {
 	}
 }
 
-function cleanUndefined(obj: any): void {
-	Object.keys(obj).forEach((key) => {
-		if (typeof obj[key] === "undefined") {
-			delete obj[key];
-		}
-	});
-}
-
 function decodeNumber(value: string | undefined): number | undefined {
 	return value?.length ? Number(value) : undefined;
 }
@@ -134,7 +126,6 @@ export function deserialize(qr: string): DataModel {
 				bic: bic || undefined,
 			} satisfies BankAccount;
 
-			cleanUndefined(account);
 			payment.bankAccounts.push(account);
 		}
 
@@ -167,7 +158,6 @@ export function deserialize(qr: string): DataModel {
 			} satisfies DirectDebit;
 		}
 
-		cleanUndefined(payment);
 		output.payments.push(payment);
 	}
 
@@ -183,7 +173,6 @@ export function deserialize(qr: string): DataModel {
 				city: addressLine2 || undefined,
 			} satisfies Beneficiary;
 
-			cleanUndefined(beneficiary);
 			output.payments[i].beneficiary = beneficiary;
 		}
 	}
@@ -219,9 +208,6 @@ function bysquareHeaderDecoder(header: Uint8Array): Header {
 		reserved,
 	};
 }
-
-/** @deprecated */
-export const parse = decode;
 
 /**
  * Decoding client data from QR Code 2005 symbol
@@ -300,43 +286,4 @@ export function decode(qr: string): DataModel {
 	const decoded = new TextDecoder("utf-8").decode(decompressedBody.buffer);
 
 	return deserialize(decoded);
-}
-
-/**
- * Detect if qr string contains bysquare header.
- *
- * There is not magic header in the bysquare specification.
- * Version is just 4 bites, so it is possible to have false positives.
- *
- * @deprecated Will be removed as of v3.
- */
-export function detect(qr: string): boolean {
-	let decoded: Uint8Array;
-	try {
-		decoded = base32hex.decode(qr, true);
-	} catch (error) {
-		return false;
-	}
-
-	if (decoded.byteLength < 2) {
-		return false;
-	}
-
-	const bysquareHeader = decoded.subarray(0, 2);
-	const header = bysquareHeaderDecoder(bysquareHeader);
-
-	const isValid = [
-		header.bysquareType,
-		header.version,
-		header.documentType,
-		header.reserved,
-	].every((nibble, index) => {
-		if (index === 1) {
-			return nibble <= Version["1.1.0"];
-		}
-
-		return 0x00 <= nibble && nibble <= 0x0F;
-	});
-
-	return isValid;
 }

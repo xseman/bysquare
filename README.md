@@ -16,7 +16,7 @@ individuals and businesses to create QR codes for their invoices.
 
 - TypeScript support
 - Compatible with Slovak banking apps
-- Runtime-independent JavaScript implementation
+- Isomorfic Browser & Runtime-independent implementation
 
 ## Installation
 

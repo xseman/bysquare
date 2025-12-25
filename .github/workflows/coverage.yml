@@ -17,10 +17,10 @@ jobs:
         runs-on: ubuntu-latest
         if: ${{ github.event.workflow_run.event == 'pull_request' && !startsWith(github.event.workflow_run.head_branch, 'release-please') }}
         steps:
-            - uses: actions/checkout@v5
+            - uses: actions/checkout@v6
 
             - name: Download coverage artifact
-              uses: actions/download-artifact@v5
+              uses: actions/download-artifact@v7
               with:
                   name: coverage
                   path: coverage
@@ -53,11 +53,13 @@ jobs:
 
             - name: coverage report
               uses: marocchino/sticky-pull-request-comment@v2
+              env:
+                  COMMIT: ${{ github.event.workflow_run.head_sha }}
               with:
                   number: ${{ steps.merge-request.outputs.number }}
                   header: Coverage Report
                   message: |
-                      ### Coverage Report `${{ github.event.workflow_run.head_sha }}`
+                      ### Coverage Report [`${COMMIT:0:7}`](https://github.com/${{ github.repository }}/commit/${{ github.event.workflow_run.head_sha }})
 
                       ```
                       ${{ steps.coverage.outputs.body }}

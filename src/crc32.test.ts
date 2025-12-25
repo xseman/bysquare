@@ -1,3 +1,10 @@
+/**
+ * Tests for the CRC32 checksum module.
+ *
+ * CRC32 is used to verify data integrity in the BySquare format.
+ * Tests verify correct checksum calculation for various inputs.
+ */
+
 import {
 	describe,
 	expect,
@@ -6,6 +13,10 @@ import {
 
 import { crc32 } from "./crc32.js";
 
+/**
+ * Test cases with known CRC32 values.
+ * Values verified against standard CRC32 implementations.
+ */
 const crc32TestCases = [
 	{ name: "empty string", input: "", expected: 0 },
 	{ name: "single character", input: "a", expected: 3904355907 },

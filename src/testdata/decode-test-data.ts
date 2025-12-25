@@ -1,11 +1,21 @@
+/**
+ * Test data for decode functionality.
+ *
+ * Contains QR string to DataModel mappings used to verify
+ * that encoded QR strings decode to expected data structures.
+ */
+
 import {
 	CurrencyCode,
 	DataModel,
 	PaymentOptions,
 } from "../types.js";
 
-// QR String to DataModel mappings for testing decode functionality
-export const decodeTestCases = new Map<string, DataModel>([
+/**
+ * QR string to DataModel mappings for testing decode functionality.
+ * Each entry maps an encoded QR string to its expected decoded DataModel.
+ */
+export const DECODE_TEST_CASES = new Map<string, DataModel>([
 	[
 		"0004I0006UC5LT8E21H3IC1K9R40P82GJL22NTU0586BBEOEKDMQSVUUBAOP1C0FFE14UJA1F1LJMV0FONE35J05TRC77FTIMV87NKNANNOFJB684000",
 		{
@@ -35,15 +45,11 @@ export const decodeTestCases = new Map<string, DataModel>([
 	],
 ]);
 
-export const invalidBase32HexStrings = [
-	"á",
-	"x",
-	"y",
-	"w",
-	"z",
-];
-
-export const serializedDataWithMissingIban = /** dprint-ignore */ [
+/**
+ * Serialized payment data with missing IBAN field.
+ * Used to test error handling when IBAN is empty.
+ */
+export const SERIALIZED_DATA_MISSING_IBAN = /** dprint-ignore */ [
 	"random-id",
 	"\t", "1",
 	"\t", "1",

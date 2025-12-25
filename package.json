@@ -27,27 +27,31 @@
 	},
 	"dependencies": {
 		"lzma1": "0.2.0",
-		"validator": "^13.15.15"
+		"validator": "^13.15.26"
 	},
 	"devDependencies": {
-		"@types/bun": "^1.2.20",
-		"@types/node": "^24.2.1",
-		"@types/validator": "^13.15.2",
+		"@types/bun": "latest",
+		"@types/node": "latest",
+		"@types/validator": "^13.15.10",
 		"dprint": "~0.50.0",
-		"typescript": "~5.8.3"
+		"typescript": "~5.9.3"
 	},
 	"bin": "./lib/cli.js",
 	"exports": {
 		"./package.json": "./package.json",
 		".": {
-			"import": "./lib/index.js",
 			"types": "./lib/index.d.ts",
+			"bun": "./src/index.ts",
+			"import": "./lib/index.js",
 			"require": "./lib/index.js"
 		}
 	},
 	"files": [
 		"lib/*.js",
 		"lib/*.d.ts",
-		"!lib/*test*"
+		"!lib/*test*",
+		"src/**/*.ts",
+		"!src/**/*.test.ts",
+		"!src/**/testdata"
 	]
 }

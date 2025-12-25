@@ -1,165 +1,227 @@
+/**
+ * Tests for the decode module.
+ *
+ * Covers:
+ * - Basic decoding of encoded QR strings
+ * - Deserialization from tab-separated format
+ * - Round-trip encode/decode verification
+ * - Error handling for invalid inputs
+ * - Property-based tests for decoding consistency
+ */
+
 import {
 	describe,
 	expect,
 	test,
 } from "bun:test";
 
+import { decompress } from "lzma1";
+import * as base32hex from "./base32hex.js";
+import { crc32 } from "./crc32.js";
 import {
 	decode,
 	DecodeError,
 	DecodeErrorMessage,
 	deserialize,
-	detect,
 } from "./decode.js";
 import { encode } from "./encode.js";
 import {
-	invalidBase32HexStrings,
-	payloadWithDirectDebit,
-	payloadWithPaymentOrder,
-	payloadWithStandingOrder,
-	serializedDirectDebit,
-	serializedPaymentOrder,
-	serializedStandingOrder,
+	buildDataModel,
+	buildPaymentOrder,
+	DECODE_TEST_CASES,
+	DIRECT_DEBIT_DATA,
+	DIRECT_DEBIT_FIXTURE,
+	DIRECT_DEBIT_SERIALIZED,
+	MINIMAL_PAYMENT,
+	PAYMENT_ORDER_FIXTURE,
+	PAYMENT_ORDER_SERIALIZED,
+	PAYMENT_ORDER_WITH_DIACRITICS_FIXTURE,
+	ROUND_TRIP_TEST_CASES,
+	SERIALIZED_DATA_MISSING_IBAN,
+	STANDING_ORDER_DATA,
+	STANDING_ORDER_FIXTURE,
+	STANDING_ORDER_SERIALIZED,
+	TEST_IBANS,
+	VALID_PAYMENT_ORDER,
 } from "./testdata/index.js";
-import {
-	CurrencyCode,
-	DataModel,
-	PaymentOptions,
-} from "./types.js";
 
-describe("decode", () => {
-	test("round trip encode/decode", () => {
-		const data = {
-			invoiceId: "2015001",
-			payments: [{
-				amount: 45.55,
-				currencyCode: CurrencyCode.EUR,
-				type: PaymentOptions.PaymentOrder,
-				bankAccounts: [{ iban: "SK2738545237537948273958" }],
-				beneficiary: { name: "Jane Doe" },
-				paymentNote: "bendzín",
-			}],
-		} satisfies DataModel;
+describe("decode basic functionality", () => {
+	test("decodes valid payment order", () => {
+		const encoded = encode(VALID_PAYMENT_ORDER);
+		const result = decode(encoded);
 
-		const qrstring = encode(data);
-		const model = decode(qrstring);
-
-		expect(model).toEqual(data);
+		expect(result).toBeDefined();
+		expect(result.payments).toBeDefined();
+		expect(result.payments.length).toBe(1);
 	});
 
-	test("invalid input should throw", () => {
-		const invalidInput = "aaaa";
-		expect(() => {
-			decode(invalidInput);
-		}).toThrow("Invalid base32hex string");
+	test("decodes minimal payment", () => {
+		const encoded = encode(MINIMAL_PAYMENT);
+		const result = decode(encoded);
+
+		expect(result).toBeDefined();
+		expect(result.payments).toBeDefined();
+		expect(result.payments.length).toBe(1);
 	});
 
-	test("bidirectional encode/decode", () => {
-		const qrstring = encode(payloadWithPaymentOrder);
-		const decoded = decode(qrstring);
-		expect(decoded).toEqual(payloadWithPaymentOrder);
+	test("decodes payment with diacritics", () => {
+		const encoded = encode(PAYMENT_ORDER_WITH_DIACRITICS_FIXTURE);
+		const result = decode(encoded);
+
+		expect(result).toBeDefined();
+		expect(result.payments).toBeDefined();
+		expect(result.payments.length).toBe(1);
+	});
+
+	test("decodes standing order", () => {
+		const encoded = encode(STANDING_ORDER_DATA);
+		const result = decode(encoded);
+
+		expect(result).toBeDefined();
+		expect(result.payments).toBeDefined();
+		expect(result.payments.length).toBe(1);
+	});
+
+	test("decodes direct debit", () => {
+		const encoded = encode(DIRECT_DEBIT_DATA);
+		const result = decode(encoded);
+
+		expect(result).toBeDefined();
+		expect(result.payments).toBeDefined();
+		expect(result.payments.length).toBe(1);
 	});
 });
 
-describe("decode - deserialize", () => {
+describe("decode error cases", () => {
+	test("empty string throws error", () => {
+		expect(() => decode("")).toThrow();
+	});
+
+	test("invalid base32hex characters throw error", () => {
+		expect(() => decode("INVALID123XYZ")).toThrow();
+	});
+
+	test("malformed BySquare data throws error", () => {
+		expect(() => decode("91JPRV3F41BPYWKCCGGG")).toThrow();
+	});
+
+	test("too short data throws error", () => {
+		expect(() => decode("00")).toThrow();
+	});
+
+	test("data with invalid header throws error", () => {
+		expect(() => decode("FF00")).toThrow();
+	});
+
+	test("throws for invalid input", () => {
+		expect(() => decode("aaaa")).toThrow("Invalid base32hex string");
+	});
+
+	test("throws UnsupportedVersion for version > 1.1.0", () => {
+		expect(() => {
+			const fakeHeader = new Uint8Array([0x08, 0x00]);
+			const encoded = base32hex.encode(fakeHeader, false);
+			decode(encoded);
+		}).toThrow();
+	});
+});
+
+describe("decode deserialization", () => {
 	test("throws missing IBAN error", () => {
-		const serialized = /** dprint-ignore */ [
-			"random-id",
-			"\t", "1",
-			"\t", "1",
-			"\t", "100",
-			"\t", "EUR",
-			"\t",
-			"\t", "123",
-			"\t",
-			"\t",
-			"\t",
-			"\t",
-			"\t", "1",
-			"\t", "",
-			"\t",
-			"\t", "0",
-			"\t", "0",
-			"\t",
-			"\t",
-			"\t",
-		].join("");
+		const serialized = SERIALIZED_DATA_MISSING_IBAN;
 
 		expect(() => deserialize(serialized)).toThrow(
 			new DecodeError(DecodeErrorMessage.MissingIBAN),
 		);
 	});
 
-	test("return decoded payment order", () => {
-		const result = deserialize(serializedPaymentOrder);
-		expect(result).toEqual(payloadWithPaymentOrder);
+	test("deserializes payment order", () => {
+		const result = deserialize(PAYMENT_ORDER_SERIALIZED);
+		expect(result).toEqual(PAYMENT_ORDER_FIXTURE);
 	});
 
-	test("return decoded standing order", () => {
-		const result = deserialize(serializedStandingOrder);
-		expect(result).toEqual(payloadWithStandingOrder);
+	test("deserializes standing order", () => {
+		const result = deserialize(STANDING_ORDER_SERIALIZED);
+		expect(result).toEqual(STANDING_ORDER_FIXTURE);
 	});
 
-	test("return decoded direct debit", () => {
-		const result = deserialize(serializedDirectDebit);
-		expect(result).toEqual(payloadWithDirectDebit);
+	test("deserializes direct debit", () => {
+		const result = deserialize(DIRECT_DEBIT_SERIALIZED);
+		expect(result).toEqual(DIRECT_DEBIT_FIXTURE);
+	});
+
+	test("validates CRC32 checksum on decode", () => {
+		const encoded = encode(MINIMAL_PAYMENT);
+
+		const decoded_base32 = base32hex.decode(encoded, true);
+		const compressed = decoded_base32.slice(4);
+
+		const lzmaHeader = new Uint8Array(13);
+		lzmaHeader[0] = 0x5d;
+		lzmaHeader[1] = 0x00;
+		lzmaHeader[2] = 0x00;
+		lzmaHeader[3] = 0x02;
+		lzmaHeader[4] = 0x00;
+
+		const lzmaFull = new Uint8Array([...lzmaHeader, ...compressed]);
+		const decompressed = decompress(lzmaFull);
+
+		const checksum = decompressed!.slice(0, 4);
+		const body = decompressed!.slice(4);
+		const bodyText = new TextDecoder("utf-8").decode(body);
+
+		const checksumValue = new DataView(
+			checksum.buffer,
+			checksum.byteOffset,
+			4,
+		).getUint32(0, true);
+		const expectedChecksum = crc32(bodyText);
+
+		expect(checksumValue).toBe(expectedChecksum);
 	});
 });
 
-describe("decode - detect", () => {
-	test("detect invalid header", () => {
-		const invalidHeader = "";
-		const isBysquare = detect(invalidHeader);
-		expect(isBysquare).toBe(false);
-	});
-
-	test("detect valid header", () => {
-		const encoded = encode(payloadWithPaymentOrder);
-		const isBysquare = detect(encoded);
-		expect(isBysquare).toBe(true);
-	});
-
-	test("detect various invalid inputs", () => {
-		for (const testCase of invalidBase32HexStrings) {
-			const result = detect(testCase);
-			expect(result).toBe(false);
+describe("decode multiple data", () => {
+	test("decodes various QR codes correctly", () => {
+		for (const [qr, encoded] of DECODE_TEST_CASES) {
+			const decoded = decode(qr);
+			expect(decoded).toEqual(encoded);
 		}
 	});
 });
 
-test("decode - multiple data", () => {
-	const data = new Map<string, DataModel>([
-		[
-			"0004I0006UC5LT8E21H3IC1K9R40P82GJL22NTU0586BBEOEKDMQSVUUBAOP1C0FFE14UJA1F1LJMV0FONE35J05TRC77FTIMV87NKNANNOFJB684000",
-			{
-				invoiceId: "2015001",
-				payments: [{
-					amount: 25.30,
-					currencyCode: CurrencyCode.EUR,
-					type: PaymentOptions.PaymentOrder,
-					bankAccounts: [{ iban: "SK4523585719461382368397" }],
-					beneficiary: { name: "John Doe" },
-				}],
-			},
-		],
-		[
-			"00054000DG4GL2L1JL66N01P4GCBG05KQEPULNMP9EB7MEE935VG4P4B1BDBN7MV4GU13R7DMGU9O93QEI2KQJLPTFFU7GJNP6QL0UADVHOQ3B0OP0OO5P4L58M918PG00",
-			{
-				invoiceId: "2015001",
-				payments: [{
-					amount: 45.55,
-					currencyCode: CurrencyCode.EUR,
-					type: PaymentOptions.PaymentOrder,
-					bankAccounts: [{ iban: "SK2738545237537948273958" }],
-					beneficiary: { name: "Jane Doe" },
-					paymentNote: "bendzín",
-				}],
-			},
-		],
-	]);
+describe("decode property based", () => {
+	test("decode always returns valid DataModel for encoded data", () => {
+		const validIbans = [
+			TEST_IBANS.SK_VALID,
+			TEST_IBANS.CZ_VALID,
+			TEST_IBANS.AT_VALID,
+		];
 
-	for (const [qr, encoded] of data) {
-		const decoded = decode(qr);
-		expect(decoded).toEqual(encoded);
-	}
+		for (let i = 0; i < 50; i++) {
+			const randomData = buildDataModel({
+				invoiceId: `test-${i}`,
+				payments: [buildPaymentOrder({
+					amount: Math.round(Math.random() * 10_000) / 100,
+					bankAccounts: [{
+						iban: validIbans[Math.floor(Math.random() * validIbans.length)],
+					}],
+					variableSymbol: String(Math.floor(Math.random() * 999_999)),
+				})],
+			});
+
+			const encoded = encode(randomData);
+			const decoded = decode(encoded);
+
+			expect(decoded).toEqual(randomData);
+		}
+	});
+});
+
+describe("round trip verification", () => {
+	test.each(ROUND_TRIP_TEST_CASES as unknown as any[])("$name", ({ data }) => {
+		const encoded = encode(data);
+		const decoded = decode(encoded);
+		expect(decoded).toEqual(data);
+	});
 });

@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/xseman/bysquare/compare/v3.0.0...v3.0.1) (2025-12-26)
+
+
+### Documentation
+
+* fix diagram name ([c1817b6](https://github.com/xseman/bysquare/commit/c1817b654a54fd2185dd8e75e53d1c54d34b787c))
+
 ## [3.0.0](https://github.com/xseman/bysquare/compare/v2.13.3...v3.0.0) (2025-12-26)
 
 

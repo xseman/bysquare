@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.0.0](https://github.com/xseman/bysquare/compare/v2.13.3...v3.0.0) (2025-12-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* improve structure & deprecated functionality ([#75](https://github.com/xseman/bysquare/issues/75))
+
+### Documentation
+
+* update/add visual comments ([5e64c40](https://github.com/xseman/bysquare/commit/5e64c403ce50cc02f6d37014ea3c713430ef1850))
+
+
+### Maintenance
+
+* improve structure & deprecated functionality ([#75](https://github.com/xseman/bysquare/issues/75)) ([1aaa88d](https://github.com/xseman/bysquare/commit/1aaa88d53aa4df0623da04ccd55c2f5c64cffca5))
+
 ## [2.13.3](https://github.com/xseman/bysquare/compare/v2.13.2...v2.13.3) (2025-12-10)
 
 

@@ -4,6 +4,32 @@
  *
  * Supports Month Classifier (Table 10) and other classifiers that use summed
  * values.
+ *
+ * Bit-flag encoding example (Month Classifier):
+ * ```
+ * Month      | Binary         | Decimal | Bit Position
+ * -----------+----------------+---------+-------------
+ * January    | 0b000000000001 | 1       | Bit 0
+ * February   | 0b000000000010 | 2       | Bit 1
+ * March      | 0b000000000100 | 4       | Bit 2
+ * April      | 0b000000001000 | 8       | Bit 3
+ * May        | 0b000000010000 | 16      | Bit 4
+ * June       | 0b000000100000 | 32      | Bit 5
+ * July       | 0b000001000000 | 64      | Bit 6
+ * August     | 0b000010000000 | 128     | Bit 7
+ * September  | 0b000100000000 | 256     | Bit 8
+ * October    | 0b001000000000 | 512     | Bit 9
+ * November   | 0b010000000000 | 1024    | Bit 10
+ * December   | 0b100000000000 | 2048    | Bit 11
+ *
+ * Combined example:
+ *   January + July + October = 1 + 64 + 512 = 577
+ *   Binary: 0b001001000001
+ *           ^^^  ^      ^
+ *           |    |      └─ Bit 0 (January)
+ *           |    └──────── Bit 6 (July)
+ *           └───────────── Bit 9 (October)
+ * ```
  */
 
 /**

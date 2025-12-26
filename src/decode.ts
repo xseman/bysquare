@@ -74,9 +74,57 @@ function deserializeDate(input?: string): string | undefined {
 }
 
 /**
- * Generating by square Code
+ * Parse a tab-separated intermediate format into DataModel.
  *
- * @see 3.14.
+ * Base fields
+ * - Field 0: invoiceId
+ * - Field 1: paymentsCount
+ *
+ * Payment block (repeated `paymentsCount` times)
+ * - Field +0: type
+ * - Field +1: amount
+ * - Field +2: currencyCode
+ * - Field +3: paymentDueDate (YYYYMMDD)
+ * - Field +4: variableSymbol
+ * - Field +5: constantSymbol
+ * - Field +6: specificSymbol
+ * - Field +7: originatorsReferenceInformation
+ * - Field +8: paymentNote
+ * - Field +9: bankAccountsCount
+ *
+ * Bank account block (nested, repeated `bankAccountsCount` times)
+ * - Field +0: iban
+ * - Field +1: bic
+ *
+ * Standing order extension
+ * - Field +X: standingOrderExt ("0" | "1")
+ *   - if "1":
+ *     - Field +1: day
+ *     - Field +2: month (classifier sum)
+ *     - Field +3: periodicity
+ *     - Field +4: lastDate (YYYYMMDD)
+ *
+ * Direct debit extension
+ * - Field +Y: directDebitExt ("0" | "1")
+ *   - if "1":
+ *     - Field +1: directDebitScheme
+ *     - Field +2: directDebitType
+ *     - Field +3: variableSymbol
+ *     - Field +4: specificSymbol
+ *     - Field +5: originatorsReferenceInformation
+ *     - Field +6: mandateId
+ *     - Field +7: creditorId
+ *     - Field +8: contractId
+ *     - Field +9: maxAmount
+ *     - Field +10: validTillDate
+ *
+ * Beneficiary block (repeated per payment)
+ * - Field +0: beneficiaryName
+ * - Field +1: beneficiaryStreet
+ * - Field +2: beneficiaryCity
+ *
+ * @see 3.14
+ * @see Table 15
  */
 export function deserialize(qr: string): DataModel {
 	const data = qr.split("\t");
@@ -188,11 +236,20 @@ interface Header {
 }
 
 /**
- * The function uses bit-shifting and masking to convert the first two bytes of
- * the input header array into four nibbles representing the bysquare header
- * values.
+ * Extracts the 4 nibbles from a 2-byte bysquare header using bit-shifting and
+ * masking.
+ *
+ * ```
+ * | Attribute    | Number of bits | Possible values | Note
+ * --------------------------------------------------------------------------------------------
+ * | BySquareType | 4              | 0-15            | by square type
+ * | Version      | 4              | 0-15            | version of the by square type
+ * | DocumentType | 4              | 0-15            | document type within given by square type
+ * | Reserved     | 4              | 0-15            | bits reserved for future needs
+ * ```
  *
  * @param header 2-bytes size
+ * @see 3.5.
  */
 function bysquareHeaderDecoder(header: Uint8Array): Header {
 	const bytes = (header[0] << 8) | header[1];

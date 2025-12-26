@@ -133,6 +133,18 @@ export function buildBysquareHeader(
 /**
  * Creates a 2-byte array that represents the length of compressed data in
  * combination with CRC32 in bytes.
+ *
+ * ```
+ * +---------------+---------------+
+ * |    Byte 0     |    Byte 1     |
+ * +---------------+---------------+
+ * |  LSB (0-255)  | MSB (0-511)   |
+ * +---------------+---------------+
+ * | Little-endian 16-bit unsigned |
+ * +-------------------------------+
+ * ```
+ *
+ * @see 3.6.
  */
 export function buildPayloadLength(length: number): Uint8Array {
 	if (length >= MAX_COMPRESSED_SIZE) {
@@ -149,7 +161,16 @@ export function buildPayloadLength(length: number): Uint8Array {
 }
 
 /**
- * Transfer object to a tabbed string and append a CRC32 checksum
+ * Prepends a 4-byte CRC32 checksum to the tab-separated payload.
+ *
+ * ```
+ * +------------------+---------------------------+
+ * |      4 bytes     |        Variable           |
+ * +------------------+---------------------------+
+ * | CRC32 Checksum   | Tab-separated payload     |
+ * | (little-endian)  | (UTF-8 encoded)           |
+ * +------------------+---------------------------+
+ * ```
  *
  * @see 3.10.
  */
@@ -166,10 +187,56 @@ export function addChecksum(tabbedPayload: string): Uint8Array {
 }
 
 /**
- * Transform data to ordered tab-separated intermediate representation ready for
- * encoding
+ * Transform DataModel to a tab-separated intermediate format.
  *
- * @see Table 15.
+ * Base fields
+ * - Field 0: invoiceId
+ * - Field 1: paymentsCount
+ *
+ * Payment block (repeated `paymentsCount` times)
+ * - Field +0: type
+ * - Field +1: amount
+ * - Field +2: currencyCode
+ * - Field +3: paymentDueDate (YYYYMMDD)
+ * - Field +4: variableSymbol
+ * - Field +5: constantSymbol
+ * - Field +6: specificSymbol
+ * - Field +7: originatorsReferenceInformation
+ * - Field +8: paymentNote
+ * - Field +9: bankAccountsCount
+ *
+ * Bank account block (nested, repeated `bankAccountsCount` times)
+ * - Field +0: iban
+ * - Field +1: bic
+ *
+ * Standing order extension
+ * - Field +X: standingOrderExt ("0" | "1")
+ *   - if "1":
+ *     - Field +1: day
+ *     - Field +2: month (classifier sum)
+ *     - Field +3: periodicity
+ *     - Field +4: lastDate (YYYYMMDD)
+ *
+ * Direct debit extension
+ * - Field +Y: directDebitExt ("0" | "1")
+ *   - if "1":
+ *     - Field +1: directDebitScheme
+ *     - Field +2: directDebitType
+ *     - Field +3: variableSymbol
+ *     - Field +4: specificSymbol
+ *     - Field +5: originatorsReferenceInformation
+ *     - Field +6: mandateId
+ *     - Field +7: creditorId
+ *     - Field +8: contractId
+ *     - Field +9: maxAmount
+ *     - Field +10: validTillDate
+ *
+ * Beneficiary block (repeated per payment)
+ * - Field +0: beneficiaryName
+ * - Field +1: beneficiaryStreet
+ * - Field +2: beneficiaryCity
+ *
+ * @see Table 15
  */
 export function serialize(data: DataModel): string {
 	const serialized = new Array<string | undefined>();
@@ -294,13 +361,38 @@ type Options = {
 };
 
 /**
- * Generate QR string ready for encoding into text QR code
+ * Generate QR string ready for encoding into text QR code.
+ *
+ * Complete BySquare QR binary structure:
+ * ```
+ * +------------------+------------------+-----------------------------+
+ * |     2 bytes      |     2 bytes      |          Variable           |
+ * +------------------+------------------+-----------------------------+
+ * | Bysquare Header  | Payload Length   |         LZMA Body           |
+ * | (4 nibbles)      | (little-endian)  |  (compressed CRC+payload)   |
+ * +------------------+------------------+-----------------------------+
+ *         |                  |                       |
+ *         v                  v                       v
+ * +-----+-----+-----+-----+  +-----+-----+  +---------+-----------+
+ * | 4b  | 4b  | 4b  | 4b  |  | LSB | MSB |  | Header  | Body      |
+ * +-----+-----+-----+-----+  +-----+-----+  | (13B)   | (var)     |
+ * | Type| Ver | Doc |Resv |  |   Length  |  | omitted |           |
+ * +-----+-----+-----+-----+  +-----------+  +---------+-----------+
+ *                                                       |
+ *                                                       v
+ *                                           +--------+-------------+
+ *                                           | CRC32  | Tab-sep     |
+ *                                           | (4B)   | payload     |
+ *                                           +--------+-------------+
+ * ```
  *
  * @param model - Data model to encode
  * @param options - Options for encoding
  *
  * @default options.deburr - true
  * @default options.validate - true
+ *
+ * @see 3.16.
  */
 export function encode(
 	model: DataModel,

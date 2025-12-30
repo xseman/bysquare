@@ -18,6 +18,11 @@ individuals and businesses to create QR codes for their invoices.
 - Compatible with Slovak banking apps
 - Isomorphic Browser & Runtime-independent implementation
 
+> [!NOTE]
+> Since v3, the implementation is considered stable and specification-complete.
+> No breaking changes are planned. Only minor improvements and bug fixes may be
+> introduced.
+
 ## Installation
 
 ### [npm](https://npmjs.com/bysquare)

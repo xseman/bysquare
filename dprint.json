@@ -28,8 +28,11 @@
 	"excludes": [
 		"**/node_modules",
 		"**/*-lock.json",
-		"tsconfig.json",
-		"CHANGELOG.md"
+		"**/tsconfig.json",
+		"**/CHANGELOG.md",
+		"**/lib",
+		"**/coverage",
+		"go/bin"
 	],
 	"plugins": [
 		"https://plugins.dprint.dev/typescript-0.95.13.wasm",

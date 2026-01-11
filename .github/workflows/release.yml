@@ -4,6 +4,10 @@ on:
     push:
         branches:
             - master
+        paths:
+            - "typescript/**"
+            - ".github/.release*"
+            - ".github/workflows/release.yml"
     workflow_dispatch:
         inputs:
             tag:
@@ -41,12 +45,14 @@ jobs:
               if: ${{ steps.release.outputs.release_created || github.event.inputs.tag}}
               with:
                   cache: npm
+                  cache-dependency-path: typescript/package-lock.json
                   node-version: 24
                   registry-url: "https://registry.npmjs.org"
 
             - if: ${{ steps.release.outputs.release_created || github.event.inputs.tag }}
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+              working-directory: typescript
               run: |
                   npm install
                   node --run build

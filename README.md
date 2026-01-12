@@ -52,12 +52,12 @@ The Go implementation provides a C-compatible Foreign Function Interface (FFI), 
 
 **Available examples:**
 
-- **[Java](examples/java/)** - Using JNA (Java Native Access)
-- **[PHP](examples/php/)** - Using FFI extension
-- **[Python](examples/python/)** - Using `ctypes`
-- **[Swift](examples/swift/)** - Using Swift's C interoperability
+- **[Java](examples/ffi/java/)** - Using JNA (Java Native Access)
+- **[PHP](examples/ffi/php/)** - Using FFI extension
+- **[Python](examples/ffi/python/)** - Using `ctypes`
+- **[Swift](examples/ffi/swift/)** - Using Swift's C interoperability
 
-See [FFI examples](examples/) for setup and usage instructions.
+See [FFI examples](examples/ffi/) for setup and usage instructions.
 
 ## Related
 

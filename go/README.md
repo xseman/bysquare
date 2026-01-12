@@ -170,8 +170,9 @@ result = lib.bysquare_encode(data)
 lib.bysquare_free(result)  # Important!
 ```
 
-See detailed examples in [`../examples/`](../examples/):
+See detailed examples in [`../examples/ffi/`](../examples/ffi/):
 
-- **Python**: [`../examples/python/example.py`](../examples/python/example.py)
-- **PHP**: [`../examples/php/example.php`](../examples/php/example.php)
-- **Java**: [`../examples/java/Example.java`](../examples/java/Example.java)
+- **Python**: [`../examples/ffi/python/example.py`](../examples/ffi/python/example.py)
+- **PHP**: [`../examples/ffi/php/example.php`](../examples/ffi/php/example.php)
+- **Java**: [`../examples/ffi/java/Example.java`](../examples/ffi/java/Example.java)
+- **Swift**: [`../examples/ffi/swift/Example.swift`](../examples/ffi/swift/Example.swift)

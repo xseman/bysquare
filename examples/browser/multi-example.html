@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			http-equiv="X-UA-Compatible"
+			content="IE=edge"
+		/>
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>Multiple Payments Example - Bysquare</title>
+</head>
+<body>
+	<h1>Multiple Payments Example</h1>
+	<p>Create and manage multiple payment QR codes in batch</p>
+
+	<div
+		id="payment-inputs"
+		style="overflow-x: auto; 
+	white-space: nowrap; 
+	padding: 10px 0; 
+	margin-bottom: 2rem;
+	border: 1px solid var(--border);
+	border-radius: 4px;"
+	/>
+
+	<div
+		id="result"
+		style="text-align: center;"
+	>
+		<pre
+			id="encodedText"
+			style="word-wrap: break-word; text-wrap: auto; max-width: 100%; margin-bottom: 1rem;"
+		/>
+		<canvas
+			height="200"
+			width="200"
+			id="canvas"
+		/>
+	</div>
+
+	<script type="module">
+		import { CurrencyCode, encode, PaymentOptions } from "https://esm.sh/bysquare@latest/";
+		import { qrcanvas } from "https://esm.sh/qrcanvas@latest";
+
+		const inputsContainer = document.getElementById("payment-inputs");
+		const encodedTextElement = document.getElementById("encodedText");
+		const canvas = document.getElementById("canvas");
+
+		function createInputId(index) {
+			return `payment-${index}`;
+		}
+
+		function createInputGroup(index, defaultValue = {}) {
+			const card = document.createElement("div");
+			card.id = createInputId(index);
+			card.style.cssText = `
+				display: inline-block; 
+				vertical-align: top; 
+				white-space: normal;
+				width: 250px; 
+				margin: 10px; 
+				padding: 15px; 
+				border: 1px solid var(--border);
+				border-radius: 4px;
+				background: var(--bg-alt);
+			`;
+
+			card.innerHTML = `
+				<h3 style="margin-top: 0;">Payment ${index + 1}</h3>
+				<label style="display: block; margin: 10px 0;">
+					Amount
+					<input 
+						name="amount" 
+						type="number" 
+						step="0.01" 
+						value="${defaultValue.amount || 100}" 
+						style="width: 100%; padding: 8px; margin-top: 5px;"
+					/>
+				</label>
+				<label style="display: block; margin: 10px 0;">
+					IBAN
+					<input 
+						name="iban" 
+						type="text" 
+						value="${defaultValue.iban || "SK9611000000002918599669"}" 
+						style="width: 100%; padding: 8px; margin-top: 5px;"
+					/>
+				</label>
+				<label style="display: block; margin: 10px 0;">
+					Variable Symbol
+					<input 
+						name="variable" 
+						type="text" 
+						value="${defaultValue.variable || "123"}" 
+						style="width: 100%; padding: 8px; margin-top: 5px;"
+					/>
+				</label>
+				<div style="display: flex; gap: 10px;">
+					<button style="flex: 1; padding: 8px;">Clone</button>
+					<button style="flex: 1; padding: 8px;">Delete</button>
+				</div>
+			`;
+
+			const [cloneButton, deleteButton] = card.querySelectorAll("button");
+			cloneButton.addEventListener("click", () => clonePayment(index));
+			deleteButton.addEventListener("click", () => deletePayment(index));
+
+			const inputs = card.querySelectorAll("input");
+			inputs.forEach((input) => input.addEventListener("input", generateBysquare));
+
+			return card;
+		}
+
+		function clonePayment(index) {
+			const originalCard = document.getElementById(createInputId(index));
+			if (!originalCard) return;
+
+			const values = {
+				amount: originalCard.querySelector('input[name="amount"]').value,
+				iban: originalCard.querySelector('input[name="iban"]').value,
+				variable: originalCard.querySelector('input[name="variable"]').value,
+			};
+
+			const newIndex = inputsContainer.children.length;
+			const newCard = createInputGroup(newIndex, values);
+			inputsContainer.appendChild(newCard);
+			generateBysquare();
+		}
+
+		function deletePayment(index) {
+			const card = document.getElementById(createInputId(index));
+			if (!card) return;
+
+			if (inputsContainer.children.length > 1) {
+				card.remove();
+				generateBysquare();
+			} else {
+				alert("At least one payment is required.");
+			}
+		}
+
+		function generateBysquare() {
+			const paymentCards = inputsContainer.querySelectorAll("div[id^='payment-']");
+			const payments = Array.from(paymentCards).map((card) => ({
+				type: PaymentOptions.PaymentOrder,
+				amount: parseFloat(card.querySelector('input[name="amount"]').value),
+				bankAccounts: [{
+					iban: card.querySelector('input[name="iban"]').value,
+				}],
+				currencyCode: CurrencyCode.EUR,
+				variableSymbol: card.querySelector('input[name="variable"]').value,
+			}));
+
+			try {
+				const encodedText = encode({
+					invoiceId: new Date().toLocaleDateString("sk"),
+					payments: payments,
+				});
+
+				encodedTextElement.textContent = encodedText;
+				const ctx = canvas.getContext("2d");
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				qrcanvas({
+					data: encodedText,
+					canvas: canvas,
+				});
+			} catch (error) {
+				console.error("Error generating QR code:", error);
+				encodedTextElement.textContent = error.message;
+			}
+		}
+
+		function initialize() {
+			inputsContainer.appendChild(createInputGroup(0));
+			inputsContainer.appendChild(createInputGroup(1, {
+				amount: 200,
+				iban: "SK9611000000002918599669",
+				variable: "456",
+			}));
+			generateBysquare();
+		}
+
+		initialize();
+	</script>
+</html>

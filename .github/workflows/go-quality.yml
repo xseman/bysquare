@@ -1,4 +1,4 @@
-name: Go Quality
+name: Go quality checks
 
 on:
     push:
@@ -10,6 +10,7 @@ on:
         branches: [master]
         paths:
             - "go/**"
+            - ".github/workflows/go-quality.yml"
 
 permissions:
     contents: read
@@ -74,4 +75,4 @@ jobs:
 
             - name: Build FFI
               working-directory: ./go
-              run: go build -buildmode=c-shared -o libbysquare.so ./ffi
+              run: go build -buildmode=c-shared -o libbysquare.so ./cmd/libbysquare

@@ -1,9 +1,9 @@
-name: coverage report
+name: TypeScript coverage report
 
 on:
     workflow_run:
         workflows:
-            - quality checks
+            - TypeScript quality checks
         types:
             - completed
 

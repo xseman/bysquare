@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			http-equiv="X-UA-Compatible"
+			content="IE=edge"
+		/>
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>Preact Example - Bysquare</title>
+	</head>
+	<body>
+		<h1>Bysquare - Preact Example</h1>
+
+		<div id="app" />
+	</body>
+
+<script type="module">
+	import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
+	import { CurrencyCode, encode, PaymentOptions } from "https://esm.sh/bysquare@latest/";
+	import { h, render } from "https://esm.sh/preact@latest";
+	import { useEffect, useRef, useState } from "https://esm.sh/preact@latest/hooks";
+
+	function App() {
+		const [amount, setAmount] = useState(100);
+		const [iban, setIban] = useState("SK9611000000002918599669");
+		const [variable, setVariable] = useState("123");
+		const [encodedText, setEncodedText] = useState("");
+		const qrRef = useRef(null);
+
+		useEffect(() => {
+			try {
+				const encoded = encode({
+					invoiceId: new Date().toLocaleDateString("sk"),
+					payments: [{
+						type: PaymentOptions.PaymentOrder,
+						amount: parseFloat(amount),
+						bankAccounts: [{ iban }],
+						currencyCode: CurrencyCode.EUR,
+						variableSymbol: variable,
+					}],
+				});
+				setEncodedText(encoded);
+			} catch (error) {
+				console.error("Encoding error:", error);
+				setEncodedText(error.message);
+			}
+		}, [amount, iban, variable]);
+
+		useEffect(() => {
+			if (qrRef.current && encodedText) {
+				qrRef.current.innerHTML = "";
+				try {
+					qrRef.current.appendChild(QRCode.generateSVG(encodedText));
+				} catch (error) {
+					console.error("QR generation error:", error);
+				}
+			}
+		}, [encodedText]);
+
+		return h(
+			"div",
+			null,
+			h(
+				"div",
+				{ style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginBottom: "2rem" } },
+				h(
+					"div",
+					null,
+					h(
+						"label",
+						{ style: { display: "block", marginBottom: "1rem" } },
+						"Amount:",
+						h("input", {
+							type: "number",
+							value: amount,
+							onInput: (e) => setAmount(e.target.value),
+							style: { width: "100%", marginTop: "0.5rem" },
+						}),
+					),
+					h(
+						"label",
+						{ style: { display: "block", marginBottom: "1rem" } },
+						"IBAN:",
+						h("input", {
+							value: iban,
+							onInput: (e) => setIban(e.target.value),
+							style: { width: "100%", marginTop: "0.5rem" },
+						}),
+					),
+					h(
+						"label",
+						{ style: { display: "block", marginBottom: "1rem" } },
+						"Variable:",
+						h("input", {
+							type: "number",
+							value: variable,
+							onInput: (e) => setVariable(e.target.value),
+							style: { width: "100%", marginTop: "0.5rem" },
+						}),
+					),
+				),
+				h(
+					"div",
+					{ style: { width: "200px" } },
+					h("div", { ref: qrRef }),
+				),
+			),
+			h(
+				"pre",
+				{ style: { wordWrap: "break-word", whiteSpace: "pre-wrap" } },
+				encodedText,
+			),
+		);
+	}
+
+	render(h(App), document.getElementById("app"));
+</script>

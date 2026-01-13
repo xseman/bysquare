@@ -6,7 +6,8 @@ on:
             - master
         paths:
             - "go/**"
-            - ".github/.release*"
+            - ".github/.release-manifest.json"
+            - ".github/.release-config.json"
             - ".github/workflows/go-release.yml"
 
 permissions:
@@ -27,7 +28,6 @@ jobs:
                   manifest-file: .github/.release-manifest.json
                   config-file: .github/.release-config.json
                   token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-                  target-branch: master
 
     build:
         name: Build Artifacts

@@ -2,6 +2,7 @@
 	"$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
 	"packages": {
 		"typescript": {
+			"path": "typescript",
 			"release-type": "node",
 			"include-v-in-tag": true,
 			"include-component-in-tag": false,
@@ -11,6 +12,7 @@
 			"changelog-path": "typescript/CHANGELOG.md"
 		},
 		"go": {
+			"path": "go",
 			"release-type": "go",
 			"include-v-in-tag": true,
 			"include-component-in-tag": true,

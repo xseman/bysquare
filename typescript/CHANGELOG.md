@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/xseman/bysquare/compare/bysquare/v3.0.0...bysquare/v3.1.0) (2026-01-13)
+
+
+### Features
+
+* add golang implementation & structure refactor ([#78](https://github.com/xseman/bysquare/issues/78)) ([8a76cb5](https://github.com/xseman/bysquare/commit/8a76cb5fae23826193c011b26d6e87169e9eaaee))
+
 ## [3.0.0](https://github.com/xseman/bysquare/compare/v2.13.3...v3.0.0) (2025-12-26)
 
 

@@ -7,19 +7,6 @@ import (
 	"strings"
 )
 
-// DecodeOptions configures the decoding process.
-type DecodeOptions struct {
-	// Strict mode enforces stricter validation
-	Strict bool
-}
-
-// DefaultDecodeOptions returns default decoding options.
-func DefaultDecodeOptions() DecodeOptions {
-	return DecodeOptions{
-		Strict: false,
-	}
-}
-
 // Decode parses a BySquare QR string back to DataModel.
 //
 // The decoding process:
@@ -28,12 +15,7 @@ func DefaultDecodeOptions() DecodeOptions {
 // 3. LZMA decompression
 // 4. CRC32 verification
 // 5. Deserialization from tab-separated format
-func Decode(qr string, opts ...DecodeOptions) (DataModel, error) {
-	_ = DefaultDecodeOptions()
-	if len(opts) > 0 {
-		_ = opts[0]
-	}
-
+func Decode(qr string) (DataModel, error) {
 	// Decode Base32Hex
 	bytes, err := decodeBase32Hex(qr, true)
 	if err != nil {

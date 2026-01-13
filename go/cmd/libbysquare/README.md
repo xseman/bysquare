@@ -55,9 +55,8 @@ Invoke-WebRequest -Uri $url -OutFile "libbysquare.dll"
 
 ```bash
 cd go
-./scripts/build-ffi.sh
-# Output: bin/libbysquare-{platform}-{arch}.{so,dylib,dll}
-# e.g., bin/libbysquare-linux-amd64.so
+make build-ffi
+# Output: bin/libbysquare.so (current platform)
 ```
 
 The build script generates platform-specific filenames. You may want to create
@@ -119,17 +118,11 @@ JNA (Java) automatically handles the "lib" prefix and extension, so use
 ### Build Commands
 
 ```bash
-# Linux
-./scripts/build-ffi.sh linux
+# Current platform
+make build-ffi
 
-# macOS
-./scripts/build-ffi.sh darwin
-
-# Windows (cross-compile)
-./scripts/build-ffi.sh windows
-
-# All platforms
-./scripts/build-ffi.sh all
+# All platforms (cross-compile)
+make build-ffi-all
 ```
 
 ### Cross-Compilation

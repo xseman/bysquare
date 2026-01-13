@@ -113,16 +113,16 @@ type StandingOrder struct {
 
 // DirectDebit represents direct debit extension fields.
 type DirectDebit struct {
-	DirectDebitScheme          uint8  `json:"directDebitScheme,omitempty"`
-	DirectDebitType            uint8  `json:"directDebitType,omitempty"`
-	VariableSymbol             string `json:"variableSymbol,omitempty"`
-	SpecificSymbol             string `json:"specificSymbol,omitempty"`
-	OriginatorsReferenceInfo   string `json:"originatorsReferenceInformation,omitempty"`
-	MandateID                  string `json:"mandateId,omitempty"`
-	CreditorID                 string `json:"creditorId,omitempty"`
-	ContractID    string `json:"contractId,omitempty"`
-	MaxAmount     string `json:"maxAmount,omitempty"`
-	ValidTillDate string `json:"validTillDate,omitempty"`
+	DirectDebitScheme        uint8  `json:"directDebitScheme,omitempty"`
+	DirectDebitType          uint8  `json:"directDebitType,omitempty"`
+	VariableSymbol           string `json:"variableSymbol,omitempty"`
+	SpecificSymbol           string `json:"specificSymbol,omitempty"`
+	OriginatorsReferenceInfo string `json:"originatorsReferenceInformation,omitempty"`
+	MandateID                string `json:"mandateId,omitempty"`
+	CreditorID               string `json:"creditorId,omitempty"`
+	ContractID               string `json:"contractId,omitempty"`
+	MaxAmount                string `json:"maxAmount,omitempty"`
+	ValidTillDate            string `json:"validTillDate,omitempty"`
 }
 
 // DataModel represents the complete payment data structure.

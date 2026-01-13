@@ -8,7 +8,8 @@ cd "$(dirname "${0}")" || exit 1
 
 echo "Building bysquare FFI library..."
 
-./../../go/scripts/build-ffi.sh
+cd ../../go
+make build-ffi
 
 echo ""
 echo "FFI library built in: bin/libbysquare.*"

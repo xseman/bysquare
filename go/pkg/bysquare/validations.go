@@ -1,27 +1,9 @@
 package bysquare
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
-)
-
-var (
-	// ErrInvalidIBAN indicates an invalid IBAN format.
-	ErrInvalidIBAN = errors.New("invalid IBAN format")
-
-	// ErrInvalidBIC indicates an invalid BIC format.
-	ErrInvalidBIC = errors.New("invalid BIC format")
-
-	// ErrInvalidCurrency indicates an invalid currency code.
-	ErrInvalidCurrency = errors.New("invalid currency code")
-
-	// ErrInvalidDate indicates an invalid date format.
-	ErrInvalidDate = errors.New("invalid date format")
-
-	// ErrMissingBankAccount indicates no bank accounts provided.
-	ErrMissingBankAccount = errors.New("at least one bank account required")
 )
 
 var (

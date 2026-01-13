@@ -29,13 +29,9 @@ jobs:
                   go-version: "stable"
                   cache-dependency-path: go/go.sum
 
-            - name: Download dependencies
+            - name: Run tests with coverage
               working-directory: ./go
-              run: go mod download
-
-            - name: Run tests
-              working-directory: ./go
-              run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+              run: make cover
 
             - name: Upload coverage artifact
               if: github.event_name == 'pull_request'
@@ -75,10 +71,8 @@ jobs:
                   go-version: "stable"
                   cache-dependency-path: go/go.sum
 
-            - name: Build CLI
+            - name: Build binaries
               working-directory: ./go
-              run: go build -v ./cmd/bysquare
-
-            - name: Build FFI
-              working-directory: ./go
-              run: go build -buildmode=c-shared -o libbysquare.so ./cmd/libbysquare
+              run: |
+                  make build
+                  make build-ffi

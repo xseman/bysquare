@@ -390,9 +390,9 @@ func TestValidateSimplePayment(t *testing.T) {
 		{
 			name: "invalid date format",
 			payment: SimplePayment{
-				Type:         PaymentTypePaymentOrder,
-				Amount:       100.00,
-				CurrencyCode: CurrencyEUR,
+				Type:           PaymentTypePaymentOrder,
+				Amount:         100.00,
+				CurrencyCode:   CurrencyEUR,
 				PaymentDueDate: "31-12-2023",
 				BankAccounts: []BankAccount{
 					{IBAN: "SK3112000000198742637541"},

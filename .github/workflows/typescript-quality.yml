@@ -1,0 +1,79 @@
+name: TypeScript quality checks
+
+on:
+    pull_request:
+        branches:
+            - master
+        paths:
+            - "typescript/src/**"
+            - "typescript/package.json"
+            - "typescript/tsconfig.json"
+            - ".github/workflows/typescript-quality.yml"
+    push:
+        branches:
+            - master
+        paths:
+            - "typescript/src/**"
+            - "typescript/package.json"
+            - "typescript/tsconfig.json"
+            - ".github/workflows/typescript-quality.yml"
+
+permissions:
+    contents: read
+    pull-requests: write
+    actions: write
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: install
+              working-directory: ./typescript
+              run: bun install
+
+            - name: typecheck
+              working-directory: ./typescript
+              run: bun run typecheck
+
+            - name: bunfig.toml
+              shell: bash
+              run: |
+                  cat > "${GITHUB_WORKSPACE}/typescript/bunfig.toml" <<'EOF'
+                  [test]
+                  coveragePathIgnorePatterns = [
+                      "src/testdata/**",
+                  ]
+                  EOF
+
+            - name: test
+              working-directory: ./typescript
+              run: bun run test
+
+            - name: upload coverage artifact
+              if: github.event_name == 'pull_request'
+              uses: actions/upload-artifact@v6
+              with:
+                  name: coverage
+                  path: typescript/coverage/lcov.info
+                  if-no-files-found: warn
+
+    fmt:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: install
+              working-directory: ./typescript
+              run: bun install
+
+            - name: format check
+              working-directory: ./typescript
+              run: bun fmt:check

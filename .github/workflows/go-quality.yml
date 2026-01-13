@@ -1,0 +1,78 @@
+name: Go quality checks
+
+on:
+    push:
+        branches: [master]
+        paths:
+            - "go/**"
+            - ".github/workflows/go-quality.yml"
+    pull_request:
+        branches: [master]
+        paths:
+            - "go/**"
+            - ".github/workflows/go-quality.yml"
+
+permissions:
+    contents: read
+    actions: write
+
+jobs:
+    test:
+        name: Test
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v6
+
+            - uses: actions/setup-go@v6
+              with:
+                  go-version: "stable"
+                  cache-dependency-path: go/go.sum
+
+            - name: Run tests with coverage
+              working-directory: ./go
+              run: make cover
+
+            - name: Upload coverage artifact
+              if: github.event_name == 'pull_request'
+              uses: actions/upload-artifact@v6
+              with:
+                  name: go-coverage
+                  path: go/coverage.out
+                  if-no-files-found: warn
+
+    lint:
+        name: Lint
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v6
+
+            - uses: actions/setup-go@v6
+              with:
+                  go-version: "stable"
+                  cache-dependency-path: go/go.sum
+
+            - name: golangci-lint
+              uses: golangci/golangci-lint-action@v9
+              with:
+                  version: latest
+                  working-directory: ./go
+
+    build:
+        name: Build
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v6
+
+            - uses: actions/setup-go@v6
+              with:
+                  go-version: "stable"
+                  cache-dependency-path: go/go.sum
+
+            - name: Build binaries
+              working-directory: ./go
+              run: |
+                  make build
+                  make build-ffi

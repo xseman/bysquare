@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			http-equiv="X-UA-Compatible"
+			content="IE=edge"
+		/>
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>Native JavaScript Example - Bysquare</title>
+	</head>
+
+	<body>
+		<h1>Bysquare - Native JavaScript Example</h1>
+
+		<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+			<div>
+				<label style="display: block; margin-bottom: 1rem">
+					Amount:
+					<input
+						style="width: 100%; margin-top: 0.5rem"
+						type="number"
+						name="amount"
+						value=""
+					/>
+				</label>
+				<label style="display: block; margin-bottom: 1rem">
+					IBAN:
+					<input
+						style="width: 100%; margin-top: 0.5rem"
+						name="iban"
+					/>
+				</label>
+				<label style="display: block; margin-bottom: 1rem">
+					Variable:
+					<input
+						style="width: 100%; margin-top: 0.5rem"
+						type="number"
+						name="variable"
+					/>
+				</label>
+			</div>
+
+			<div>
+				<div
+					style="width: 200px"
+					id="qrcode"
+				/>
+			</div>
+		</div>
+
+		<pre
+			id="encodedText"
+			style="word-wrap: break-word; white-space: pre-wrap;"
+		/>
+
+		<script type="module">
+			import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
+			import {
+				CurrencyCode,
+				encode,
+				PaymentOptions,
+			} from "https://esm.sh/bysquare@latest/";
+
+			class BysquareQR {
+				constructor() {
+					this.amountInput = null;
+					this.ibanInput = null;
+					this.variableInput = null;
+					this.encodedTextDiv = null;
+					this.qrContainer = null;
+				}
+
+				getEncodedText(iban, amount, variable) {
+					return encode({
+						invoiceId: new Date().toLocaleDateString("sk"),
+						payments: [{
+							type: PaymentOptions.PaymentOrder,
+							amount: amount,
+							bankAccounts: [{ iban: iban }],
+							currencyCode: CurrencyCode.EUR,
+							variableSymbol: variable,
+						}],
+					});
+				}
+
+				renderQrCode(container, encodedText) {
+					container.innerHTML = "";
+					const svgQr = QRCode.generateSVG(encodedText);
+					container.appendChild(svgQr);
+				}
+
+				init() {
+					this.amountInput = document.querySelector('input[name="amount"]');
+					this.ibanInput = document.querySelector('input[name="iban"]');
+					this.variableInput = document.querySelector('input[name="variable"]');
+					this.encodedTextDiv = document.querySelector("#encodedText");
+					this.qrContainer = document.querySelector("#qrcode");
+
+					this.amountInput.value = "100";
+					this.ibanInput.value = "SK9611000000002918599669";
+					this.variableInput.value = "123";
+
+					this.amountInput.addEventListener("input", this.render);
+					this.ibanInput.addEventListener("input", this.render);
+					this.variableInput.addEventListener("input", this.render);
+
+					this.render();
+				}
+
+				render = () => {
+					const encodedText = this.getEncodedText(
+						this.ibanInput.value,
+						this.amountInput.value,
+						this.variableInput.value,
+					);
+
+					this.encodedTextDiv.innerText = encodedText;
+					this.renderQrCode(this.qrContainer, encodedText);
+				};
+			}
+
+			window.addEventListener("load", () => {
+				const bysquareQR = new BysquareQR();
+				bysquareQR.init();
+			});
+		</script>
+	</body>
+</html>

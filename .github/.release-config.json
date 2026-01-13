@@ -5,6 +5,7 @@
 	"packages": {
 		"typescript": {
 			"release-type": "node",
+			"tag-separator": "/",
 			"include-v-in-tag": true,
 			"include-component-in-tag": true,
 			"pull-request-title-pattern": "typescript/v${version}",
@@ -15,6 +16,7 @@
 		"go": {
 			"release-as": "0.1.0",
 			"release-type": "go",
+			"tag-separator": "/",
 			"include-v-in-tag": true,
 			"include-component-in-tag": true,
 			"pull-request-title-pattern": "go/v${version}",

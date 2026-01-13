@@ -1,23 +1,29 @@
 {
 	"$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+	"separate-pull-requests": true,
+	"last-release-sha": "48154fbe558c783abcef3b31070fc4252d7d9cf5",
 	"packages": {
 		"typescript": {
 			"release-type": "node",
+			"tag-separator": "/",
 			"include-v-in-tag": true,
-			"include-component-in-tag": false,
+			"include-component-in-tag": true,
 			"pull-request-title-pattern": "typescript/v${version}",
 			"pull-request-header": "🚢 TypeScript package release",
 			"pull-request-footer": "",
-			"changelog-path": "typescript/CHANGELOG.md"
+			"changelog-path": "CHANGELOG.md"
 		},
 		"go": {
 			"release-type": "go",
+			"tag-separator": "/",
 			"include-v-in-tag": true,
 			"include-component-in-tag": true,
 			"pull-request-title-pattern": "go/v${version}",
 			"pull-request-header": "🚢 Go package release",
 			"pull-request-footer": "",
-			"changelog-path": "go/CHANGELOG.md"
+			"changelog-path": "CHANGELOG.md",
+			"bump-minor-pre-major": true,
+			"bump-patch-for-minor-pre-major": true
 		}
 	},
 	"changelog-sections": [

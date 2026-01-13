@@ -1,0 +1,162 @@
+name: Release Please
+
+on:
+    push:
+        branches:
+            - master
+        paths:
+            - "typescript/**"
+            - "go/**"
+            - ".github/.release-manifest.json"
+            - ".github/.release-config.json"
+    workflow_dispatch:
+        inputs:
+            typescript_release:
+                description: "Publish TypeScript package"
+                type: boolean
+                default: false
+            typescript_tag:
+                description: "TypeScript tag name (e.g., typescript/v3.0.0)"
+                type: string
+                required: false
+            go_release:
+                description: "Build and upload Go artifacts"
+                type: boolean
+                default: false
+            go_tag:
+                description: "Go tag name (e.g., go/v0.1.0)"
+                type: string
+                required: false
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    release-please:
+        name: Release Please
+        runs-on: ubuntu-latest
+        outputs:
+            typescript_release_created: ${{ steps.release.outputs['typescript--release_created'] }}
+            typescript_tag_name: ${{ steps.release.outputs['typescript--tag_name'] }}
+            go_release_created: ${{ steps.release.outputs['go--release_created'] }}
+            go_tag_name: ${{ steps.release.outputs['go--tag_name'] }}
+        steps:
+            - uses: googleapis/release-please-action@v4
+              id: release
+              with:
+                  manifest-file: .github/.release-manifest.json
+                  config-file: .github/.release-config.json
+                  token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+    typescript-publish:
+        name: Publish TypeScript Package
+        needs: release-please
+        if: ${{ (github.event_name == 'push' && needs.release-please.outputs.typescript_release_created) || (github.event_name == 'workflow_dispatch' && inputs.typescript_release == true) }}
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write
+        steps:
+            - uses: actions/checkout@v6
+
+            - uses: actions/setup-node@v4
+              with:
+                  cache: npm
+                  cache-dependency-path: typescript/package-lock.json
+                  node-version: 24
+                  registry-url: "https://registry.npmjs.org"
+
+            - name: Build and publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+              working-directory: typescript
+              run: |
+                  npm install
+                  node --run build
+                  npm publish --provenance --access public
+
+    go-build:
+        name: Build Go Artifacts
+        needs: release-please
+        if: ${{ (github.event_name == 'push' && needs.release-please.outputs.go_release_created) || (github.event_name == 'workflow_dispatch' && inputs.go_release == true) }}
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                include:
+                    - os: ubuntu-latest
+                      goos: linux
+                      goarch: amd64
+                    - os: ubuntu-latest
+                      goos: linux
+                      goarch: arm64
+                    - os: macos-latest
+                      goos: darwin
+                      goarch: amd64
+                    - os: macos-latest
+                      goos: darwin
+                      goarch: arm64
+                    - os: windows-latest
+                      goos: windows
+                      goarch: amd64
+        steps:
+            - uses: actions/checkout@v6
+
+            - uses: actions/setup-go@v6
+              with:
+                  go-version: "stable"
+                  cache-dependency-path: go/go.sum
+
+            - name: Build CLI
+              shell: bash
+              working-directory: ./go
+              run: |
+                  mkdir -p ../artifacts
+                  CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="-s -w" -o ../artifacts/bysquare-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }} ./cmd/bysquare
+
+            - name: Build FFI
+              shell: bash
+              working-directory: ./go
+              run: |
+                  make OUTPUT_DIR=../artifacts build-ffi
+                  cd ../artifacts
+                  # Rename the FFI library to include platform info
+                  if [ "${{ matrix.goos }}" = "windows" ]; then
+                      mv libbysquare.dll libbysquare-${{ matrix.goos }}-${{ matrix.goarch }}.dll
+                      mv libbysquare.h libbysquare-${{ matrix.goos }}-${{ matrix.goarch }}.h
+                  elif [ "${{ matrix.goos }}" = "darwin" ]; then
+                      mv libbysquare.dylib libbysquare-${{ matrix.goos }}-${{ matrix.goarch }}.dylib
+                      mv libbysquare.h libbysquare-${{ matrix.goos }}-${{ matrix.goarch }}.h
+                  else
+                      mv libbysquare.so libbysquare-${{ matrix.goos }}-${{ matrix.goarch }}.so
+                      mv libbysquare.h libbysquare-${{ matrix.goos }}-${{ matrix.goarch }}.h
+                  fi
+
+            - uses: actions/upload-artifact@v6
+              with:
+                  name: bysquare-${{ matrix.goos }}-${{ matrix.goarch }}
+                  path: artifacts/*
+                  retention-days: 1
+
+    go-upload:
+        name: Upload Go Release Assets
+        needs: [release-please, go-build]
+        if: ${{ (github.event_name == 'push' && needs.release-please.outputs.go_release_created) || (github.event_name == 'workflow_dispatch' && inputs.go_release == true) }}
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/download-artifact@v7
+              with:
+                  pattern: bysquare-*
+                  path: artifacts
+                  merge-multiple: true
+
+            - name: Generate checksums
+              working-directory: artifacts
+              run: sha256sum * > CHECKSUMS.txt
+
+            - name: Upload artifacts to release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  GH_REPO: ${{ github.repository }}
+              run: |
+                  gh release upload ${{ github.event_name == 'push' && needs.release-please.outputs.go_tag_name || inputs.go_tag }} artifacts/*

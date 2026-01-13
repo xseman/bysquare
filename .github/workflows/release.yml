@@ -1,0 +1,101 @@
+name: Release Please
+
+on:
+    push:
+        branches:
+            - master
+        paths:
+            - "typescript/**"
+            - "go/**"
+            - ".github/.release-manifest.json"
+            - ".github/.release-config.json"
+    workflow_dispatch:
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    release-please:
+        name: Release Please
+        runs-on: ubuntu-latest
+        outputs:
+            typescript_release_created: ${{ steps.release.outputs['typescript--release_created'] }}
+            typescript_tag_name: ${{ steps.release.outputs['typescript--tag_name'] }}
+            go_release_created: ${{ steps.release.outputs['go--release_created'] }}
+            go_tag_name: ${{ steps.release.outputs['go--tag_name'] }}
+        steps:
+            - uses: googleapis/release-please-action@v4
+              id: release
+              with:
+                  manifest-file: .github/.release-manifest.json
+                  config-file: .github/.release-config.json
+                  token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+    typescript-publish:
+        name: Publish TypeScript Package
+        needs: release-please
+        if: ${{ needs.release-please.outputs.typescript_release_created }}
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write
+        steps:
+            - uses: actions/checkout@v6
+
+            - uses: actions/setup-node@v4
+              with:
+                  cache: npm
+                  cache-dependency-path: typescript/package-lock.json
+                  node-version: 24
+                  registry-url: "https://registry.npmjs.org"
+
+            - name: Build and publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+              working-directory: typescript
+              run: |
+                  npm install
+                  node --run build
+                  npm publish --provenance --access public
+
+    go-build:
+        name: Build Go Artifacts
+        needs: release-please
+        if: ${{ needs.release-please.outputs.go_release_created }}
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+
+            - uses: actions/setup-go@v6
+              with:
+                  go-version: "stable"
+                  cache-dependency-path: go/go.sum
+
+            - name: Build release artifacts
+              working-directory: ./go
+              run: make OUTPUT_DIR=../artifacts artifacts
+
+            - uses: actions/upload-artifact@v6
+              with:
+                  name: bysquare-artifacts
+                  path: artifacts/*
+                  retention-days: 1
+
+    go-upload:
+        name: Upload Go Release Assets
+        needs: [release-please, go-build]
+        if: ${{ needs.release-please.outputs.go_release_created }}
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/download-artifact@v7
+              with:
+                  name: bysquare-artifacts
+                  path: artifacts
+
+            - name: Upload artifacts to release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  GH_REPO: ${{ github.repository }}
+              run: |
+                  gh release upload ${{ needs.release-please.outputs.go_tag_name }} artifacts/*

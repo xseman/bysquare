@@ -35,6 +35,7 @@ jobs:
                   manifest-file: .github/.release-manifest.json
                   config-file: ${{ github.event.inputs.release_next == 'true' && '.github/.release-config.next.json' || '.github/.release-config.json' }}
                   token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+                  target-branch: master
 
             - uses: actions/checkout@v6
               if: ${{ steps.release.outputs.release_created || github.event.inputs.tag }}

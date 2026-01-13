@@ -27,6 +27,7 @@ jobs:
                   manifest-file: .github/.release-manifest.json
                   config-file: .github/.release-config.json
                   token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+                  target-branch: master
 
     build:
         name: Build Artifacts

@@ -14,6 +14,7 @@ on:
 
 permissions:
     contents: read
+    actions: write
 
 jobs:
     test:
@@ -35,6 +36,14 @@ jobs:
             - name: Run tests
               working-directory: ./go
               run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+            - name: Upload coverage artifact
+              if: github.event_name == 'pull_request'
+              uses: actions/upload-artifact@v6
+              with:
+                  name: go-coverage
+                  path: go/coverage.out
+                  if-no-files-found: warn
 
     lint:
         name: Lint

@@ -15,7 +15,6 @@
 			"changelog-path": "CHANGELOG.md"
 		},
 		"go": {
-			"release-as": "0.1.0",
 			"release-type": "go",
 			"component": "go",
 			"tag-separator": "/",

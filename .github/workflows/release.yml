@@ -107,24 +107,33 @@ jobs:
                   go-version: "stable"
                   cache-dependency-path: go/go.sum
 
+            - name: Install cross-compilation tools
+              if: matrix.goos == 'linux' && matrix.goarch == 'arm64'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y gcc-aarch64-linux-gnu
+
             - name: Build CLI
               shell: bash
               working-directory: ./go
               run: |
                   mkdir -p ../artifacts
-                  CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="-s -w" -o ../artifacts/bysquare-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }} ./cmd/bysquare
+                  CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build \
+                      -ldflags="-s -w" \
+                      -o ../artifacts/bysquare-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }} \
+                      ./cmd/bysquare
 
             - name: Build FFI
               shell: bash
               working-directory: ./go
+              env:
+                  CC: ${{ matrix.goos == 'linux' && matrix.goarch == 'arm64' && 'aarch64-linux-gnu-gcc' || '' }}
               run: |
-                  CGO_ENABLED=1 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -buildmode=c-shared -o ../artifacts/libbysquare-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/libbysquare
+                  CGO_ENABLED=1 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build \
+                      -buildmode=c-shared \
+                      -o ../artifacts/libbysquare-${{ matrix.goos }}-${{ matrix.goarch }} \
+                      ./cmd/libbysquare
                   cd ../artifacts
-                  # Rename the header file to include platform info
-                  if [ -f "libbysquare-${{ matrix.goos }}-${{ matrix.goarch }}.h" ]; then
-                      mv "libbysquare-${{ matrix.goos }}-${{ matrix.goarch }}.h" "libbysquare-${{ matrix.goos }}-${{ matrix.goarch }}.h"
-                  fi
-                  # List files for debugging
                   ls -la
 
             - uses: actions/upload-artifact@v6
@@ -147,11 +156,14 @@ jobs:
 
             - name: Generate checksums
               working-directory: artifacts
-              run: sha256sum * > CHECKSUMS.txt
+              run: |
+                  sha256sum * > CHECKSUMS.txt
 
             - name: Upload artifacts to release
               env:
                   GH_TOKEN: ${{ github.token }}
                   GH_REPO: ${{ github.repository }}
               run: |
-                  gh release upload ${{ github.event_name == 'push' && needs.release-please.outputs.go_tag_name || inputs.go_tag }} artifacts/*
+                  gh release upload \
+                      ${{ github.event_name == 'push' && needs.release-please.outputs.go_tag_name || inputs.go_tag }} \
+                      artifacts/*

@@ -37,13 +37,12 @@ jobs:
         name: Release Please
         runs-on: ubuntu-latest
         outputs:
-            typescript_release_created: ${{ steps.release.outputs['typescript--release_created'] || inputs.typescript_release }}
-            typescript_tag_name: ${{ steps.release.outputs['typescript--tag_name'] || inputs.typescript_tag }}
-            go_release_created: ${{ steps.release.outputs['go--release_created'] || inputs.go_release }}
-            go_tag_name: ${{ steps.release.outputs['go--tag_name'] || inputs.go_tag }}
+            typescript_release_created: ${{ steps.release.outputs['typescript--release_created'] }}
+            typescript_tag_name: ${{ steps.release.outputs['typescript--tag_name'] }}
+            go_release_created: ${{ steps.release.outputs['go--release_created'] }}
+            go_tag_name: ${{ steps.release.outputs['go--tag_name'] }}
         steps:
             - uses: googleapis/release-please-action@v4
-              if: github.event_name == 'push'
               id: release
               with:
                   manifest-file: .github/.release-manifest.json
@@ -53,7 +52,7 @@ jobs:
     typescript-publish:
         name: Publish TypeScript Package
         needs: release-please
-        if: ${{ needs.release-please.outputs.typescript_release_created }}
+        if: ${{ (github.event_name == 'push' && needs.release-please.outputs.typescript_release_created) || (github.event_name == 'workflow_dispatch' && inputs.typescript_release == true) }}
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -80,7 +79,7 @@ jobs:
     go-build:
         name: Build Go Artifacts
         needs: release-please
-        if: ${{ needs.release-please.outputs.go_release_created }}
+        if: ${{ (github.event_name == 'push' && needs.release-please.outputs.go_release_created) || (github.event_name == 'workflow_dispatch' && inputs.go_release == true) }}
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
@@ -129,7 +128,7 @@ jobs:
     go-upload:
         name: Upload Go Release Assets
         needs: [release-please, go-build]
-        if: ${{ needs.release-please.outputs.go_release_created }}
+        if: ${{ (github.event_name == 'push' && needs.release-please.outputs.go_release_created) || (github.event_name == 'workflow_dispatch' && inputs.go_release == true) }}
         runs-on: ubuntu-latest
         steps:
             - uses: actions/download-artifact@v7
@@ -147,4 +146,4 @@ jobs:
                   GH_TOKEN: ${{ github.token }}
                   GH_REPO: ${{ github.repository }}
               run: |
-                  gh release upload ${{ needs.release-please.outputs.go_tag_name }} artifacts/*
+                  gh release upload ${{ github.event_name == 'push' && needs.release-please.outputs.go_tag_name || inputs.go_tag }} artifacts/*

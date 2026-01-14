@@ -29,21 +29,39 @@ standard:
 Both implementations are fully compatible with each other and follow the same specification.
 
 ```mermaid
-%%{init: {'theme': 'neutral', 'flowchart': {'nodeSpacing': 30, 'rankSpacing': 50}} }%%
-graph TD
-    A[Specification] --> B[TypeScript]
-    A --> C[Go]
+---
+config:
+  theme: neutral
+  look: handDrawn
+  themeVariables:
+    fontFamily: monospace
+    fontSize: "10px"
+---
 
-    B --> D[Library]
-    B --> E[CLI Tool]
-    B --> F[Browsers]
-    B --> G[Node.js / Bun / Deno]
+flowchart LR
+    subgraph Core["Core Implementations"]
+        TS[TypeScript]
+        GO[Go]
+    end
 
-    C --> H[Library]
-    C --> I[CLI Tool]
-    C --> J[C FFI]
+    subgraph Runtime["Runtime Environments"]
+        TS --> Browser
+        TS --> Node/Bun/Deno
+    end
 
-    J --> K[Python / PHP / Java<br/>Swift / etc.]
+    subgraph Tools["CLI Tools"]
+        TS --> TS_CLI[bysquare CLI]
+        GO --> GO_CLI[bysquare CLI]
+    end
+
+    subgraph Native["Go Library"]
+        GO --> GO_LIB[Go Applications]
+    end
+
+    subgraph FFI["Universal via C FFI"]
+        GO --> CFFI[libbysquare.so/dll]
+        CFFI --> ANY[Python, PHP, Java, Swift, etc.]
+    end
 ```
 
 ## Using C FFI

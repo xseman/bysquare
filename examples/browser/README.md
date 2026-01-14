@@ -18,9 +18,11 @@ Open any HTML file directly in your browser:
 
 ```bash
 # Using a simple HTTP server
-python3 -m http.server 8000
+bun *.html
 # or
 npx serve
+# or
+python3 -m http.server 8000
 ```
 
 Then navigate to `http://localhost:8000/native-example.html`

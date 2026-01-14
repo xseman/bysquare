@@ -8,11 +8,16 @@ Web-based examples using HTML and JavaScript:
 
 - [Browser Examples](browser/) - Vanilla JS, Lit, Preact, and PDF extraction
 
+## CLI
+
+Command-line examples:
+
+- [CLI Examples](cli/) - Node.js and Go CLI usage examples
+
 ## Node.js
 
-Server-side and CLI examples:
+Server-side examples:
 
-- [CLI](nodejs/cli/) - Command-line usage
 - [Server](nodejs/server/) - Node.js/Bun/Deno integration
 
 ## FFI (Foreign Function Interface)
@@ -39,7 +44,7 @@ cd nodejs/server && npm install && npm start
 **CLI:**
 
 ```bash
-npx bysquare --encode nodejs/cli/example.json
+npx bysquare --encode cli/nodejs/example.json
 ```
 
 **FFI:** Build the library first:

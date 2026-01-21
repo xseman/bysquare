@@ -53,13 +53,11 @@ jobs:
 
             - name: coverage report
               uses: marocchino/sticky-pull-request-comment@v2
-              env:
-                  COMMIT: ${{ github.event.workflow_run.head_sha }}
               with:
                   number: ${{ steps.merge-request.outputs.number }}
-                  header: Coverage Report
+                  header: TypeScript Coverage Report
                   message: |
-                      ### Coverage Report [`${COMMIT:0:7}`](https://github.com/${{ github.repository }}/commit/${{ github.event.workflow_run.head_sha }})
+                      ### TypeScript Coverage Report [Commit ${{ github.event.workflow_run.head_sha }}](https://github.com/${{ github.repository }}/commit/${{ github.event.workflow_run.head_sha }})
 
                       ```
                       ${{ steps.coverage.outputs.body }}

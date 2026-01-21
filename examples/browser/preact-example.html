@@ -18,11 +18,22 @@
 		<div id="app" />
 	</body>
 
-<script type="module">
+	<script type="module">
 	import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
-	import { CurrencyCode, encode, PaymentOptions } from "https://esm.sh/bysquare@latest/";
-	import { h, render } from "https://esm.sh/preact@latest";
-	import { useEffect, useRef, useState } from "https://esm.sh/preact@latest/hooks";
+	import {
+		CurrencyCode,
+		encode,
+		PaymentOptions,
+	} from "https://esm.sh/bysquare@latest/";
+	import {
+		h,
+		render,
+	} from "https://esm.sh/preact@latest";
+	import {
+		useEffect,
+		useRef,
+		useState,
+	} from "https://esm.sh/preact@latest/hooks";
 
 	function App() {
 		const [amount, setAmount] = useState(100);
@@ -35,13 +46,16 @@
 			try {
 				const encoded = encode({
 					invoiceId: new Date().toLocaleDateString("sk"),
-					payments: [{
-						type: PaymentOptions.PaymentOrder,
-						amount: parseFloat(amount),
-						bankAccounts: [{ iban }],
-						currencyCode: CurrencyCode.EUR,
-						variableSymbol: variable,
-					}],
+					payments: [
+						{
+							type: PaymentOptions.PaymentOrder,
+							amount: parseFloat(amount),
+							bankAccounts: [{ iban }],
+							currencyCode: CurrencyCode.EUR,
+							variableSymbol: variable,
+							beneficiary: { name: "John Doe" },
+						},
+					],
 				});
 				setEncodedText(encoded);
 			} catch (error) {
@@ -66,7 +80,14 @@
 			null,
 			h(
 				"div",
-				{ style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginBottom: "2rem" } },
+				{
+					style: {
+						display: "grid",
+						gridTemplateColumns: "1fr 1fr",
+						gap: "2rem",
+						marginBottom: "2rem",
+					},
+				},
 				h(
 					"div",
 					null,
@@ -103,11 +124,7 @@
 						}),
 					),
 				),
-				h(
-					"div",
-					{ style: { width: "200px" } },
-					h("div", { ref: qrRef }),
-				),
+				h("div", { style: { width: "200px" } }, h("div", { ref: qrRef })),
 			),
 			h(
 				"pre",
@@ -118,4 +135,5 @@
 	}
 
 	render(h(App), document.getElementById("app"));
-</script>
+	</script>
+</html>

@@ -29,6 +29,7 @@ export const DIRECT_DEBIT_FIXTURE = {
 			],
 			currencyCode: CurrencyCode.EUR,
 			variableSymbol: TEST_SYMBOLS.SIMPLE,
+			beneficiary: { name: "John Doe" },
 		},
 	],
 } satisfies DataModel;
@@ -76,7 +77,7 @@ export const DIRECT_DEBIT_SERIALIZED = /** dprint-ignore */ [
 	"\t",
 	"\t",
 	"\t",
-	"\t",
+	"\t", "John Doe",
 	"\t",
 	"\t",
 ].join("");

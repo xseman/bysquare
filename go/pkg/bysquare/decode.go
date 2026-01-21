@@ -31,7 +31,7 @@ func Decode(qr string) (DataModel, error) {
 	header := parseBysquareHeader(headerBytes)
 
 	// Validate version
-	if header.Version > uint8(Version110) {
+	if header.Version > uint8(Version120) {
 		return DataModel{}, fmt.Errorf("unsupported version: %d", header.Version)
 	}
 
@@ -266,7 +266,13 @@ func deserialize(data string) (DataModel, error) {
 	for i := 0; i < paymentsCount; i++ {
 		if idx+3 > len(parts) {
 			// Beneficiary fields might be missing in older versions
-			break
+			// Create empty beneficiary for v1.2.0 compliance
+			model.Payments[i].Beneficiary = &Beneficiary{
+				Name:   "",
+				Street: "",
+				City:   "",
+			}
+			continue
 		}
 
 		name := parts[idx]
@@ -276,12 +282,10 @@ func deserialize(data string) (DataModel, error) {
 		city := parts[idx]
 		idx++
 
-		if name != "" || street != "" || city != "" {
-			model.Payments[i].Beneficiary = &Beneficiary{
-				Name:   name,
-				Street: street,
-				City:   city,
-			}
+		model.Payments[i].Beneficiary = &Beneficiary{
+			Name:   name,
+			Street: street,
+			City:   city,
 		}
 	}
 

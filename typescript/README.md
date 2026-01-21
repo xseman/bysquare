@@ -6,6 +6,14 @@ the Slovak Banking Association in 2013. It is incorporated into a variety of
 invoices, reminders and other payment regulations.
 </p>
 
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#usage">Usage</a> •
+  <a href="#cli">CLI</a> •
+  <a href="#validation">Validation</a>
+</p>
+
 ## Features
 
 - TypeScript support
@@ -65,9 +73,8 @@ page:
 						amount: 123.45,
 						variableSymbol: "987654",
 						currencyCode: CurrencyCode.EUR,
-						bankAccounts: [
-							{ iban: "SK9611000000002918599669" }
-						],
+						beneficiary: { name: "John Doe" },
+						bankAccounts: [{ iban: "SK9611000000002918599669" }],
 					},
 				],
 			});
@@ -100,9 +107,8 @@ const qrstring = encode({
 			amount: 50.75,
 			variableSymbol: "123456",
 			currencyCode: CurrencyCode.EUR, // "EUR"
-			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
-			],
+			beneficiary: { name: "John Doe" },
+			bankAccounts: [{ iban: "SK9611000000002918599669" }],
 		},
 	],
 });
@@ -118,9 +124,8 @@ const qrstring = encode({
 			day: 15,
 			month: Month.January, // Single month
 			periodicity: Periodicity.Monthly, // "m"
-			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
-			],
+			beneficiary: { name: "John Doe" },
+			bankAccounts: [{ iban: "SK9611000000002918599669" }],
 		},
 	],
 });
@@ -133,9 +138,8 @@ const qrstring = encode({
 			amount: 25.0,
 			variableSymbol: "789012",
 			currencyCode: CurrencyCode.EUR, // "EUR"
-			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
-			],
+			beneficiary: { name: "John Doe" },
+			bankAccounts: [{ iban: "SK9611000000002918599669" }],
 		},
 	],
 });
@@ -168,9 +172,8 @@ const qrstring = encode({
 			month: Month.January | Month.July | Month.October, // Results in 577
 			periodicity: Periodicity.Monthly,
 			lastDate: "20251231",
-			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
-			],
+			beneficiary: { name: "John Doe" },
+			bankAccounts: [{ iban: "SK9611000000002918599669" }],
 		},
 	],
 });
@@ -190,9 +193,8 @@ const qrstring2 = encode({
 			month: encodedMonths, // Same result: 577
 			periodicity: Periodicity.Monthly,
 			lastDate: "20251231",
-			bankAccounts: [
-				{ iban: "SK9611000000002918599669" },
-			],
+			beneficiary: { name: "John Doe" },
+			bankAccounts: [{ iban: "SK9611000000002918599669" }],
 		},
 	],
 });
@@ -233,6 +235,7 @@ const data = {
 			amount: 100.0,
 			variableSymbol: "123",
 			paymentNote: "hello world",
+			beneficiary: { name: "John Doe" },
 			bankAccounts: [
 				{ iban: "SK9611000000002918599669" },
 				// ...more bank accounts
@@ -313,15 +316,16 @@ all XSD schema restrictions.
 
 ### Validation Behavior
 
-| Aspect        | Behavior                                                        |
-| ------------- | --------------------------------------------------------------- |
-| IBAN          | Validated (format + checksum via ISO 13616)                     |
-| BIC           | Validated (format via ISO 9362)                                 |
-| Currency      | Validated (ISO 4217, case-insensitive, includes XXX)            |
-| Date          | Validated (ISO 8601 format)                                     |
-| Symbols       | Permissive (accepts letters, spaces - XSD pattern not enforced) |
-| Amounts       | Permissive (accepts negative values)                            |
-| Field lengths | Not enforced                                                    |
+| Aspect           | Behavior                                                        |
+| ---------------- | --------------------------------------------------------------- |
+| IBAN             | Validated (format + checksum via ISO 13616)                     |
+| BIC              | Validated (format via ISO 9362)                                 |
+| Currency         | Validated (ISO 4217, case-insensitive, includes XXX)            |
+| Date             | Validated (ISO 8601 format)                                     |
+| Beneficiary name | Required (per spec v1.2.0)                                      |
+| Symbols          | Permissive (accepts letters, spaces - XSD pattern not enforced) |
+| Amounts          | Permissive (accepts negative values)                            |
+| Field lengths    | Not enforced                                                    |
 
 ### XSD Field Constraints Reference
 

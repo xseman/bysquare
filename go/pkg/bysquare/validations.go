@@ -83,6 +83,14 @@ func validateSimplePayment(payment *SimplePayment, path string) error {
 		}
 	}
 
+	// Validate beneficiary name (required since v1.2.0)
+	if payment.Beneficiary == nil || payment.Beneficiary.Name == "" {
+		return &ValidationError{
+			Message: "beneficiary name is required",
+			Path:    fmt.Sprintf("%s.beneficiary.name", path),
+		}
+	}
+
 	return nil
 }
 

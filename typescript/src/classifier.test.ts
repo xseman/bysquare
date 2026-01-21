@@ -111,6 +111,7 @@ describe("classifier", () => {
 						month: Month.January | Month.July | Month.October,
 						periodicity: Periodicity.Monthly,
 						lastDate: "20241231",
+						beneficiary: { name: "John Doe" },
 					},
 				],
 			} satisfies DataModel;

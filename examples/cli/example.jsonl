@@ -1,2 +1,2 @@
-{ "invoiceId": "random-id", "payments": [{ "type": 1, "amount": 100.0, "bankAccounts": [{ "iban": "SK9611000000002918599669" }], "currencyCode": "EUR", "variableSymbol": "123" }] }
-{ "invoiceId": "random-id", "payments": [{ "type": 1, "amount": 100.0, "bankAccounts": [{ "iban": "SK9611000000002918599669" }], "currencyCode": "EUR", "variableSymbol": "123" }] }
+{ "invoiceId": "random-id", "payments": [{ "beneficiary": { "name": "John Doe" }, "type": 1, "amount": 100.0, "bankAccounts": [{ "iban": "SK9611000000002918599669" }], "currencyCode": "EUR", "variableSymbol": "123" }] }
+{ "invoiceId": "random-id", "payments": [{ "beneficiary": { "name": "John Doe" }, "type": 1, "amount": 100.0, "bankAccounts": [{ "iban": "SK9611000000002918599669" }], "currencyCode": "EUR", "variableSymbol": "123" }] }

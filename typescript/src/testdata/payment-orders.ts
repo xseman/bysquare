@@ -33,6 +33,7 @@ export const PAYMENT_ORDER_FIXTURE = {
 			],
 			currencyCode: CurrencyCode.EUR,
 			variableSymbol: TEST_SYMBOLS.SIMPLE,
+			beneficiary: { name: "John Doe" },
 		},
 	],
 } satisfies DataModel;
@@ -49,6 +50,7 @@ export const VALID_PAYMENT_ORDER: DataModel = {
 		currencyCode: CurrencyCode.EUR,
 		bankAccounts: [{ iban: TEST_IBANS.SK_VALID }],
 		variableSymbol: TEST_SYMBOLS.SIMPLE,
+		beneficiary: { name: "John Doe" },
 	}],
 };
 
@@ -62,6 +64,7 @@ export const MINIMAL_PAYMENT: DataModel = {
 		amount: 0, // Add explicit amount to match encode/decode behavior
 		currencyCode: CurrencyCode.EUR,
 		bankAccounts: [{ iban: TEST_IBANS.SK_VALID }],
+		beneficiary: { name: "John Doe" },
 	}],
 };
 
@@ -86,7 +89,7 @@ export const PAYMENT_ORDER_SERIALIZED = /** dprint-ignore */ [
 	"\t",
 	"\t", "0",
 	"\t", "0",
-	"\t",
+	"\t", "John Doe",
 	"\t",
 	"\t",
 ].join("");

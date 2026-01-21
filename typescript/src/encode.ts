@@ -351,11 +351,10 @@ type Options = {
 	/**
 	 * Version of the BySquare format to use.
 	 *
-	 * Note: Version 1.1.0 adds beneficiary name and address fields but is not
-	 * supported by all banking apps (e.g., TatraBanka). Use 1.0.0 for better
-	 * compatibility.
+	 * Note: Version 1.2.0 requires beneficiary name. Earlier versions (1.0.0, 1.1.0)
+	 * do not require it but may have limited banking app support for beneficiary fields.
 	 *
-	 * @default Version["1.0.0"]
+	 * @default Version["1.2.0"]
 	 */
 	version?: Version;
 };
@@ -431,7 +430,7 @@ export function encode(
 	const _lzmaHeader = payloadCompressed.subarray(0, 13);
 	const lzmaBody = payloadCompressed.subarray(13);
 
-	const version = options.version ?? Version["1.0.0"];
+	const version = options.version ?? Version["1.2.0"];
 
 	const output = new Uint8Array([
 		...buildBysquareHeader([0x00, version, 0x00, 0x00]),

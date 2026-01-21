@@ -213,6 +213,7 @@ func TestEncode(t *testing.T) {
 						Amount:         100.0,
 						CurrencyCode:   CurrencyEUR,
 						VariableSymbol: "123",
+						Beneficiary: &Beneficiary{Name: "John Doe"},
 						BankAccounts: []BankAccount{
 							{IBAN: "SK9611000000002918599669"},
 						},
@@ -231,6 +232,7 @@ func TestEncode(t *testing.T) {
 						Amount:         100.0,
 						CurrencyCode:   CurrencyEUR,
 						VariableSymbol: "123",
+						Beneficiary: &Beneficiary{Name: "John Doe"},
 						BankAccounts: []BankAccount{
 							{IBAN: "INVALID"},
 						},

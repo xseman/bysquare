@@ -30,11 +30,14 @@ jobs:
             - uses: actions/setup-go@v6
               with:
                   go-version: "stable"
+                  cache-dependency-path: go/go.sum
 
             - name: Generate coverage markdown
+              working-directory: ./go
               shell: bash
               run: |
-                  go tool cover -func=coverage/coverage.out > cover_func.txt
+                  mv ../coverage/coverage.out coverage.out
+                  go tool cover -func=coverage.out > cover_func.txt
                   {
                       echo "### Go Coverage Report"
                       echo ""
@@ -44,7 +47,7 @@ jobs:
                       total=$(grep total cover_func.txt | awk '{print $3}')
                       echo ""
                       echo "**Total coverage:** $total"
-                  } > coverage.md
+                  } > ../coverage.md
 
             - name: coverage output
               id: coverage
@@ -67,12 +70,10 @@ jobs:
 
             - name: coverage report
               uses: marocchino/sticky-pull-request-comment@v2
-              env:
-                  COMMIT: ${{ github.event.workflow_run.head_sha }}
               with:
                   number: ${{ steps.merge-request.outputs.number }}
                   header: Go Coverage Report
                   message: |
-                      [`${COMMIT:0:7}`](https://github.com/${{ github.repository }}/commit/${{ github.event.workflow_run.head_sha }})
+                      [Commit ${{ github.event.workflow_run.head_sha }}](https://github.com/${{ github.repository }}/commit/${{ github.event.workflow_run.head_sha }})
 
                       ${{ steps.coverage.outputs.body }}

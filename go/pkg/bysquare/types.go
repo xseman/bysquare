@@ -16,6 +16,10 @@ const (
 	// Version110 - Added fields for beneficiary name and address.
 	// Released Date: 2015-06-24
 	Version110 Version = 0x01
+
+	// Version120 - Beneficiary name is now a required field.
+	// Released Date: 2025-04-01
+	Version120 Version = 0x02
 )
 
 // PaymentType represents the type of payment.
@@ -81,7 +85,8 @@ type BankAccount struct {
 
 // Beneficiary represents payment beneficiary information.
 type Beneficiary struct {
-	Name   string `json:"name,omitempty"`
+	// Name is required since v1.2.0.
+	Name   string `json:"name"`
 	Street string `json:"street,omitempty"`
 	City   string `json:"city,omitempty"`
 }
@@ -98,7 +103,8 @@ type SimplePayment struct {
 	OriginatorsReferenceInformation string         `json:"originatorsReferenceInformation,omitempty"`
 	PaymentNote                     string         `json:"paymentNote,omitempty"`
 	BankAccounts                    []BankAccount  `json:"bankAccounts" validate:"required,min=1,dive"`
-	Beneficiary                     *Beneficiary   `json:"beneficiary,omitempty"`
+	// Beneficiary is required since v1.2.0.
+	Beneficiary                     *Beneficiary   `json:"beneficiary" validate:"required"`
 	StandingOrderExt                *StandingOrder `json:"standingOrderExt,omitempty"`
 	DirectDebitExt                  *DirectDebit   `json:"directDebitExt,omitempty"`
 }

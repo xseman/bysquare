@@ -61,6 +61,7 @@ func TestDecodeWithVariableSymbol(t *testing.T) {
 				Amount:         100.50,
 				CurrencyCode:   "EUR",
 				VariableSymbol: "123456",
+				Beneficiary: &bysquare.Beneficiary{Name: "John Doe"},
 				BankAccounts: []bysquare.BankAccount{
 					{IBAN: "SK9611000000002918599669"},
 				},

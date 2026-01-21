@@ -34,10 +34,9 @@ jobs:
 
             - name: Generate coverage markdown
               shell: bash
-              working-directory: ./go
               run: |
-                  go tool cover -func=../coverage/coverage.out > ../cover_func.txt
-                  cd ..
+                  cd go
+                  go tool cover -func=../coverage/coverage.out > cover_func.txt
                   {
                       echo "### Go Coverage Report"
                       echo ""
@@ -47,7 +46,7 @@ jobs:
                       total=$(grep total cover_func.txt | awk '{print $3}')
                       echo ""
                       echo "**Total coverage:** $total"
-                  } > coverage.md
+                  } > ../coverage.md
 
             - name: coverage output
               id: coverage

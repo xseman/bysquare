@@ -42,6 +42,32 @@ go install github.com/xseman/bysquare/go/cmd/bysquare@latest
 
 Or download pre-built binaries from [GitHub Releases](https://github.com/xseman/bysquare/releases):
 
+#### Debian/Ubuntu (.deb)
+
+```bash
+# AMD64
+curl -LO https://github.com/xseman/bysquare/releases/latest/download/bysquare_0.1.0_amd64.deb
+sudo dpkg -i bysquare_0.1.0_amd64.deb
+
+# ARM64
+curl -LO https://github.com/xseman/bysquare/releases/latest/download/bysquare_0.1.0_arm64.deb
+sudo dpkg -i bysquare_0.1.0_arm64.deb
+```
+
+#### RHEL/Fedora/CentOS (.rpm)
+
+```bash
+# AMD64 (x86_64)
+curl -LO https://github.com/xseman/bysquare/releases/latest/download/bysquare-0.1.0-1.x86_64.rpm
+sudo rpm -i bysquare-0.1.0-1.x86_64.rpm
+
+# ARM64 (aarch64)
+curl -LO https://github.com/xseman/bysquare/releases/latest/download/bysquare-0.1.0-1.aarch64.rpm
+sudo rpm -i bysquare-0.1.0-1.aarch64.rpm
+```
+
+#### Standalone Binaries
+
 ```bash
 # Linux AMD64
 curl -LO https://github.com/xseman/bysquare/releases/latest/download/bysquare-linux-amd64

@@ -60,7 +60,7 @@ jobs:
         steps:
             - uses: actions/checkout@v6
 
-            - uses: actions/setup-node@v4
+            - uses: actions/setup-node@v6
               with:
                   cache: npm
                   cache-dependency-path: typescript/package-lock.json
@@ -136,6 +136,50 @@ jobs:
                   cd ../artifacts
                   ls -la
 
+            - name: Install nfpm
+              if: matrix.goos == 'linux'
+              shell: bash
+              run: go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+
+            - name: Create packages
+              if: matrix.goos == 'linux'
+              shell: bash
+              env:
+                  VERSION: ${{ needs.release-please.outputs.go_tag_name || inputs.go_tag }}
+                  GOARCH: ${{ matrix.goarch }}
+              run: |
+                  VERSION_NUM=${VERSION#go/v}
+
+                  cat > nfpm.yaml << EOF
+                  name: bysquare
+                  arch: ${GOARCH}
+                  platform: linux
+                  version: ${VERSION_NUM}
+                  section: utils
+                  priority: optional
+                  maintainer: Filip Seman <filip.seman@pm.me>
+                  description: |
+                    A CLI tool for generating and parsing PAY by square QR codes,
+                    a national standard for QR code payments adopted by the Slovak
+                    Banking Association in 2013.
+                  homepage: https://github.com/xseman/bysquare
+                  license: Apache-2.0
+
+                  contents:
+                    - src: artifacts/bysquare-linux-${GOARCH}
+                      dst: /usr/bin/bysquare
+                      file_info:
+                        mode: 0755
+
+                    - src: LICENSE
+                      dst: /usr/share/doc/bysquare/LICENSE
+                      file_info:
+                        mode: 0644
+                  EOF
+
+                  nfpm package --packager deb --target artifacts/
+                  nfpm package --packager rpm --target artifacts/
+
             - uses: actions/upload-artifact@v6
               with:
                   name: bysquare-${{ matrix.goos }}-${{ matrix.goarch }}
@@ -166,4 +210,5 @@ jobs:
               run: |
                   gh release upload \
                       ${{ github.event_name == 'push' && needs.release-please.outputs.go_tag_name || inputs.go_tag }} \
-                      artifacts/*
+                      artifacts/* \
+                      --clobber

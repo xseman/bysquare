@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.0](https://github.com/xseman/bysquare/compare/typescript/v3.0.0...typescript/v3.1.0) (2026-01-21)
+
+
+### Features
+
+* add golang implementation & structure refactor ([#78](https://github.com/xseman/bysquare/issues/78)) ([8a76cb5](https://github.com/xseman/bysquare/commit/8a76cb5fae23826193c011b26d6e87169e9eaaee))
+* support bysquare specification v1.2.0 ([#96](https://github.com/xseman/bysquare/issues/96)) ([39bfab1](https://github.com/xseman/bysquare/commit/39bfab1a0b8396fa0d5e57ef5dbf9a190ec90ddc))
+
 ## [3.0.0](https://github.com/xseman/bysquare/compare/v2.13.3...v3.0.0) (2025-12-26)
 
 

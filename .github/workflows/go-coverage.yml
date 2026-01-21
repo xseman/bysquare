@@ -33,10 +33,11 @@ jobs:
                   cache-dependency-path: go/go.sum
 
             - name: Generate coverage markdown
+              working-directory: ./go
               shell: bash
               run: |
-                  cd go
-                  go tool cover -func=../coverage/coverage.out > cover_func.txt
+                  mv ../coverage/coverage.out coverage.out
+                  go tool cover -func=coverage.out > cover_func.txt
                   {
                       echo "### Go Coverage Report"
                       echo ""

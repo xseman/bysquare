@@ -57,7 +57,7 @@ describe("encode basic functionality", () => {
 		expect(result).toBeDefined();
 		expect(typeof result).toBe("string");
 		expect(result.length).toBeGreaterThan(0);
-		expect(result.startsWith("00")).toBe(true);
+		expect(result.startsWith("08")).toBe(true);
 	});
 
 	test("encodes minimal payment", () => {
@@ -84,11 +84,11 @@ describe("encode basic functionality", () => {
 		expect(result.length).toBeGreaterThan(0);
 	});
 
-	test("encodes with Version 1.0.0 by default", () => {
+	test("encodes with Version 1.2.0 by default", () => {
 		const result = encode(MINIMAL_PAYMENT);
 
 		expect(result).toBeDefined();
-		expect(result.startsWith("00")).toBe(true);
+		expect(result.startsWith("08")).toBe(true);
 	});
 
 	test("encodes with Version 1.1.0 when specified", () => {

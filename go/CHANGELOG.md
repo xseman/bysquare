@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/xseman/bysquare/compare/go/v0.1.0...go/v0.2.0) (2026-01-21)
+
+
+### Features
+
+* support bysquare specification v1.2.0 ([#96](https://github.com/xseman/bysquare/issues/96)) ([39bfab1](https://github.com/xseman/bysquare/commit/39bfab1a0b8396fa0d5e57ef5dbf9a190ec90ddc))
+
+
+### Maintenance
+
+* **base32hex:** use standard encoding/base32 ([42aba02](https://github.com/xseman/bysquare/commit/42aba02045bafa3a8cabfd8cae2d3c8e637224c9))
+
 ## 0.1.0 (2026-01-14)
 
 

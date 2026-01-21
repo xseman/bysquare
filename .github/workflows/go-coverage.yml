@@ -30,11 +30,13 @@ jobs:
             - uses: actions/setup-go@v6
               with:
                   go-version: "stable"
+                  cache-dependency-path: go/go.sum
 
             - name: Generate coverage markdown
+              working-directory: ./go
               shell: bash
               run: |
-                  go tool cover -func=coverage/coverage.out > cover_func.txt
+                  go tool cover -func=../coverage/coverage.out > cover_func.txt
                   {
                       echo "### Go Coverage Report"
                       echo ""

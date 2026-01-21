@@ -52,6 +52,7 @@ export function buildPaymentOrder(overrides?: Partial<Payment>): Payment {
 		amount: TEST_AMOUNTS.STANDARD,
 		currencyCode: TEST_CURRENCIES.EUR,
 		bankAccounts: [buildBankAccount()],
+		beneficiary: { name: "John Doe" },
 		...overrides,
 	} as Payment;
 }

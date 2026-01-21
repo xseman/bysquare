@@ -157,6 +157,7 @@ export function deserialize(qr: string): DataModel {
 			specificSymbol: specificSymbol || undefined,
 			originatorsReferenceInformation: originatorRefInfo || undefined,
 			paymentNote: paymentNote || undefined,
+			beneficiary: { name: "" },
 			bankAccounts: [],
 		} as Payment;
 
@@ -210,19 +211,17 @@ export function deserialize(qr: string): DataModel {
 	}
 
 	for (let i = 0; i < paymentslen; i++) {
-		const name = data.shift();
-		const addressLine1 = data.shift();
-		const addressLine2 = data.shift();
+		const name = data.shift() ?? "";
+		const addressLine1 = data.shift() ?? "";
+		const addressLine2 = data.shift() ?? "";
 
-		if (Boolean(name) || Boolean(addressLine1) || Boolean(addressLine2)) {
-			const beneficiary = {
-				name: name || undefined,
-				street: addressLine1 || undefined,
-				city: addressLine2 || undefined,
-			} satisfies Beneficiary;
+		const beneficiary = {
+			name: name,
+			street: addressLine1 || undefined,
+			city: addressLine2 || undefined,
+		} satisfies Beneficiary;
 
-			output.payments[i].beneficiary = beneficiary;
-		}
+		output.payments[i].beneficiary = beneficiary;
 	}
 
 	return output;
@@ -277,7 +276,7 @@ export function decode(qr: string): DataModel {
 	const headerBytes = bytes.slice(0, 2);
 	const headerData = bysquareHeaderDecoder(headerBytes);
 
-	if ((headerData.version > Version["1.1.0"])) {
+	if ((headerData.version > Version["1.2.0"])) {
 		throw new DecodeError(DecodeErrorMessage.UnsupportedVersion, {
 			version: headerData.version,
 		});

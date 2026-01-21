@@ -348,6 +348,7 @@ func TestValidateSimplePayment(t *testing.T) {
 		Amount:         100.00,
 		CurrencyCode:   CurrencyEUR,
 		PaymentDueDate: "2023-12-31",
+		Beneficiary: &Beneficiary{Name: "John Doe"},
 		BankAccounts: []BankAccount{
 			{IBAN: "SK3112000000198742637541"},
 		},
@@ -370,6 +371,7 @@ func TestValidateSimplePayment(t *testing.T) {
 				Amount:         100.00,
 				CurrencyCode:   CurrencyEUR,
 				PaymentDueDate: "2023-12-31",
+				Beneficiary:    &Beneficiary{Name: "John Doe"},
 				BankAccounts:   []BankAccount{},
 			},
 			shouldErr: true,
@@ -381,6 +383,7 @@ func TestValidateSimplePayment(t *testing.T) {
 				Amount:         100.00,
 				CurrencyCode:   "invalid",
 				PaymentDueDate: "2023-12-31",
+				Beneficiary: &Beneficiary{Name: "John Doe"},
 				BankAccounts: []BankAccount{
 					{IBAN: "SK3112000000198742637541"},
 				},
@@ -394,6 +397,35 @@ func TestValidateSimplePayment(t *testing.T) {
 				Amount:         100.00,
 				CurrencyCode:   CurrencyEUR,
 				PaymentDueDate: "31-12-2023",
+				Beneficiary: &Beneficiary{Name: "John Doe"},
+				BankAccounts: []BankAccount{
+					{IBAN: "SK3112000000198742637541"},
+				},
+			},
+			shouldErr: true,
+		},
+		{
+			name: "missing beneficiary name",
+			payment: SimplePayment{
+				Type:           PaymentTypePaymentOrder,
+				Amount:         100.00,
+				CurrencyCode:   CurrencyEUR,
+				PaymentDueDate: "2023-12-31",
+				Beneficiary: nil,
+				BankAccounts: []BankAccount{
+					{IBAN: "SK3112000000198742637541"},
+				},
+			},
+			shouldErr: true,
+		},
+		{
+			name: "empty beneficiary name",
+			payment: SimplePayment{
+				Type:           PaymentTypePaymentOrder,
+				Amount:         100.00,
+				CurrencyCode:   CurrencyEUR,
+				PaymentDueDate: "2023-12-31",
+				Beneficiary: &Beneficiary{Name: ""},
 				BankAccounts: []BankAccount{
 					{IBAN: "SK3112000000198742637541"},
 				},
@@ -423,6 +455,7 @@ func TestValidateDataModel(t *testing.T) {
 				Type:         PaymentTypePaymentOrder,
 				Amount:       100.00,
 				CurrencyCode: CurrencyEUR,
+				Beneficiary: &Beneficiary{Name: "John Doe"},
 				BankAccounts: []BankAccount{
 					{IBAN: "SK3112000000198742637541"},
 				},
@@ -457,6 +490,7 @@ func TestValidateDataModel(t *testing.T) {
 						Type:         PaymentTypePaymentOrder,
 						Amount:       100.00,
 						CurrencyCode: "INVALID",
+						Beneficiary: &Beneficiary{Name: "John Doe"},
 						BankAccounts: []BankAccount{
 							{IBAN: "SK3112000000198742637541"},
 						},
@@ -485,6 +519,7 @@ func TestValidationErrorPath(t *testing.T) {
 		Type:         PaymentTypePaymentOrder,
 		Amount:       100.00,
 		CurrencyCode: "INVALID",
+		Beneficiary: &Beneficiary{Name: "John Doe"},
 		BankAccounts: []BankAccount{
 			{IBAN: "SK3112000000198742637541"},
 		},

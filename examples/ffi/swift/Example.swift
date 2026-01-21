@@ -27,6 +27,7 @@ let json = """
     "amount": 123.45,
     "currencyCode": "EUR",
     "variableSymbol": "987654",
+    "beneficiary": {"name": "John Doe"},
     "bankAccounts": [{"iban": "SK9611000000002918599669"}]
   }]
 }

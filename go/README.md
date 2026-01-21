@@ -6,6 +6,14 @@ the Slovak Banking Association in 2013. It is incorporated into a variety of
 invoices, reminders and other payment regulations.
 </p>
 
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#usage">Usage</a> •
+  <a href="#cli">CLI</a> •
+  <a href="#ffi-usage">FFI</a>
+</p>
+
 ## Features
 
 - CLI tooling
@@ -91,6 +99,7 @@ func main() {
 				Amount:         123.45,
 				CurrencyCode:   bysquare.CurrencyEUR,
 				VariableSymbol: "987654",
+				Beneficiary: &bysquare.Beneficiary{Name: "John Doe"},
 				BankAccounts: []bysquare.BankAccount{
 					{IBAN: "SK9611000000002918599669"},
 				},
@@ -129,7 +138,7 @@ bysquare encode file.jsonl
 Encode from stdin:
 
 ```bash
-echo '{"payments":[{"type":1,"amount":123.45,"currencyCode":"EUR","bankAccounts":[{"iban":"SK9611000000002918599669"}]}]}' | bysquare encode -
+echo '{"payments":[{"type":1,"amount":123.45,"currencyCode":"EUR","bankAccounts":[{"iban":"SK9611000000002918599669"}],"beneficiary":{"name":"John Doe"}}]}' | bysquare encode -
 ```
 
 #### Decode

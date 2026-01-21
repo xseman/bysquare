@@ -11,52 +11,57 @@
 			content="width=device-width, initial-scale=1.0"
 		/>
 		<title>Multiple Payments Example - Bysquare</title>
-</head>
-<body>
-	<h1>Multiple Payments Example</h1>
-	<p>Create and manage multiple payment QR codes in batch</p>
+	</head>
+	<body>
+		<h1>Multiple Payments Example</h1>
+		<p>Create and manage multiple payment QR codes in batch</p>
 
-	<div
-		id="payment-inputs"
-		style="overflow-x: auto; 
-	white-space: nowrap; 
-	padding: 10px 0; 
-	margin-bottom: 2rem;
-	border: 1px solid var(--border);
-	border-radius: 4px;"
-	/>
+		<div
+			id="payment-inputs"
+			style="overflow-x: auto;
+				white-space: nowrap;
+				padding: 10px 0;
+				margin-bottom: 2rem;
+				border: 1px solid var(--border);
+				border-radius: 4px;"
+		/>
 
-	<div
-		id="result"
-		style="text-align: center;"
-	>
-		<pre
-			id="encodedText"
-			style="word-wrap: break-word; text-wrap: auto; max-width: 100%; margin-bottom: 1rem;"
-		/>
-		<canvas
-			height="200"
-			width="200"
-			id="canvas"
-		/>
-	</div>
+		<div
+			id="result"
+			style="text-align: center"
+		>
+			<pre
+				id="encodedText"
+				style="word-wrap: break-word; text-wrap: auto; max-width: 100%; margin-bottom: 1rem"
+			/>
+			<canvas
+				height="200"
+				width="200"
+				id="canvas"
+			/>
+		</div>
+	</body>
 
 	<script type="module">
-		import { CurrencyCode, encode, PaymentOptions } from "https://esm.sh/bysquare@latest/";
-		import { qrcanvas } from "https://esm.sh/qrcanvas@latest";
+	import {
+		CurrencyCode,
+		encode,
+		PaymentOptions,
+	} from "https://esm.sh/bysquare@latest/";
+	import { qrcanvas } from "https://esm.sh/qrcanvas@latest";
 
-		const inputsContainer = document.getElementById("payment-inputs");
-		const encodedTextElement = document.getElementById("encodedText");
-		const canvas = document.getElementById("canvas");
+	const inputsContainer = document.getElementById("payment-inputs");
+	const encodedTextElement = document.getElementById("encodedText");
+	const canvas = document.getElementById("canvas");
 
-		function createInputId(index) {
-			return `payment-${index}`;
-		}
+	function createInputId(index) {
+		return `payment-${index}`;
+	}
 
-		function createInputGroup(index, defaultValue = {}) {
-			const card = document.createElement("div");
-			card.id = createInputId(index);
-			card.style.cssText = `
+	function createInputGroup(index, defaultValue = {}) {
+		const card = document.createElement("div");
+		card.id = createInputId(index);
+		card.style.cssText = `
 				display: inline-block; 
 				vertical-align: top; 
 				white-space: normal;
@@ -68,7 +73,7 @@
 				background: var(--bg-alt);
 			`;
 
-			card.innerHTML = `
+		card.innerHTML = `
 				<h3 style="margin-top: 0;">Payment ${index + 1}</h3>
 				<label style="display: block; margin: 10px 0;">
 					Amount
@@ -104,85 +109,90 @@
 				</div>
 			`;
 
-			const [cloneButton, deleteButton] = card.querySelectorAll("button");
-			cloneButton.addEventListener("click", () => clonePayment(index));
-			deleteButton.addEventListener("click", () => deletePayment(index));
+		const [cloneButton, deleteButton] = card.querySelectorAll("button");
+		cloneButton.addEventListener("click", () => clonePayment(index));
+		deleteButton.addEventListener("click", () => deletePayment(index));
 
-			const inputs = card.querySelectorAll("input");
-			inputs.forEach((input) => input.addEventListener("input", generateBysquare));
+		const inputs = card.querySelectorAll("input");
+		inputs.forEach((input) => input.addEventListener("input", generateBysquare));
 
-			return card;
-		}
+		return card;
+	}
 
-		function clonePayment(index) {
-			const originalCard = document.getElementById(createInputId(index));
-			if (!originalCard) return;
+	function clonePayment(index) {
+		const originalCard = document.getElementById(createInputId(index));
+		if (!originalCard) return;
 
-			const values = {
-				amount: originalCard.querySelector('input[name="amount"]').value,
-				iban: originalCard.querySelector('input[name="iban"]').value,
-				variable: originalCard.querySelector('input[name="variable"]').value,
-			};
+		const values = {
+			amount: originalCard.querySelector('input[name="amount"]').value,
+			iban: originalCard.querySelector('input[name="iban"]').value,
+			variable: originalCard.querySelector('input[name="variable"]').value,
+		};
 
-			const newIndex = inputsContainer.children.length;
-			const newCard = createInputGroup(newIndex, values);
-			inputsContainer.appendChild(newCard);
+		const newIndex = inputsContainer.children.length;
+		const newCard = createInputGroup(newIndex, values);
+		inputsContainer.appendChild(newCard);
+		generateBysquare();
+	}
+
+	function deletePayment(index) {
+		const card = document.getElementById(createInputId(index));
+		if (!card) return;
+
+		if (inputsContainer.children.length > 1) {
+			card.remove();
 			generateBysquare();
+		} else {
+			alert("At least one payment is required.");
 		}
+	}
 
-		function deletePayment(index) {
-			const card = document.getElementById(createInputId(index));
-			if (!card) return;
-
-			if (inputsContainer.children.length > 1) {
-				card.remove();
-				generateBysquare();
-			} else {
-				alert("At least one payment is required.");
-			}
-		}
-
-		function generateBysquare() {
-			const paymentCards = inputsContainer.querySelectorAll("div[id^='payment-']");
-			const payments = Array.from(paymentCards).map((card) => ({
-				type: PaymentOptions.PaymentOrder,
-				amount: parseFloat(card.querySelector('input[name="amount"]').value),
-				bankAccounts: [{
+	function generateBysquare() {
+		const paymentCards = inputsContainer.querySelectorAll("div[id^='payment-']");
+		const payments = Array.from(paymentCards).map((card) => ({
+			type: PaymentOptions.PaymentOrder,
+			amount: parseFloat(card.querySelector('input[name="amount"]').value),
+			currencyCode: CurrencyCode.EUR,
+			variableSymbol: card.querySelector('input[name="variable"]').value,
+			beneficiary: { name: "John Doe" },
+			bankAccounts: [
+				{
 					iban: card.querySelector('input[name="iban"]').value,
-				}],
-				currencyCode: CurrencyCode.EUR,
-				variableSymbol: card.querySelector('input[name="variable"]').value,
-			}));
+				},
+			],
+		}));
 
-			try {
-				const encodedText = encode({
-					invoiceId: new Date().toLocaleDateString("sk"),
-					payments: payments,
-				});
+		try {
+			const encodedText = encode({
+				invoiceId: new Date().toLocaleDateString("sk"),
+				payments: payments,
+			});
 
-				encodedTextElement.textContent = encodedText;
-				const ctx = canvas.getContext("2d");
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
-				qrcanvas({
-					data: encodedText,
-					canvas: canvas,
-				});
-			} catch (error) {
-				console.error("Error generating QR code:", error);
-				encodedTextElement.textContent = error.message;
-			}
+			encodedTextElement.textContent = encodedText;
+			const ctx = canvas.getContext("2d");
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			qrcanvas({
+				data: encodedText,
+				canvas: canvas,
+			});
+		} catch (error) {
+			console.error("Error generating QR code:", error);
+			encodedTextElement.textContent = error.message;
 		}
+	}
 
-		function initialize() {
-			inputsContainer.appendChild(createInputGroup(0));
-			inputsContainer.appendChild(createInputGroup(1, {
+	function initialize() {
+		inputsContainer.appendChild(createInputGroup(0));
+		inputsContainer.appendChild(
+			createInputGroup(1, {
 				amount: 200,
 				iban: "SK9611000000002918599669",
 				variable: "456",
-			}));
-			generateBysquare();
-		}
+			}),
+		);
+		generateBysquare();
+	}
 
-		initialize();
+	initialize();
 	</script>
 </html>

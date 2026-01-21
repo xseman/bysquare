@@ -12,69 +12,74 @@
 		<h1>PDF QR Code Extract</h1>
 		<p>Upload a PDF file to extract and parse Bysquare QR codes.</p>
 		<div id="app" />
+	</body>
 
 	<script type="module">
-		import { decode } from "https://esm.sh/bysquare@latest/";
-		import jsQR from "https://esm.sh/jsqr@latest";
-		import { getDocument, GlobalWorkerOptions } from "https://esm.sh/pdfjs-dist@latest";
+	import { decode } from "https://esm.sh/bysquare@latest/";
+	import jsQR from "https://esm.sh/jsqr@latest";
+	import {
+		getDocument,
+		GlobalWorkerOptions,
+	} from "https://esm.sh/pdfjs-dist@latest";
 
-		GlobalWorkerOptions.workerSrc = "https://esm.sh/pdfjs-dist@latest/build/pdf.worker.min.mjs";
+	GlobalWorkerOptions.workerSrc = "https://esm.sh/pdfjs-dist@latest/build/pdf.worker.min.mjs";
 
-		const app = document.getElementById("app");
-		app.innerHTML = `
+	const app = document.getElementById("app");
+	app.innerHTML = `
 			<input type="file" accept="application/pdf" id="fileInput" />
 			<div id="result"></div>
 		`;
 
-		const fileInput = document.getElementById("fileInput");
-		const result = document.getElementById("result");
+	const fileInput = document.getElementById("fileInput");
+	const result = document.getElementById("result");
 
-		fileInput.addEventListener("change", async (event) => {
-			const file = event.target.files[0];
-			if (!file) return;
+	fileInput.addEventListener("change", async (event) => {
+		const file = event.target.files[0];
+		if (!file) return;
 
-			result.textContent = "Processing PDF...";
+		result.textContent = "Processing PDF...";
 
-			try {
-				const arrayBuffer = await file.arrayBuffer();
-				const pdf = await getDocument({ data: arrayBuffer }).promise;
+		try {
+			const arrayBuffer = await file.arrayBuffer();
+			const pdf = await getDocument({ data: arrayBuffer }).promise;
 
-				for (let i = 1; i <= pdf.numPages; i++) {
-					const page = await pdf.getPage(i);
-					const viewport = page.getViewport({ scale: 2.0 });
+			for (let i = 1; i <= pdf.numPages; i++) {
+				const page = await pdf.getPage(i);
+				const viewport = page.getViewport({ scale: 2.0 });
 
-					const canvas = document.createElement("canvas");
-					const context = canvas.getContext("2d");
-					canvas.width = viewport.width;
-					canvas.height = viewport.height;
+				const canvas = document.createElement("canvas");
+				const context = canvas.getContext("2d");
+				canvas.width = viewport.width;
+				canvas.height = viewport.height;
 
-					await page.render({
-						canvasContext: context,
-						viewport: viewport,
-					}).promise;
+				await page.render({
+					canvasContext: context,
+					viewport: viewport,
+				}).promise;
 
-					const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-					const qrCode = jsQR(imageData.data, canvas.width, canvas.height);
+				const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+				const qrCode = jsQR(imageData.data, canvas.width, canvas.height);
 
-					if (qrCode) {
-						try {
-							const decoded = decode(qrCode.data);
-							result.innerHTML = `
+				if (qrCode) {
+					try {
+						const decoded = decode(qrCode.data);
+						result.innerHTML = `
 								<h3>Found QR code on page ${i}</h3>
 								<pre>${JSON.stringify(decoded, null, 2)}</pre>
 							`;
-							return;
-						} catch (decodeError) {
-							console.error("Decode error:", decodeError);
-							continue;
-						}
+						return;
+					} catch (decodeError) {
+						console.error("Decode error:", decodeError);
+						continue;
 					}
 				}
-
-				result.textContent = "No valid Bysquare QR codes found in PDF.";
-			} catch (error) {
-				console.error("PDF processing error:", error);
-				result.textContent = `Error: ${error.message}`;
 			}
-		});
+
+			result.textContent = "No valid Bysquare QR codes found in PDF.";
+		} catch (error) {
+			console.error("PDF processing error:", error);
+			result.textContent = `Error: ${error.message}`;
+		}
+	});
 	</script>
+</html>

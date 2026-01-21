@@ -111,6 +111,18 @@ describe("validateSimplePayment", () => {
 
 		expect(() => validateSimplePayment(payment, "test")).toThrow(ValidationError);
 	});
+
+	test("rejects payment without beneficiary name", () => {
+		const payment = buildPaymentOrder({ beneficiary: { name: "" } });
+
+		expect(() => validateSimplePayment(payment, "test")).toThrow(ValidationError);
+	});
+
+	test("rejects payment without beneficiary", () => {
+		const payment = buildPaymentOrder({ beneficiary: undefined as any });
+
+		expect(() => validateSimplePayment(payment, "test")).toThrow(ValidationError);
+	});
 });
 
 describe("validateDataModel", () => {

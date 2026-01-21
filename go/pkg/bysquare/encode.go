@@ -25,7 +25,7 @@ func DefaultEncodeOptions() EncodeOptions {
 	return EncodeOptions{
 		Deburr:   true,
 		Validate: true,
-		Version:  Version100,
+		Version:  Version120,
 	}
 }
 

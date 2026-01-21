@@ -11,6 +11,7 @@ const ErrorMessages = {
 	BIC: "Invalid BIC. Make sure ISO 9362 format is used.",
 	CurrencyCode: "Invalid currency code. Make sure ISO 4217 format is used.",
 	Date: "Invalid date. Make sure ISO 8601 format is used.",
+	BeneficiaryName: "Beneficiary name is required.",
 } as const;
 
 /**
@@ -78,6 +79,13 @@ export function validateSimplePayment(
 		throw new ValidationError(
 			ErrorMessages.Date,
 			`${path}.paymentDueDate`,
+		);
+	}
+
+	if (!simplePayment.beneficiary?.name) {
+		throw new ValidationError(
+			ErrorMessages.BeneficiaryName,
+			`${path}.beneficiary.name`,
 		);
 	}
 }

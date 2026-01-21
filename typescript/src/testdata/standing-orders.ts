@@ -33,6 +33,7 @@ export const STANDING_ORDER_FIXTURE = {
 			variableSymbol: TEST_SYMBOLS.SIMPLE,
 			lastDate: "20241011",
 			day: 1,
+			beneficiary: { name: "John Doe" },
 		},
 	],
 } satisfies DataModel;
@@ -46,7 +47,7 @@ export const STANDING_ORDER_DATA: DataModel = {
 		amount: 50.0,
 		currencyCode: CurrencyCode.EUR,
 		bankAccounts: [{ iban: TEST_IBANS.SK_VALID }],
-		beneficiary: { name: "Test Beneficiary" },
+		beneficiary: { name: "John Doe" },
 		periodicity: "m",
 	}],
 };
@@ -75,7 +76,7 @@ export const STANDING_ORDER_SERIALIZED = /** dprint-ignore */ [
 	"\t", "m",
 	"\t", "20241011",
 	"\t", "0",
-	"\t",
+	"\t", "John Doe",
 	"\t",
 	"\t",
 ].join("");

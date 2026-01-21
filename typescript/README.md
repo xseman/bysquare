@@ -1,17 +1,17 @@
 <h1 align="center">bysquare</h1>
 
 <p align="center">
-"PAY by square" is a national standard for QR code payments that was adopted by
-the Slovak Banking Association in 2013. It is incorporated into a variety of
-invoices, reminders and other payment regulations.
+	"PAY by square" is a national standard for QR code payments that was adopted by
+	the Slovak Banking Association in 2013. It is incorporated into a variety of
+	invoices, reminders and other payment regulations.
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#usage">Usage</a> •
-  <a href="#cli">CLI</a> •
-  <a href="#validation">Validation</a>
+	<a href="#features">Features</a> •
+	<a href="#installation">Installation</a> •
+	<a href="#usage">Usage</a> •
+	<a href="#cli">CLI</a> •
+	<a href="#validation">Validation</a>
 </p>
 
 ## Features

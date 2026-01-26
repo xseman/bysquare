@@ -7,53 +7,12 @@ C-compatible FFI layer for using library from other programming languages.
 - Go 1.23+
 - GCC (for CGo)
 
-## Tested Languages
+## Usage Examples
 
-- Python (via ctypes)
-- PHP (via FFI extension)
-- Java (via JNA)
+See [../../examples/ffi/](../../examples/ffi/) for complete examples in Java,
+C#, PHP, Python, and Swift.
 
-## Architecture
-
-```mermaid
----
-config:
-  theme: neutral
-  themeVariables:
-    fontFamily: monospace
-    fontSize: "10px"
----
-
-flowchart TB
-	Bindings["Any language supporting C FFI"]
-
-    subgraph FFI["C FFI Layer"]
-        CFG["1. create_config()"]
-        SET["2. config_set_*()"]
-        ENC["3. encode()"]
-        DEC["3. decode()"]
-        FREE["4. free()"]
-    end
-
-    subgraph Core["Go Core"]
-        LIB["libbysquare.so/dll"]
-    end
-
-    Bindings --> CFG
-    CFG --> SET
-    SET --> ENC & DEC
-    ENC & DEC --> LIB
-    LIB --> FREE
-
-    style CFG  fill:#B7B1FF, stroke:#7B1FA2, stroke-width:1.5px
-    style SET  fill:#B7B1FF, stroke:#7B1FA2, stroke-width:1.5px
-    style ENC  fill:#B7B1FF, stroke:#7B1FA2, stroke-width:1.5px
-    style DEC  fill:#B7B1FF, stroke:#7B1FA2, stroke-width:1.5px
-    style FREE fill:#B7B1FF, stroke:#7B1FA2, stroke-width:1.5px
-    style LIB  fill:#A5EAFF, stroke:#00838F, stroke-width:1.5px
-```
-
-**Configuration Pattern:**
+**Basic Configuration Pattern:**
 
 1. Create config handle with defaults
 2. Set options (deburr, validate, version)

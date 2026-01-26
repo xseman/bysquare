@@ -121,8 +121,12 @@ decode, version). Call `bysquare_free_config()` only if you created a config poi
 **Thread Safety:**
 
 - Config instances are NOT thread-safe for concurrent modification.
-- Do not modify config from multiple threads simultaneously.
-- Concurrent reads (multiple threads encoding with the same config) are safe.
+- Do not call config setters from multiple threads on the same config
+  simultaneously.
+- Concurrent encoding operations (reading config) from multiple threads are safe
+  as long as no thread is modifying the config during those operations.
+- For multi-threaded applications that need to modify config, either synchronize
+  access externally or use separate config instances per thread.
 - For multi-threaded applications, either synchronize config modifications or use
   separate config instances per thread.
 

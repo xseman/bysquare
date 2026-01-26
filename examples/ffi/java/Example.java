@@ -21,27 +21,27 @@ public class Example {
 
         var createConfigFunc = linker.downcallHandle(
             lookup.find("bysquare_create_config").orElseThrow(),
-            FunctionDescriptor.of(ValueLayout.JAVA_LONG)
+            FunctionDescriptor.of(ValueLayout.ADDRESS)
         );
 
         var configSetDeburrFunc = linker.downcallHandle(
             lookup.find("bysquare_config_set_deburr").orElseThrow(),
-            FunctionDescriptor.ofVoid(ValueLayout.JAVA_LONG, ValueLayout.JAVA_INT)
+            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.JAVA_INT)
         );
 
         var configSetValidateFunc = linker.downcallHandle(
             lookup.find("bysquare_config_set_validate").orElseThrow(),
-            FunctionDescriptor.ofVoid(ValueLayout.JAVA_LONG, ValueLayout.JAVA_INT)
+            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.JAVA_INT)
         );
 
         var freeConfigFunc = linker.downcallHandle(
             lookup.find("bysquare_free_config").orElseThrow(),
-            FunctionDescriptor.ofVoid(ValueLayout.JAVA_LONG)
+            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
         );
 
         var encodeFunc = linker.downcallHandle(
             lookup.find("bysquare_encode").orElseThrow(),
-            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG)
+            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
         );
 
         var decodeFunc = linker.downcallHandle(
@@ -68,8 +68,11 @@ public class Example {
             """;
 
         try (var arena = Arena.ofConfined()) {
-            // Create config and set options
-            long config = (long) createConfigFunc.invoke();
+            // Option 1: Use defaults (pass MemorySegment.NULL for config)
+            // var encodeResult = (MemorySegment) encodeFunc.invoke(jsonPtr, MemorySegment.NULL);
+
+            // Option 2: Create config and customize options
+            var config = (MemorySegment) createConfigFunc.invoke();
             configSetDeburrFunc.invoke(config, 1);      // enable deburr
             configSetValidateFunc.invoke(config, 1);    // enable validation
 
@@ -85,7 +88,11 @@ public class Example {
             var decodedJson = decodeResult.reinterpret(Integer.MAX_VALUE).getUtf8String(0L);
             System.out.println("Decoded: " + decodedJson);
 
-            // Cleanup
+            // Cleanup - free allocated memory
+            freeFunc.invoke(encodeResult);
+            freeFunc.invoke(decodeResult);
+
+            // Free config
             freeConfigFunc.invoke(config);
         }
     }

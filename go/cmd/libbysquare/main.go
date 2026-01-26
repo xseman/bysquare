@@ -2,13 +2,12 @@ package main
 
 /*
 #include <stdlib.h>
-#include <stdint.h>
 */
 import "C"
 import (
 	"encoding/json"
 	"fmt"
-	"sync"
+	"runtime/cgo"
 	"unsafe"
 
 	"github.com/xseman/bysquare/go/pkg/bysquare"
@@ -16,49 +15,19 @@ import (
 
 // Config holds encoding configuration.
 // Opaque to C callers, managed by Go.
+//
+// Thread-safety: Config instances are NOT thread-safe for concurrent modification.
+// Callers must not modify the same config from multiple threads simultaneously.
+// However, concurrent reads (multiple threads encoding with the same config) are safe.
+// Callers must manually free the config using bysquare_free_config.
 type Config struct {
 	Deburr   bool
 	Validate bool
 	Version  bysquare.Version
 }
 
-var (
-	// configRegistry tracks live config objects for safe memory management
-	configRegistry = make(map[uintptr]*Config)
-	configMutex    sync.RWMutex
-	configCounter  uintptr
-)
-
-// registerConfig stores a config and returns an opaque handle
-func registerConfig(cfg *Config) uintptr {
-	configMutex.Lock()
-	defer configMutex.Unlock()
-
-	configCounter++
-	handle := configCounter
-	configRegistry[handle] = cfg
-
-	return handle
-}
-
-// getConfig retrieves a config by handle
-func getConfig(handle uintptr) *Config {
-	configMutex.RLock()
-	defer configMutex.RUnlock()
-
-	return configRegistry[handle]
-}
-
-// unregisterConfig removes a config from the registry
-func unregisterConfig(handle uintptr) {
-	configMutex.Lock()
-	defer configMutex.Unlock()
-
-	delete(configRegistry, handle)
-}
-
 //export bysquare_create_config
-func bysquare_create_config() C.uintptr_t {
+func bysquare_create_config() uintptr {
 	// Create config with defaults
 	cfg := &Config{
 		Deburr:   true,
@@ -66,41 +35,47 @@ func bysquare_create_config() C.uintptr_t {
 		Version:  bysquare.Version120,
 	}
 
-	handle := registerConfig(cfg)
-	return C.uintptr_t(handle)
+	// Use cgo.NewHandle to safely pass Go pointer to C
+	handle := cgo.NewHandle(cfg)
+	return uintptr(handle)
 }
 
 //export bysquare_free_config
-func bysquare_free_config(handle C.uintptr_t) {
-	unregisterConfig(uintptr(handle))
+func bysquare_free_config(handle uintptr) {
+	// Delete the handle, allowing Go to garbage collect
+	h := cgo.Handle(handle)
+	h.Delete()
 }
 
 //export bysquare_config_set_deburr
-func bysquare_config_set_deburr(handle C.uintptr_t, enabled C.int) {
-	cfg := getConfig(uintptr(handle))
-	if cfg != nil {
+func bysquare_config_set_deburr(handle uintptr, enabled C.int) {
+	h := cgo.Handle(handle)
+	if cfg, ok := h.Value().(*Config); ok {
 		cfg.Deburr = enabled != 0
 	}
 }
 
 //export bysquare_config_set_validate
-func bysquare_config_set_validate(handle C.uintptr_t, enabled C.int) {
-	cfg := getConfig(uintptr(handle))
-	if cfg != nil {
+func bysquare_config_set_validate(handle uintptr, enabled C.int) {
+	h := cgo.Handle(handle)
+	if cfg, ok := h.Value().(*Config); ok {
 		cfg.Validate = enabled != 0
 	}
 }
 
 //export bysquare_config_set_version
-func bysquare_config_set_version(handle C.uintptr_t, version C.int) {
-	cfg := getConfig(uintptr(handle))
-	if cfg != nil {
-		cfg.Version = bysquare.Version(version)
+func bysquare_config_set_version(handle uintptr, version C.int) {
+	h := cgo.Handle(handle)
+	if cfg, ok := h.Value().(*Config); ok {
+		// Validate version is within valid range (0-2)
+		if version >= 0 && version <= 2 {
+			cfg.Version = bysquare.Version(version)
+		}
 	}
 }
 
 //export bysquare_encode
-func bysquare_encode(jsonData *C.char, cfgHandle C.uintptr_t) *C.char {
+func bysquare_encode(jsonData *C.char, cfgHandle uintptr) *C.char {
 	input := C.GoString(jsonData)
 
 	var model bysquare.DataModel
@@ -109,17 +84,22 @@ func bysquare_encode(jsonData *C.char, cfgHandle C.uintptr_t) *C.char {
 		return C.CString(errJSON)
 	}
 
-	// Get config from handle
-	cfg := getConfig(uintptr(cfgHandle))
-	if cfg == nil {
-		errJSON := `{"error": "Invalid config handle"}`
-		return C.CString(errJSON)
+	// Use defaults if config is NULL (0)
+	opts := bysquare.EncodeOptions{
+		Deburr:   true,
+		Validate: true,
+		Version:  bysquare.Version120,
 	}
 
-	opts := bysquare.EncodeOptions{
-		Deburr:   cfg.Deburr,
-		Validate: cfg.Validate,
-		Version:  cfg.Version,
+	// Override with config if provided
+	if cfgHandle != 0 {
+		h := cgo.Handle(cfgHandle)
+		if cfg, ok := h.Value().(*Config); ok {
+			opts.Deburr = cfg.Deburr
+			opts.Validate = cfg.Validate
+			opts.Version = cfg.Version
+		}
+		// If type assertion fails, use defaults (already set)
 	}
 
 	result, err := bysquare.Encode(model, opts)

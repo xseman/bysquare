@@ -62,10 +62,16 @@ flowchart TB
 
 **Configuration Pattern:**
 
-1. Create config handle with defaults
-2. Set options (deburr, validate, version)
-3. Encode or decode payment data
-4. Free allocated memory
+1. (Optional) Create config pointer and customize options
+2. Encode payment data (with custom config or NULL for defaults)
+3. Decode QR strings (no config needed)
+4. Free allocated memory (both results and config if created)
+
+**Default values when config is NULL:**
+
+- `deburr = true` (remove diacritics)
+- `validate = true` (validate input data)
+- `version = 2` (PAY by square v1.2.0)
 
 ## Prerequisites
 
@@ -83,23 +89,23 @@ This creates `libbysquare.so` in `../../go/bin/`.
 ## C API
 
 ```c
-// Create configuration handle with defaults
+// Create configuration pointer with defaults
 // (deburr=1, validate=1, version=2)
-uintptr_t bysquare_create_config();
+void* bysquare_create_config();
 
 // Configure options using setters (all optional)
-void bysquare_config_set_deburr(uintptr_t handle, int enabled);
-void bysquare_config_set_validate(uintptr_t handle, int enabled);
-void bysquare_config_set_version(uintptr_t handle, int version);
+void bysquare_config_set_deburr(void* ptr, int enabled);
+void bysquare_config_set_validate(void* ptr, int enabled);
+void bysquare_config_set_version(void* ptr, int version);
 
-// Encode with configuration
-char* bysquare_encode(char* jsonData, uintptr_t configHandle);
+// Encode with configuration (pass NULL to use defaults)
+char* bysquare_encode(char* jsonData, void* ptr);
 
 // Decode QR string to JSON
 char* bysquare_decode(char* qrString);
 
-// Free configuration handle
-void bysquare_free_config(uintptr_t configHandle);
+// Free configuration pointer
+void bysquare_free_config(void* ptr);
 
 // Free memory allocated by the library
 void bysquare_free(char* ptr);
@@ -108,8 +114,17 @@ void bysquare_free(char* ptr);
 char* bysquare_version(void);
 ```
 
-**Important:** Always call `bysquare_free()` on returned strings and
-`bysquare_free_config()` on config handles.
+**Memory Management:** Always call `bysquare_free()` on returned strings (from encode,
+decode, version). Call `bysquare_free_config()` only if you created a config pointer
+(not needed if you passed NULL to encode).
+
+**Thread Safety:**
+
+- Config instances are NOT thread-safe for concurrent modification.
+- Do not modify config from multiple threads simultaneously.
+- Concurrent reads (multiple threads encoding with the same config) are safe.
+- For multi-threaded applications, either synchronize config modifications or use
+  separate config instances per thread.
 
 ## Troubleshooting
 

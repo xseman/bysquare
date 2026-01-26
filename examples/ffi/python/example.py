@@ -12,13 +12,13 @@ lib = ctypes.CDLL(str(lib_path))
 
 # Define function signatures
 lib.bysquare_create_config.argtypes = []
-lib.bysquare_create_config.restype = ctypes.c_size_t
-lib.bysquare_config_set_deburr.argtypes = [ctypes.c_size_t, ctypes.c_int]
-lib.bysquare_config_set_validate.argtypes = [ctypes.c_size_t, ctypes.c_int]
-lib.bysquare_config_set_version.argtypes = [ctypes.c_size_t, ctypes.c_int]
-lib.bysquare_encode.argtypes = [ctypes.c_char_p, ctypes.c_size_t]
+lib.bysquare_create_config.restype = ctypes.c_void_p
+lib.bysquare_config_set_deburr.argtypes = [ctypes.c_void_p, ctypes.c_int]
+lib.bysquare_config_set_validate.argtypes = [ctypes.c_void_p, ctypes.c_int]
+lib.bysquare_config_set_version.argtypes = [ctypes.c_void_p, ctypes.c_int]
+lib.bysquare_encode.argtypes = [ctypes.c_char_p, ctypes.c_void_p]
 lib.bysquare_encode.restype = ctypes.c_void_p
-lib.bysquare_free_config.argtypes = [ctypes.c_size_t]
+lib.bysquare_free_config.argtypes = [ctypes.c_void_p]
 lib.bysquare_decode.argtypes = [ctypes.c_char_p]
 lib.bysquare_decode.restype = ctypes.c_void_p
 lib.bysquare_free.argtypes = [ctypes.c_void_p]
@@ -34,7 +34,10 @@ payment_data = {
     }]
 }
 
-# Create config and set options
+# Option 1: Use defaults (pass None/NULL for config)
+# result_ptr = lib.bysquare_encode(json.dumps(payment_data).encode('utf-8'), None)
+
+# Option 2: Create config and customize options
 config = lib.bysquare_create_config()
 lib.bysquare_config_set_deburr(config, 1)      # enable deburr
 lib.bysquare_config_set_validate(config, 1)    # enable validation

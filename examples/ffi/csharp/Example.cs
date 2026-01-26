@@ -8,22 +8,22 @@ class Example
     private const string LibName = "bysquare";
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern UIntPtr bysquare_create_config();
+    private static extern IntPtr bysquare_create_config();
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void bysquare_free_config(UIntPtr handle);
+    private static extern void bysquare_free_config(IntPtr ptr);
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void bysquare_config_set_deburr(UIntPtr handle, int enabled);
+    private static extern void bysquare_config_set_deburr(IntPtr ptr, int enabled);
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void bysquare_config_set_validate(UIntPtr handle, int enabled);
+    private static extern void bysquare_config_set_validate(IntPtr ptr, int enabled);
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void bysquare_config_set_version(UIntPtr handle, int version);
+    private static extern void bysquare_config_set_version(IntPtr ptr, int version);
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern IntPtr bysquare_encode(string jsonData, UIntPtr cfgHandle);
+    private static extern IntPtr bysquare_encode(string jsonData, IntPtr ptr);
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern IntPtr bysquare_decode(string qrString);
@@ -47,8 +47,11 @@ class Example
   }]
 }";
 
-        // Create config with default options (deburr=1, validate=1, version=2)
-        UIntPtr config = bysquare_create_config();
+        // Option 1: Use defaults (pass IntPtr.Zero for config)
+        // IntPtr resultPtr = bysquare_encode(json, IntPtr.Zero);
+
+        // Option 2: Create config with default options (deburr=1, validate=1, version=2)
+        IntPtr config = bysquare_create_config();
 
         // Encode with default options
         IntPtr resultPtr = bysquare_encode(json, config);

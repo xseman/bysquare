@@ -6,12 +6,12 @@ $libExt = match (PHP_OS_FAMILY) {
 };
 
 $ffi = FFI::cdef("
-    uintptr_t bysquare_create_config();
-    void bysquare_config_set_deburr(uintptr_t handle, int enabled);
-    void bysquare_config_set_validate(uintptr_t handle, int enabled);
-    void bysquare_config_set_version(uintptr_t handle, int version);
-    void bysquare_free_config(uintptr_t handle);
-    char* bysquare_encode(char* jsonData, uintptr_t configHandle);
+    void* bysquare_create_config();
+    void bysquare_config_set_deburr(void* ptr, int enabled);
+    void bysquare_config_set_validate(void* ptr, int enabled);
+    void bysquare_config_set_version(void* ptr, int version);
+    void bysquare_free_config(void* ptr);
+    char* bysquare_encode(char* jsonData, void* ptr);
     char* bysquare_decode(char* qrString);
     void bysquare_free(char* ptr);
 ", __DIR__ . "/../../../go/bin/libbysquare.{$libExt}");
@@ -27,7 +27,10 @@ $paymentData = [
     ]]
 ];
 
-// Create config and set options
+// Option 1: Use defaults (pass null for config)
+// $result = $ffi->bysquare_encode(json_encode($paymentData), null);
+
+// Option 2: Create config and customize options
 $config = $ffi->bysquare_create_config();
 $ffi->bysquare_config_set_deburr($config, 1);      // enable deburr
 $ffi->bysquare_config_set_validate($config, 1);    // enable validation

@@ -12,12 +12,21 @@ C-compatible FFI layer for using library from other programming languages.
 See [../../examples/ffi/](../../examples/ffi/) for complete examples in Java,
 C#, PHP, Python, and Swift.
 
-**Basic Configuration Pattern:**
+**Configuration Options:**
 
-1. Create config handle with defaults
-2. Set options (deburr, validate, version)
-3. Encode or decode payment data
-4. Free allocated memory
+You can either:
+
+- Pass `NULL` (0) to `bysquare_encode()` to use defaults (deburr=true,
+  validate=true, version=2)
+- Create a custom config handle for specific options
+
+**Custom Configuration Pattern:**
+
+1. Create a configuration handle using `bysquare_create_config()`
+2. Customize options with setter functions
+3. Pass the config handle to `bysquare_encode()`
+4. Free memory allocated by the library
+5. Clean up the config handle when done
 
 ## Installation
 
@@ -89,6 +98,7 @@ void bysquare_config_set_validate(uintptr_t handle, int enabled);
 void bysquare_config_set_version(uintptr_t handle, int version);
 
 // Encode JSON payment data to QR string
+// Pass 0 (NULL) for configHandle to use defaults
 char* bysquare_encode(char* jsonData, uintptr_t configHandle);
 
 // Decode QR string to JSON payment data

@@ -12,10 +12,10 @@ guard let lib = dlopen(libName, RTLD_NOW) else {
     fatalError("Failed to load library: \(String(cString: dlerror()))")
 }
 
-typealias CreateConfigFunc = @convention(c) () -> UInt
-typealias ConfigSetterFunc = @convention(c) (UInt, Int32) -> Void
-typealias FreeConfigFunc = @convention(c) (UInt) -> Void
-typealias EncodeFunc = @convention(c) (UnsafePointer<CChar>?, UInt) -> UnsafePointer<CChar>?
+typealias CreateConfigFunc = @convention(c) () -> OpaquePointer?
+typealias ConfigSetterFunc = @convention(c) (OpaquePointer?, Int32) -> Void
+typealias FreeConfigFunc = @convention(c) (OpaquePointer?) -> Void
+typealias EncodeFunc = @convention(c) (UnsafePointer<CChar>?, OpaquePointer?) -> UnsafePointer<CChar>?
 typealias DecodeFunc = @convention(c) (UnsafePointer<CChar>?) -> UnsafePointer<CChar>?
 typealias FreeFunc = @convention(c) (UnsafeMutablePointer<CChar>?) -> Void
 
@@ -53,7 +53,10 @@ let paymentJson = """
 }
 """
 
-// Create config and set options
+// Option 1: Use defaults (pass nil for config)
+// let encodeResult = encode(paymentJson, nil)
+
+// Option 2: Create config and customize options
 let config = createConfig()
 configSetDeburr(config, 1)      // enable deburr
 configSetValidate(config, 1)    // enable validation

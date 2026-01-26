@@ -11,24 +11,6 @@ import {
 } from "./types.js";
 import { validateDataModel } from "./validations.js";
 
-/**
- * Converts date from ISO 8601 format (YYYY-MM-DD) to YYYYMMDD format
- * per Pay by Square specification section 3.7.
- *
- * Note: This conversion is only used for paymentDueDate per specification.
- * lastDate expects YYYYMMDD format directly.
- *
- * @param input - Date in ISO 8601 format (YYYY-MM-DD)
- * @returns Date in YYYYMMDD format | undefined
- */
-function serializeDate(input?: string): string | undefined {
-	if (!input) {
-		return undefined;
-	}
-
-	return input.split("-").join("");
-}
-
 export const EncodeErrorMessage = {
 	/**
 	 * @description - find invalid value in extensions
@@ -248,7 +230,7 @@ export function serialize(data: DataModel): string {
 		serialized.push(p.type.toString());
 		serialized.push(p.amount?.toString());
 		serialized.push(p.currencyCode);
-		serialized.push(serializeDate(p.paymentDueDate));
+		serialized.push(p.paymentDueDate);
 		serialized.push(p.variableSymbol);
 		serialized.push(p.constantSymbol);
 		serialized.push(p.specificSymbol);

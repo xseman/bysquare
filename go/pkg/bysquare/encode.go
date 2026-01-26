@@ -148,7 +148,7 @@ func serialize(model DataModel) string {
 		parts = append(parts, fmt.Sprintf("%d", payment.Type))
 		parts = append(parts, formatFloat(payment.Amount))
 		parts = append(parts, string(payment.CurrencyCode))
-		parts = append(parts, serializeDate(payment.PaymentDueDate))
+		parts = append(parts, payment.PaymentDueDate)
 		parts = append(parts, payment.VariableSymbol)
 		parts = append(parts, payment.ConstantSymbol)
 		parts = append(parts, payment.SpecificSymbol)
@@ -184,7 +184,7 @@ func serialize(model DataModel) string {
 			parts = append(parts, payment.DirectDebitExt.MandateID)
 			parts = append(parts, payment.DirectDebitExt.CreditorID)
 			parts = append(parts, payment.DirectDebitExt.ContractID)
-			parts = append(parts, payment.DirectDebitExt.MaxAmount)
+			parts = append(parts, formatFloat(payment.DirectDebitExt.MaxAmount))
 			parts = append(parts, payment.DirectDebitExt.ValidTillDate)
 		} else {
 			parts = append(parts, "0")
@@ -203,14 +203,6 @@ func serialize(model DataModel) string {
 	}
 
 	return strings.Join(parts, "\t")
-}
-
-// serializeDate converts ISO 8601 date (YYYY-MM-DD) to YYYYMMDD format.
-func serializeDate(date string) string {
-	if date == "" {
-		return ""
-	}
-	return strings.ReplaceAll(date, "-", "")
 }
 
 // formatFloat formats a float64 to string, omitting if zero.

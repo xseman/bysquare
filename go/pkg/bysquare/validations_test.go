@@ -229,17 +229,17 @@ func TestIsValidDate(t *testing.T) {
 		// Valid dates
 		{
 			name:  "standard date",
-			date:  "2023-12-31",
+			date:  "20231231",
 			valid: true,
 		},
 		{
 			name:  "leap year date",
-			date:  "2024-02-29",
+			date:  "20240229",
 			valid: true,
 		},
 		{
 			name:  "first day of year",
-			date:  "2023-01-01",
+			date:  "20230101",
 			valid: true,
 		},
 
@@ -250,8 +250,8 @@ func TestIsValidDate(t *testing.T) {
 			valid: false,
 		},
 		{
-			name:  "wrong format YYYYMMDD",
-			date:  "20231231",
+			name:  "wrong format YYYY-MM-DD",
+			date:  "2023-12-31",
 			valid: false,
 		},
 		{
@@ -271,13 +271,68 @@ func TestIsValidDate(t *testing.T) {
 		},
 		{
 			name:  "month too large",
-			date:  "2023-13-01",
-			valid: true, // Regex only checks format, not validity
+			date:  "20231301",
+			valid: false,
 		},
 		{
 			name:  "day too large",
-			date:  "2023-12-32",
-			valid: true, // Regex only checks format, not validity
+			date:  "20231232",
+			valid: false,
+		},
+		{
+			name:  "month zero",
+			date:  "20230001",
+			valid: false,
+		},
+		{
+			name:  "day zero",
+			date:  "20231200",
+			valid: false,
+		},
+		{
+			name:  "invalid leap year Feb 29",
+			date:  "20230229",
+			valid: false,
+		},
+		{
+			name:  "Feb 30 (invalid)",
+			date:  "20240230",
+			valid: false,
+		},
+		{
+			name:  "April 31 (invalid)",
+			date:  "20240431",
+			valid: false,
+		},
+		{
+			name:  "June 31 (invalid)",
+			date:  "20240631",
+			valid: false,
+		},
+		{
+			name:  "September 31 (invalid)",
+			date:  "20240931",
+			valid: false,
+		},
+		{
+			name:  "November 31 (invalid)",
+			date:  "20241131",
+			valid: false,
+		},
+		{
+			name:  "valid Feb 28 non-leap year",
+			date:  "20230228",
+			valid: true,
+		},
+		{
+			name:  "valid April 30",
+			date:  "20240430",
+			valid: true,
+		},
+		{
+			name:  "valid May 31",
+			date:  "20240531",
+			valid: true,
 		},
 	}
 
@@ -347,8 +402,8 @@ func TestValidateSimplePayment(t *testing.T) {
 		Type:           PaymentTypePaymentOrder,
 		Amount:         100.00,
 		CurrencyCode:   CurrencyEUR,
-		PaymentDueDate: "2023-12-31",
-		Beneficiary: &Beneficiary{Name: "John Doe"},
+		PaymentDueDate: "20231231",
+		Beneficiary:    &Beneficiary{Name: "John Doe"},
 		BankAccounts: []BankAccount{
 			{IBAN: "SK3112000000198742637541"},
 		},
@@ -370,7 +425,7 @@ func TestValidateSimplePayment(t *testing.T) {
 				Type:           PaymentTypePaymentOrder,
 				Amount:         100.00,
 				CurrencyCode:   CurrencyEUR,
-				PaymentDueDate: "2023-12-31",
+				PaymentDueDate: "20231231",
 				Beneficiary:    &Beneficiary{Name: "John Doe"},
 				BankAccounts:   []BankAccount{},
 			},
@@ -382,8 +437,8 @@ func TestValidateSimplePayment(t *testing.T) {
 				Type:           PaymentTypePaymentOrder,
 				Amount:         100.00,
 				CurrencyCode:   "invalid",
-				PaymentDueDate: "2023-12-31",
-				Beneficiary: &Beneficiary{Name: "John Doe"},
+				PaymentDueDate: "20231231",
+				Beneficiary:    &Beneficiary{Name: "John Doe"},
 				BankAccounts: []BankAccount{
 					{IBAN: "SK3112000000198742637541"},
 				},
@@ -397,7 +452,7 @@ func TestValidateSimplePayment(t *testing.T) {
 				Amount:         100.00,
 				CurrencyCode:   CurrencyEUR,
 				PaymentDueDate: "31-12-2023",
-				Beneficiary: &Beneficiary{Name: "John Doe"},
+				Beneficiary:    &Beneficiary{Name: "John Doe"},
 				BankAccounts: []BankAccount{
 					{IBAN: "SK3112000000198742637541"},
 				},
@@ -410,8 +465,8 @@ func TestValidateSimplePayment(t *testing.T) {
 				Type:           PaymentTypePaymentOrder,
 				Amount:         100.00,
 				CurrencyCode:   CurrencyEUR,
-				PaymentDueDate: "2023-12-31",
-				Beneficiary: nil,
+				PaymentDueDate: "20231231",
+				Beneficiary:    nil,
 				BankAccounts: []BankAccount{
 					{IBAN: "SK3112000000198742637541"},
 				},
@@ -424,13 +479,89 @@ func TestValidateSimplePayment(t *testing.T) {
 				Type:           PaymentTypePaymentOrder,
 				Amount:         100.00,
 				CurrencyCode:   CurrencyEUR,
-				PaymentDueDate: "2023-12-31",
-				Beneficiary: &Beneficiary{Name: ""},
+				PaymentDueDate: "20231231",
+				Beneficiary:    &Beneficiary{Name: ""},
 				BankAccounts: []BankAccount{
 					{IBAN: "SK3112000000198742637541"},
 				},
 			},
 			shouldErr: true,
+		},
+		{
+			name: "standing order with valid lastDate",
+			payment: SimplePayment{
+				Type:           PaymentTypeStandingOrder,
+				Amount:         100.00,
+				CurrencyCode:   CurrencyEUR,
+				PaymentDueDate: "20240101",
+				Beneficiary:    &Beneficiary{Name: "John Doe"},
+				BankAccounts: []BankAccount{
+					{IBAN: "SK3112000000198742637541"},
+				},
+				StandingOrderExt: &StandingOrder{
+					Day:         1,
+					Periodicity: PeriodicityMonthly,
+					LastDate:    "20241231",
+				},
+			},
+			shouldErr: false,
+		},
+		{
+			name: "standing order with invalid lastDate format",
+			payment: SimplePayment{
+				Type:           PaymentTypeStandingOrder,
+				Amount:         100.00,
+				CurrencyCode:   CurrencyEUR,
+				PaymentDueDate: "20240101",
+				Beneficiary:    &Beneficiary{Name: "John Doe"},
+				BankAccounts: []BankAccount{
+					{IBAN: "SK3112000000198742637541"},
+				},
+				StandingOrderExt: &StandingOrder{
+					Day:         1,
+					Periodicity: PeriodicityMonthly,
+					LastDate:    "2024-12-31",
+				},
+			},
+			shouldErr: true,
+		},
+		{
+			name: "standing order with invalid lastDate (Feb 30)",
+			payment: SimplePayment{
+				Type:           PaymentTypeStandingOrder,
+				Amount:         100.00,
+				CurrencyCode:   CurrencyEUR,
+				PaymentDueDate: "20240101",
+				Beneficiary:    &Beneficiary{Name: "John Doe"},
+				BankAccounts: []BankAccount{
+					{IBAN: "SK3112000000198742637541"},
+				},
+				StandingOrderExt: &StandingOrder{
+					Day:         1,
+					Periodicity: PeriodicityMonthly,
+					LastDate:    "20240230",
+				},
+			},
+			shouldErr: true,
+		},
+		{
+			name: "standing order with empty lastDate",
+			payment: SimplePayment{
+				Type:           PaymentTypeStandingOrder,
+				Amount:         100.00,
+				CurrencyCode:   CurrencyEUR,
+				PaymentDueDate: "20240101",
+				Beneficiary:    &Beneficiary{Name: "John Doe"},
+				BankAccounts: []BankAccount{
+					{IBAN: "SK3112000000198742637541"},
+				},
+				StandingOrderExt: &StandingOrder{
+					Day:         1,
+					Periodicity: PeriodicityMonthly,
+					LastDate:    "",
+				},
+			},
+			shouldErr: false,
 		},
 	}
 
@@ -455,7 +586,7 @@ func TestValidateDataModel(t *testing.T) {
 				Type:         PaymentTypePaymentOrder,
 				Amount:       100.00,
 				CurrencyCode: CurrencyEUR,
-				Beneficiary: &Beneficiary{Name: "John Doe"},
+				Beneficiary:  &Beneficiary{Name: "John Doe"},
 				BankAccounts: []BankAccount{
 					{IBAN: "SK3112000000198742637541"},
 				},
@@ -490,7 +621,7 @@ func TestValidateDataModel(t *testing.T) {
 						Type:         PaymentTypePaymentOrder,
 						Amount:       100.00,
 						CurrencyCode: "INVALID",
-						Beneficiary: &Beneficiary{Name: "John Doe"},
+						Beneficiary:  &Beneficiary{Name: "John Doe"},
 						BankAccounts: []BankAccount{
 							{IBAN: "SK3112000000198742637541"},
 						},
@@ -519,7 +650,7 @@ func TestValidationErrorPath(t *testing.T) {
 		Type:         PaymentTypePaymentOrder,
 		Amount:       100.00,
 		CurrencyCode: "INVALID",
-		Beneficiary: &Beneficiary{Name: "John Doe"},
+		Beneficiary:  &Beneficiary{Name: "John Doe"},
 		BankAccounts: []BankAccount{
 			{IBAN: "SK3112000000198742637541"},
 		},

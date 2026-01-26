@@ -96,15 +96,14 @@ type SimplePayment struct {
 	Type                            PaymentType    `json:"type" validate:"required,min=1,max=3"`
 	Amount                          float64        `json:"amount,omitempty"`
 	CurrencyCode                    CurrencyCode   `json:"currencyCode,omitempty" validate:"omitempty,iso4217"`
-	PaymentDueDate                  string         `json:"paymentDueDate,omitempty" validate:"omitempty,datetime=2006-01-02"`
+	PaymentDueDate                  string         `json:"paymentDueDate,omitempty" validate:"omitempty,len=8,numeric"`
 	VariableSymbol                  string         `json:"variableSymbol,omitempty"`
 	ConstantSymbol                  string         `json:"constantSymbol,omitempty"`
 	SpecificSymbol                  string         `json:"specificSymbol,omitempty"`
 	OriginatorsReferenceInformation string         `json:"originatorsReferenceInformation,omitempty"`
 	PaymentNote                     string         `json:"paymentNote,omitempty"`
 	BankAccounts                    []BankAccount  `json:"bankAccounts" validate:"required,min=1,dive"`
-	// Beneficiary is required since v1.2.0.
-	Beneficiary                     *Beneficiary   `json:"beneficiary" validate:"required"`
+	Beneficiary                     *Beneficiary   `json:"beneficiary" validate:"required"` // required since v1.2.0.
 	StandingOrderExt                *StandingOrder `json:"standingOrderExt,omitempty"`
 	DirectDebitExt                  *DirectDebit   `json:"directDebitExt,omitempty"`
 }
@@ -119,16 +118,16 @@ type StandingOrder struct {
 
 // DirectDebit represents direct debit extension fields.
 type DirectDebit struct {
-	DirectDebitScheme        uint8  `json:"directDebitScheme,omitempty"`
-	DirectDebitType          uint8  `json:"directDebitType,omitempty"`
-	VariableSymbol           string `json:"variableSymbol,omitempty"`
-	SpecificSymbol           string `json:"specificSymbol,omitempty"`
-	OriginatorsReferenceInfo string `json:"originatorsReferenceInformation,omitempty"`
-	MandateID                string `json:"mandateId,omitempty"`
-	CreditorID               string `json:"creditorId,omitempty"`
-	ContractID               string `json:"contractId,omitempty"`
-	MaxAmount                string `json:"maxAmount,omitempty"`
-	ValidTillDate            string `json:"validTillDate,omitempty"`
+	DirectDebitScheme        uint8   `json:"directDebitScheme,omitempty"`
+	DirectDebitType          uint8   `json:"directDebitType,omitempty"`
+	VariableSymbol           string  `json:"variableSymbol,omitempty"`
+	SpecificSymbol           string  `json:"specificSymbol,omitempty"`
+	OriginatorsReferenceInfo string  `json:"originatorsReferenceInformation,omitempty"`
+	MandateID                string  `json:"mandateId,omitempty"`
+	CreditorID               string  `json:"creditorId,omitempty"`
+	ContractID               string  `json:"contractId,omitempty"`
+	MaxAmount                float64 `json:"maxAmount,omitempty"`
+	ValidTillDate            string  `json:"validTillDate,omitempty"`
 }
 
 // DataModel represents the complete payment data structure.

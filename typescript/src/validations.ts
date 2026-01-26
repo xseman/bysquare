@@ -3,16 +3,49 @@ import validator from "validator";
 import {
 	BankAccount,
 	DataModel,
-	SimplePayment,
+	type Payment,
+	PaymentOptions,
 } from "./types.js";
 
 const ErrorMessages = {
 	IBAN: "Invalid IBAN. Make sure ISO 13616 format is used.",
 	BIC: "Invalid BIC. Make sure ISO 9362 format is used.",
 	CurrencyCode: "Invalid currency code. Make sure ISO 4217 format is used.",
-	Date: "Invalid date. Make sure ISO 8601 format is used.",
+	Date: "Invalid date. Make sure YYYYMMDD format is used.",
 	BeneficiaryName: "Beneficiary name is required.",
 } as const;
+
+/**
+ * TODO: remove after relese https://github.com/validatorjs/validator.js/pull/2659
+ *
+ * Validates date string in YYYYMMDD format.
+ *
+ * Uses validator.js library for semantic date validation by converting
+ * YYYYMMDD to YYYY-MM-DD format (ISO 8601) which validator.isDate supports.
+ *
+ * @param date - Date string to validate in YYYYMMDD format
+ * @returns true if valid YYYYMMDD date, false otherwise
+ */
+function isValidYYYYMMDD(date: string): boolean {
+	// Check format: exactly 8 digits
+	if (!/^\d{8}$/.test(date)) {
+		return false;
+	}
+
+	// Convert YYYYMMDD to YYYY-MM-DD for validator.js
+	const year = date.substring(0, 4);
+	const month = date.substring(4, 6);
+	const day = date.substring(6, 8);
+	const isoFormat = `${year}-${month}-${day}`;
+
+	// Use validator.js to check if it's a valid calendar date
+	// This handles leap years, month boundaries, and all edge cases
+	return validator.isDate(isoFormat, {
+		format: "YYYY-MM-DD",
+		strictMode: true,
+		delimiters: ["-"],
+	});
+}
 
 /**
  * This error will be thrown in case of a validation issue. It provides message with error description and specific path to issue in dataModel object.
@@ -55,13 +88,13 @@ export function validateBankAccount(
 /**
  * validate simple payment fields:
  * - currencyCode (ISO 4217)
- * - paymentDueDate (ISO 8601)
+ * - paymentDueDate (YYYYMMDD format per v1.2 specification)
  * - bankAccounts
  *
  * @see validateBankAccount
  */
 export function validateSimplePayment(
-	simplePayment: SimplePayment,
+	simplePayment: Payment,
 	path: string,
 ): void {
 	for (const [index, bankAccount] of simplePayment.bankAccounts.entries()) {
@@ -75,10 +108,24 @@ export function validateSimplePayment(
 		);
 	}
 
-	if (simplePayment.paymentDueDate && !validator.isDate(simplePayment.paymentDueDate)) {
+	if (
+		simplePayment.paymentDueDate
+		&& !isValidYYYYMMDD(simplePayment.paymentDueDate)
+	) {
 		throw new ValidationError(
 			ErrorMessages.Date,
 			`${path}.paymentDueDate`,
+		);
+	}
+
+	if (
+		simplePayment.type === PaymentOptions.StandingOrder
+		&& simplePayment.lastDate
+		&& !isValidYYYYMMDD(simplePayment.lastDate)
+	) {
+		throw new ValidationError(
+			ErrorMessages.Date,
+			`${path}.lastDate`,
 		);
 	}
 

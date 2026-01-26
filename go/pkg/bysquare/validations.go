@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var (
@@ -13,8 +14,8 @@ var (
 	// BIC regex: 4 letters + 2 letters + 2 alphanumeric + optional 3 alphanumeric
 	bicRegex = regexp.MustCompile(`^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$`)
 
-	// ISO 8601 date regex: YYYY-MM-DD
-	dateRegex = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+	// YYYYMMDD date regex per v1.2 specification
+	dateRegex = regexp.MustCompile(`^\d{8}$`)
 )
 
 // ValidationError represents a validation error with path information.
@@ -77,8 +78,18 @@ func validateSimplePayment(payment *SimplePayment, path string) error {
 	if payment.PaymentDueDate != "" {
 		if !isValidDate(payment.PaymentDueDate) {
 			return &ValidationError{
-				Message: "invalid date format (ISO 8601: YYYY-MM-DD)",
+				Message: "invalid date format (YYYYMMDD per v1.2 specification)",
 				Path:    fmt.Sprintf("%s.paymentDueDate", path),
+			}
+		}
+	}
+
+	// Validate lastDate for standing orders
+	if payment.Type == PaymentTypeStandingOrder && payment.StandingOrderExt != nil {
+		if payment.StandingOrderExt.LastDate != "" && !isValidDate(payment.StandingOrderExt.LastDate) {
+			return &ValidationError{
+				Message: "invalid date format (YYYYMMDD per v1.2 specification)",
+				Path:    fmt.Sprintf("%s.standingOrderExt.lastDate", path),
 			}
 		}
 	}
@@ -170,7 +181,35 @@ func isValidCurrencyCode(code string) bool {
 	return true
 }
 
-// isValidDate checks if date is in ISO 8601 format (YYYY-MM-DD).
+// isValidDate checks if date is in YYYYMMDD format per v1.2 specification.
+// It performs both format validation and semantic calendar validation.
 func isValidDate(date string) bool {
-	return dateRegex.MatchString(date)
+	if !dateRegex.MatchString(date) {
+		return false
+	}
+
+	// Parse year, month, day
+	year := 0
+	month := 0
+	day := 0
+
+	fmt.Sscanf(date[0:4], "%d", &year)
+	fmt.Sscanf(date[4:6], "%d", &month)
+	fmt.Sscanf(date[6:8], "%d", &day)
+
+	// Validate month range
+	if month < 1 || month > 12 {
+		return false
+	}
+
+	// Validate day range
+	if day < 1 || day > 31 {
+		return false
+	}
+
+	// Check if the date is valid using time package
+	// Create a time.Time and verify it matches the input
+	t := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
+
+	return t.Year() == year && int(t.Month()) == month && t.Day() == day
 }

@@ -20,7 +20,7 @@ const data = {
 			paymentNote: "hello world",
 			day: 1,
 			periodicity: Periodicity.Monthly,
-			paymentDueDate: "2024-08-30",
+			paymentDueDate: "20240830",
 			beneficiary: {
 				name: "Filip",
 				city: "City",

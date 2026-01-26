@@ -79,7 +79,7 @@ func TestSerialize(t *testing.T) {
 						Type:           PaymentTypePaymentOrder,
 						Amount:         500.0,
 						CurrencyCode:   CurrencyEUR,
-						PaymentDueDate: "2024-12-31",
+						PaymentDueDate: "20241231",
 						VariableSymbol: "123",
 						BankAccounts: []BankAccount{
 							{IBAN: "SK9611000000002918599669"},
@@ -213,7 +213,7 @@ func TestEncode(t *testing.T) {
 						Amount:         100.0,
 						CurrencyCode:   CurrencyEUR,
 						VariableSymbol: "123",
-						Beneficiary: &Beneficiary{Name: "John Doe"},
+						Beneficiary:    &Beneficiary{Name: "John Doe"},
 						BankAccounts: []BankAccount{
 							{IBAN: "SK9611000000002918599669"},
 						},
@@ -232,7 +232,7 @@ func TestEncode(t *testing.T) {
 						Amount:         100.0,
 						CurrencyCode:   CurrencyEUR,
 						VariableSymbol: "123",
-						Beneficiary: &Beneficiary{Name: "John Doe"},
+						Beneficiary:    &Beneficiary{Name: "John Doe"},
 						BankAccounts: []BankAccount{
 							{IBAN: "INVALID"},
 						},
@@ -269,28 +269,6 @@ func TestEncode(t *testing.T) {
 				if len(result) < 10 {
 					t.Errorf("Encode() result too short: %s", result)
 				}
-			}
-		})
-	}
-}
-
-// TestSerializeDate tests date serialization.
-func TestSerializeDate(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{"2024-12-31", "20241231"},
-		{"2024-01-01", "20240101"},
-		{"2023-06-15", "20230615"},
-		{"", ""},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.input, func(t *testing.T) {
-			result := serializeDate(tt.input)
-			if result != tt.expected {
-				t.Errorf("serializeDate(%q) = %q, expected %q", tt.input, result, tt.expected)
 			}
 		})
 	}

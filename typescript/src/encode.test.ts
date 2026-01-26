@@ -314,7 +314,9 @@ describe("encode diacritic removal", () => {
 describe("date conversion", () => {
 	test("should convert paymentDueDate from ISO 8601 to YYYYMMDD", () => {
 		const dataModel = buildDataModel({
-			payments: [buildPaymentOrder({ paymentDueDate: "2024-12-31" })],
+			payments: [buildPaymentOrder({
+				paymentDueDate: "20241231",
+			})],
 		});
 
 		const serialized = serialize(dataModel);
@@ -339,7 +341,9 @@ describe("date conversion", () => {
 
 	test("should handle undefined paymentDueDate", () => {
 		const dataModel = buildDataModel({
-			payments: [buildPaymentOrder({ paymentDueDate: undefined })],
+			payments: [buildPaymentOrder({
+				paymentDueDate: undefined,
+			})],
 		});
 
 		const serialized = serialize(dataModel);
@@ -366,13 +370,15 @@ describe("date conversion", () => {
 
 	test("should round-trip paymentDueDate through encode/decode", () => {
 		const input = buildDataModel({
-			payments: [buildPaymentOrder({ paymentDueDate: "2024-12-31" })],
+			payments: [buildPaymentOrder({
+				paymentDueDate: "20241231",
+			})],
 		});
 
 		const encoded = encode(input);
 		const decoded = decode(encoded);
 
-		expect(decoded.payments[0].paymentDueDate).toBe("2024-12-31");
+		expect(decoded.payments[0].paymentDueDate).toBe("20241231");
 	});
 
 	test("should round-trip lastDate through encode/decode", () => {

@@ -16,7 +16,7 @@ const ErrorMessages = {
 } as const;
 
 /**
- * TODO: remove after relese https://github.com/validatorjs/validator.js/pull/2659
+ * TODO: remove after release https://github.com/validatorjs/validator.js/pull/2659
  *
  * Validates date string in YYYYMMDD format.
  *

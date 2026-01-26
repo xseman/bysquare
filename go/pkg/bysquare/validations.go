@@ -193,9 +193,15 @@ func isValidDate(date string) bool {
 	month := 0
 	day := 0
 
-	fmt.Sscanf(date[0:4], "%d", &year)
-	fmt.Sscanf(date[4:6], "%d", &month)
-	fmt.Sscanf(date[6:8], "%d", &day)
+	if _, err := fmt.Sscanf(date[0:4], "%d", &year); err != nil {
+		return false
+	}
+	if _, err := fmt.Sscanf(date[4:6], "%d", &month); err != nil {
+		return false
+	}
+	if _, err := fmt.Sscanf(date[6:8], "%d", &day); err != nil {
+		return false
+	}
 
 	// Validate month range
 	if month < 1 || month > 12 {

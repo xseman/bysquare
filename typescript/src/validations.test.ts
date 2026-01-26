@@ -101,7 +101,7 @@ describe("validateSimplePayment", () => {
 	});
 
 	test("validates payment due date", () => {
-		const payment = buildPaymentOrder({ paymentDueDate: "2024-12-31" });
+		const payment = buildPaymentOrder({ paymentDueDate: "20241231" });
 
 		expect(() => validateSimplePayment(payment, "test")).not.toThrow();
 	});

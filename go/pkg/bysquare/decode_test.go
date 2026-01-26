@@ -61,7 +61,7 @@ func TestDecodeWithVariableSymbol(t *testing.T) {
 				Amount:         100.50,
 				CurrencyCode:   "EUR",
 				VariableSymbol: "123456",
-				Beneficiary: &bysquare.Beneficiary{Name: "John Doe"},
+				Beneficiary:    &bysquare.Beneficiary{Name: "John Doe"},
 				BankAccounts: []bysquare.BankAccount{
 					{IBAN: "SK9611000000002918599669"},
 				},
@@ -116,7 +116,7 @@ func TestRoundTrip(t *testing.T) {
 				Type:                            1,
 				Amount:                          250.75,
 				CurrencyCode:                    "EUR",
-				PaymentDueDate:                  "2024-12-31",
+				PaymentDueDate:                  "20241231",
 				VariableSymbol:                  "VS123",
 				ConstantSymbol:                  "0308",
 				SpecificSymbol:                  "SS456",

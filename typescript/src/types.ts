@@ -259,14 +259,13 @@ export type SimplePayment = {
 	currencyCode: string | keyof typeof CurrencyCode;
 
 	/**
-	 * Payment due date.
+	 * Payment due date in YYYYMMDD format per v1.2 specification section 3.7.
 	 *
 	 * For standing orders, this indicates the first payment date.
-	 * The date will be converted to YYYYMMDD format during encoding per specification section 3.7.
 	 *
 	 * @format date
-	 * @example "2024-12-31"
-	 * @pattern \d{4}-\d{2}-\d{2}
+	 * @example "20241231"
+	 * @pattern \d{8}
 	 */
 	paymentDueDate?: string;
 

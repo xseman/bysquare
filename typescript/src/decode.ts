@@ -52,28 +52,6 @@ function decodeString(value: string | undefined): string | undefined {
 }
 
 /**
- * Converts date from YYYYMMDD format to ISO 8601 format (YYYY-MM-DD)
- * per Pay by Square specification section 3.7.
- *
- * Note: This conversion is only used for paymentDueDate per specification.
- * lastDate remains in YYYYMMDD format.
- *
- * @param input - Date in YYYYMMDD format
- * @returns Date in ISO 8601 format (YYYY-MM-DD) | undefined
- */
-function deserializeDate(input?: string): string | undefined {
-	if (!input || input.length !== 8) {
-		return undefined;
-	}
-
-	const year = input.slice(0, 4);
-	const month = input.slice(4, 6);
-	const day = input.slice(6, 8);
-
-	return year + "-" + month + "-" + day;
-}
-
-/**
  * Parse a tab-separated intermediate format into DataModel.
  *
  * Base fields
@@ -151,7 +129,7 @@ export function deserialize(qr: string): DataModel {
 			type: Number(paymentOptions),
 			currencyCode: currency ?? CurrencyCode.EUR,
 			amount: Number(ammount),
-			paymentDueDate: deserializeDate(dueDate),
+			paymentDueDate: dueDate || undefined,
 			variableSymbol: variableSymbol || undefined,
 			constantSymbol: constantSymbol || undefined,
 			specificSymbol: specificSymbol || undefined,

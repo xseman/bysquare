@@ -133,7 +133,7 @@ func deserialize(data string) (DataModel, error) {
 		idx++
 		currencyCode := parts[idx]
 		idx++
-		paymentDueDate := deserializeDate(parts[idx])
+		paymentDueDate := parts[idx]
 		idx++
 		variableSymbol := parts[idx]
 		idx++
@@ -240,7 +240,7 @@ func deserialize(data string) (DataModel, error) {
 			idx++
 			contractID := parts[idx]
 			idx++
-			maxAmount := parts[idx]
+			maxAmount, _ := parseFloat(parts[idx])
 			idx++
 			validTillDate := parts[idx]
 			idx++
@@ -290,14 +290,6 @@ func deserialize(data string) (DataModel, error) {
 	}
 
 	return model, nil
-}
-
-// deserializeDate converts YYYYMMDD to ISO 8601 format (YYYY-MM-DD).
-func deserializeDate(date string) string {
-	if date == "" || len(date) != 8 {
-		return ""
-	}
-	return date[0:4] + "-" + date[4:6] + "-" + date[6:8]
 }
 
 // parseNumber parses a string to int, returning 0 if empty or invalid.

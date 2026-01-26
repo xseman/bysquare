@@ -7,11 +7,26 @@ C-compatible FFI layer for using library from other programming languages.
 - Go 1.23+
 - GCC (for CGo)
 
-## Tested Languages
+## Usage Examples
 
-- Python (via ctypes)
-- PHP (via FFI extension)
-- Java (via JNA)
+See [../../examples/ffi/](../../examples/ffi/) for complete examples in Java,
+C#, PHP, Python, and Swift.
+
+**Configuration Options:**
+
+You can either:
+
+- Pass `NULL` (0) to `bysquare_encode()` to use defaults (deburr=true,
+  validate=true, version=2)
+- Create a custom config handle for specific options
+
+**Custom Configuration Pattern:**
+
+1. Create a configuration handle using `bysquare_create_config()`
+2. Customize options with setter functions
+3. Pass the config handle to `bysquare_encode()`
+4. Free memory allocated by the library
+5. Clean up the config handle when done
 
 ## Installation
 
@@ -69,14 +84,28 @@ ln -s libbysquare-linux-amd64.so bin/libbysquare.so
 
 ## API Reference
 
-### Function Signatures
+The library uses a config-based API with setter functions for maximum
+flexibility and API stability:
 
 ```c
-// Encode payment data (JSON string) to BySquare QR string
-char* bysquare_encode(char* jsonData);
+// Create configuration handle with defaults
+// (deburr=1, validate=1, version=2/v1.2.0)
+uintptr_t bysquare_create_config();
 
-// Decode BySquare QR string to payment data (JSON string)
+// Configure options using setters (all optional)
+void bysquare_config_set_deburr(uintptr_t handle, int enabled);
+void bysquare_config_set_validate(uintptr_t handle, int enabled);
+void bysquare_config_set_version(uintptr_t handle, int version);
+
+// Encode JSON payment data to QR string
+// Pass 0 (NULL) for configHandle to use defaults
+char* bysquare_encode(char* jsonData, uintptr_t configHandle);
+
+// Decode QR string to JSON payment data
 char* bysquare_decode(char* qrString);
+
+// Free configuration handle
+void bysquare_free_config(uintptr_t configHandle);
 
 // Free memory allocated by the library
 void bysquare_free(char* ptr);
@@ -84,6 +113,20 @@ void bysquare_free(char* ptr);
 // Get library version
 char* bysquare_version();
 ```
+
+**Setter Parameters:**
+
+- `deburr`: 1 = remove diacritics, 0 = keep diacritics
+- `validate`: 1 = validate before encoding, 0 = skip validation
+- `version`: 0 = v1.0.0, 1 = v1.1.0, 2 = v1.2.0 (default)
+
+### Version Constants
+
+| Value | Version | Release Date |
+| ----- | ------- | ------------ |
+| 0     | 1.0.0   | 2013-02-22   |
+| 1     | 1.1.0   | 2015-06-24   |
+| 2     | 1.2.0   | 2025-04-01   |
 
 ### Error Handling
 

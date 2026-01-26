@@ -13,11 +13,70 @@ from any language supporting C FFI.
 | Language          | Implementation            | Requirements      |
 | ----------------- | ------------------------- | ----------------- |
 | [Java](java/)     | Foreign Function & Memory | JDK 19+ (JEP 454) |
+| [C#](csharp/)     | P/Invoke                  | .NET SDK 8.0+     |
 | [PHP](php/)       | Built-in FFI              | PHP 7.4+ with FFI |
 | [Python](python/) | ctypes                    | Python 3.6+       |
 | [Swift](swift/)   | C interoperability        | Swift 5+          |
 
+## Architecture
+
+```mermaid
+---
+config:
+  theme: neutral
+  themeVariables:
+    fontFamily: monospace
+    fontSize: "10px"
+---
+
+flowchart TB
+    subgraph Bindings["Language Bindings"]
+        ANY["Any Language"]
+    end
+
+    subgraph FFI["C FFI Layer"]
+        CFG["1. create_config()"]
+        SET["2. config_set_*()"]
+        ENC["3. encode()"]
+        DEC["3. decode()"]
+        FREE["4. free()"]
+    end
+
+    subgraph Core["Go Core"]
+        LIB["libbysquare.so/dll"]
+    end
+
+    ANY --> CFG
+    CFG --> SET
+    SET --> ENC & DEC
+    ENC & DEC --> LIB
+    LIB --> FREE
+
+    style CFG fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
+    style SET fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
+    style ENC fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
+    style DEC fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
+    style FREE fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
+    style LIB fill:#A5EAFF,stroke:#00838F,stroke-width:1.5px
+```
+
+**Configuration Pattern:**
+
+1. (Optional) Create config pointer and customize options
+2. Encode payment data (with custom config or NULL for defaults)
+3. Decode QR strings (no config needed)
+4. Free allocated memory (both results and config if created)
+
+**Default values when config is NULL:**
+
+- `deburr = true` (remove diacritics)
+- `validate = true` (validate input data)
+- `version = 2` (PAY by square v1.2.0)
+
 ## Prerequisites
+
+**Note:** These examples are designed for Linux. For macOS/Windows support, you'll
+need to adapt the build and run scripts for platform-specific library extensions.
 
 Build the shared library:
 
@@ -25,30 +84,51 @@ Build the shared library:
 ./build.sh
 ```
 
-This creates the platform-specific library in `../../go/bin/`:
-
-- Linux: `libbysquare.so`
-- macOS: `libbysquare.dylib`
-- Windows: `libbysquare.dll`
+This creates `libbysquare.so` in `../../go/bin/`.
 
 ## C API
 
 ```c
-char* bysquare_encode(char* jsonData);
+// Create configuration pointer with defaults
+// (deburr=1, validate=1, version=2)
+void* bysquare_create_config();
+
+// Configure options using setters (all optional)
+void bysquare_config_set_deburr(void* ptr, int enabled);
+void bysquare_config_set_validate(void* ptr, int enabled);
+void bysquare_config_set_version(void* ptr, int version);
+
+// Encode with configuration (pass NULL to use defaults)
+char* bysquare_encode(char* jsonData, void* ptr);
+
+// Decode QR string to JSON
 char* bysquare_decode(char* qrString);
+
+// Free configuration pointer
+void bysquare_free_config(void* ptr);
+
+// Free memory allocated by the library
 void bysquare_free(char* ptr);
+
+// Get library version
+char* bysquare_version(void);
 ```
 
-**Important:** Always call `bysquare_free()` on returned strings.
+**Memory Management:** Always call `bysquare_free()` on returned strings (from encode,
+decode, version). Call `bysquare_free_config()` only if you created a config pointer
+(not needed if you passed NULL to encode).
 
-## Running Examples
+**Thread Safety:**
 
-```bash
-cd java && ./run.sh
-cd php && ./run.sh
-cd python && ./run.sh
-cd swift && ./run.sh
-```
+- Config instances are NOT thread-safe for concurrent modification.
+- Do not call config setters from multiple threads on the same config
+  simultaneously.
+- Concurrent encoding operations (reading config) from multiple threads are safe
+  as long as no thread is modifying the config during those operations.
+- For multi-threaded applications that need to modify config, either synchronize
+  access externally or use separate config instances per thread.
+- For multi-threaded applications, either synchronize config modifications or use
+  separate config instances per thread.
 
 ## Troubleshooting
 

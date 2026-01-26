@@ -6,12 +6,17 @@ $libExt = match (PHP_OS_FAMILY) {
 };
 
 $ffi = FFI::cdef("
-    char* bysquare_encode(char* jsonData);
+    void* bysquare_create_config();
+    void bysquare_config_set_deburr(void* ptr, int enabled);
+    void bysquare_config_set_validate(void* ptr, int enabled);
+    void bysquare_config_set_version(void* ptr, int version);
+    void bysquare_free_config(void* ptr);
+    char* bysquare_encode(char* jsonData, void* ptr);
     char* bysquare_decode(char* qrString);
     void bysquare_free(char* ptr);
 ", __DIR__ . "/../../../go/bin/libbysquare.{$libExt}");
 
-$data = [
+$paymentData = [
     'payments' => [[
         'type' => 1,
         'amount' => 123.45,
@@ -22,14 +27,25 @@ $data = [
     ]]
 ];
 
-$result = $ffi->bysquare_encode(json_encode($data));
-$qr = FFI::string($result);
+// Option 1: Use defaults (pass null for config)
+// $result = $ffi->bysquare_encode(json_encode($paymentData), null);
+
+// Option 2: Create config and customize options
+$config = $ffi->bysquare_create_config();
+$ffi->bysquare_config_set_deburr($config, 1);      // enable deburr
+$ffi->bysquare_config_set_validate($config, 1);    // enable validation
+
+// Encode
+$result = $ffi->bysquare_encode(json_encode($paymentData), $config);
+$qrString = FFI::string($result);
 $ffi->bysquare_free($result);
+echo "Encoded: " . $qrString . "\n";
 
-echo "Encoded: {$qr}\n";
-
-$result = $ffi->bysquare_decode($qr);
-$decoded = FFI::string($result);
+// Decode
+$result = $ffi->bysquare_decode($qrString);
+$decodedJson = FFI::string($result);
 $ffi->bysquare_free($result);
+echo "Decoded: " . $decodedJson . "\n";
 
-echo "Decoded: {$decoded}\n";
+// Cleanup
+$ffi->bysquare_free_config($config);

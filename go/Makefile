@@ -11,7 +11,7 @@ build: ## Build CLI binary
 .PHONY: build-ffi
 build-ffi: ## Build FFI shared library
 	@mkdir -p $(OUTPUT_DIR)
-	@CGO_ENABLED=1 go build -buildmode=c-shared -o $(OUTPUT_DIR)/libbysquare ./cmd/libbysquare
+	@CGO_ENABLED=1 go build -buildmode=c-shared -o $(OUTPUT_DIR)/libbysquare.so ./cmd/libbysquare
 
 .PHONY: test
 test: ## Run tests

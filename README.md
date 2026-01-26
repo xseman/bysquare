@@ -1,9 +1,11 @@
-<h1 align="center">bysquare</h1>
+<h1 align="center">
+	bysquare
+</h1>
 
 <p align="center">
-"PAY by square" is a national standard for QR code payments that was adopted
-by the Slovak Banking Association in 2013. It is incorporated into a variety
-of invoices, reminders and other payment regulations.
+	"PAY by square" is a national standard for QR code payments that was adopted
+	by the Slovak Banking Association in 2013. It is incorporated into a variety
+	of invoices, reminders and other payment regulations.
 </p>
 
 ## Why
@@ -60,13 +62,13 @@ flowchart LR
         CFFI --> ANY[Python, PHP, Java, Swift, etc.]
     end
 
-    style TS fill:#A5D8FF,stroke:#1976D2,stroke-width:1.5px
-    style Browser fill:#A5D8FF,stroke:#1976D2,stroke-width:1.5px
-    style Node/Bun/Deno fill:#A5D8FF,stroke:#1976D2,stroke-width:1.5px
+    style TS            fill:#A5D8FF, stroke:#1976D2, stroke-width:1.5px
+    style Browser       fill:#A5D8FF, stroke:#1976D2, stroke-width:1.5px
+    style Node/Bun/Deno fill:#A5D8FF, stroke:#1976D2, stroke-width:1.5px
 
-    style GO fill:#A5EAFF,stroke:#00838F,stroke-width:1.5px
-    style GO_LIB fill:#A5EAFF,stroke:#00838F,stroke-width:1.5px
-    style CFFI fill:#A5EAFF,stroke:#00838F,stroke-width:1.5px
+    style GO      fill:#A5EAFF, stroke:#00838F, stroke-width:1.5px
+    style GO_LIB  fill:#A5EAFF, stroke:#00838F, stroke-width:1.5px
+    style CFFI    fill:#A5EAFF, stroke:#00838F, stroke-width:1.5px
 ```
 
 ## Using C FFI

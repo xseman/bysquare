@@ -7,7 +7,7 @@ import java.lang.foreign.ValueLayout;
 
 /**
  * Java example using Foreign Function & Memory API (JEP 454, preview in JDK 21+).
- * 
+ *
  * Usage:
  *     javac --enable-preview --release 25 Example.java
  *     java --enable-preview --enable-native-access=ALL-UNNAMED Example
@@ -15,25 +15,45 @@ import java.lang.foreign.ValueLayout;
 public class Example {
     public static void main(String[] args) throws Throwable {
         System.loadLibrary("bysquare");
-        
+
         var linker = Linker.nativeLinker();
         var lookup = SymbolLookup.loaderLookup();
-        
+
+        var createConfigFunc = linker.downcallHandle(
+            lookup.find("bysquare_create_config").orElseThrow(),
+            FunctionDescriptor.of(ValueLayout.JAVA_LONG)
+        );
+
+        var configSetDeburrFunc = linker.downcallHandle(
+            lookup.find("bysquare_config_set_deburr").orElseThrow(),
+            FunctionDescriptor.ofVoid(ValueLayout.JAVA_LONG, ValueLayout.JAVA_INT)
+        );
+
+        var configSetValidateFunc = linker.downcallHandle(
+            lookup.find("bysquare_config_set_validate").orElseThrow(),
+            FunctionDescriptor.ofVoid(ValueLayout.JAVA_LONG, ValueLayout.JAVA_INT)
+        );
+
+        var freeConfigFunc = linker.downcallHandle(
+            lookup.find("bysquare_free_config").orElseThrow(),
+            FunctionDescriptor.ofVoid(ValueLayout.JAVA_LONG)
+        );
+
         var encodeFunc = linker.downcallHandle(
             lookup.find("bysquare_encode").orElseThrow(),
-            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
+            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG)
         );
-        
+
         var decodeFunc = linker.downcallHandle(
             lookup.find("bysquare_decode").orElseThrow(),
             FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
         );
-        
+
         var freeFunc = linker.downcallHandle(
             lookup.find("bysquare_free").orElseThrow(),
             FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
         );
-        
+
         String json = """
             {
               "payments": [{
@@ -46,22 +66,27 @@ public class Example {
               }]
             }
             """;
-        
+
         try (var arena = Arena.ofConfined()) {
+            // Create config and set options
+            long config = (long) createConfigFunc.invoke();
+            configSetDeburrFunc.invoke(config, 1);      // enable deburr
+            configSetValidateFunc.invoke(config, 1);    // enable validation
+
+            // Encode
             var jsonPtr = arena.allocateUtf8String(json);
-            var resultPtr = (MemorySegment) encodeFunc.invoke(jsonPtr);
-            var qrString = resultPtr.reinterpret(Integer.MAX_VALUE).getUtf8String(0L);
-            
+            var encodeResult = (MemorySegment) encodeFunc.invoke(jsonPtr, config);
+            var qrString = encodeResult.reinterpret(Integer.MAX_VALUE).getUtf8String(0L);
             System.out.println("Encoded: " + qrString);
-            
+
+            // Decode
             var qrPtr = arena.allocateUtf8String(qrString);
-            var decodedPtr = (MemorySegment) decodeFunc.invoke(qrPtr);
-            var decoded = decodedPtr.reinterpret(Integer.MAX_VALUE).getUtf8String(0L);
-            
-            System.out.println("Decoded: " + decoded);
-            
-            freeFunc.invoke(resultPtr);
-            freeFunc.invoke(decodedPtr);
+            var decodeResult = (MemorySegment) decodeFunc.invoke(qrPtr);
+            var decodedJson = decodeResult.reinterpret(Integer.MAX_VALUE).getUtf8String(0L);
+            System.out.println("Decoded: " + decodedJson);
+
+            // Cleanup
+            freeConfigFunc.invoke(config);
         }
     }
 }

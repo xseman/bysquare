@@ -22,17 +22,35 @@ class Example
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
     private static extern void bysquare_config_set_version(IntPtr ptr, int version);
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern IntPtr bysquare_encode(string jsonData, IntPtr ptr);
+    [DllImport(LibName, EntryPoint = "bysquare_encode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern IntPtr bysquare_encode_raw(string jsonData, IntPtr ptr);
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern IntPtr bysquare_decode(string qrString);
+    [DllImport(LibName, EntryPoint = "bysquare_decode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern IntPtr bysquare_decode_raw(string qrString);
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
     private static extern void bysquare_free(IntPtr ptr);
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern IntPtr bysquare_version();
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [return: MarshalAs(UnmanagedType.LPStr)]
+    private static extern string bysquare_version();
+
+    // Managed wrapper methods that handle marshaling automatically
+    private static string bysquare_encode(string jsonData, IntPtr config)
+    {
+        IntPtr ptr = bysquare_encode_raw(jsonData, config);
+        string result = Marshal.PtrToStringAnsi(ptr) ?? string.Empty;
+        bysquare_free(ptr);
+        return result;
+    }
+
+    private static string bysquare_decode(string qrString)
+    {
+        IntPtr ptr = bysquare_decode_raw(qrString);
+        string result = Marshal.PtrToStringAnsi(ptr) ?? string.Empty;
+        bysquare_free(ptr);
+        return result;
+    }
 
     static void Main(string[] args)
     {
@@ -54,9 +72,7 @@ class Example
         IntPtr config = bysquare_create_config();
 
         // Encode with default options
-        IntPtr resultPtr = bysquare_encode(json, config);
-        string? qr = Marshal.PtrToStringAnsi(resultPtr);
-        bysquare_free(resultPtr);
+        string qr = bysquare_encode(json, config);
 
         Console.WriteLine($"Encoded (default options): {qr}");
 
@@ -66,23 +82,17 @@ class Example
         bysquare_config_set_validate(config, 1);
 
         // Encode with custom options
-        IntPtr resultWithOptsPtr = bysquare_encode(json, config);
-        string? qrWithOpts = Marshal.PtrToStringAnsi(resultWithOptsPtr);
-        bysquare_free(resultWithOptsPtr);
+        string qrWithOpts = bysquare_encode(json, config);
 
         Console.WriteLine($"Encoded (version 1): {qrWithOpts}");
 
         // Decode
-        IntPtr decodedPtr = bysquare_decode(qr!);
-        string? decoded = Marshal.PtrToStringAnsi(decodedPtr);
-        bysquare_free(decodedPtr);
+        string decoded = bysquare_decode(qr);
 
         Console.WriteLine($"Decoded: {decoded}");
 
         // Get library version
-        IntPtr versionPtr = bysquare_version();
-        string? version = Marshal.PtrToStringAnsi(versionPtr);
-        bysquare_free(versionPtr);
+        string version = bysquare_version();
 
         Console.WriteLine($"Library version: {version}");
 

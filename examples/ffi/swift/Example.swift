@@ -12,18 +12,17 @@ guard let lib = dlopen(libName, RTLD_NOW) else {
     fatalError("Failed to load library: \(String(cString: dlerror()))")
 }
 
-typealias CreateConfigFunc = @convention(c) () -> OpaquePointer?
-typealias ConfigSetterFunc = @convention(c) (OpaquePointer?, Int32) -> Void
-typealias FreeConfigFunc = @convention(c) (OpaquePointer?) -> Void
-typealias EncodeFunc = @convention(c) (UnsafePointer<CChar>?, OpaquePointer?) -> UnsafePointer<CChar>?
+// Config bitflags
+let BYSQUARE_DEBURR: Int32 = 0b00000001    // Bit 0: Enable diacritics removal
+let BYSQUARE_VALIDATE: Int32 = 0b00000010  // Bit 1: Enable input validation
+
+// Version values (in high byte, bits 24-31)
+let BYSQUARE_VERSION_110: Int32 = 1 << 24  // v1.1.0 = 0b00000001_00000000_00000000_00000000
+
+typealias EncodeFunc = @convention(c) (UnsafePointer<CChar>?, Int32) -> UnsafePointer<CChar>?
 typealias DecodeFunc = @convention(c) (UnsafePointer<CChar>?) -> UnsafePointer<CChar>?
 typealias FreeFunc = @convention(c) (UnsafeMutablePointer<CChar>?) -> Void
 
-let createConfig = unsafeBitCast(dlsym(lib, "bysquare_create_config"), to: CreateConfigFunc.self)
-let configSetDeburr = unsafeBitCast(dlsym(lib, "bysquare_config_set_deburr"), to: ConfigSetterFunc.self)
-let configSetValidate = unsafeBitCast(dlsym(lib, "bysquare_config_set_validate"), to: ConfigSetterFunc.self)
-let configSetVersion = unsafeBitCast(dlsym(lib, "bysquare_config_set_version"), to: ConfigSetterFunc.self)
-let freeConfig = unsafeBitCast(dlsym(lib, "bysquare_free_config"), to: FreeConfigFunc.self)
 let encode = unsafeBitCast(dlsym(lib, "bysquare_encode"), to: EncodeFunc.self)
 let decode = unsafeBitCast(dlsym(lib, "bysquare_decode"), to: DecodeFunc.self)
 let free = unsafeBitCast(dlsym(lib, "bysquare_free"), to: FreeFunc.self)
@@ -53,25 +52,34 @@ let paymentJson = """
 }
 """
 
-// Option 1: Use defaults (pass nil for config)
-// let encodeResult = encode(paymentJson, nil)
+// Option 1: Use config=0 for automatic default (deburr + validate + v1.2.0)
+let encodeResultAuto = encode(paymentJson, 0)
+let qrStringAuto = String(cString: encodeResultAuto!)
+free(UnsafeMutablePointer(mutating: encodeResultAuto))
+if qrStringAuto.hasPrefix("ERROR:") {
+    let errorMsg = String(qrStringAuto.dropFirst(6)) // Strip "ERROR:" prefix
+    fatalError("Encoding error: \\(errorMsg)")
+}
+print("Encoded (config=0, auto-default): \(qrStringAuto)")
 
-// Option 2: Create config and customize options
-let config = createConfig()
-configSetDeburr(config, 1)      // enable deburr
-configSetValidate(config, 1)    // enable validation
-
-// Encode
-let encodeResult = encode(paymentJson, config)
-let qrString = String(cString: encodeResult!)
-free(UnsafeMutablePointer(mutating: encodeResult))
-print("Encoded: \(qrString)")
+// Option 2: Custom config - version 1.1.0, no validation
+let customConfig = BYSQUARE_DEBURR | BYSQUARE_VERSION_110
+let encodeResult2 = encode(paymentJson, customConfig)
+let qrStringCustom = String(cString: encodeResult2!)
+free(UnsafeMutablePointer(mutating: encodeResult2))
+if qrStringCustom.hasPrefix("ERROR:") {
+    let errorMsg = String(qrStringCustom.dropFirst(6))
+    fatalError("Encoding error: \\(errorMsg)")
+}
+print("Encoded (v1.1.0, no validation): \(qrStringCustom)")
 
 // Decode
-let decodeResult = decode(qrString)
+let decodeResult = decode(qrStringAuto)
 let decodedJson = String(cString: decodeResult!)
 free(UnsafeMutablePointer(mutating: decodeResult))
+if decodedJson.hasPrefix("ERROR:") {
+    let errorMsg = String(decodedJson.dropFirst(6))
+    fatalError("Decoding error: \\(errorMsg)")
+}
 print("Decoded: \(decodedJson)")
 
-// Cleanup
-freeConfig(config)

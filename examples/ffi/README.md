@@ -35,39 +35,35 @@ flowchart TB
     end
 
     subgraph FFI["C FFI Layer"]
-        CFG["1. create_config()"]
-        SET["2. config_set_*()"]
-        ENC["3. encode()"]
-        DEC["3. decode()"]
-        FREE["4. free()"]
+        ENC["encode(json, config)"]
+        DEC["decode(qrString)"]
+        FREE["free(ptr)"]
+        VER["version()"]
     end
 
     subgraph Core["Go Core"]
         LIB["libbysquare.so/dll"]
     end
 
-    ANY --> CFG
-    CFG --> SET
-    SET --> ENC & DEC
-    ENC & DEC --> LIB
+    ANY --> ENC & DEC & VER
+    ENC & DEC & VER --> LIB
     LIB --> FREE
 
-    style CFG fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
-    style SET fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
     style ENC fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
     style DEC fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
     style FREE fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
+    style VER fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
     style LIB fill:#A5EAFF,stroke:#00838F,stroke-width:1.5px
 ```
 
 **Configuration Pattern:**
 
-1. (Optional) Create config pointer and customize options
-2. Encode payment data (with custom config or NULL for defaults)
+1. Define configuration bitflags (or use `config=0` for defaults)
+2. Encode payment data with chosen config
 3. Decode QR strings (no config needed)
-4. Free allocated memory (both results and config if created)
+4. Free allocated memory
 
-**Default values when config is NULL:**
+**Default values when `config=0`:**
 
 - `deburr = true` (remove diacritics)
 - `validate = true` (validate input data)
@@ -89,23 +85,16 @@ This creates `libbysquare.so` in `../../go/bin/`.
 ## C API
 
 ```c
-// Create configuration pointer with defaults
-// (deburr=1, validate=1, version=2)
-void* bysquare_create_config();
-
-// Configure options using setters (all optional)
-void bysquare_config_set_deburr(void* ptr, int enabled);
-void bysquare_config_set_validate(void* ptr, int enabled);
-void bysquare_config_set_version(void* ptr, int version);
-
-// Encode with configuration (pass NULL to use defaults)
-char* bysquare_encode(char* jsonData, void* ptr);
+// Encode JSON payment data to QR string with configuration
+// config: 32-bit integer bitflags, or 0 for defaults
+//   - Bits 0-23: Feature flags (deburr=0x01, validate=0x02)
+//   - Bits 24-31: Version (0=v1.0.0, 1=v1.1.0, 2=v1.2.0)
+// Returns: QR string on success, "ERROR:<message>" on failure
+char* bysquare_encode(char* jsonData, int config);
 
 // Decode QR string to JSON
+// Returns: JSON string on success, "ERROR:<message>" on failure
 char* bysquare_decode(char* qrString);
-
-// Free configuration pointer
-void bysquare_free_config(void* ptr);
 
 // Free memory allocated by the library
 void bysquare_free(char* ptr);
@@ -114,21 +103,41 @@ void bysquare_free(char* ptr);
 char* bysquare_version(void);
 ```
 
-**Memory Management:** Always call `bysquare_free()` on returned strings (from encode,
-decode, version). Call `bysquare_free_config()` only if you created a config pointer
-(not needed if you passed NULL to encode).
+**Configuration Bitflags:**
 
-**Thread Safety:**
+```c
+// Feature flags (bits 0-23)
+#define BYSQUARE_DEBURR   0x00000001  // Bit 0: Remove diacritics
+#define BYSQUARE_VALIDATE 0x00000002  // Bit 1: Validate input data
 
-- Config instances are NOT thread-safe for concurrent modification.
-- Do not call config setters from multiple threads on the same config
-  simultaneously.
-- Concurrent encoding operations (reading config) from multiple threads are safe
-  as long as no thread is modifying the config during those operations.
-- For multi-threaded applications that need to modify config, either synchronize
-  access externally or use separate config instances per thread.
-- For multi-threaded applications, either synchronize config modifications or use
-  separate config instances per thread.
+// Version values (bits 24-31)
+#define BYSQUARE_VERSION_100 (0 << 24)  // v1.0.0 (released 2013-02-22)
+#define BYSQUARE_VERSION_110 (1 << 24)  // v1.1.0 (released 2015-06-24)
+#define BYSQUARE_VERSION_120 (2 << 24)  // v1.2.0 (released 2025-04-01)
+
+// Usage examples:
+config = 0;  // Auto-defaults: deburr + validate + v1.2.0
+config = BYSQUARE_DEBURR | BYSQUARE_VERSION_110;  // Custom: v1.1.0
+```
+
+**Error Handling:**
+
+Errors are returned as strings with "ERROR:" prefix:
+
+```c
+char* result = bysquare_encode(json, 0);
+if (strncmp(result, "ERROR:", 6) == 0) {
+    fprintf(stderr, "Encoding failed: %s\n", result + 6);
+    bysquare_free(result);
+    return 1;
+}
+```
+
+**Memory Management:** Always call `bysquare_free()` on returned strings from
+encode, decode, and version functions.
+
+**Thread Safety:** All functions are fully thread-safe and can be called
+concurrently from multiple threads.
 
 ## Troubleshooting
 

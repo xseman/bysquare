@@ -13,8 +13,7 @@ guard let lib = dlopen(libName, RTLD_NOW) else {
 }
 
 // Config bitflags
-let BYSQUARE_DEBURR: Int32 = 0b00000001    // Bit 0: Enable diacritics removal
-let BYSQUARE_VALIDATE: Int32 = 0b00000010  // Bit 1: Enable input validation
+let BYSQUARE_DEBURR: Int32 = 0b00000001  // Bit 0: Enable diacritics removal
 
 // Version values (in high byte, bits 24-31)
 let BYSQUARE_VERSION_110: Int32 = 1 << 24  // v1.1.0 = 0b00000001_00000000_00000000_00000000

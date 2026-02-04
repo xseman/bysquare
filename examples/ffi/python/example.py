@@ -11,8 +11,7 @@ lib_path = Path(__file__).parent.parent.parent.parent / "go" / "bin" / f"libbysq
 lib = ctypes.CDLL(str(lib_path))
 
 # Config bitflags
-BYSQUARE_DEBURR = 0b00000001    # Bit 0: Enable diacritics removal
-BYSQUARE_VALIDATE = 0b00000010  # Bit 1: Enable input validation
+BYSQUARE_DEBURR = 0b00000001  # Bit 0: Enable diacritics removal
 
 # Version values (in high byte, bits 24-31)
 BYSQUARE_VERSION_110 = 1 << 24  # v1.1.0 = 0b00000001_00000000_00000000_00000000

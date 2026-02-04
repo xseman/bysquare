@@ -1,6 +1,5 @@
 using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 class Example
 {
@@ -8,8 +7,7 @@ class Example
     private const string LibName = "bysquare";
 
     // Config bitflags
-    private const int BYSQUARE_DEBURR = 0b00000001;    // Bit 0: Enable diacritics removal
-    private const int BYSQUARE_VALIDATE = 0b00000010;  // Bit 1: Enable input validation
+    private const int BYSQUARE_DEBURR = 0b00000001;  // Bit 0: Enable diacritics removal
 
     // Version values (in high byte, bits 24-31)
     private const int BYSQUARE_VERSION_110 = 1 << 24;  // v1.1.0 = 0b00000001_00000000_00000000_00000000

@@ -58,12 +58,12 @@ flowchart TB
 
 **Configuration Pattern:**
 
-1. Define configuration bitflags (or use `config=0` for defaults)
+1. Define configuration bitflags (or use `config=-1` for defaults)
 2. Encode payment data with chosen config
 3. Decode QR strings (no config needed)
 4. Free allocated memory
 
-**Default values when `config=0`:**
+**Default values when `config=-1`:**
 
 - `deburr = true` (remove diacritics)
 - `validate = true` (validate input data)
@@ -86,9 +86,10 @@ This creates `libbysquare.so` in `../../go/bin/`.
 
 ```c
 // Encode JSON payment data to QR string with configuration
-// config: 32-bit integer bitflags, or 0 for defaults
+// config: 32-bit integer bitflags, or -1 for defaults
 //   - Bits 0-23: Feature flags (deburr=0x01, validate=0x02)
 //   - Bits 24-31: Version (0=v1.0.0, 1=v1.1.0, 2=v1.2.0)
+//   - Special: -1 for auto-defaults (v1.2.0 + deburr + validate)
 // Returns: QR string on success, "ERROR:<message>" on failure
 char* bysquare_encode(char* jsonData, int config);
 
@@ -116,8 +117,9 @@ char* bysquare_version(void);
 #define BYSQUARE_VERSION_120 (2 << 24)  // v1.2.0 (released 2025-04-01)
 
 // Usage examples:
-config = 0;  // Auto-defaults: deburr + validate + v1.2.0
-config = BYSQUARE_DEBURR | BYSQUARE_VERSION_110;  // Custom: v1.1.0
+config = -1;  // Auto-defaults: deburr + validate + v1.2.0
+config = 0;   // v1.0.0 with no flags
+config = BYSQUARE_DEBURR | BYSQUARE_VERSION_110;  // Custom: v1.1.0 + deburr
 ```
 
 **Error Handling:**
@@ -125,7 +127,7 @@ config = BYSQUARE_DEBURR | BYSQUARE_VERSION_110;  // Custom: v1.1.0
 Errors are returned as strings with "ERROR:" prefix:
 
 ```c
-char* result = bysquare_encode(json, 0);
+char* result = bysquare_encode(json, -1);
 if (strncmp(result, "ERROR:", 6) == 0) {
     fprintf(stderr, "Encoding failed: %s\n", result + 6);
     bysquare_free(result);

@@ -16,7 +16,8 @@ C#, PHP, Python, and Swift.
 
 Pass an integer config value to `bysquare_encode()`:
 
-- `config = 0` → Use automatic defaults (deburr + validate + v1.2.0)
+- `config = -1` → Use automatic defaults (deburr + validate + v1.2.0)
+- `config = 0` → v1.0.0 with no flags
 - `config = <bitflags>` → Custom configuration using bitflags
 
 **Bitflag Configuration:**
@@ -32,8 +33,9 @@ Pass an integer config value to `bysquare_encode()`:
 #define BYSQUARE_VERSION_120 (2 << 24)  // v1.2.0
 
 // Usage examples:
-char* qr1 = bysquare_encode(json, 0);  // Auto-defaults
-char* qr2 = bysquare_encode(json, BYSQUARE_DEBURR | BYSQUARE_VERSION_110);
+char* qr1 = bysquare_encode(json, -1);  // Auto-defaults
+char* qr2 = bysquare_encode(json, 0);  // v1.0.0, no flags
+char* qr3 = bysquare_encode(json, BYSQUARE_DEBURR | BYSQUARE_VERSION_110);
 ```
 
 ## Installation
@@ -97,9 +99,10 @@ The library provides a simple, bitflag-based configuration API:
 ```c
 // Encode JSON payment data to QR string
 // jsonData: JSON string containing payment information
-// config: 32-bit integer configuration (0 for defaults)
+// config: 32-bit integer configuration (-1 for defaults)
 //   - Bits 0-23: Feature flags (deburr=0x01, validate=0x02)
 //   - Bits 24-31: Version field (0=v1.0.0, 1=v1.1.0, 2=v1.2.0)
+//   - Special: -1 for auto-defaults (v1.2.0 + deburr + validate)
 // Returns: QR string on success, "ERROR:<message>" on failure
 char* bysquare_encode(char* jsonData, int config);
 
@@ -143,7 +146,7 @@ BYSQUARE_VERSION_120 = (2 << 24)  // 0x02000000 - v1.2.0 (2025-04-01)
 Errors are returned as strings with "ERROR:" prefix:
 
 ```c
-char* result = bysquare_encode(json, 0);
+char* result = bysquare_encode(json, -1);
 if (strncmp(result, "ERROR:", 6) == 0) {
     // Error occurred - message starts at result[6]
     fprintf(stderr, "Encoding failed: %s\n", result + 6);

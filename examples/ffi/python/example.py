@@ -14,7 +14,10 @@ lib = ctypes.CDLL(str(lib_path))
 BYSQUARE_DEBURR = 0b00000001  # Bit 0: Enable diacritics removal
 
 # Version values (in high byte, bits 24-31)
-BYSQUARE_VERSION_110 = 1 << 24  # v1.1.0 = 0b00000001_00000000_00000000_00000000
+BYSQUARE_VERSION_110 = 1 << 24  # v1.1.0
+
+# Special config value for default (v1.2.0 + deburr + validate)
+BYSQUARE_CONFIG_DEFAULT = -1
 
 # Define function signatures
 lib.bysquare_encode.argtypes = [ctypes.c_char_p, ctypes.c_int]
@@ -34,31 +37,28 @@ payment_data = {
     }]
 }
 
-# Option 1: Use config=0 for automatic default (deburr + validate + v1.2.0)
-result_ptr = lib.bysquare_encode(json.dumps(payment_data).encode('utf-8'), 0)
-qr_auto = ctypes.string_at(result_ptr).decode('utf-8')
-lib.bysquare_free(result_ptr)
+json_bytes = json.dumps(payment_data).encode('utf-8')
 
-if qr_auto.startswith("ERROR:"):
-    print(f"Error: {qr_auto[6:]}")  # Strip "ERROR:" prefix
-    sys.exit(1)
+# Helper function for encode + error handling
+def encode(config: int) -> str:
+    result_ptr = lib.bysquare_encode(json_bytes, config)
+    qr = ctypes.string_at(result_ptr).decode('utf-8')
+    lib.bysquare_free(result_ptr)
+    if qr.startswith("ERROR:"):
+        print(f"Error: {qr[6:]}")
+        sys.exit(1)
+    return qr
 
-print(f"Encoded (config=0, auto-default): {qr_auto}")
+# Default config (v1.2.0 + deburr + validate)
+qr_default = encode(BYSQUARE_CONFIG_DEFAULT)
+print(f"Default config: {qr_default}")
 
-# Option 2: Custom config - version 1.1.0, no validation
-custom_config = BYSQUARE_DEBURR | BYSQUARE_VERSION_110
-result_ptr = lib.bysquare_encode(json.dumps(payment_data).encode('utf-8'), custom_config)
-qr_custom = ctypes.string_at(result_ptr).decode('utf-8')
-lib.bysquare_free(result_ptr)
-
-if qr_custom.startswith("ERROR:"):
-    print(f"Error: {qr_custom[6:]}")
-    sys.exit(1)
-
-print(f"Encoded (v1.1.0, no validation): {qr_custom}")
+# Custom config - version 1.1.0 with deburr only
+qr_custom = encode(BYSQUARE_DEBURR | BYSQUARE_VERSION_110)
+print(f"Custom config:  {qr_custom}")
 
 # Decode
-result_ptr = lib.bysquare_decode(qr_auto.encode('utf-8'))
+result_ptr = lib.bysquare_decode(qr_default.encode('utf-8'))
 decoded_json = ctypes.string_at(result_ptr).decode('utf-8')
 lib.bysquare_free(result_ptr)
 

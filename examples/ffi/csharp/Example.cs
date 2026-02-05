@@ -10,7 +10,10 @@ class Example
     private const int BYSQUARE_DEBURR = 0b00000001;  // Bit 0: Enable diacritics removal
 
     // Version values (in high byte, bits 24-31)
-    private const int BYSQUARE_VERSION_110 = 1 << 24;  // v1.1.0 = 0b00000001_00000000_00000000_00000000
+    private const int BYSQUARE_VERSION_110 = 1 << 24;  // v1.1.0
+
+    // Special config value for default (v1.2.0 + deburr + validate)
+    private const int BYSQUARE_CONFIG_DEFAULT = -1;
 
     [DllImport(LibName, EntryPoint = "bysquare_encode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern IntPtr bysquare_encode_raw(string jsonData, int config);
@@ -20,10 +23,6 @@ class Example
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
     private static extern void bysquare_free(IntPtr ptr);
-
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    [return: MarshalAs(UnmanagedType.LPStr)]
-    private static extern string bysquare_version();
 
     // Managed wrapper methods that handle marshaling automatically
     private static string bysquare_encode(string jsonData, int config)
@@ -69,21 +68,17 @@ class Example
   }]
 }";
 
-        // Option 1: Use config=0 for automatic default (deburr + validate + v1.2.0)
-        string qrAuto = bysquare_encode(json, 0);
-        Console.WriteLine($"Encoded (config=0, auto-default): {qrAuto}");
+        // Use default config (v1.2.0 + deburr + validate)
+        string qrDefault = bysquare_encode(json, BYSQUARE_CONFIG_DEFAULT);
+        Console.WriteLine($"Default config: {qrDefault}");
 
-        // Option 2: Custom config - version 1.1.0, no validation
-        int customConfig = BYSQUARE_DEBURR | BYSQUARE_VERSION_110;
-        string qrCustom = bysquare_encode(json, customConfig);
-        Console.WriteLine($"Encoded (v1.1.0, no validation): {qrCustom}");
+        // Custom config - version 1.1.0 with deburr only
+        int custom = BYSQUARE_DEBURR | BYSQUARE_VERSION_110;
+        string qrCustom = bysquare_encode(json, custom);
+        Console.WriteLine($"Custom config:  {qrCustom}");
 
         // Decode
-        string decoded = bysquare_decode(qrAuto);
+        string decoded = bysquare_decode(qrDefault);
         Console.WriteLine($"Decoded: {decoded}");
-
-        // Get library version
-        string version = bysquare_version();
-        Console.WriteLine($"Library version: {version}");
     }
 }

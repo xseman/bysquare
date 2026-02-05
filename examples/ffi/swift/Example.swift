@@ -16,7 +16,10 @@ guard let lib = dlopen(libName, RTLD_NOW) else {
 let BYSQUARE_DEBURR: Int32 = 0b00000001  // Bit 0: Enable diacritics removal
 
 // Version values (in high byte, bits 24-31)
-let BYSQUARE_VERSION_110: Int32 = 1 << 24  // v1.1.0 = 0b00000001_00000000_00000000_00000000
+let BYSQUARE_VERSION_110: Int32 = 1 << 24  // v1.1.0
+
+// Special config value for default (v1.2.0 + deburr + validate)
+let BYSQUARE_CONFIG_DEFAULT: Int32 = -1
 
 typealias EncodeFunc = @convention(c) (UnsafePointer<CChar>?, Int32) -> UnsafePointer<CChar>?
 typealias DecodeFunc = @convention(c) (UnsafePointer<CChar>?) -> UnsafePointer<CChar>?
@@ -51,34 +54,31 @@ let paymentJson = """
 }
 """
 
-// Option 1: Use config=0 for automatic default (deburr + validate + v1.2.0)
-let encodeResultAuto = encode(paymentJson, 0)
-let qrStringAuto = String(cString: encodeResultAuto!)
-free(UnsafeMutablePointer(mutating: encodeResultAuto))
-if qrStringAuto.hasPrefix("ERROR:") {
-    let errorMsg = String(qrStringAuto.dropFirst(6)) // Strip "ERROR:" prefix
-    fatalError("Encoding error: \\(errorMsg)")
+// Helper function for encode + error handling
+func encodeQR(_ config: Int32) -> String {
+    let result = encode(paymentJson, config)
+    let qr = String(cString: result!)
+    free(UnsafeMutablePointer(mutating: result))
+    if qr.hasPrefix("ERROR:") {
+        fatalError("Encoding error: \(String(qr.dropFirst(6)))")
+    }
+    return qr
 }
-print("Encoded (config=0, auto-default): \(qrStringAuto)")
 
-// Option 2: Custom config - version 1.1.0, no validation
-let customConfig = BYSQUARE_DEBURR | BYSQUARE_VERSION_110
-let encodeResult2 = encode(paymentJson, customConfig)
-let qrStringCustom = String(cString: encodeResult2!)
-free(UnsafeMutablePointer(mutating: encodeResult2))
-if qrStringCustom.hasPrefix("ERROR:") {
-    let errorMsg = String(qrStringCustom.dropFirst(6))
-    fatalError("Encoding error: \\(errorMsg)")
-}
-print("Encoded (v1.1.0, no validation): \(qrStringCustom)")
+// Default config (v1.2.0 + deburr + validate)
+let qrDefault = encodeQR(BYSQUARE_CONFIG_DEFAULT)
+print("Default config: \(qrDefault)")
+
+// Custom config - version 1.1.0 with deburr only
+let qrCustom = encodeQR(BYSQUARE_DEBURR | BYSQUARE_VERSION_110)
+print("Custom config:  \(qrCustom)")
 
 // Decode
-let decodeResult = decode(qrStringAuto)
+let decodeResult = decode(qrDefault)
 let decodedJson = String(cString: decodeResult!)
 free(UnsafeMutablePointer(mutating: decodeResult))
 if decodedJson.hasPrefix("ERROR:") {
-    let errorMsg = String(decodedJson.dropFirst(6))
-    fatalError("Decoding error: \\(errorMsg)")
+    fatalError("Decoding error: \(String(decodedJson.dropFirst(6)))")
 }
 print("Decoded: \(decodedJson)")
 

@@ -4,7 +4,10 @@
 const BYSQUARE_DEBURR = 0b00000001;  // Bit 0: Enable diacritics removal
 
 // Version values (in high byte, bits 24-31)
-const BYSQUARE_VERSION_110 = 1 << 24;  // v1.1.0 = 0b00000001_00000000_00000000_00000000
+const BYSQUARE_VERSION_110 = 1 << 24;  // v1.1.0
+
+// Special config value for default (v1.2.0 + deburr + validate)
+const BYSQUARE_CONFIG_DEFAULT = -1;
 
 $libExt = match (PHP_OS_FAMILY) {
     'Darwin' => 'dylib',
@@ -29,40 +32,35 @@ $paymentData = [
     ]]
 ];
 
-// Option 1: Use config=0 for automatic default (deburr + validate + v1.2.0)
-$result = $ffi->bysquare_encode(json_encode($paymentData), 0);
-$qrStringAuto = FFI::string($result);
-$ffi->bysquare_free($result);
+$json = json_encode($paymentData);
 
-if (str_starts_with($qrStringAuto, 'ERROR:')) {
-    $errorMsg = substr($qrStringAuto, 6); // Strip "ERROR:" prefix
-    die("Encoding error: {$errorMsg}\n");
-}
+// Helper function for encode + error handling
+$encode = function($config) use ($ffi, $json) {
+    $result = $ffi->bysquare_encode($json, $config);
+    $qr = FFI::string($result);
+    $ffi->bysquare_free($result);
+    if (str_starts_with($qr, 'ERROR:')) {
+        die("Encoding error: " . substr($qr, 6) . "\n");
+    }
+    return $qr;
+};
 
-echo "Encoded (config=0, auto-default): " . $qrStringAuto . "\n";
+// Default config (v1.2.0 + deburr + validate)
+$qrDefault = $encode(BYSQUARE_CONFIG_DEFAULT);
+echo "Default config: {$qrDefault}\n";
 
-// Option 2: Custom config - version 1.1.0, no validation
-$customConfig = BYSQUARE_DEBURR | BYSQUARE_VERSION_110;
-$result = $ffi->bysquare_encode(json_encode($paymentData), $customConfig);
-$qrStringCustom = FFI::string($result);
-$ffi->bysquare_free($result);
-
-if (str_starts_with($qrStringCustom, 'ERROR:')) {
-    $errorMsg = substr($qrStringCustom, 6);
-    die("Encoding error: {$errorMsg}\n");
-}
-
-echo "Encoded (v1.1.0, no validation): " . $qrStringCustom . "\n";
+// Custom config - version 1.1.0 with deburr only
+$qrCustom = $encode(BYSQUARE_DEBURR | BYSQUARE_VERSION_110);
+echo "Custom config:  {$qrCustom}\n";
 
 // Decode
-$result = $ffi->bysquare_decode($qrStringAuto);
+$result = $ffi->bysquare_decode($qrDefault);
 $decodedJson = FFI::string($result);
 $ffi->bysquare_free($result);
 
 if (str_starts_with($decodedJson, 'ERROR:')) {
-    $errorMsg = substr($decodedJson, 6);
-    die("Decoding error: {$errorMsg}\n");
+    die("Decoding error: " . substr($decodedJson, 6) . "\n");
 }
 
-echo "Decoded: " . $decodedJson . "\n";
+echo "Decoded: {$decodedJson}\n";
 

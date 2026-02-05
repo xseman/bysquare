@@ -17,7 +17,10 @@ public class Example {
     private static final int BYSQUARE_DEBURR = 0b00000001;  // Bit 0: Enable diacritics removal
 
     // Version values (in high byte, bits 24-31)
-    private static final int BYSQUARE_VERSION_110 = 1 << 24;  // v1.1.0 = 0b00000001_00000000_00000000_00000000
+    private static final int BYSQUARE_VERSION_110 = 1 << 24;  // v1.1.0
+
+    // Special config value for default (v1.2.0 + deburr + validate)
+    private static final int BYSQUARE_CONFIG_DEFAULT = -1;
 
     public static void main(String[] args) throws Throwable {
         System.loadLibrary("bysquare");
@@ -56,42 +59,33 @@ public class Example {
         try (var arena = Arena.ofConfined()) {
             var jsonPtr = arena.allocateUtf8String(json);
 
-            // Option 1: Use config=0 for automatic default (deburr + validate + v1.2.0)
-            var encodeResultAuto = (MemorySegment) encodeFunc.invoke(jsonPtr, 0);
-            var qrStringAuto = encodeResultAuto.reinterpret(Integer.MAX_VALUE).getUtf8String(0L);
-            freeFunc.invoke(encodeResultAuto);
-
-            if (qrStringAuto.startsWith("ERROR:")) {
-                String errorMsg = qrStringAuto.substring(6); // Strip "ERROR:" prefix
-                throw new RuntimeException("Encoding error: " + errorMsg);
+            // Default config (v1.2.0 + deburr + validate)
+            var resultDefault = (MemorySegment) encodeFunc.invoke(jsonPtr, BYSQUARE_CONFIG_DEFAULT);
+            var qrDefault = resultDefault.reinterpret(Integer.MAX_VALUE).getUtf8String(0L);
+            freeFunc.invoke(resultDefault);
+            if (qrDefault.startsWith("ERROR:")) {
+                throw new RuntimeException("Encoding error: " + qrDefault.substring(6));
             }
+            System.out.println("Default config: " + qrDefault);
 
-            System.out.println("Encoded (config=0, auto-default): " + qrStringAuto);
-
-            // Option 2: Custom config - version 1.1.0, no validation
-            int customConfig = BYSQUARE_DEBURR | BYSQUARE_VERSION_110;
-            var encodeResult2 = (MemorySegment) encodeFunc.invoke(jsonPtr, customConfig);
-            var qrStringCustom = encodeResult2.reinterpret(Integer.MAX_VALUE).getUtf8String(0L);
-            freeFunc.invoke(encodeResult2);
-
-            if (qrStringCustom.startsWith("ERROR:")) {
-                String errorMsg = qrStringCustom.substring(6);
-                throw new RuntimeException("Encoding error: " + errorMsg);
+            // Custom config - version 1.1.0 with deburr only
+            int custom = BYSQUARE_DEBURR | BYSQUARE_VERSION_110;
+            var resultCustom = (MemorySegment) encodeFunc.invoke(jsonPtr, custom);
+            var qrCustom = resultCustom.reinterpret(Integer.MAX_VALUE).getUtf8String(0L);
+            freeFunc.invoke(resultCustom);
+            if (qrCustom.startsWith("ERROR:")) {
+                throw new RuntimeException("Encoding error: " + qrCustom.substring(6));
             }
-
-            System.out.println("Encoded (v1.1.0, no validation): " + qrStringCustom);
+            System.out.println("Custom config:  " + qrCustom);
 
             // Decode
-            var qrPtr = arena.allocateUtf8String(qrStringAuto);
+            var qrPtr = arena.allocateUtf8String(qrDefault);
             var decodeResult = (MemorySegment) decodeFunc.invoke(qrPtr);
             var decodedJson = decodeResult.reinterpret(Integer.MAX_VALUE).getUtf8String(0L);
             freeFunc.invoke(decodeResult);
-
             if (decodedJson.startsWith("ERROR:")) {
-                String errorMsg = decodedJson.substring(6);
-                throw new RuntimeException("Decoding error: " + errorMsg);
+                throw new RuntimeException("Decoding error: " + decodedJson.substring(6));
             }
-
             System.out.println("Decoded: " + decodedJson);
         }
     }

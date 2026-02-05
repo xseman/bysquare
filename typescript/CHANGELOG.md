@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.1.1](https://github.com/xseman/bysquare/compare/typescript/v3.1.0...typescript/v3.1.1) (2026-02-05)
+
+
+### Bug Fixes
+
+* **spec:** update dates formats change v1.2 ([#99](https://github.com/xseman/bysquare/issues/99)) ([c026cd0](https://github.com/xseman/bysquare/commit/c026cd0d953f573f2f26ecc448ec1aaccdbe4863))
+
+
+### Documentation
+
+* update format & link ([e24a0a3](https://github.com/xseman/bysquare/commit/e24a0a38ca464770658b54788e1f02822265a59b))
+
 ## [3.1.0](https://github.com/xseman/bysquare/compare/typescript/v3.0.0...typescript/v3.1.0) (2026-01-21)
 
 

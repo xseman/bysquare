@@ -6,14 +6,14 @@ on:
 
 jobs:
     close-issues:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-slim
         permissions:
             issues: write
         env:
             DAYS_BEFORE_STALE: 90
             DAYS_BEFORE_CLOSE: 30
         steps:
-            - uses: actions/stale@v9
+            - uses: actions/stale@v10
               with:
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
                   days-before-issue-stale: ${{ env.DAYS_BEFORE_STALE }}

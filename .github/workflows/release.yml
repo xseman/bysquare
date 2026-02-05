@@ -116,10 +116,13 @@ jobs:
             - name: Build CLI
               shell: bash
               working-directory: ./go
+              env:
+                  VERSION: ${{ needs.release-please.outputs.go_tag_name || inputs.go_tag }}
               run: |
+                  VERSION_NUM=${VERSION#go/v}
                   mkdir -p ../artifacts
                   CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build \
-                      -ldflags="-s -w" \
+                      -ldflags="-s -w -X main.version=${VERSION_NUM}" \
                       -o ../artifacts/bysquare-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }} \
                       ./cmd/bysquare
 
@@ -127,11 +130,22 @@ jobs:
               shell: bash
               working-directory: ./go
               env:
+                  VERSION: ${{ needs.release-please.outputs.go_tag_name || inputs.go_tag }}
                   CC: ${{ matrix.goos == 'linux' && matrix.goarch == 'arm64' && 'aarch64-linux-gnu-gcc' || '' }}
               run: |
+                  VERSION_NUM=${VERSION#go/v}
+                  EXT=""
+                  if [ "${{ matrix.goos }}" = "windows" ]; then
+                      EXT=".dll"
+                  elif [ "${{ matrix.goos }}" = "darwin" ]; then
+                      EXT=".dylib"
+                  else
+                      EXT=".so"
+                  fi
                   CGO_ENABLED=1 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build \
                       -buildmode=c-shared \
-                      -o ../artifacts/libbysquare-${{ matrix.goos }}-${{ matrix.goarch }} \
+                      -ldflags="-X main.version=${VERSION_NUM}" \
+                      -o ../artifacts/libbysquare-${{ matrix.goos }}-${{ matrix.goarch }}${EXT} \
                       ./cmd/libbysquare
                   cd ../artifacts
                   ls -la

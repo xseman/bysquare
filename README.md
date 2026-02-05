@@ -1,9 +1,11 @@
-<h1 align="center">bysquare</h1>
+<h1 align="center">
+	bysquare
+</h1>
 
 <p align="center">
-"PAY by square" is a national standard for QR code payments that was adopted
-by the Slovak Banking Association in 2013. It is incorporated into a variety
-of invoices, reminders and other payment regulations.
+	"PAY by square" is a national standard for QR code payments that was adopted
+	by the Slovak Banking Association in 2013. It is incorporated into a variety
+	of invoices, reminders and other payment regulations.
 </p>
 
 ## Why
@@ -18,6 +20,11 @@ individuals and businesses to create QR codes for their invoices.
 - Support latest PAY by square standard (v1.2.0)
 - Isomorphic Browser & Runtime-independent (Browser, Node.js, Bun, Deno)
 - Compatible with any system language using C Foreign Function Interface (CFFI)
+
+| Specification | TypeScript      | Go      |
+| ------------- | --------------- | ------- |
+| v1.1          | v1.0.0 – v3.0.0 | v0.1.0  |
+| v1.2          | v3.1.0+         | v0.2.0+ |
 
 ## Implementations
 
@@ -60,13 +67,13 @@ flowchart LR
         CFFI --> ANY[Python, PHP, Java, Swift, etc.]
     end
 
-    style TS fill:#A5D8FF,stroke:#1976D2,stroke-width:1.5px
-    style Browser fill:#A5D8FF,stroke:#1976D2,stroke-width:1.5px
-    style Node/Bun/Deno fill:#A5D8FF,stroke:#1976D2,stroke-width:1.5px
+    style TS            fill:#A5D8FF, stroke:#1976D2, stroke-width:1.5px
+    style Browser       fill:#A5D8FF, stroke:#1976D2, stroke-width:1.5px
+    style Node/Bun/Deno fill:#A5D8FF, stroke:#1976D2, stroke-width:1.5px
 
-    style GO fill:#A5EAFF,stroke:#00838F,stroke-width:1.5px
-    style GO_LIB fill:#A5EAFF,stroke:#00838F,stroke-width:1.5px
-    style CFFI fill:#A5EAFF,stroke:#00838F,stroke-width:1.5px
+    style GO      fill:#A5EAFF, stroke:#00838F, stroke-width:1.5px
+    style GO_LIB  fill:#A5EAFF, stroke:#00838F, stroke-width:1.5px
+    style CFFI    fill:#A5EAFF, stroke:#00838F, stroke-width:1.5px
 ```
 
 ## Using C FFI

@@ -1,17 +1,21 @@
-.DEFAULT_GOAL := help
-
 OUTPUT_DIR ?= bin
-LDFLAGS := -s -w
+VERSION ?= $(shell jq -r '.go' ../.github/.release-manifest.json 2>/dev/null || echo "dev")
 
 .PHONY: build
 build: ## Build CLI binary
 	@mkdir -p $(OUTPUT_DIR)
-	@CGO_ENABLED=0 go build -ldflags="$(LDFLAGS)" -o $(OUTPUT_DIR)/bysquare ./cmd/bysquare
+	@CGO_ENABLED=0 go build -ldflags="-s -w -X main.version=$(VERSION)" -o $(OUTPUT_DIR)/bysquare ./cmd/bysquare
 
 .PHONY: build-ffi
 build-ffi: ## Build FFI shared library
 	@mkdir -p $(OUTPUT_DIR)
-	@CGO_ENABLED=1 go build -buildmode=c-shared -o $(OUTPUT_DIR)/libbysquare ./cmd/libbysquare
+	@if [ "$$(uname)" = "Darwin" ]; then \
+		CGO_ENABLED=1 go build -buildmode=c-shared -ldflags="-X main.version=$(VERSION)" -o $(OUTPUT_DIR)/libbysquare.dylib ./cmd/libbysquare; \
+	elif [ "$$OS" = "Windows_NT" ]; then \
+		CGO_ENABLED=1 go build -buildmode=c-shared -ldflags="-X main.version=$(VERSION)" -o $(OUTPUT_DIR)/libbysquare.dll ./cmd/libbysquare; \
+	else \
+		CGO_ENABLED=1 go build -buildmode=c-shared -ldflags="-X main.version=$(VERSION)" -o $(OUTPUT_DIR)/libbysquare.so ./cmd/libbysquare; \
+	fi
 
 .PHONY: test
 test: ## Run tests

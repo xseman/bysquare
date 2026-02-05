@@ -7,11 +7,36 @@ C-compatible FFI layer for using library from other programming languages.
 - Go 1.23+
 - GCC (for CGo)
 
-## Tested Languages
+## Usage Examples
 
-- Python (via ctypes)
-- PHP (via FFI extension)
-- Java (via JNA)
+See [../../examples/ffi/](../../examples/ffi/) for complete examples in Java,
+C#, PHP, Python, and Swift.
+
+**Configuration Options:**
+
+Pass an integer config value to `bysquare_encode()`:
+
+- `config = -1` → Use automatic defaults (deburr + validate + v1.2.0)
+- `config = 0` → v1.0.0 with no flags
+- `config = <bitflags>` → Custom configuration using bitflags
+
+**Bitflag Configuration:**
+
+```c
+// Feature flags (bits 0-23)
+#define BYSQUARE_DEBURR   0x00000001  // Bit 0: Remove diacritics
+#define BYSQUARE_VALIDATE 0x00000002  // Bit 1: Validate input data
+
+// Version values (bits 24-31)
+#define BYSQUARE_VERSION_100 (0 << 24)  // v1.0.0
+#define BYSQUARE_VERSION_110 (1 << 24)  // v1.1.0
+#define BYSQUARE_VERSION_120 (2 << 24)  // v1.2.0
+
+// Usage examples:
+char* qr1 = bysquare_encode(json, -1);  // Auto-defaults
+char* qr2 = bysquare_encode(json, 0);  // v1.0.0, no flags
+char* qr3 = bysquare_encode(json, BYSQUARE_DEBURR | BYSQUARE_VERSION_110);
+```
 
 ## Installation
 
@@ -69,66 +94,74 @@ ln -s libbysquare-linux-amd64.so bin/libbysquare.so
 
 ## API Reference
 
-### Function Signatures
+The library provides a simple, bitflag-based configuration API:
 
 ```c
-// Encode payment data (JSON string) to BySquare QR string
-char* bysquare_encode(char* jsonData);
+// Encode JSON payment data to QR string
+// jsonData: JSON string containing payment information
+// config: 32-bit integer configuration (-1 for defaults)
+//   - Bits 0-23: Feature flags (deburr=0x01, validate=0x02)
+//   - Bits 24-31: Version field (0=v1.0.0, 1=v1.1.0, 2=v1.2.0)
+//   - Special: -1 for auto-defaults (v1.2.0 + deburr + validate)
+// Returns: QR string on success, "ERROR:<message>" on failure
+char* bysquare_encode(char* jsonData, int config);
 
-// Decode BySquare QR string to payment data (JSON string)
+// Decode QR string to JSON payment data
+// qrString: PAY by square QR code string
+// Returns: JSON string on success, "ERROR:<message>" on failure
 char* bysquare_decode(char* qrString);
 
 // Free memory allocated by the library
+// ptr: String returned by encode, decode, or version
 void bysquare_free(char* ptr);
 
 // Get library version
+// Returns: Version string (e.g., "0.1.0") - caller must free
 char* bysquare_version();
 ```
 
+**Configuration Bitflags:**
+
+```c
+// Feature flags (bits 0-1)
+BYSQUARE_DEBURR   = 0x00000001  // Remove diacritics (ľščťž → lstz)
+BYSQUARE_VALIDATE = 0x00000002  // Validate input before encoding
+
+// Version values (bits 24-31)
+BYSQUARE_VERSION_100 = (0 << 24)  // 0x00000000 - v1.0.0 (2013-02-22)
+BYSQUARE_VERSION_110 = (1 << 24)  // 0x01000000 - v1.1.0 (2015-06-24)
+BYSQUARE_VERSION_120 = (2 << 24)  // 0x02000000 - v1.2.0 (2025-04-01)
+```
+
+### Version Constants
+
+| Value | Version | Release Date |
+| ----- | ------- | ------------ |
+| 0     | 1.0.0   | 2013-02-22   |
+| 1     | 1.1.0   | 2015-06-24   |
+| 2     | 1.2.0   | 2025-04-01   |
+
 ### Error Handling
 
-Errors are returned as JSON with `error` field:
+Errors are returned as strings with "ERROR:" prefix:
 
-```json
-{
-	"error": "Encoding error: invalid IBAN (ISO 13616)"
+```c
+char* result = bysquare_encode(json, -1);
+if (strncmp(result, "ERROR:", 6) == 0) {
+    // Error occurred - message starts at result[6]
+    fprintf(stderr, "Encoding failed: %s\n", result + 6);
+    bysquare_free(result);  // Must still free the error string
+    return 1;
 }
+
+// Success - use the QR string
+printf("QR: %s\n", result);
+bysquare_free(result);
 ```
 
-## Thread Safety
+**Example error messages:**
 
-The library is **thread-safe** for concurrent encoding/decoding operations. Each
-function call is independent.
-
-## Library Naming
-
-The build script generates platform-specific filenames (e.g.,
-`libbysquare-linux-amd64.so`). For convenience, examples assume the library is
-renamed or symlinked to:
-
-- `libbysquare.so` (Linux)
-- `libbysquare.dylib` (macOS)
-- `libbysquare.dll` (Windows)
-
-JNA (Java) automatically handles the "lib" prefix and extension, so use
-`Native.load("bysquare", ...)` which will search for `libbysquare.{so,dylib,dll}`.
-
-## Building FFI Library
-
-### Build Commands
-
-```bash
-# Current platform
-make build-ffi
-
-# All platforms (cross-compile)
-make build-ffi-all
-```
-
-### Cross-Compilation
-
-```bash
-# Example: Build Windows DLL from Linux
-GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc \
-  go build -buildmode=c-shared -o libbysquare-windows-amd64.dll ./cmd/libbysquare
-```
+- `ERROR:invalid IBAN (ISO 13616): SK123`
+- `ERROR:amount must be positive`
+- `ERROR:invalid JSON: unexpected end of input`
+- `ERROR:panic: runtime error: index out of range` (internal panic recovery)

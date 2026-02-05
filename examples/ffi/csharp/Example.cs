@@ -1,0 +1,84 @@
+using System;
+using System.Runtime.InteropServices;
+
+class Example
+{
+    // Determine library name based on platform
+    private const string LibName = "bysquare";
+
+    // Config bitflags
+    private const int BYSQUARE_DEBURR = 0b00000001;  // Bit 0: Enable diacritics removal
+
+    // Version values (in high byte, bits 24-31)
+    private const int BYSQUARE_VERSION_110 = 1 << 24;  // v1.1.0
+
+    // Special config value for default (v1.2.0 + deburr + validate)
+    private const int BYSQUARE_CONFIG_DEFAULT = -1;
+
+    [DllImport(LibName, EntryPoint = "bysquare_encode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern IntPtr bysquare_encode_raw(string jsonData, int config);
+
+    [DllImport(LibName, EntryPoint = "bysquare_decode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern IntPtr bysquare_decode_raw(string qrString);
+
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+    private static extern void bysquare_free(IntPtr ptr);
+
+    // Managed wrapper methods that handle marshaling automatically
+    private static string bysquare_encode(string jsonData, int config)
+    {
+        IntPtr ptr = bysquare_encode_raw(jsonData, config);
+        string result = Marshal.PtrToStringAnsi(ptr) ?? string.Empty;
+        bysquare_free(ptr);
+
+        if (result.StartsWith("ERROR:"))
+        {
+            string errorMsg = result.Substring(6); // Strip "ERROR:" prefix
+            throw new Exception($"Encoding error: {errorMsg}");
+        }
+
+        return result;
+    }
+
+    private static string bysquare_decode(string qrString)
+    {
+        IntPtr ptr = bysquare_decode_raw(qrString);
+        string result = Marshal.PtrToStringAnsi(ptr) ?? string.Empty;
+        bysquare_free(ptr);
+
+        if (result.StartsWith("ERROR:"))
+        {
+            string errorMsg = result.Substring(6); // Strip "ERROR:" prefix
+            throw new Exception($"Decoding error: {errorMsg}");
+        }
+
+        return result;
+    }
+
+    static void Main(string[] args)
+    {
+        string json = @"{
+  ""payments"": [{
+    ""type"": 1,
+    ""amount"": 123.45,
+    ""currencyCode"": ""EUR"",
+    ""variableSymbol"": ""987654"",
+    ""beneficiary"": {""name"": ""John Doe""},
+    ""bankAccounts"": [{""iban"": ""SK9611000000002918599669""}]
+  }]
+}";
+
+        // Use default config (v1.2.0 + deburr + validate)
+        string qrDefault = bysquare_encode(json, BYSQUARE_CONFIG_DEFAULT);
+        Console.WriteLine($"Default config: {qrDefault}");
+
+        // Custom config - version 1.1.0 with deburr only
+        int custom = BYSQUARE_DEBURR | BYSQUARE_VERSION_110;
+        string qrCustom = bysquare_encode(json, custom);
+        Console.WriteLine($"Custom config:  {qrCustom}");
+
+        // Decode
+        string decoded = bysquare_decode(qrDefault);
+        Console.WriteLine($"Decoded: {decoded}");
+    }
+}

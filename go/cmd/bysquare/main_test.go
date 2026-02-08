@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 	if err := cmd.Run(); err != nil {
 		os.Exit(1)
 	}
-	defer os.Remove(binaryPath)
+	defer func() { _ = os.Remove(binaryPath) }()
 
 	// Set up example file paths
 	exampleJSON = filepath.Join("..", "..", "..", "examples", "cli", "example.json")
@@ -121,7 +121,7 @@ func TestEncodeWithFile(t *testing.T) {
 
 	// Check base32hex characters
 	for _, c := range stdout {
-		if !((c >= '0' && c <= '9') || (c >= 'A' && c <= 'V')) {
+		if (c < '0' || c > '9') && (c < 'A' || c > 'V') {
 			t.Errorf("Invalid base32hex character in output: %c", c)
 		}
 	}

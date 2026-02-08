@@ -8,21 +8,27 @@ const CLI_PATH = join(import.meta.dir, "cli.ts");
 const EXAMPLE_JSON = join(import.meta.dir, "../../examples/cli/example.json");
 const EXAMPLE_JSONL = join(import.meta.dir, "../../examples/cli/example.jsonl");
 
+// Base32hex alphabet: digits 0-9 and letters A-V
+const BASE32HEX_PATTERN = /^[0-9A-V]+$/;
+
+const EXAMPLE_QR =
+	"0804Q000AEM958SPQK31JJFA00H0OBFGMH6PKV0OQSNQPQK5KCH0BB12EJI6C2NFLCHS43I7E8NVVNCAMCF3GSRUMS4EK680FG7L2H6H9UDVLMR955998RVVVBUV000";
+
 async function runCli(args: string[], stdin?: string): Promise<{
 	stdout: string;
 	stderr: string;
 	exitCode: number;
 }> {
 	const proc = Bun.spawn(["bun", CLI_PATH, ...args], {
-		stdin: stdin ? "pipe" : "inherit",
+		stdin: "pipe",
 		stdout: "pipe",
 		stderr: "pipe",
 	});
 
 	if (stdin && proc.stdin) {
 		proc.stdin.write(stdin);
-		proc.stdin.end();
 	}
+	proc.stdin?.end();
 
 	const [stdout, stderr] = await Promise.all([
 		new Response(proc.stdout).text(),
@@ -72,7 +78,7 @@ test("encode with JSON file", async () => {
 	const result = await runCli(["encode", EXAMPLE_JSON]);
 
 	expect(result.exitCode).toBe(0);
-	expect(result.stdout).toMatch(/^[0-9A-V]+$/);
+	expect(result.stdout).toMatch(BASE32HEX_PATTERN);
 	expect(result.stdout.length).toBeGreaterThan(50);
 });
 
@@ -82,8 +88,8 @@ test("encode with JSONL file", async () => {
 	expect(result.exitCode).toBe(0);
 	const lines = result.stdout.split("\n");
 	expect(lines.length).toBe(2);
-	expect(lines[0]).toMatch(/^[0-9A-V]+$/);
-	expect(lines[1]).toMatch(/^[0-9A-V]+$/);
+	expect(lines[0]).toMatch(BASE32HEX_PATTERN);
+	expect(lines[1]).toMatch(BASE32HEX_PATTERN);
 });
 
 test("encode from stdin", async () => {
@@ -101,43 +107,32 @@ test("encode from stdin", async () => {
 	const result = await runCli(["encode", "-"], input);
 
 	expect(result.exitCode).toBe(0);
-	expect(result.stdout).toMatch(/^[0-9A-V]+$/);
+	expect(result.stdout).toMatch(BASE32HEX_PATTERN);
 });
 
-test("encode with --no-deburr flag", async () => {
-	const result = await runCli(["encode", "--no-deburr", EXAMPLE_JSON]);
+for (const flag of ["--no-deburr", "--no-validate"]) {
+	test(`encode with ${flag} flag`, async () => {
+		const result = await runCli(["encode", flag, EXAMPLE_JSON]);
 
-	expect(result.exitCode).toBe(0);
-	expect(result.stdout).toMatch(/^[0-9A-V]+$/);
-});
+		expect(result.exitCode).toBe(0);
+		expect(result.stdout).toMatch(BASE32HEX_PATTERN);
+	});
+}
 
-test("encode with --no-validate flag", async () => {
-	const result = await runCli(["encode", "--no-validate", EXAMPLE_JSON]);
+for (
+	const { version, prefix } of [
+		{ version: "1.0.0", prefix: "00" },
+		{ version: "1.1.0", prefix: "04" },
+		{ version: "1.2.0", prefix: "08" },
+	]
+) {
+	test(`encode with --spec-version ${version}`, async () => {
+		const result = await runCli(["encode", "-s", version, EXAMPLE_JSON]);
 
-	expect(result.exitCode).toBe(0);
-	expect(result.stdout).toMatch(/^[0-9A-V]+$/);
-});
-
-test("encode with --spec-version 1.0.0", async () => {
-	const result = await runCli(["encode", "-s", "1.0.0", EXAMPLE_JSON]);
-
-	expect(result.exitCode).toBe(0);
-	expect(result.stdout).toMatch(/^00/);
-});
-
-test("encode with --spec-version 1.1.0", async () => {
-	const result = await runCli(["encode", "-s", "1.1.0", EXAMPLE_JSON]);
-
-	expect(result.exitCode).toBe(0);
-	expect(result.stdout).toMatch(/^04/);
-});
-
-test("encode with --spec-version 1.2.0", async () => {
-	const result = await runCli(["encode", "-s", "1.2.0", EXAMPLE_JSON]);
-
-	expect(result.exitCode).toBe(0);
-	expect(result.stdout).toMatch(/^08/);
-});
+		expect(result.exitCode).toBe(0);
+		expect(result.stdout).toMatch(new RegExp(`^${prefix}`));
+	});
+}
 
 test("encode with invalid spec version", async () => {
 	const result = await runCli(["encode", "-s", "9.9.9", EXAMPLE_JSON]);
@@ -161,9 +156,7 @@ test("encode with no file argument", async () => {
 });
 
 test("decode QR string", async () => {
-	const qrString =
-		"0804Q000AEM958SPQK31JJFA00H0OBFGMH6PKV0OQSNQPQK5KCH0BB12EJI6C2NFLCHS43I7E8NVVNCAMCF3GSRUMS4EK680FG7L2H6H9UDVLMR955998RVVVBUV000";
-	const result = await runCli(["decode", qrString]);
+	const result = await runCli(["decode", EXAMPLE_QR]);
 
 	expect(result.exitCode).toBe(0);
 
@@ -174,9 +167,7 @@ test("decode QR string", async () => {
 });
 
 test("decode from stdin", async () => {
-	const qrString =
-		"0804Q000AEM958SPQK31JJFA00H0OBFGMH6PKV0OQSNQPQK5KCH0BB12EJI6C2NFLCHS43I7E8NVVNCAMCF3GSRUMS4EK680FG7L2H6H9UDVLMR955998RVVVBUV000";
-	const result = await runCli(["decode", "-"], qrString);
+	const result = await runCli(["decode", "-"], EXAMPLE_QR);
 
 	expect(result.exitCode).toBe(0);
 

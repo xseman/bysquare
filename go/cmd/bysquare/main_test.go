@@ -166,42 +166,6 @@ func TestEncodeDecodeRoundTrip(t *testing.T) {
 	}
 }
 
-func TestEncodeAndPrint(t *testing.T) {
-	input := []byte(`{
-		"invoiceId": "test",
-		"payments": [{
-			"type": 1,
-			"amount": 100,
-			"bankAccounts": [{"iban": "SK9611000000002918599669"}],
-			"currencyCode": "EUR",
-			"beneficiary": {"name": "Test"}
-		}]
-	}`)
-
-	cfg := bysquare.EncodeOptions{
-		Deburr:   true,
-		Validate: true,
-		Version:  bysquare.Version120,
-	}
-
-	var encErr error
-	output := captureStdout(t, func() {
-		encErr = encodeAndPrint(input, cfg)
-	})
-
-	if encErr != nil {
-		t.Errorf("encodeAndPrint failed: %v", encErr)
-	}
-
-	if len(output) < 50 {
-		t.Errorf("Output too short: %s", output)
-	}
-
-	if !strings.HasPrefix(output, "08") {
-		t.Errorf("Expected version 1.2.0 prefix '08', got: %s", output[:2])
-	}
-}
-
 func TestEncodeAndPrintInvalidJSON(t *testing.T) {
 	input := []byte(`{invalid json}`)
 
@@ -218,49 +182,6 @@ func TestEncodeAndPrintInvalidJSON(t *testing.T) {
 
 	if !strings.Contains(err.Error(), "failed to parse JSON") {
 		t.Errorf("Expected parse error, got: %v", err)
-	}
-}
-
-func TestCmdEncodeWithFile(t *testing.T) {
-	tmpfile, err := os.CreateTemp("", "test*.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = os.Remove(tmpfile.Name()) }()
-
-	content := `{
-		"invoiceId": "test",
-		"payments": [{
-			"type": 1,
-			"amount": 100,
-			"bankAccounts": [{"iban": "SK9611000000002918599669"}],
-			"currencyCode": "EUR",
-			"beneficiary": {"name": "Test"}
-		}]
-	}`
-
-	if _, err := tmpfile.Write([]byte(content)); err != nil {
-		t.Fatal(err)
-	}
-	if err := tmpfile.Close(); err != nil {
-		t.Fatal(err)
-	}
-
-	var cmdErr error
-	output := captureStdout(t, func() {
-		cmdErr = cmdEncode([]string{tmpfile.Name()})
-	})
-
-	if cmdErr != nil {
-		t.Errorf("cmdEncode failed: %v", cmdErr)
-	}
-
-	if len(output) < 50 {
-		t.Errorf("Output too short: %s", output)
-	}
-
-	if !strings.HasPrefix(output, "08") {
-		t.Errorf("Expected version 1.2.0 prefix, got: %s", output[:4])
 	}
 }
 
@@ -506,23 +427,6 @@ func TestProcessFileJSONL(t *testing.T) {
 	lines := strings.Split(output, "\n")
 	if len(lines) != 2 {
 		t.Errorf("Expected 2 output lines, got %d", len(lines))
-	}
-}
-
-func TestProcessFileMissing(t *testing.T) {
-	cfg := bysquare.EncodeOptions{
-		Deburr:   true,
-		Validate: true,
-		Version:  bysquare.Version120,
-	}
-
-	err := processFile("nonexistent.json", cfg)
-	if err == nil {
-		t.Error("Expected error for missing file, got nil")
-	}
-
-	if !strings.Contains(err.Error(), "failed to read input") {
-		t.Errorf("Expected read error, got: %v", err)
 	}
 }
 

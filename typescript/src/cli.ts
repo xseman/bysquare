@@ -58,12 +58,28 @@ EXAMPLES:
 For more information, visit: https://github.com/xseman/bysquare
 `;
 
+function errorMessage(error: unknown): string {
+	return error instanceof Error
+		? error.message
+		: String(error);
+}
+
 async function readStdin(): Promise<string> {
 	const chunks: Buffer[] = [];
 	for await (const chunk of process.stdin) {
 		chunks.push(chunk);
 	}
 	return Buffer.concat(chunks).toString("utf8");
+}
+
+async function readInput(path: string): Promise<string> {
+	if (path === "-") {
+		return readStdin();
+	}
+	if (!existsSync(path)) {
+		throw new Error(`file ${path} doesn't exist`);
+	}
+	return readFileSync(path, "utf8");
 }
 
 async function cmdEncode(args: string[]): Promise<void> {
@@ -92,53 +108,25 @@ async function cmdEncode(args: string[]): Promise<void> {
 		process.exit(1);
 	}
 
-	const flagDeburr = !parsed.values["no-deburr"];
-	const flagValidate = !parsed.values["no-validate"];
-
-	// Map version string to numeric value
-	let specVersion: Version;
 	const versionStr = parsed.values["spec-version"] as keyof typeof Version;
-
 	if (!(versionStr in Version)) {
 		console.error("Error: unsupported spec version:", parsed.values["spec-version"]);
 		process.exit(1);
 	}
-	specVersion = Version[versionStr];
 
 	const encodeOpts = {
-		validate: flagValidate,
-		deburr: flagDeburr,
-		version: specVersion,
+		validate: !parsed.values["no-validate"],
+		deburr: !parsed.values["no-deburr"],
+		version: Version[versionStr],
 	} satisfies EncodeOptions;
 
 	for (const inputFile of parsed.positionals) {
 		let input: string;
-
-		if (inputFile === "-") {
-			try {
-				input = await readStdin();
-			} catch (error) {
-				console.error(
-					"Error reading stdin:",
-					error instanceof Error ? error.message : String(error),
-				);
-				process.exit(1);
-			}
-		} else {
-			if (!existsSync(inputFile)) {
-				console.error(`Error: file ${inputFile} doesn't exist`);
-				process.exit(1);
-			}
-
-			try {
-				input = readFileSync(inputFile, "utf8");
-			} catch (error) {
-				console.error(
-					`Error reading file ${inputFile}:`,
-					error instanceof Error ? error.message : String(error),
-				);
-				process.exit(1);
-			}
+		try {
+			input = await readInput(inputFile);
+		} catch (error) {
+			console.error("Error:", errorMessage(error));
+			process.exit(1);
 		}
 
 		if (inputFile.endsWith(".jsonl")) {
@@ -159,7 +147,7 @@ function encodeAndPrint(jsonStr: string, opts: EncodeOptions): void {
 		const result = encode(data, opts);
 		console.log(result);
 	} catch (error) {
-		console.error("Error:", error instanceof Error ? error.message : String(error));
+		console.error("Error:", errorMessage(error));
 		process.exit(1);
 	}
 }
@@ -186,7 +174,7 @@ async function cmdDecode(args: string[]): Promise<void> {
 		const model = decode(qr.trim());
 		console.log(JSON.stringify(model, null, 2));
 	} catch (error) {
-		console.error("Error:", error instanceof Error ? error.message : String(error));
+		console.error("Error:", errorMessage(error));
 		process.exit(1);
 	}
 }

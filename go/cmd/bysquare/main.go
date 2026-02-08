@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -166,9 +164,8 @@ func processFile(inputFile string, cfg bysquare.EncodeOptions) error {
 	}
 
 	if strings.HasSuffix(inputFile, ".jsonl") {
-		scanner := bufio.NewScanner(bytes.NewReader(input))
-		for scanner.Scan() {
-			line := strings.TrimSpace(scanner.Text())
+		for _, line := range strings.Split(string(input), "\n") {
+			line = strings.TrimSpace(line)
 			if line == "" {
 				continue
 			}
@@ -176,7 +173,7 @@ func processFile(inputFile string, cfg bysquare.EncodeOptions) error {
 				return err
 			}
 		}
-		return scanner.Err()
+		return nil
 	}
 
 	return encodeAndPrint(input, cfg)

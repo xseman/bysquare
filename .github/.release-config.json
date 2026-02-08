@@ -1,7 +1,6 @@
 {
 	"$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
 	"separate-pull-requests": true,
-	"last-release-sha": "48154fbe558c783abcef3b31070fc4252d7d9cf5",
 	"packages": {
 		"typescript": {
 			"release-type": "node",

@@ -21,11 +21,6 @@ individuals and businesses to create QR codes for their invoices.
 - Isomorphic Browser & Runtime-independent (Browser, Node.js, Bun, Deno)
 - Compatible with any system language using C Foreign Function Interface (CFFI)
 
-| Specification | TypeScript      | Go      |
-| ------------- | --------------- | ------- |
-| v1.1          | v1.0.0 – v3.0.0 | v0.1.0  |
-| v1.2          | v3.1.0+         | v0.2.0+ |
-
 ## Implementations
 
 This repository provides multiple language implementations of the PAY by square
@@ -56,7 +51,7 @@ flowchart LR
         TS --> Node/Bun/Deno
     end
 
-    TS & GO --> CLI[CLI encoder/decoder tools]
+    TS & GO --> CLI[CLI encoder/decoder tools<br/>.rpm, .deb, binaries]
 
     subgraph Native["Go Library"]
         GO --> GO_LIB[Go Applications]
@@ -76,6 +71,13 @@ flowchart LR
     style CFFI    fill:#A5EAFF, stroke:#00838F, stroke-width:1.5px
 ```
 
+## Specification Versions
+
+| Specification | TypeScript      | Go      |
+| ------------- | --------------- | ------- |
+| v1.1          | v1.0.0 – v3.0.0 | v0.1.0  |
+| v1.2          | v3.1.0+         | v0.2.0+ |
+
 ## Using C FFI
 
 The Go implementation provides a C-compatible Foreign Function Interface (FFI), allowing you to use the library from any language that supports C bindings.
@@ -83,6 +85,7 @@ The Go implementation provides a C-compatible Foreign Function Interface (FFI), 
 **Available examples:**
 
 - **[Java](examples/ffi/java/)** - Using `JNA` (Java Native Access)
+- **[C#](examples/ffi/csharp/)** - Using P/Invoke (`DllImport`)
 - **[PHP](examples/ffi/php/)** - Using FFI extension
 - **[Python](examples/ffi/python/)** - Using `ctypes`
 - **[Swift](examples/ffi/swift/)** - Using Swift's C interoperability

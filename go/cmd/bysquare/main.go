@@ -69,12 +69,12 @@ func main() {
 
 	switch command {
 	case "encode":
-		if err := cmdEncode(); err != nil {
+		if err := cmdEncode(os.Args[2:]); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
 	case "decode":
-		if err := cmdDecode(); err != nil {
+		if err := cmdDecode(os.Args[2:]); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -89,7 +89,7 @@ func main() {
 	}
 }
 
-func cmdEncode() error {
+func cmdEncode(args []string) error {
 	fs := flag.NewFlagSet("encode", flag.ExitOnError)
 
 	noDeburr := fs.Bool("no-deburr", false, "Keep diacritics")
@@ -101,12 +101,12 @@ func cmdEncode() error {
 	specVersion := fs.String("spec-version", "1.2.0", "Specification version (1.0.0, 1.1.0, 1.2.0)")
 	fs.StringVar(specVersion, "s", "1.2.0", "Specification version (shorthand)")
 
-	if err := fs.Parse(os.Args[2:]); err != nil {
+	if err := fs.Parse(args); err != nil {
 		return err
 	}
 
-	args := fs.Args()
-	if len(args) < 1 {
+	positionals := fs.Args()
+	if len(positionals) < 1 {
 		return fmt.Errorf("missing input file argument")
 	}
 
@@ -128,7 +128,7 @@ func cmdEncode() error {
 		Version:  ver,
 	}
 
-	for _, inputFile := range args {
+	for _, inputFile := range positionals {
 		if err := processFile(inputFile, cfg); err != nil {
 			return err
 		}
@@ -182,12 +182,12 @@ func processFile(inputFile string, cfg bysquare.EncodeOptions) error {
 	return encodeAndPrint(input, cfg)
 }
 
-func cmdDecode() error {
-	if len(os.Args) < 3 {
+func cmdDecode(args []string) error {
+	if len(args) < 1 {
 		return fmt.Errorf("missing QR string argument")
 	}
 
-	qrInput := os.Args[2]
+	qrInput := args[0]
 
 	var qr string
 	if qrInput == "-" {

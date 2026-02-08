@@ -525,3 +525,77 @@ func TestProcessFileMissing(t *testing.T) {
 		t.Errorf("Expected read error, got: %v", err)
 	}
 }
+
+func TestProcessFileFromStdin(t *testing.T) {
+	content := `{
+		"invoiceId": "stdin-test",
+		"payments": [{
+			"type": 1,
+			"amount": 100,
+			"bankAccounts": [{"iban": "SK9611000000002918599669"}],
+			"currencyCode": "EUR",
+			"beneficiary": {"name": "Test"}
+		}]
+	}`
+
+	oldStdin := os.Stdin
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Stdin = r
+
+	go func() {
+		_, _ = w.Write([]byte(content))
+		_ = w.Close()
+	}()
+
+	cfg := bysquare.EncodeOptions{
+		Deburr:   true,
+		Validate: true,
+		Version:  bysquare.Version120,
+	}
+
+	var encErr error
+	output := captureStdout(t, func() {
+		encErr = processFile("-", cfg)
+	})
+
+	os.Stdin = oldStdin
+
+	if encErr != nil {
+		t.Errorf("processFile stdin failed: %v", encErr)
+	}
+
+	if len(output) < 50 {
+		t.Errorf("Output too short: %s", output)
+	}
+}
+
+func TestEncodeAndPrintValidationError(t *testing.T) {
+	input := []byte(`{
+		"invoiceId": "test",
+		"payments": [{
+			"type": 1,
+			"amount": 100,
+			"bankAccounts": [{"iban": "INVALID_IBAN"}],
+			"currencyCode": "EUR",
+			"beneficiary": {"name": "Test"}
+		}]
+	}`)
+
+	cfg := bysquare.EncodeOptions{
+		Deburr:   true,
+		Validate: true,
+		Version:  bysquare.Version120,
+	}
+
+	err := encodeAndPrint(input, cfg)
+	if err == nil {
+		t.Error("Expected validation error for invalid IBAN, got nil")
+	}
+
+	if !strings.Contains(err.Error(), "encoding failed") {
+		t.Errorf("Expected encoding error, got: %v", err)
+	}
+}

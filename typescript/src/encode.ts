@@ -314,7 +314,7 @@ export function removeDiacritics(model: DataModel): void {
 	}
 }
 
-type Options = {
+export type EncodeOptions = {
 	/**
 	 * Many banking apps do not support diacritics, which results in errors when
 	 * serializing data from QR codes.
@@ -377,7 +377,7 @@ type Options = {
  */
 export function encode(
 	model: DataModel,
-	options: Options = { deburr: true, validate: true },
+	options: EncodeOptions = { deburr: true, validate: true },
 ): string {
 	if (options.deburr) {
 		removeDiacritics(model);

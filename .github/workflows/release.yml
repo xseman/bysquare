@@ -99,6 +99,9 @@ jobs:
                     - os: windows-latest
                       goos: windows
                       goarch: amd64
+                    - os: windows-latest
+                      goos: windows
+                      goarch: arm64
         steps:
             - uses: actions/checkout@v6
 
@@ -126,7 +129,10 @@ jobs:
                       -o ../artifacts/bysquare-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }} \
                       ./cmd/bysquare
 
+            # Skip Windows ARM64 FFI build due to cross-compilation CGO assembler incompatibility
+            # The required Windows ARM64 toolchain is not available on GitHub runners
             - name: Build FFI
+              if: ${{ !(matrix.goos == 'windows' && matrix.goarch == 'arm64') }}
               shell: bash
               working-directory: ./go
               env:

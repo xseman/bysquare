@@ -11,10 +11,17 @@ on:
         paths:
             - "go/**"
             - ".github/workflows/go-quality.yml"
+    workflow_dispatch:
+        inputs:
+            pr_number:
+                description: "PR number to run coverage for"
+                required: false
+                type: string
 
 permissions:
     contents: read
     actions: write
+    pull-requests: write
 
 jobs:
     test:
@@ -33,13 +40,14 @@ jobs:
               working-directory: ./go
               run: make cover
 
-            - name: Upload coverage artifact
-              if: github.event_name == 'pull_request'
-              uses: actions/upload-artifact@v6
+            - name: Coverage report
+              if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+              uses: xseman/coverage@v0.2.0
               with:
-                  name: go-coverage
-                  path: go/coverage.out
-                  if-no-files-found: warn
+                  pull-request-number: ${{ github.event.inputs.pr_number }}
+                  update-comment-marker: "<!-- coverage-reporter-go -->"
+                  coverage-artifact-paths: |
+                      go:go/coverage.out
 
     lint:
         name: Lint

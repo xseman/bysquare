@@ -61,7 +61,7 @@ func Encode(model DataModel, opts ...EncodeOptions) (string, error) {
 
 	// Validate if enabled
 	if options.Validate {
-		if err := validateDataModel(&model); err != nil {
+		if err := validateDataModel(&model, options.Version); err != nil {
 			return "", err
 		}
 	}
@@ -133,6 +133,13 @@ func buildPayloadLength(length int) []byte {
 	return buf
 }
 
+// sanitize replaces tab characters in field values with space.
+//
+// @see 3.8.
+func sanitize(s string) string {
+	return strings.ReplaceAll(s, "\t", " ")
+}
+
 // serialize converts DataModel to tab-separated format.
 //
 // Format matches TypeScript implementation exactly.
@@ -140,26 +147,26 @@ func serialize(model DataModel) string {
 	parts := make([]string, 0, 100)
 
 	// Base fields
-	parts = append(parts, model.InvoiceID)
+	parts = append(parts, sanitize(model.InvoiceID))
 	parts = append(parts, fmt.Sprintf("%d", len(model.Payments)))
 
 	// Payment blocks
 	for _, payment := range model.Payments {
 		parts = append(parts, fmt.Sprintf("%d", payment.Type))
 		parts = append(parts, formatFloat(payment.Amount))
-		parts = append(parts, string(payment.CurrencyCode))
-		parts = append(parts, payment.PaymentDueDate)
-		parts = append(parts, payment.VariableSymbol)
-		parts = append(parts, payment.ConstantSymbol)
-		parts = append(parts, payment.SpecificSymbol)
-		parts = append(parts, payment.OriginatorsReferenceInformation)
-		parts = append(parts, payment.PaymentNote)
+		parts = append(parts, sanitize(string(payment.CurrencyCode)))
+		parts = append(parts, sanitize(payment.PaymentDueDate))
+		parts = append(parts, sanitize(payment.VariableSymbol))
+		parts = append(parts, sanitize(payment.ConstantSymbol))
+		parts = append(parts, sanitize(payment.SpecificSymbol))
+		parts = append(parts, sanitize(payment.OriginatorsReferenceInformation))
+		parts = append(parts, sanitize(payment.PaymentNote))
 
 		// Bank accounts
 		parts = append(parts, fmt.Sprintf("%d", len(payment.BankAccounts)))
 		for _, account := range payment.BankAccounts {
-			parts = append(parts, account.IBAN)
-			parts = append(parts, account.BIC)
+			parts = append(parts, sanitize(account.IBAN))
+			parts = append(parts, sanitize(account.BIC))
 		}
 
 		// Standing order extension
@@ -168,7 +175,7 @@ func serialize(model DataModel) string {
 			parts = append(parts, fmt.Sprintf("%d", payment.StandingOrderExt.Day))
 			parts = append(parts, fmt.Sprintf("%d", payment.StandingOrderExt.Month))
 			parts = append(parts, string(payment.StandingOrderExt.Periodicity))
-			parts = append(parts, payment.StandingOrderExt.LastDate)
+			parts = append(parts, sanitize(payment.StandingOrderExt.LastDate))
 		} else {
 			parts = append(parts, "0")
 		}
@@ -178,14 +185,14 @@ func serialize(model DataModel) string {
 			parts = append(parts, "1")
 			parts = append(parts, fmt.Sprintf("%d", payment.DirectDebitExt.DirectDebitScheme))
 			parts = append(parts, fmt.Sprintf("%d", payment.DirectDebitExt.DirectDebitType))
-			parts = append(parts, payment.DirectDebitExt.VariableSymbol)
-			parts = append(parts, payment.DirectDebitExt.SpecificSymbol)
-			parts = append(parts, payment.DirectDebitExt.OriginatorsReferenceInfo)
-			parts = append(parts, payment.DirectDebitExt.MandateID)
-			parts = append(parts, payment.DirectDebitExt.CreditorID)
-			parts = append(parts, payment.DirectDebitExt.ContractID)
+			parts = append(parts, sanitize(payment.DirectDebitExt.VariableSymbol))
+			parts = append(parts, sanitize(payment.DirectDebitExt.SpecificSymbol))
+			parts = append(parts, sanitize(payment.DirectDebitExt.OriginatorsReferenceInfo))
+			parts = append(parts, sanitize(payment.DirectDebitExt.MandateID))
+			parts = append(parts, sanitize(payment.DirectDebitExt.CreditorID))
+			parts = append(parts, sanitize(payment.DirectDebitExt.ContractID))
 			parts = append(parts, formatFloat(payment.DirectDebitExt.MaxAmount))
-			parts = append(parts, payment.DirectDebitExt.ValidTillDate)
+			parts = append(parts, sanitize(payment.DirectDebitExt.ValidTillDate))
 		} else {
 			parts = append(parts, "0")
 		}
@@ -194,9 +201,9 @@ func serialize(model DataModel) string {
 	// Beneficiary blocks (one per payment)
 	for _, payment := range model.Payments {
 		if payment.Beneficiary != nil {
-			parts = append(parts, payment.Beneficiary.Name)
-			parts = append(parts, payment.Beneficiary.Street)
-			parts = append(parts, payment.Beneficiary.City)
+			parts = append(parts, sanitize(payment.Beneficiary.Name))
+			parts = append(parts, sanitize(payment.Beneficiary.Street))
+			parts = append(parts, sanitize(payment.Beneficiary.City))
 		} else {
 			parts = append(parts, "", "", "")
 		}

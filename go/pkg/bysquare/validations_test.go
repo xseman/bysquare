@@ -567,7 +567,7 @@ func TestValidateSimplePayment(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := validateSimplePayment(&tc.payment, "test")
+			err := validateSimplePayment(&tc.payment, "test", Version120)
 			if tc.shouldErr && err == nil {
 				t.Error("expected error, got nil")
 			}
@@ -656,7 +656,7 @@ func TestValidationErrorPath(t *testing.T) {
 		},
 	}
 
-	err := validateSimplePayment(&payment, "payments[0]")
+	err := validateSimplePayment(&payment, "payments[0]", Version120)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}

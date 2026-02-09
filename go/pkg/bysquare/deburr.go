@@ -63,7 +63,23 @@ var deburredLettersMap = map[rune]string{
 	'\u0149': "'n", '\u017f': "ss",
 }
 
+// isCombiningMark checks if a rune is a combining diacritical mark.
+//
+// Covers the same Unicode ranges as the TypeScript implementation:
+// - Combining Diacritical Marks (U+0300-U+036F)
+// - Combining Half Marks (U+FE20-U+FE23)
+// - Combining Diacritical Marks for Symbols (U+20D0-U+20F0)
+func isCombiningMark(r rune) bool {
+	return (r >= '\u0300' && r <= '\u036f') ||
+		(r >= '\ufe20' && r <= '\ufe23') ||
+		(r >= '\u20d0' && r <= '\u20f0')
+}
+
 // deburr removes diacritics from a string.
+//
+// Two-step process matching the TypeScript implementation:
+// 1. Replace precomposed Latin letters via lookup map
+// 2. Strip combining diacritical marks
 func deburr(s string) string {
 	var result strings.Builder
 	result.Grow(len(s))
@@ -71,9 +87,10 @@ func deburr(s string) string {
 	for _, r := range s {
 		if replacement, ok := deburredLettersMap[r]; ok {
 			result.WriteString(replacement)
-		} else {
+		} else if !isCombiningMark(r) {
 			result.WriteRune(r)
 		}
+		// Combining marks are dropped (not written)
 	}
 
 	return result.String()

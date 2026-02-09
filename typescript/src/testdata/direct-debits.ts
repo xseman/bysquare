@@ -30,6 +30,7 @@ export const DIRECT_DEBIT_FIXTURE = {
 			currencyCode: CurrencyCode.EUR,
 			variableSymbol: TEST_SYMBOLS.SIMPLE,
 			beneficiary: { name: "John Doe" },
+			ddVariableSymbol: TEST_SYMBOLS.SIMPLE,
 		},
 	],
 } satisfies DataModel;

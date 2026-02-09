@@ -1,6 +1,7 @@
 import { decompress } from "lzma1";
 
 import * as base32hex from "./base32hex.js";
+import { crc32 } from "./crc32.js";
 import {
 	BankAccount,
 	Beneficiary,
@@ -156,33 +157,40 @@ export function deserialize(qr: string): DataModel {
 			payment.bankAccounts.push(account);
 		}
 
+		// Standing order extension — fields must be consumed whenever the
+		// flag is "1" regardless of payment type to keep data aligned.
 		const standingOrderExt = data.shift();
-		if (standingOrderExt === "1" && payment.type === PaymentOptions.StandingOrder) {
-			payment = {
-				...payment,
-				day: decodeNumber(data.shift()),
-				month: decodeNumber(data.shift()),
-				periodicity: decodeString(data.shift()) as Periodicity,
-				// lastDate stays in YYYYMMDD format (not converted per specification)
-				lastDate: decodeString(data.shift()),
-			} satisfies StandingOrder;
+		if (standingOrderExt === "1") {
+			if (payment.type === PaymentOptions.StandingOrder) {
+				payment = {
+					...payment,
+					day: decodeNumber(data.shift()),
+					month: decodeNumber(data.shift()),
+					periodicity: decodeString(data.shift()) as Periodicity,
+					lastDate: decodeString(data.shift()),
+				} satisfies StandingOrder;
+			}
 		}
 
+		// Direct debit extension — fields must be consumed whenever the
+		// flag is "1" regardless of payment type to keep data aligned.
 		const directDebitExt = data.shift();
-		if (directDebitExt === "1" && payment.type === PaymentOptions.DirectDebit) {
-			payment = {
-				...payment,
-				directDebitScheme: decodeNumber(data.shift()),
-				directDebitType: decodeNumber(data.shift()),
-				variableSymbol: decodeString(data.shift()),
-				specificSymbol: decodeString(data.shift()),
-				originatorsReferenceInformation: decodeString(data.shift()),
-				mandateId: decodeString(data.shift()),
-				creditorId: decodeString(data.shift()),
-				contractId: decodeString(data.shift()),
-				maxAmount: decodeNumber(data.shift()),
-				validTillDate: decodeString(data.shift()),
-			} satisfies DirectDebit;
+		if (directDebitExt === "1") {
+			if (payment.type === PaymentOptions.DirectDebit) {
+				payment = {
+					...payment,
+					directDebitScheme: decodeNumber(data.shift()),
+					directDebitType: decodeNumber(data.shift()),
+					ddVariableSymbol: decodeString(data.shift()),
+					ddSpecificSymbol: decodeString(data.shift()),
+					ddOriginatorsReferenceInformation: decodeString(data.shift()),
+					mandateId: decodeString(data.shift()),
+					creditorId: decodeString(data.shift()),
+					contractId: decodeString(data.shift()),
+					maxAmount: decodeNumber(data.shift()),
+					validTillDate: decodeString(data.shift()),
+				} satisfies DirectDebit;
+			}
 		}
 
 		output.payments.push(payment);
@@ -275,7 +283,7 @@ export function decode(qr: string): DataModel {
 	 * +---------------+---------------------------+-------------------+
 	 */
 	const defaultProperties = [0x5D]; // lc=3, lp=0, pb=2
-	const defaultDictionarySize = [0x00, 0x00, 0x20, 0x00]; // 2^21 = 2097152
+	const defaultDictionarySize = [0x00, 0x00, 0x02, 0x00]; // 2^17 = 131072
 
 	// Parse the payload length from bytes 2-3 and properly expand to 8-byte uncompressed size
 	const payloadLengthBytes = bytes.slice(2, 4);
@@ -315,9 +323,21 @@ export function decode(qr: string): DataModel {
 	}
 
 	// Extract checksum and body
-	const _checksum = decompressed.slice(0, 4);
+	const checksumBytes = decompressed.slice(0, 4);
 	const decompressedBody = decompressed.slice(4);
 	const decoded = new TextDecoder("utf-8").decode(decompressedBody.buffer);
+
+	// Verify CRC32 checksum integrity
+	const storedChecksum = new DataView(checksumBytes.buffer, checksumBytes.byteOffset, 4)
+		.getUint32(0, true);
+
+	const computedChecksum = crc32(decoded);
+	if (storedChecksum !== computedChecksum) {
+		throw new DecodeError("CRC32 checksum mismatch", {
+			stored: storedChecksum,
+			computed: computedChecksum,
+		});
+	}
 
 	return deserialize(decoded);
 }

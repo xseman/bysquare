@@ -183,14 +183,16 @@ func deserialize(data string) (DataModel, error) {
 			})
 		}
 
-		// Standing order extension
+		// Standing order extension — fields must be consumed whenever
+		// the flag is "1" regardless of payment type to keep the index
+		// aligned for subsequent fields.
 		if idx >= len(parts) {
 			return DataModel{}, fmt.Errorf("missing standing order extension field")
 		}
 		standingOrderExt := parts[idx]
 		idx++
 
-		if standingOrderExt == "1" && payment.Type == PaymentTypeStandingOrder {
+		if standingOrderExt == "1" {
 			if idx+4 > len(parts) {
 				return DataModel{}, fmt.Errorf("insufficient standing order fields")
 			}
@@ -204,22 +206,26 @@ func deserialize(data string) (DataModel, error) {
 			lastDate := parts[idx]
 			idx++
 
-			payment.StandingOrderExt = &StandingOrder{
-				Day:         uint8(day),
-				Month:       uint16(month),
-				Periodicity: Periodicity(periodicity),
-				LastDate:    lastDate,
+			if payment.Type == PaymentTypeStandingOrder {
+				payment.StandingOrderExt = &StandingOrder{
+					Day:         uint8(day),
+					Month:       uint16(month),
+					Periodicity: Periodicity(periodicity),
+					LastDate:    lastDate,
+				}
 			}
 		}
 
-		// Direct debit extension
+		// Direct debit extension — fields must be consumed whenever
+		// the flag is "1" regardless of payment type to keep the index
+		// aligned for subsequent fields.
 		if idx >= len(parts) {
 			return DataModel{}, fmt.Errorf("missing direct debit extension field")
 		}
 		directDebitExt := parts[idx]
 		idx++
 
-		if directDebitExt == "1" && payment.Type == PaymentTypeDirectDebit {
+		if directDebitExt == "1" {
 			if idx+10 > len(parts) {
 				return DataModel{}, fmt.Errorf("insufficient direct debit fields")
 			}
@@ -245,17 +251,19 @@ func deserialize(data string) (DataModel, error) {
 			validTillDate := parts[idx]
 			idx++
 
-			payment.DirectDebitExt = &DirectDebit{
-				DirectDebitScheme:        uint8(scheme),
-				DirectDebitType:          uint8(ddType),
-				VariableSymbol:           varSymbol,
-				SpecificSymbol:           specSymbol,
-				OriginatorsReferenceInfo: origRefInfo,
-				MandateID:                mandateID,
-				CreditorID:               creditorID,
-				ContractID:               contractID,
-				MaxAmount:                maxAmount,
-				ValidTillDate:            validTillDate,
+			if payment.Type == PaymentTypeDirectDebit {
+				payment.DirectDebitExt = &DirectDebit{
+					DirectDebitScheme:        uint8(scheme),
+					DirectDebitType:          uint8(ddType),
+					VariableSymbol:           varSymbol,
+					SpecificSymbol:           specSymbol,
+					OriginatorsReferenceInfo: origRefInfo,
+					MandateID:                mandateID,
+					CreditorID:               creditorID,
+					ContractID:               contractID,
+					MaxAmount:                maxAmount,
+					ValidTillDate:            validTillDate,
+				}
 			}
 		}
 

@@ -2,6 +2,9 @@
  * Mapping semantic version to encoded version number, header 4-bit.
  * It's a bit silly to limit the version number to 4-bit, if they keep
  * increasing the version number, the latest possible mapped value is 16
+ *
+ * @see 3.3.
+ * @see Table 1
  */
 export const Version = {
 	/**
@@ -30,8 +33,11 @@ export const Version = {
 export type Version = typeof Version[keyof typeof Version];
 
 /**
- * Calendar month.
+ * Calendar month classifier. Multiple months can be combined by summing
+ * their values.
  *
+ * @see Appendix A, Table 10
+ * @see 3.7.
  * @dprint-ignore
  */
 export const Month = {
@@ -57,6 +63,7 @@ export type Month = typeof Month[keyof typeof Month];
  * between 1 and 31. Day of the week is a number between 1 and 7 (1 = Monday,
  * 2 = Tuesday, …, 7 = Sunday).
  *
+ * @see Appendix A, Table 9
  * @dprint-ignore
  */
 export const Periodicity = {
@@ -76,11 +83,13 @@ export type Periodicity = typeof Periodicity[keyof typeof Periodicity];
 /**
  * This is the payment day. It's meaning depends on the periodicity, meaning
  * either day of the month (number between 1 and 31) or day of the week
- * (1=Monday,2=Tuesday, …, 7=Sunday).
+ * (1=Monday, 2=Tuesday, …, 7=Sunday).
  *
- * @description Payment day value range from 1 to 31
+ * @see Table 15 field #16
+ * @see 2.5.
  * @minimum 1
  * @maximum 31
+ * @maxLength 2
  */
 export type Day =
 	| 1
@@ -116,11 +125,16 @@ export type Day =
 	| 31;
 
 /**
- * Payment options can be combined. At least one option must be specified:
+ * Payment options classifier. Can be combined by summing values. At least
+ * one option must be specified:
  *
  * - `PaymentOrder`: Single payment order
  * - `StandingOrder`: Standing order (recurring payment), details in StandingOrderExt
  * - `DirectDebit`: Direct debit, details in DirectDebitExt
+ *
+ * @see Appendix A, Table 11
+ * @see Table 15 field #3
+ * @see 2.1.
  */
 export const PaymentOptions = {
 	/**
@@ -144,11 +158,15 @@ export type PaymentOptions = typeof PaymentOptions[keyof typeof PaymentOptions];
 
 /**
  * Bank account data of the payment recipient.
+ *
+ * @see Table 15 fields #13-14
  */
 export type BankAccount = {
 	/**
 	 * International Bank Account Number in IBAN format.
 	 *
+	 * @see Table 15 field #13
+	 * @see Table 8
 	 * @example "SK8209000000000011424060"
 	 * @pattern [A-Z]{2}[0-9]{2}[A-Z0-9]{0,30}
 	 * @minLength 15
@@ -159,6 +177,8 @@ export type BankAccount = {
 	/**
 	 * Bank Identification Code (BIC) in ISO 9362 format (SWIFT).
 	 *
+	 * @see Table 15 field #14
+	 * @see Table 8
 	 * @example "TATRSKBX"
 	 * @pattern [A-Z]{4}[A-Z]{2}[A-Z\d]{2}([A-Z\d]{3})?
 	 * @minLength 8
@@ -172,6 +192,9 @@ export type BankAccount = {
  *
  * - SEPA - Direct debit follows the SEPA scheme
  * - Other - Other scheme
+ *
+ * @see Appendix A, Table 13
+ * @see Table 15 field #21
  */
 export const DirectDebitScheme = {
 	/**
@@ -191,10 +214,13 @@ export type DirectDebitScheme = typeof DirectDebitScheme[keyof typeof DirectDebi
 /**
  * Direct debit type. One of the following options:
  *
- * @maximum 1
- *
  * - one-off: One-time direct debit
  * - recurrent: Recurring direct debit
+ *
+ * @see Appendix A, Table 12
+ * @see Table 15 field #22
+ * @minimum 0
+ * @maximum 1
  */
 export const DirectDebitType = {
 	/**
@@ -213,8 +239,9 @@ export type DirectDebitType = typeof DirectDebitType[keyof typeof DirectDebitTyp
 
 export type Beneficiary = {
 	/**
-	 * Beneficiary name (required since v1.2.0).
+	 * Beneficiary name. Added in v1.1.0, required since v1.2.0.
 	 *
+	 * @see Table 15 field #31
 	 * @maxLength 70
 	 */
 	name: string;
@@ -222,6 +249,7 @@ export type Beneficiary = {
 	/**
 	 * Beneficiary street address.
 	 *
+	 * @see Table 15 field #32
 	 * @maxLength 70
 	 */
 	street?: string;
@@ -229,6 +257,7 @@ export type Beneficiary = {
 	/**
 	 * Beneficiary city.
 	 *
+	 * @see Table 15 field #33
 	 * @maxLength 70
 	 */
 	city?: string;
@@ -239,18 +268,23 @@ export type SimplePayment = {
 	 * Payment amount. Only positive values are allowed. The decimal part is
 	 * separated by a dot. Can be left empty, e.g., for voluntary donations.
 	 *
+	 * @see Table 15 field #4
+	 * @see Table 8
 	 * @example 1000
 	 * @example 1.99
 	 * @example 10.5
 	 * @example 0.08
 	 * @minimum 0
-	 * @maximum 999999999999999
+	 * @maximum 999_999_999_999_999
+	 * @maxLength 15
 	 */
 	amount?: number;
 
 	/**
 	 * Currency code in [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) format (3 letters).
 	 *
+	 * @see Table 15 field #5
+	 * @see Table 8
 	 * @example "EUR"
 	 * @pattern [A-Z]{3}
 	 * @minLength 3
@@ -259,27 +293,32 @@ export type SimplePayment = {
 	currencyCode: string | keyof typeof CurrencyCode;
 
 	/**
-	 * Payment due date in YYYYMMDD format per v1.2 specification section 3.7.
+	 * Payment due date in YYYYMMDD format. For standing orders, this indicates
+	 * the first payment date.
 	 *
-	 * For standing orders, this indicates the first payment date.
-	 *
+	 * @see Table 15 field #6
+	 * @see 3.7.
 	 * @format date
 	 * @example "20241231"
 	 * @pattern \d{8}
+	 * @maxLength 8
 	 */
 	paymentDueDate?: string;
 
 	/**
 	 * Variable symbol, up to 10 digits.
 	 *
+	 * @see Table 15 field #7
 	 * @pattern [0-9]{0,10}
 	 * @maxLength 10
 	 */
 	variableSymbol?: string;
 
 	/**
-	 * Constant symbol, a 4-digit payment identifier defined by NBS (National Bank of Slovakia).
+	 * Constant symbol, a 4-digit payment identifier defined by NBS
+	 * (National Bank of Slovakia).
 	 *
+	 * @see Table 15 field #8
 	 * @pattern [0-9]{0,4}
 	 * @maxLength 4
 	 */
@@ -288,6 +327,7 @@ export type SimplePayment = {
 	/**
 	 * Specific symbol, up to 10 digits.
 	 *
+	 * @see Table 15 field #9
 	 * @pattern [0-9]{0,10}
 	 * @maxLength 10
 	 */
@@ -296,6 +336,7 @@ export type SimplePayment = {
 	/**
 	 * Originator's reference information according to SEPA.
 	 *
+	 * @see Table 15 field #10
 	 * @maxLength 35
 	 */
 	originatorsReferenceInformation?: string;
@@ -304,61 +345,90 @@ export type SimplePayment = {
 	 * Payment note for the recipient. Contains payment details that help the
 	 * recipient identify the payment.
 	 *
+	 * @see Table 15 field #11
+	 * @see Table 14
 	 * @maxLength 140
 	 */
 	paymentNote?: string;
 
 	/**
-	 * List of bank accounts.
+	 * List of bank accounts of the payment recipient.
 	 *
+	 * @see Table 15 fields #12-14
+	 * @see 2.2.
 	 * @minItems 1
 	 */
 	bankAccounts: BankAccount[];
 
 	/**
-	 * Beneficiary information (required since v1.2.0).
+	 * Beneficiary information. Added in v1.1.0, name required since v1.2.0.
+	 *
+	 * @see Table 15 fields #31-33
+	 * @see Appendix E
 	 */
 	beneficiary: Beneficiary;
 };
 
 export type PaymentOrder = SimplePayment & {
+	/**
+	 * @see Table 15 field #3
+	 */
 	type: typeof PaymentOptions.PaymentOrder;
 };
 
 /**
  * Extension of payment data with standing order (recurring payment) settings.
+ *
+ * @see Table 15 fields #15-19
+ * @see 2.5.
  */
 export type StandingOrder = SimplePayment & {
+	/**
+	 * @see Table 15 field #3
+	 */
 	type: typeof PaymentOptions.StandingOrder;
+
 	/**
 	 * Specifies the day on which the standing order will be processed in the
 	 * specified months.
 	 *
+	 * @see Table 15 field #16
 	 * @minimum 1
 	 * @maximum 31
+	 * @maxLength 2
 	 */
 	day?: number | Day;
 
 	/**
 	 * Specifies the months in which the standing order payment should be
-	 * executed.
+	 * executed. Multiple months are combined by summing their classifier values.
 	 *
+	 * @see Table 15 field #17
+	 * @see Appendix A, Table 10
 	 * @example Month.January
 	 * @example Month.January | Month.July | Month.October
 	 * @example 577
+	 * @maxLength 4
 	 */
 	month?: keyof typeof Month | number;
 
 	/**
 	 * Periodicity (frequency) of the standing order.
+	 *
+	 * @see Table 15 field #18
+	 * @see Appendix A, Table 9
+	 * @maxLength 1
 	 */
 	periodicity: keyof typeof Periodicity | string;
 
 	/**
-	 * Last payment date within the standing order.
+	 * Last payment date within the standing order. After this date, the
+	 * standing order is cancelled.
 	 *
+	 * @see Table 15 field #19
 	 * @format date
 	 * @pattern \d{8}
+	 * @maxLength 8
 	 * @example "20241231"
 	 */
 	lastDate?: string;
@@ -366,27 +436,68 @@ export type StandingOrder = SimplePayment & {
 
 /**
  * Extension of payment data with direct debit settings and identification.
+ *
+ * @see Table 15 fields #20-30
+ * @see 2.6.
  */
 export type DirectDebit = SimplePayment & {
+	/**
+	 * @see Table 15 field #3
+	 */
 	type: typeof PaymentOptions.DirectDebit;
 
 	/**
 	 * Direct debit scheme.
 	 *
+	 * @see Table 15 field #21
+	 * @see Appendix A, Table 13
 	 * @example DirectDebitScheme.Sepa
+	 * @minimum 0
+	 * @maximum 1
 	 */
 	directDebitScheme?: keyof typeof DirectDebitScheme | number;
 
 	/**
 	 * Direct debit type.
 	 *
+	 * @see Table 15 field #22
+	 * @see Appendix A, Table 12
 	 * @example DirectDebitType.Recurrent
+	 * @minimum 0
+	 * @maximum 1
 	 */
 	directDebitType?: keyof typeof DirectDebitType | number;
 
 	/**
+	 * Variable symbol for direct debit extension (separate from base payment).
+	 *
+	 * @see Table 15 field #23
+	 * @pattern [0-9]{0,10}
+	 * @maxLength 10
+	 */
+	ddVariableSymbol?: string;
+
+	/**
+	 * Specific symbol for direct debit extension (separate from base payment).
+	 *
+	 * @see Table 15 field #24
+	 * @pattern [0-9]{0,10}
+	 * @maxLength 10
+	 */
+	ddSpecificSymbol?: string;
+
+	/**
+	 * Originator's reference information for direct debit extension (separate from base payment).
+	 *
+	 * @see Table 15 field #25
+	 * @maxLength 35
+	 */
+	ddOriginatorsReferenceInformation?: string;
+
+	/**
 	 * Mandate identification between creditor and debtor according to SEPA.
 	 *
+	 * @see Table 15 field #26
 	 * @maxLength 35
 	 */
 	mandateId?: string;
@@ -394,6 +505,7 @@ export type DirectDebit = SimplePayment & {
 	/**
 	 * Creditor identification according to SEPA.
 	 *
+	 * @see Table 15 field #27
 	 * @maxLength 35
 	 */
 	creditorId?: string;
@@ -401,6 +513,7 @@ export type DirectDebit = SimplePayment & {
 	/**
 	 * Contract identification between creditor and debtor according to SEPA.
 	 *
+	 * @see Table 15 field #28
 	 * @maxLength 35
 	 */
 	contractId?: string;
@@ -408,14 +521,17 @@ export type DirectDebit = SimplePayment & {
 	/**
 	 * Maximum direct debit amount.
 	 *
+	 * @see Table 15 field #29
 	 * @minimum 0
-	 * @maximum 999999999999999
+	 * @maximum 999_999_999_999_999
+	 * @maxLength 15
 	 */
 	maxAmount?: number;
 
 	/**
 	 * Direct debit validity date. The direct debit expires on this date.
 	 *
+	 * @see Table 15 field #30
 	 * @format date
 	 * @pattern \d{8}
 	 * @maxLength 8
@@ -426,14 +542,23 @@ export type DirectDebit = SimplePayment & {
 
 /**
  * Data for a single payment order.
+ *
+ * @see 4.
  */
 export type Payment = PaymentOrder | StandingOrder | DirectDebit;
 
+/**
+ * PAY by square data model.
+ *
+ * @see 4.
+ * @see Table 15
+ */
 export type DataModel = {
 	/**
 	 * Invoice number if the data is part of an invoice, or an identifier for
 	 * the issuer's internal purposes.
 	 *
+	 * @see Table 15 field #1
 	 * @maxLength 10
 	 */
 	invoiceId?: string;
@@ -442,6 +567,7 @@ export type DataModel = {
 	 * List of one or more payments for batch payment orders.
 	 * The main (preferred) payment should be listed first.
 	 *
+	 * @see Table 15 field #2
 	 * @minItems 1
 	 */
 	payments: Payment[];
@@ -449,6 +575,9 @@ export type DataModel = {
 
 /**
  * [ISO-4217](https://en.wikipedia.org/wiki/ISO_4217)
+ *
+ * @see Table 8
+ * @see Table 15 field #5
  */
 export const CurrencyCode = {
 	AED: "AED",

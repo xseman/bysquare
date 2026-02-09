@@ -62,30 +62,38 @@ export function deburrLetter(key: string) {
 }
 
 /**
- * Used to match Latin Unicode letters (excluding mathematical operators).
+ * Checks if a character is a combining diacritical mark.
+ *
+ * Covers the following Unicode ranges:
+ * - Combining Diacritical Marks (U+0300-U+036F)
+ * - Combining Half Marks (U+FE20-U+FE23)
+ * - Combining Diacritical Marks for Symbols (U+20D0-U+20F0)
  */
-const reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
-
-/**
- * Used to compose unicode character classes.
- */
-const rsComboMarksRange = "\\u0300-\\u036f\\ufe20-\\ufe23",
-	rsComboSymbolsRange = "\\u20d0-\\u20f0";
-
-/**
- * Used to compose unicode capture groups.
- */
-const rsCombo = "[" + rsComboMarksRange + rsComboSymbolsRange + "]";
-
-/**
- * Used to match [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) and
- * [combining diacritical marks for symbols](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks_for_Symbols).
- */
-const reComboMark = RegExp(rsCombo, "g");
+function isCombiningMark(charCode: number): boolean {
+	return (charCode >= 0x0300 && charCode <= 0x036f)
+		|| (charCode >= 0xfe20 && charCode <= 0xfe23)
+		|| (charCode >= 0x20d0 && charCode <= 0x20f0);
+}
 
 /**
  * Deburrs string by converting Latin-1 Supplement and Latin Extended-A letters to basic Latin letters and removing [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks).
+ *
+ * Two-step process:
+ * 1. Replace precomposed Latin letters via lookup map
+ * 2. Strip combining diacritical marks
  */
 export function deburr(text: string): string {
-	return text.replace(reLatin, deburrLetter).replace(reComboMark, "");
+	let result = "";
+
+	for (const char of text) {
+		const replacement = deburrLetter(char);
+		if (replacement) {
+			result += replacement;
+		} else if (!isCombiningMark(char.charCodeAt(0))) {
+			result += char;
+		}
+		// Combining marks are dropped (not added to result)
+	}
+
+	return result;
 }

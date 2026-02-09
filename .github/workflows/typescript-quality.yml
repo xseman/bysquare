@@ -17,6 +17,12 @@ on:
             - "typescript/package.json"
             - "typescript/tsconfig.json"
             - ".github/workflows/typescript-quality.yml"
+    workflow_dispatch:
+        inputs:
+            pr_number:
+                description: "PR number to run coverage for"
+                required: false
+                type: string
 
 permissions:
     contents: read
@@ -54,13 +60,14 @@ jobs:
               working-directory: ./typescript
               run: bun run test
 
-            - name: upload coverage artifact
-              if: github.event_name == 'pull_request'
-              uses: actions/upload-artifact@v6
+            - name: Coverage report
+              if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+              uses: xseman/coverage@v0.2.0
               with:
-                  name: coverage
-                  path: typescript/coverage/lcov.info
-                  if-no-files-found: warn
+                  pull-request-number: ${{ github.event.inputs.pr_number }}
+                  update-comment-marker: "<!-- coverage-reporter-ts -->"
+                  coverage-artifact-paths: |
+                      bun:typescript/coverage/lcov.info
 
     fmt:
         runs-on: ubuntu-latest

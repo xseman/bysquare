@@ -63,12 +63,13 @@ export const MAX_COMPRESSED_SIZE = 131_072; // 2^17
  * specification
  *
  * ```
- * | Attribute    | Number of bits | Possible values | Note
- * --------------------------------------------------------------------------------------------
- * | BySquareType | 4              | 0-15            | by square type
- * | Version      | 4              | 0-15            | version of the by square type
- * | DocumentType | 4              | 0-15            | document type within given by square type
- * | Reserved     | 4              | 0-15            | bits reserved for future needs
+ * Byte 0                  Byte 1
+ * +----------+----------+----------+----------+
+ * |   4 bit  |   4 bit  |   4 bit  |   4 bit  |
+ * +----------+----------+----------+----------+
+ * | BySqType | Version  | DocType  | Reserved |
+ * | (0-15)   | (0-15)   | (0-15)   | (0-15)   |
+ * +----------+----------+----------+----------+
  * ```
  *
  * @see 3.5.
@@ -120,9 +121,10 @@ export function buildBysquareHeader(
  * +---------------+---------------+
  * |    Byte 0     |    Byte 1     |
  * +---------------+---------------+
- * |  LSB (0-255)  | MSB (0-511)   |
+ * |      LSB      |      MSB      |
  * +---------------+---------------+
  * | Little-endian 16-bit unsigned |
+ * | max 2^17 = 131072             |
  * +-------------------------------+
  * ```
  *
@@ -223,24 +225,33 @@ export function addChecksum(tabbedPayload: string): Uint8Array {
 export function serialize(data: DataModel): string {
 	const serialized = new Array<string | undefined>();
 
-	serialized.push(data.invoiceId?.toString());
+	/**
+	 * Sanitize field value by replacing tab characters with space.
+	 *
+	 * @see 3.8.
+	 */
+	function sanitize(value: string | undefined): string | undefined {
+		return value?.replaceAll("\t", " ");
+	}
+
+	serialized.push(sanitize(data.invoiceId?.toString()));
 	serialized.push(data.payments.length.toString());
 
 	for (const p of data.payments) {
 		serialized.push(p.type.toString());
 		serialized.push(p.amount?.toString());
-		serialized.push(p.currencyCode);
-		serialized.push(p.paymentDueDate);
-		serialized.push(p.variableSymbol);
-		serialized.push(p.constantSymbol);
-		serialized.push(p.specificSymbol);
-		serialized.push(p.originatorsReferenceInformation);
-		serialized.push(p.paymentNote);
+		serialized.push(sanitize(p.currencyCode));
+		serialized.push(sanitize(p.paymentDueDate));
+		serialized.push(sanitize(p.variableSymbol));
+		serialized.push(sanitize(p.constantSymbol));
+		serialized.push(sanitize(p.specificSymbol));
+		serialized.push(sanitize(p.originatorsReferenceInformation));
+		serialized.push(sanitize(p.paymentNote));
 
 		serialized.push(p.bankAccounts.length.toString());
 		for (const ba of p.bankAccounts) {
-			serialized.push(ba.iban);
-			serialized.push(ba.bic);
+			serialized.push(sanitize(ba.iban));
+			serialized.push(sanitize(ba.bic));
 		}
 
 		// Standing Order extension
@@ -260,8 +271,8 @@ export function serialize(data: DataModel): string {
 				serialized.push(monthValue?.toString());
 			}
 
-			serialized.push(p.periodicity);
-			serialized.push(p.lastDate);
+			serialized.push(sanitize(p.periodicity));
+			serialized.push(sanitize(p.lastDate));
 		} else {
 			serialized.push("0");
 		}
@@ -272,23 +283,23 @@ export function serialize(data: DataModel): string {
 			serialized.push("1");
 			serialized.push(p.directDebitScheme?.toString());
 			serialized.push(p.directDebitType?.toString());
-			serialized.push(p.variableSymbol?.toString());
-			serialized.push(p.specificSymbol?.toString());
-			serialized.push(p.originatorsReferenceInformation?.toString());
-			serialized.push(p.mandateId?.toString());
-			serialized.push(p.creditorId?.toString());
-			serialized.push(p.contractId?.toString());
+			serialized.push(sanitize(p.ddVariableSymbol?.toString()));
+			serialized.push(sanitize(p.ddSpecificSymbol?.toString()));
+			serialized.push(sanitize(p.ddOriginatorsReferenceInformation?.toString()));
+			serialized.push(sanitize(p.mandateId?.toString()));
+			serialized.push(sanitize(p.creditorId?.toString()));
+			serialized.push(sanitize(p.contractId?.toString()));
 			serialized.push(p.maxAmount?.toString());
-			serialized.push(p.validTillDate?.toString());
+			serialized.push(sanitize(p.validTillDate?.toString()));
 		} else {
 			serialized.push("0");
 		}
 	}
 
 	for (const p of data.payments) {
-		serialized.push(p.beneficiary?.name);
-		serialized.push(p.beneficiary?.street);
-		serialized.push(p.beneficiary?.city);
+		serialized.push(sanitize(p.beneficiary?.name));
+		serialized.push(sanitize(p.beneficiary?.street));
+		serialized.push(sanitize(p.beneficiary?.city));
 	}
 
 	return serialized.join("\t");
@@ -383,8 +394,10 @@ export function encode(
 		removeDiacritics(model);
 	}
 
+	const version = options.version ?? Version["1.2.0"];
+
 	if (options.validate) {
-		validateDataModel(model);
+		validateDataModel(model, version);
 	}
 
 	const payloadTabbed = serialize(model);
@@ -411,8 +424,6 @@ export function encode(
 	 */
 	const _lzmaHeader = payloadCompressed.subarray(0, 13);
 	const lzmaBody = payloadCompressed.subarray(13);
-
-	const version = options.version ?? Version["1.2.0"];
 
 	const output = new Uint8Array([
 		...buildBysquareHeader([0x00, version, 0x00, 0x00]),

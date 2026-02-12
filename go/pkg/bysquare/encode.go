@@ -61,7 +61,7 @@ func Encode(model DataModel, opts ...EncodeOptions) (string, error) {
 
 	// Validate if enabled
 	if options.Validate {
-		if err := validateDataModel(&model); err != nil {
+		if err := validateDataModel(&model, options.Version); err != nil {
 			return "", err
 		}
 	}
@@ -102,14 +102,15 @@ func Encode(model DataModel, opts ...EncodeOptions) (string, error) {
 
 // buildBysquareHeader creates a 2-byte header.
 //
-// Header structure (4 nibbles):
+//	Byte 0                  Byte 1
+//	+----------+----------+----------+----------+
+//	|   4 bit  |   4 bit  |   4 bit  |   4 bit  |
+//	+----------+----------+----------+----------+
+//	| BySqType | Version  | DocType  | Reserved |
+//	| (0-15)   | (0-15)   | (0-15)   | (0-15)   |
+//	+----------+----------+----------+----------+
 //
-//	| Attribute    | Bits | Values | Description                 |
-//	|--------------|------|--------|-----------------------------|
-//	| BySquareType | 4    | 0-15   | By square type              |
-//	| Version      | 4    | 0-15   | Version of by square type   |
-//	| DocumentType | 4    | 0-15   | Document type               |
-//	| Reserved     | 4    | 0-15   | Reserved for future use     |
+// @see 3.5.
 func buildBysquareHeader(bySquareType, version, docType, reserved uint8) []byte {
 	if bySquareType > 0x0F || version > 0x0F || docType > 0x0F || reserved > 0x0F {
 		panic("header values must be 4-bit (0-15)")
@@ -123,6 +124,17 @@ func buildBysquareHeader(bySquareType, version, docType, reserved uint8) []byte 
 }
 
 // buildPayloadLength creates a 2-byte little-endian length field.
+//
+//	+---------------+---------------+
+//	|    Byte 0     |    Byte 1     |
+//	+---------------+---------------+
+//	|      LSB      |      MSB      |
+//	+---------------+---------------+
+//	| Little-endian 16-bit unsigned |
+//	| max 2^17 = 131072             |
+//	+-------------------------------+
+//
+// @see 3.6.
 func buildPayloadLength(length int) []byte {
 	if length >= maxCompressedSize {
 		panic(fmt.Sprintf("payload length %d exceeds maximum %d", length, maxCompressedSize))
@@ -133,6 +145,13 @@ func buildPayloadLength(length int) []byte {
 	return buf
 }
 
+// sanitize replaces tab characters in field values with space.
+//
+// @see 3.8.
+func sanitize(s string) string {
+	return strings.ReplaceAll(s, "\t", " ")
+}
+
 // serialize converts DataModel to tab-separated format.
 //
 // Format matches TypeScript implementation exactly.
@@ -140,26 +159,26 @@ func serialize(model DataModel) string {
 	parts := make([]string, 0, 100)
 
 	// Base fields
-	parts = append(parts, model.InvoiceID)
+	parts = append(parts, sanitize(model.InvoiceID))
 	parts = append(parts, fmt.Sprintf("%d", len(model.Payments)))
 
 	// Payment blocks
 	for _, payment := range model.Payments {
 		parts = append(parts, fmt.Sprintf("%d", payment.Type))
 		parts = append(parts, formatFloat(payment.Amount))
-		parts = append(parts, string(payment.CurrencyCode))
-		parts = append(parts, payment.PaymentDueDate)
-		parts = append(parts, payment.VariableSymbol)
-		parts = append(parts, payment.ConstantSymbol)
-		parts = append(parts, payment.SpecificSymbol)
-		parts = append(parts, payment.OriginatorsReferenceInformation)
-		parts = append(parts, payment.PaymentNote)
+		parts = append(parts, sanitize(string(payment.CurrencyCode)))
+		parts = append(parts, sanitize(payment.PaymentDueDate))
+		parts = append(parts, sanitize(payment.VariableSymbol))
+		parts = append(parts, sanitize(payment.ConstantSymbol))
+		parts = append(parts, sanitize(payment.SpecificSymbol))
+		parts = append(parts, sanitize(payment.OriginatorsReferenceInformation))
+		parts = append(parts, sanitize(payment.PaymentNote))
 
 		// Bank accounts
 		parts = append(parts, fmt.Sprintf("%d", len(payment.BankAccounts)))
 		for _, account := range payment.BankAccounts {
-			parts = append(parts, account.IBAN)
-			parts = append(parts, account.BIC)
+			parts = append(parts, sanitize(account.IBAN))
+			parts = append(parts, sanitize(account.BIC))
 		}
 
 		// Standing order extension
@@ -167,8 +186,8 @@ func serialize(model DataModel) string {
 			parts = append(parts, "1")
 			parts = append(parts, fmt.Sprintf("%d", payment.StandingOrderExt.Day))
 			parts = append(parts, fmt.Sprintf("%d", payment.StandingOrderExt.Month))
-			parts = append(parts, string(payment.StandingOrderExt.Periodicity))
-			parts = append(parts, payment.StandingOrderExt.LastDate)
+			parts = append(parts, sanitize(string(payment.StandingOrderExt.Periodicity)))
+			parts = append(parts, sanitize(payment.StandingOrderExt.LastDate))
 		} else {
 			parts = append(parts, "0")
 		}
@@ -178,14 +197,14 @@ func serialize(model DataModel) string {
 			parts = append(parts, "1")
 			parts = append(parts, fmt.Sprintf("%d", payment.DirectDebitExt.DirectDebitScheme))
 			parts = append(parts, fmt.Sprintf("%d", payment.DirectDebitExt.DirectDebitType))
-			parts = append(parts, payment.DirectDebitExt.VariableSymbol)
-			parts = append(parts, payment.DirectDebitExt.SpecificSymbol)
-			parts = append(parts, payment.DirectDebitExt.OriginatorsReferenceInfo)
-			parts = append(parts, payment.DirectDebitExt.MandateID)
-			parts = append(parts, payment.DirectDebitExt.CreditorID)
-			parts = append(parts, payment.DirectDebitExt.ContractID)
+			parts = append(parts, sanitize(payment.DirectDebitExt.VariableSymbol))
+			parts = append(parts, sanitize(payment.DirectDebitExt.SpecificSymbol))
+			parts = append(parts, sanitize(payment.DirectDebitExt.OriginatorsReferenceInfo))
+			parts = append(parts, sanitize(payment.DirectDebitExt.MandateID))
+			parts = append(parts, sanitize(payment.DirectDebitExt.CreditorID))
+			parts = append(parts, sanitize(payment.DirectDebitExt.ContractID))
 			parts = append(parts, formatFloat(payment.DirectDebitExt.MaxAmount))
-			parts = append(parts, payment.DirectDebitExt.ValidTillDate)
+			parts = append(parts, sanitize(payment.DirectDebitExt.ValidTillDate))
 		} else {
 			parts = append(parts, "0")
 		}
@@ -194,9 +213,9 @@ func serialize(model DataModel) string {
 	// Beneficiary blocks (one per payment)
 	for _, payment := range model.Payments {
 		if payment.Beneficiary != nil {
-			parts = append(parts, payment.Beneficiary.Name)
-			parts = append(parts, payment.Beneficiary.Street)
-			parts = append(parts, payment.Beneficiary.City)
+			parts = append(parts, sanitize(payment.Beneficiary.Name))
+			parts = append(parts, sanitize(payment.Beneficiary.Street))
+			parts = append(parts, sanitize(payment.Beneficiary.City))
 		} else {
 			parts = append(parts, "", "", "")
 		}
@@ -220,8 +239,16 @@ func formatFloat(f float64) string {
 }
 
 // addChecksum prepends CRC32 checksum to payload.
+//
+//	+------------------+---------------------------+
+//	|      4 bytes     |        Variable           |
+//	+------------------+---------------------------+
+//	| CRC32 Checksum   | Tab-separated payload     |
+//	| (little-endian)  | (UTF-8 encoded)           |
+//	+------------------+---------------------------+
+//
+// @see 3.10.
 func addChecksum(payload string) []byte {
-	// TODO: Implement CRC32 checksum
 	checksum := crc32Checksum(payload)
 
 	// Create result buffer: 4 bytes (checksum) + payload

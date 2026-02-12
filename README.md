@@ -21,6 +21,14 @@ individuals and businesses to create QR codes for their invoices.
 - Isomorphic Browser & Runtime-independent (Browser, Node.js, Bun, Deno)
 - Compatible with any system language using C Foreign Function Interface (CFFI)
 
+
+## Specification Versions
+
+| Specification | TypeScript      | Go      |
+| ------------- | --------------- | ------- |
+| v1.1          | v1.0.0 – v3.0.0 | v0.1.0  |
+| v1.2          | v3.1.0+         | v0.2.0+ |
+
 ## Implementations
 
 This repository provides multiple language implementations of the PAY by square
@@ -70,13 +78,6 @@ flowchart LR
     style GO_LIB  fill:#A5EAFF, stroke:#00838F, stroke-width:1.5px
     style CFFI    fill:#A5EAFF, stroke:#00838F, stroke-width:1.5px
 ```
-
-## Specification Versions
-
-| Specification | TypeScript      | Go      |
-| ------------- | --------------- | ------- |
-| v1.1          | v1.0.0 – v3.0.0 | v0.1.0  |
-| v1.2          | v3.1.0+         | v0.2.0+ |
 
 ## Using C FFI
 

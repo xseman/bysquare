@@ -225,3 +225,77 @@ describe("round trip verification", () => {
 		expect(decoded).toEqual(data);
 	});
 });
+
+describe("decode field consumption alignment", () => {
+	test("standing order fields consumed even when type does not match", () => {
+		const serialized = [
+			"", // invoiceId
+			"1", // paymentsCount
+			"1", // type: PaymentOrder
+			"100", // amount
+			"EUR", // currencyCode
+			"", // paymentDueDate
+			"", // variableSymbol
+			"", // constantSymbol
+			"", // specificSymbol
+			"", // originatorsReferenceInformation
+			"", // paymentNote
+			"1", // bankAccountsCount
+			"SK9611000000002918599669", // iban
+			"", // bic
+			"1", // standingOrderExt flag
+			"15", // day (should be consumed)
+			"1", // month (should be consumed)
+			"m", // periodicity (should be consumed)
+			"", // lastDate (should be consumed)
+			"0", // directDebitExt flag
+			"Test Beneficiary", // beneficiaryName
+			"", // beneficiaryStreet
+			"", // beneficiaryCity
+		].join("\t");
+
+		const result = deserialize(serialized);
+
+		expect(result.payments[0].type).toBe(1);
+		expect(result.payments[0].beneficiary.name).toBe("Test Beneficiary");
+	});
+
+	test("direct debit fields consumed even when type does not match", () => {
+		const serialized = [
+			"", // invoiceId
+			"1", // paymentsCount
+			"1", // type: PaymentOrder
+			"100", // amount
+			"EUR", // currencyCode
+			"", // paymentDueDate
+			"", // variableSymbol
+			"", // constantSymbol
+			"", // specificSymbol
+			"", // originatorsReferenceInformation
+			"", // paymentNote
+			"1", // bankAccountsCount
+			"SK9611000000002918599669", // iban
+			"", // bic
+			"0", // standingOrderExt flag
+			"1", // directDebitExt flag
+			"0", // directDebitScheme (should be consumed)
+			"0", // directDebitType (should be consumed)
+			"", // variableSymbol (should be consumed)
+			"", // specificSymbol (should be consumed)
+			"", // originatorsReferenceInformation (should be consumed)
+			"", // mandateId (should be consumed)
+			"", // creditorId (should be consumed)
+			"", // contractId (should be consumed)
+			"", // maxAmount (should be consumed)
+			"", // validTillDate (should be consumed)
+			"Test Beneficiary", // beneficiaryName
+			"", // beneficiaryStreet
+			"", // beneficiaryCity
+		].join("\t");
+
+		const result = deserialize(serialized);
+
+		expect(result.payments[0].type).toBe(1);
+		expect(result.payments[0].beneficiary.name).toBe("Test Beneficiary");
+	});
+});

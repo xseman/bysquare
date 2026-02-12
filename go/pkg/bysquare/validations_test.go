@@ -563,11 +563,75 @@ func TestValidateSimplePayment(t *testing.T) {
 			},
 			shouldErr: false,
 		},
+		{
+			name: "direct debit with valid validTillDate",
+			payment: SimplePayment{
+				Type:         PaymentTypeDirectDebit,
+				Amount:       50.00,
+				CurrencyCode: CurrencyEUR,
+				Beneficiary:  &Beneficiary{Name: "Jane Doe"},
+				BankAccounts: []BankAccount{
+					{IBAN: "SK3112000000198742637541"},
+				},
+				DirectDebitExt: &DirectDebit{
+					ValidTillDate: "20251231",
+				},
+			},
+			shouldErr: false,
+		},
+		{
+			name: "direct debit with invalid validTillDate format",
+			payment: SimplePayment{
+				Type:         PaymentTypeDirectDebit,
+				Amount:       50.00,
+				CurrencyCode: CurrencyEUR,
+				Beneficiary:  &Beneficiary{Name: "Jane Doe"},
+				BankAccounts: []BankAccount{
+					{IBAN: "SK3112000000198742637541"},
+				},
+				DirectDebitExt: &DirectDebit{
+					ValidTillDate: "not-a-date",
+				},
+			},
+			shouldErr: true,
+		},
+		{
+			name: "direct debit with impossible validTillDate",
+			payment: SimplePayment{
+				Type:         PaymentTypeDirectDebit,
+				Amount:       50.00,
+				CurrencyCode: CurrencyEUR,
+				Beneficiary:  &Beneficiary{Name: "Jane Doe"},
+				BankAccounts: []BankAccount{
+					{IBAN: "SK3112000000198742637541"},
+				},
+				DirectDebitExt: &DirectDebit{
+					ValidTillDate: "20251332",
+				},
+			},
+			shouldErr: true,
+		},
+		{
+			name: "direct debit with empty validTillDate",
+			payment: SimplePayment{
+				Type:         PaymentTypeDirectDebit,
+				Amount:       50.00,
+				CurrencyCode: CurrencyEUR,
+				Beneficiary:  &Beneficiary{Name: "Jane Doe"},
+				BankAccounts: []BankAccount{
+					{IBAN: "SK3112000000198742637541"},
+				},
+				DirectDebitExt: &DirectDebit{
+					ValidTillDate: "",
+				},
+			},
+			shouldErr: false,
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := validateSimplePayment(&tc.payment, "test")
+			err := validateSimplePayment(&tc.payment, "test", Version120)
 			if tc.shouldErr && err == nil {
 				t.Error("expected error, got nil")
 			}
@@ -656,7 +720,7 @@ func TestValidationErrorPath(t *testing.T) {
 		},
 	}
 
-	err := validateSimplePayment(&payment, "payments[0]")
+	err := validateSimplePayment(&payment, "payments[0]", Version120)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}

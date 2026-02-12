@@ -29,7 +29,12 @@ func (e *ValidationError) Error() string {
 }
 
 // validateDataModel validates the complete data model.
-func validateDataModel(model *DataModel) error {
+func validateDataModel(model *DataModel, version ...Version) error {
+	v := Version120
+	if len(version) > 0 {
+		v = version[0]
+	}
+
 	if len(model.Payments) == 0 {
 		return &ValidationError{
 			Message: "at least one payment required",
@@ -39,7 +44,7 @@ func validateDataModel(model *DataModel) error {
 
 	for i, payment := range model.Payments {
 		path := fmt.Sprintf("payments[%d]", i)
-		if err := validateSimplePayment(&payment, path); err != nil {
+		if err := validateSimplePayment(&payment, path, v); err != nil {
 			return err
 		}
 	}
@@ -48,7 +53,7 @@ func validateDataModel(model *DataModel) error {
 }
 
 // validateSimplePayment validates a single payment.
-func validateSimplePayment(payment *SimplePayment, path string) error {
+func validateSimplePayment(payment *SimplePayment, path string, version Version) error {
 	// Validate bank accounts
 	if len(payment.BankAccounts) == 0 {
 		return &ValidationError{
@@ -94,8 +99,18 @@ func validateSimplePayment(payment *SimplePayment, path string) error {
 		}
 	}
 
+	// Validate validTillDate for direct debits
+	if payment.Type == PaymentTypeDirectDebit && payment.DirectDebitExt != nil {
+		if payment.DirectDebitExt.ValidTillDate != "" && !isValidDate(payment.DirectDebitExt.ValidTillDate) {
+			return &ValidationError{
+				Message: "invalid date format (YYYYMMDD per v1.2 specification)",
+				Path:    fmt.Sprintf("%s.directDebitExt.validTillDate", path),
+			}
+		}
+	}
+
 	// Validate beneficiary name (required since v1.2.0)
-	if payment.Beneficiary == nil || payment.Beneficiary.Name == "" {
+	if version >= Version120 && (payment.Beneficiary == nil || payment.Beneficiary.Name == "") {
 		return &ValidationError{
 			Message: "beneficiary name is required",
 			Path:    fmt.Sprintf("%s.beneficiary.name", path),

@@ -28,7 +28,7 @@ type PaymentType uint8
 const (
 	PaymentTypePaymentOrder  PaymentType = 1
 	PaymentTypeStandingOrder PaymentType = 2
-	PaymentTypeDirectDebit   PaymentType = 3
+	PaymentTypeDirectDebit   PaymentType = 4
 )
 
 // CurrencyCode represents ISO 4217 currency codes.
@@ -93,7 +93,7 @@ type Beneficiary struct {
 
 // SimplePayment represents base payment fields.
 type SimplePayment struct {
-	Type                            PaymentType    `json:"type" validate:"required,min=1,max=3"`
+	Type                            PaymentType    `json:"type" validate:"required,min=1,max=4"`
 	Amount                          float64        `json:"amount,omitempty"`
 	CurrencyCode                    CurrencyCode   `json:"currencyCode,omitempty" validate:"omitempty,iso4217"`
 	PaymentDueDate                  string         `json:"paymentDueDate,omitempty" validate:"omitempty,len=8,numeric"`

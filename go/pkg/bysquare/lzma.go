@@ -10,13 +10,20 @@ import (
 
 // compressLZMA compresses data using LZMA1 with custom settings.
 //
-// Settings match TypeScript implementation:
-// - Dictionary size: 2^17 (131,072 bytes)
-// - Literal context bits (lc): 3
-// - Literal position bits (lp): 0
-// - Position bits (pb): 2
+// LZMA stream output (13-byte header + compressed body):
 //
-// Returns the full LZMA stream including 13-byte header.
+//	+---------------+---------------------------+-------------------+-----------+
+//	|      1B       |           4B              |         8B        | Variable  |
+//	+---------------+---------------------------+-------------------+-----------+
+//	| Properties    | Dictionary Size           | Uncompressed Size | Body      |
+//	| 0x5D          | 0x00020000 (2^17)         | (little-endian)   |           |
+//	+---------------+---------------------------+-------------------+-----------+
+//
+// Properties byte: (pb * 5 + lp) * 9 + lc = (2 * 5 + 0) * 9 + 3 = 0x5D
+//
+// BySquare stores only the body (skips the 13-byte header)
+//
+// @see 3.11.
 func compressLZMA(data []byte) ([]byte, error) {
 	var buf bytes.Buffer
 
@@ -50,28 +57,32 @@ func compressLZMA(data []byte) ([]byte, error) {
 
 // decompressLZMA decompresses LZMA data.
 //
-// The input compressed data does not include the 13-byte LZMA header.
-// We need to reconstruct the header before decompression.
+// The input is the LZMA body without the 13-byte header. The header must be
+// reconstructed before the LZMA library can decompress:
+//
+//	+---------------+---------------------------+-------------------+
+//	|      1B       |           4B              |         8B        |
+//	+---------------+---------------------------+-------------------+
+//	| Properties    | Dictionary Size           | Uncompressed Size |
+//	| 0x5D          | 0x00020000 (2^17)         | (little-endian)   |
+//	+---------------+---------------------------+-------------------+
+//
+// Properties byte: (pb * 5 + lp) * 9 + lc = (2 * 5 + 0) * 9 + 3 = 0x5D
+//
+// @see 3.11.
 func decompressLZMA(compressed []byte, uncompressedSize int) ([]byte, error) {
-	// Reconstruct LZMA header (13 bytes):
-	// - Byte 0: Properties (1 byte): 0x5D (lc=3, lp=0, pb=2)
-	// - Bytes 1-4: Dictionary size (4 bytes, little-endian): 0x00020000 (2^17)
-	// - Bytes 5-12: Uncompressed size (8 bytes, little-endian)
-
 	header := make([]byte, 13)
 
-	// Properties: lc=3, lp=0, pb=2
-	// Formula: (pb * 5 + lp) * 9 + lc = (2 * 5 + 0) * 9 + 3 = 93 = 0x5D
+	// Properties: 0x5D (lc=3, lp=0, pb=2)
 	header[0] = 0x5D
 
-	// Dictionary size: 2^17 = 131072 = 0x00020000 (little-endian)
+	// Dictionary size: 2^17 = 0x00020000 (little-endian)
 	header[1] = 0x00
 	header[2] = 0x00
 	header[3] = 0x02
 	header[4] = 0x00
 
 	// Uncompressed size (8 bytes, little-endian)
-	// For sizes < 2^32, only first 4 bytes are used
 	header[5] = byte(uncompressedSize & 0xFF)
 	header[6] = byte((uncompressedSize >> 8) & 0xFF)
 	header[7] = byte((uncompressedSize >> 16) & 0xFF)

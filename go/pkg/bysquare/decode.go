@@ -9,12 +9,25 @@ import (
 
 // Decode parses a BySquare QR string back to DataModel.
 //
-// The decoding process:
-// 1. Base32Hex decoding
-// 2. Header parsing
-// 3. LZMA decompression
-// 4. CRC32 verification
-// 5. Deserialization from tab-separated format
+// Input binary structure (after base32hex decoding):
+//
+//	+------------------+------------------+-----------------------------+
+//	|     2 bytes      |     2 bytes      |          Variable           |
+//	+------------------+------------------+-----------------------------+
+//	| Bysquare Header  | Payload Length   |         LZMA Body           |
+//	| (4 nibbles)      | (little-endian)  |  (compressed CRC+payload)   |
+//	+------------------+------------------+-----------------------------+
+//
+// After LZMA decompression:
+//
+//	+------------------+---------------------------+
+//	|      4 bytes     |        Variable           |
+//	+------------------+---------------------------+
+//	| CRC32 Checksum   | Tab-separated payload     |
+//	| (little-endian)  | (UTF-8 encoded)           |
+//	+------------------+---------------------------+
+//
+// @see 3.16.
 func Decode(qr string) (DataModel, error) {
 	// Decode Base32Hex
 	bytes, err := decodeBase32Hex(qr, true)
@@ -84,6 +97,16 @@ type BysquareHeader struct {
 }
 
 // parseBysquareHeader extracts header fields from 2 bytes.
+//
+//	Byte 0                  Byte 1
+//	+----------+----------+----------+----------+
+//	|   4 bit  |   4 bit  |   4 bit  |   4 bit  |
+//	+----------+----------+----------+----------+
+//	| BySqType | Version  | DocType  | Reserved |
+//	| (0-15)   | (0-15)   | (0-15)   | (0-15)   |
+//	+----------+----------+----------+----------+
+//
+// @see 3.5.
 func parseBysquareHeader(header []byte) BysquareHeader {
 	if len(header) < 2 {
 		panic("header must be 2 bytes")
@@ -183,14 +206,16 @@ func deserialize(data string) (DataModel, error) {
 			})
 		}
 
-		// Standing order extension
+		// Standing order extension — fields must be consumed whenever
+		// the flag is "1" regardless of payment type to keep the index
+		// aligned for subsequent fields.
 		if idx >= len(parts) {
 			return DataModel{}, fmt.Errorf("missing standing order extension field")
 		}
 		standingOrderExt := parts[idx]
 		idx++
 
-		if standingOrderExt == "1" && payment.Type == PaymentTypeStandingOrder {
+		if standingOrderExt == "1" {
 			if idx+4 > len(parts) {
 				return DataModel{}, fmt.Errorf("insufficient standing order fields")
 			}
@@ -204,22 +229,26 @@ func deserialize(data string) (DataModel, error) {
 			lastDate := parts[idx]
 			idx++
 
-			payment.StandingOrderExt = &StandingOrder{
-				Day:         uint8(day),
-				Month:       uint16(month),
-				Periodicity: Periodicity(periodicity),
-				LastDate:    lastDate,
+			if payment.Type == PaymentTypeStandingOrder {
+				payment.StandingOrderExt = &StandingOrder{
+					Day:         uint8(day),
+					Month:       uint16(month),
+					Periodicity: Periodicity(periodicity),
+					LastDate:    lastDate,
+				}
 			}
 		}
 
-		// Direct debit extension
+		// Direct debit extension — fields must be consumed whenever
+		// the flag is "1" regardless of payment type to keep the index
+		// aligned for subsequent fields.
 		if idx >= len(parts) {
 			return DataModel{}, fmt.Errorf("missing direct debit extension field")
 		}
 		directDebitExt := parts[idx]
 		idx++
 
-		if directDebitExt == "1" && payment.Type == PaymentTypeDirectDebit {
+		if directDebitExt == "1" {
 			if idx+10 > len(parts) {
 				return DataModel{}, fmt.Errorf("insufficient direct debit fields")
 			}
@@ -245,17 +274,19 @@ func deserialize(data string) (DataModel, error) {
 			validTillDate := parts[idx]
 			idx++
 
-			payment.DirectDebitExt = &DirectDebit{
-				DirectDebitScheme:        uint8(scheme),
-				DirectDebitType:          uint8(ddType),
-				VariableSymbol:           varSymbol,
-				SpecificSymbol:           specSymbol,
-				OriginatorsReferenceInfo: origRefInfo,
-				MandateID:                mandateID,
-				CreditorID:               creditorID,
-				ContractID:               contractID,
-				MaxAmount:                maxAmount,
-				ValidTillDate:            validTillDate,
+			if payment.Type == PaymentTypeDirectDebit {
+				payment.DirectDebitExt = &DirectDebit{
+					DirectDebitScheme:        uint8(scheme),
+					DirectDebitType:          uint8(ddType),
+					VariableSymbol:           varSymbol,
+					SpecificSymbol:           specSymbol,
+					OriginatorsReferenceInfo: origRefInfo,
+					MandateID:                mandateID,
+					CreditorID:               creditorID,
+					ContractID:               contractID,
+					MaxAmount:                maxAmount,
+					ValidTillDate:            validTillDate,
+				}
 			}
 		}
 

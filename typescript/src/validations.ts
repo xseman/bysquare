@@ -5,6 +5,7 @@ import {
 	DataModel,
 	type Payment,
 	PaymentOptions,
+	Version,
 } from "./types.js";
 
 const ErrorMessages = {
@@ -96,6 +97,7 @@ export function validateBankAccount(
 export function validateSimplePayment(
 	simplePayment: Payment,
 	path: string,
+	version: Version = Version["1.2.0"],
 ): void {
 	for (const [index, bankAccount] of simplePayment.bankAccounts.entries()) {
 		validateBankAccount(bankAccount, `${path}.bankAccounts[${index}]`);
@@ -129,7 +131,18 @@ export function validateSimplePayment(
 		);
 	}
 
-	if (!simplePayment.beneficiary?.name) {
+	if (
+		simplePayment.type === PaymentOptions.DirectDebit
+		&& simplePayment.validTillDate
+		&& !isValidYYYYMMDD(simplePayment.validTillDate)
+	) {
+		throw new ValidationError(
+			ErrorMessages.Date,
+			`${path}.validTillDate`,
+		);
+	}
+
+	if (version >= Version["1.2.0"] && !simplePayment.beneficiary?.name) {
 		throw new ValidationError(
 			ErrorMessages.BeneficiaryName,
 			`${path}.beneficiary.name`,
@@ -143,9 +156,12 @@ export function validateSimplePayment(
  * @see validateSimplePayment
  * @see ValidationError
  */
-export function validateDataModel(dataModel: DataModel): DataModel {
+export function validateDataModel(
+	dataModel: DataModel,
+	version: Version = Version["1.2.0"],
+): DataModel {
 	for (const [index, payment] of dataModel.payments.entries()) {
-		validateSimplePayment(payment, `payments[${index}]`);
+		validateSimplePayment(payment, `payments[${index}]`, version);
 	}
 
 	return dataModel;

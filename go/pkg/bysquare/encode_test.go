@@ -132,7 +132,7 @@ func TestSerialize(t *testing.T) {
 					},
 				},
 			},
-			expected: "direct-debit\t1\t3\t75\tEUR\t\t123\t\t\t\t\t1\tSK9611000000002918599669\t\t0\t1\t1\t1\t\t\t\t\t\t\t\t\t\t\t",
+			expected: "direct-debit\t1\t4\t75\tEUR\t\t123\t\t\t\t\t1\tSK9611000000002918599669\t\t0\t1\t1\t1\t\t\t\t\t\t\t\t\t\t\t",
 		},
 		{
 			name: "Payment with beneficiary",

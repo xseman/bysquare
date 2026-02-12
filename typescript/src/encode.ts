@@ -271,7 +271,7 @@ export function serialize(data: DataModel): string {
 				serialized.push(monthValue?.toString());
 			}
 
-			serialized.push(p.periodicity);
+			serialized.push(sanitize(p.periodicity));
 			serialized.push(sanitize(p.lastDate));
 		} else {
 			serialized.push("0");

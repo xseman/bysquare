@@ -186,7 +186,7 @@ func serialize(model DataModel) string {
 			parts = append(parts, "1")
 			parts = append(parts, fmt.Sprintf("%d", payment.StandingOrderExt.Day))
 			parts = append(parts, fmt.Sprintf("%d", payment.StandingOrderExt.Month))
-			parts = append(parts, string(payment.StandingOrderExt.Periodicity))
+			parts = append(parts, sanitize(string(payment.StandingOrderExt.Periodicity)))
 			parts = append(parts, sanitize(payment.StandingOrderExt.LastDate))
 		} else {
 			parts = append(parts, "0")

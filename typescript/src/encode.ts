@@ -63,12 +63,13 @@ export const MAX_COMPRESSED_SIZE = 131_072; // 2^17
  * specification
  *
  * ```
- * | Attribute    | Number of bits | Possible values | Note
- * --------------------------------------------------------------------------------------------
- * | BySquareType | 4              | 0-15            | by square type
- * | Version      | 4              | 0-15            | version of the by square type
- * | DocumentType | 4              | 0-15            | document type within given by square type
- * | Reserved     | 4              | 0-15            | bits reserved for future needs
+ * Byte 0                  Byte 1
+ * +----------+----------+----------+----------+
+ * |   4 bit  |   4 bit  |   4 bit  |   4 bit  |
+ * +----------+----------+----------+----------+
+ * | BySqType | Version  | DocType  | Reserved |
+ * | (0-15)   | (0-15)   | (0-15)   | (0-15)   |
+ * +----------+----------+----------+----------+
  * ```
  *
  * @see 3.5.
@@ -120,9 +121,10 @@ export function buildBysquareHeader(
  * +---------------+---------------+
  * |    Byte 0     |    Byte 1     |
  * +---------------+---------------+
- * |  LSB (0-255)  | MSB (0-511)   |
+ * |      LSB      |      MSB      |
  * +---------------+---------------+
  * | Little-endian 16-bit unsigned |
+ * | max 2^17 = 131072             |
  * +-------------------------------+
  * ```
  *

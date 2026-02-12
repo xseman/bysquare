@@ -131,6 +131,17 @@ export function validateSimplePayment(
 		);
 	}
 
+	if (
+		simplePayment.type === PaymentOptions.DirectDebit
+		&& simplePayment.validTillDate
+		&& !isValidYYYYMMDD(simplePayment.validTillDate)
+	) {
+		throw new ValidationError(
+			ErrorMessages.Date,
+			`${path}.validTillDate`,
+		);
+	}
+
 	if (version >= Version["1.2.0"] && !simplePayment.beneficiary?.name) {
 		throw new ValidationError(
 			ErrorMessages.BeneficiaryName,

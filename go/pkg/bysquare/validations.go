@@ -99,6 +99,16 @@ func validateSimplePayment(payment *SimplePayment, path string, version Version)
 		}
 	}
 
+	// Validate validTillDate for direct debits
+	if payment.Type == PaymentTypeDirectDebit && payment.DirectDebitExt != nil {
+		if payment.DirectDebitExt.ValidTillDate != "" && !isValidDate(payment.DirectDebitExt.ValidTillDate) {
+			return &ValidationError{
+				Message: "invalid date format (YYYYMMDD per v1.2 specification)",
+				Path:    fmt.Sprintf("%s.directDebitExt.validTillDate", path),
+			}
+		}
+	}
+
 	// Validate beneficiary name (required since v1.2.0)
 	if version >= Version120 && (payment.Beneficiary == nil || payment.Beneficiary.Name == "") {
 		return &ValidationError{

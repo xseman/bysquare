@@ -28,7 +28,10 @@ import {
 	TEST_IBANS,
 	VALID_PAYMENT_ORDER,
 } from "./testdata/index.js";
-import { CurrencyCode } from "./types.js";
+import {
+	CurrencyCode,
+	PaymentOptions,
+} from "./types.js";
 import {
 	validateBankAccount,
 	validateDataModel,
@@ -120,6 +123,33 @@ describe("validateSimplePayment", () => {
 
 	test("rejects payment without beneficiary", () => {
 		const payment = buildPaymentOrder({ beneficiary: undefined as any });
+
+		expect(() => validateSimplePayment(payment, "test")).toThrow(ValidationError);
+	});
+
+	test("validates direct debit validTillDate", () => {
+		const payment = buildPaymentOrder({
+			type: PaymentOptions.DirectDebit,
+			validTillDate: "20251231",
+		});
+
+		expect(() => validateSimplePayment(payment, "test")).not.toThrow();
+	});
+
+	test("rejects direct debit with invalid validTillDate", () => {
+		const payment = buildPaymentOrder({
+			type: PaymentOptions.DirectDebit,
+			validTillDate: "not-a-date",
+		});
+
+		expect(() => validateSimplePayment(payment, "test")).toThrow(ValidationError);
+	});
+
+	test("rejects direct debit with impossible validTillDate", () => {
+		const payment = buildPaymentOrder({
+			type: PaymentOptions.DirectDebit,
+			validTillDate: "20251332",
+		});
 
 		expect(() => validateSimplePayment(payment, "test")).toThrow(ValidationError);
 	});

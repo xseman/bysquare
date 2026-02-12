@@ -102,14 +102,15 @@ func Encode(model DataModel, opts ...EncodeOptions) (string, error) {
 
 // buildBysquareHeader creates a 2-byte header.
 //
-// Header structure (4 nibbles):
+//	Byte 0                  Byte 1
+//	+----------+----------+----------+----------+
+//	|   4 bit  |   4 bit  |   4 bit  |   4 bit  |
+//	+----------+----------+----------+----------+
+//	| BySqType | Version  | DocType  | Reserved |
+//	| (0-15)   | (0-15)   | (0-15)   | (0-15)   |
+//	+----------+----------+----------+----------+
 //
-//	| Attribute    | Bits | Values | Description                 |
-//	|--------------|------|--------|-----------------------------|
-//	| BySquareType | 4    | 0-15   | By square type              |
-//	| Version      | 4    | 0-15   | Version of by square type   |
-//	| DocumentType | 4    | 0-15   | Document type               |
-//	| Reserved     | 4    | 0-15   | Reserved for future use     |
+// @see 3.5.
 func buildBysquareHeader(bySquareType, version, docType, reserved uint8) []byte {
 	if bySquareType > 0x0F || version > 0x0F || docType > 0x0F || reserved > 0x0F {
 		panic("header values must be 4-bit (0-15)")
@@ -123,6 +124,17 @@ func buildBysquareHeader(bySquareType, version, docType, reserved uint8) []byte 
 }
 
 // buildPayloadLength creates a 2-byte little-endian length field.
+//
+//	+---------------+---------------+
+//	|    Byte 0     |    Byte 1     |
+//	+---------------+---------------+
+//	|      LSB      |      MSB      |
+//	+---------------+---------------+
+//	| Little-endian 16-bit unsigned |
+//	| max 2^17 = 131072             |
+//	+-------------------------------+
+//
+// @see 3.6.
 func buildPayloadLength(length int) []byte {
 	if length >= maxCompressedSize {
 		panic(fmt.Sprintf("payload length %d exceeds maximum %d", length, maxCompressedSize))
@@ -227,8 +239,16 @@ func formatFloat(f float64) string {
 }
 
 // addChecksum prepends CRC32 checksum to payload.
+//
+//	+------------------+---------------------------+
+//	|      4 bytes     |        Variable           |
+//	+------------------+---------------------------+
+//	| CRC32 Checksum   | Tab-separated payload     |
+//	| (little-endian)  | (UTF-8 encoded)           |
+//	+------------------+---------------------------+
+//
+// @see 3.10.
 func addChecksum(payload string) []byte {
-	// TODO: Implement CRC32 checksum
 	checksum := crc32Checksum(payload)
 
 	// Create result buffer: 4 bytes (checksum) + payload

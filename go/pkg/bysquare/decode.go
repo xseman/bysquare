@@ -9,12 +9,25 @@ import (
 
 // Decode parses a BySquare QR string back to DataModel.
 //
-// The decoding process:
-// 1. Base32Hex decoding
-// 2. Header parsing
-// 3. LZMA decompression
-// 4. CRC32 verification
-// 5. Deserialization from tab-separated format
+// Input binary structure (after base32hex decoding):
+//
+//	+------------------+------------------+-----------------------------+
+//	|     2 bytes      |     2 bytes      |          Variable           |
+//	+------------------+------------------+-----------------------------+
+//	| Bysquare Header  | Payload Length   |         LZMA Body           |
+//	| (4 nibbles)      | (little-endian)  |  (compressed CRC+payload)   |
+//	+------------------+------------------+-----------------------------+
+//
+// After LZMA decompression:
+//
+//	+------------------+---------------------------+
+//	|      4 bytes     |        Variable           |
+//	+------------------+---------------------------+
+//	| CRC32 Checksum   | Tab-separated payload     |
+//	| (little-endian)  | (UTF-8 encoded)           |
+//	+------------------+---------------------------+
+//
+// @see 3.16.
 func Decode(qr string) (DataModel, error) {
 	// Decode Base32Hex
 	bytes, err := decodeBase32Hex(qr, true)
@@ -84,6 +97,16 @@ type BysquareHeader struct {
 }
 
 // parseBysquareHeader extracts header fields from 2 bytes.
+//
+//	Byte 0                  Byte 1
+//	+----------+----------+----------+----------+
+//	|   4 bit  |   4 bit  |   4 bit  |   4 bit  |
+//	+----------+----------+----------+----------+
+//	| BySqType | Version  | DocType  | Reserved |
+//	| (0-15)   | (0-15)   | (0-15)   | (0-15)   |
+//	+----------+----------+----------+----------+
+//
+// @see 3.5.
 func parseBysquareHeader(header []byte) BysquareHeader {
 	if len(header) < 2 {
 		panic("header must be 2 bytes")

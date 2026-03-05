@@ -5,8 +5,5 @@
  */
 
 export { decodeOptions, encodeOptions } from "./classifier.js";
-export { decode } from "./decode.js";
-export { encode, type EncodeOptions } from "./encode.js";
-export { validateDataModel } from "./validations.js";
-
+export { ValidationError } from "./errors.js";
 export * from "./types.js";

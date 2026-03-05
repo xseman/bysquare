@@ -16,16 +16,16 @@ import {
 	decodeOptions,
 	encodeOptions,
 } from "./classifier.js";
-import { decode } from "./decode.js";
-import { encode } from "./encode.js";
-import { TEST_IBANS } from "./testdata/index.js";
+import { decode } from "./pay/decode.js";
+import { encode } from "./pay/encode.js";
+import { TEST_IBANS } from "./pay/testdata/index.js";
 import {
 	CurrencyCode,
 	DataModel,
 	Month,
 	PaymentOptions,
 	Periodicity,
-} from "./types.js";
+} from "./pay/types.js";
 
 describe("classifier", () => {
 	describe("encodeOptions", () => {

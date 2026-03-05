@@ -22,8 +22,8 @@
 		"fmt": "dprint fmt",
 		"fmt:check": "dprint check",
 		"typecheck": "tsc --noEmit",
-		"test": "bun test --coverage --coverage-reporter=text --coverage-reporter=lcov",
-		"test:watch": "bun test --watch --coverage ."
+		"test": "bun test src/ --coverage --coverage-reporter=text --coverage-reporter=lcov",
+		"test:watch": "bun test src/ --watch --coverage"
 	},
 	"dependencies": {
 		"lzma1": "0.2.0",
@@ -44,12 +44,24 @@
 			"bun": "./src/index.ts",
 			"import": "./lib/index.js",
 			"require": "./lib/index.js"
+		},
+		"./pay": {
+			"types": "./lib/pay/index.d.ts",
+			"bun": "./src/pay/index.ts",
+			"import": "./lib/pay/index.js",
+			"require": "./lib/pay/index.js"
+		},
+		"./invoice": {
+			"types": "./lib/invoice/index.d.ts",
+			"bun": "./src/invoice/index.ts",
+			"import": "./lib/invoice/index.js",
+			"require": "./lib/invoice/index.js"
 		}
 	},
 	"files": [
-		"lib/*.js",
-		"lib/*.d.ts",
-		"!lib/*test*",
+		"lib/**/*.js",
+		"lib/**/*.d.ts",
+		"!lib/**/*test*",
 		"src/**/*.ts",
 		"!src/**/*.test.ts",
 		"!src/**/testdata"

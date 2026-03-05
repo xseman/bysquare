@@ -38,7 +38,7 @@ $ npm install bysquare
 
 ```html
 <script type="module">
-	import { encode, decode } from "https://esm.sh/bysquare@latest";
+	import { encode, decode } from "https://esm.sh/bysquare@latest/pay";
 </script>
 ```
 
@@ -47,7 +47,10 @@ $ npm install bysquare
 This library provides `encode` and `decode` functions to work with the data
 model directly, allowing you to create customized payment solutions.
 
-### HTML example
+### Pay BySquare
+
+<details>
+<summary>HTML example</summary>
 
 This example shows how to generate a payment QR code and display it in a web
 page:
@@ -64,7 +67,7 @@ page:
 
 		<script type="module">
 			import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
-			import { encode, PaymentOptions, CurrencyCode } from "https://esm.sh/bysquare@latest";
+			import { encode, PaymentOptions, CurrencyCode } from "https://esm.sh/bysquare@latest/pay";
 
 			const qrstring = encode({
 				payments: [
@@ -86,7 +89,10 @@ page:
 </html>
 ```
 
-### Creating Payment QR Codes
+</details>
+
+<details>
+<summary>Creating Payment QR Codes</summary>
 
 To generate QR codes for different payment types, use the `encode` function with
 the appropriate payment configuration:
@@ -95,9 +101,10 @@ the appropriate payment configuration:
 import {
 	CurrencyCode,
 	encode,
+	Month,
 	PaymentOptions,
 	Periodicity,
-} from "bysquare";
+} from "bysquare/pay";
 
 // Simple Payment (Payment Order)
 const qrstring = encode({
@@ -145,20 +152,20 @@ const qrstring = encode({
 });
 ```
 
-#### Standing Order with Multiple Months
+##### Standing Order with Multiple Months
 
 For standing orders that should execute in specific months, you can combine
 multiple months using bitwise OR operators:
 
 ```js
+import { encodeOptions } from "bysquare";
 import {
 	CurrencyCode,
 	encode,
-	encodeOptions,
 	Month,
 	PaymentOptions,
 	Periodicity,
-} from "bysquare";
+} from "bysquare/pay";
 
 const qrstring = encode({
 	payments: [
@@ -205,7 +212,10 @@ const qrstring2 = encode({
 > in ISO 8601 format (`YYYY-MM-DD`). They are automatically converted to
 > `YYYYMMDD` during encoding to match the Pay by Square specification.
 
-### Advanced usage
+</details>
+
+<details>
+<summary>Advanced usage</summary>
 
 For more complex data with multiple payments and additional fields:
 
@@ -220,11 +230,11 @@ For more complex data with multiple payments and additional fields:
 ```ts
 import {
 	CurrencyCode,
-	DataModel,
+	type DataModel,
 	decode,
 	encode,
 	PaymentOptions,
-} from "bysquare";
+} from "bysquare/pay";
 
 const data = {
 	invoiceId: "random-id",
@@ -253,6 +263,162 @@ const qrstring = encode(data);
 const model = decode(qrstring);
 ```
 
+</details>
+
+### Invoice BySquare
+
+In addition to PAY by square (payment QR codes), this library supports encoding
+and decoding invoice documents (bysquareType=1). The invoice implementation was
+reverse-engineered from the official Android application.
+
+<details>
+<summary>HTML example</summary>
+
+This example shows how to generate an invoice QR code and display it in a web
+page:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Invoice QR Code</title>
+	</head>
+	<body>
+		<div id="qrcode" style="width: 200px"></div>
+
+		<script type="module">
+			import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
+			import { encode, InvoiceDocumentType } from "https://esm.sh/bysquare@latest/invoice";
+
+			const qrstring = encode({
+				documentType: InvoiceDocumentType.Invoice,
+				invoiceId: "FV2024001",
+				issueDate: "20240115",
+				localCurrencyCode: "EUR",
+				supplierParty: {
+					partyName: "Supplier s.r.o.",
+					postalAddress: {
+						streetName: "Hlavna",
+						cityName: "Bratislava",
+						postalZone: "81101",
+						country: "SVK",
+					},
+				},
+				customerParty: {
+					partyName: "Customer a.s.",
+				},
+				numberOfInvoiceLines: 1,
+				taxCategorySummaries: [{
+					classifiedTaxCategory: 0.2,
+					taxExclusiveAmount: 100,
+					taxAmount: 20,
+				}],
+				monetarySummary: {},
+			});
+
+			const qrElement = document.getElementById("qrcode");
+			qrElement.appendChild(QRCode.generateSVG(qrstring));
+		</script>
+	</body>
+</html>
+```
+
+</details>
+
+<details>
+<summary>Invoice Document Types</summary>
+
+| Type            | Code | Description                |
+| --------------- | ---- | -------------------------- |
+| Invoice         | 0    | Standard invoice           |
+| ProformaInvoice | 1    | Proforma (advance) invoice |
+| CreditNote      | 2    | Credit note (reversal)     |
+| DebitNote       | 3    | Debit note                 |
+| AdvanceInvoice  | 4    | Advance invoice            |
+
+</details>
+
+<details>
+<summary>Encode Invoice</summary>
+
+```typescript
+import {
+	encode,
+	type InvoiceDataModel,
+	InvoiceDocumentType,
+} from "bysquare/invoice";
+
+const invoice: InvoiceDataModel = {
+	documentType: InvoiceDocumentType.Invoice,
+	invoiceId: "FV2024001",
+	issueDate: "20240115",
+	localCurrencyCode: "EUR",
+	supplierParty: {
+		partyName: "Supplier s.r.o.",
+		postalAddress: {
+			streetName: "Hlavna",
+			cityName: "Bratislava",
+			postalZone: "81101",
+			country: "SVK",
+		},
+	},
+	customerParty: {
+		partyName: "Customer a.s.",
+	},
+	numberOfInvoiceLines: 3,
+	taxCategorySummaries: [{
+		classifiedTaxCategory: 0.2,
+		taxExclusiveAmount: 100,
+		taxAmount: 20,
+	}],
+	monetarySummary: {},
+};
+
+const qr = encode(invoice);
+```
+
+</details>
+
+<details>
+<summary>Decode Invoice</summary>
+
+```typescript
+import { decode } from "bysquare/invoice";
+
+const invoice = decode(qr);
+
+console.log(invoice.invoiceId);
+console.log(invoice.documentType);
+console.log(invoice.supplierParty.partyName);
+```
+
+</details>
+
+<details>
+<summary>Invoice Validation</summary>
+
+`encode` validates the data model by default. Key validation rules:
+
+- `invoiceId` and `issueDate` are required
+- `localCurrencyCode` must be a 3-letter uppercase code (ISO 4217)
+- Foreign currency fields (`foreignCurrencyCode`, `currRate`, `referenceCurrRate`)
+  must all be present or all absent
+- Supplier party requires `partyName` and postal address with `streetName`,
+  `cityName`, `postalZone`, and `country`
+- Customer party requires `partyName`
+- Exactly one of `numberOfInvoiceLines` or `singleInvoiceLine` must be set
+- At least one tax category summary is required with `classifiedTaxCategory`
+  in range [0, 1]
+
+Validation can be disabled:
+
+```typescript
+const qr = encode(invoice, { validate: false });
+```
+
+</details>
+
 ## Classifier Utilities
 
 The library provides utility functions for working with multiple classifier
@@ -262,10 +428,8 @@ particularly useful for handling multiple month selections in standing orders.
 ### Encoding Multiple Options
 
 ```ts
-import {
-	encodeOptions,
-	Month,
-} from "bysquare";
+import { encodeOptions } from "bysquare";
+import { Month } from "bysquare/pay";
 
 // Encode multiple months into a single value
 const monthsArray = [Month.January, Month.July, Month.October];

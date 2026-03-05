@@ -1,10 +1,15 @@
 import { decompress } from "lzma1";
 
-import * as base32hex from "./base32hex.js";
-import { crc32 } from "./crc32.js";
+import * as base32hex from "../base32hex.js";
+import { crc32 } from "../crc32.js";
+import {
+	DecodeError,
+	DecodeErrorMessage,
+	decodeHeader,
+} from "../header.js";
+import { Version } from "../types.js";
 import {
 	BankAccount,
-	Beneficiary,
 	CurrencyCode,
 	DataModel,
 	type DirectDebit,
@@ -12,37 +17,7 @@ import {
 	PaymentOptions,
 	type Periodicity,
 	type StandingOrder,
-	Version,
-} from "./index.js";
-
-export const DecodeErrorMessage = {
-	MissingIBAN: "IBAN is missing",
-	/**
-	 * @description - find original LZMA error in extensions
-	 */
-	LZMADecompressionFailed: "LZMA decompression failed",
-	/**
-	 * @description - find found version in extensions
-	 * @see {@link ./types#Version} for valid ranges
-	 */
-	UnsupportedVersion: "Unsupported version",
-} as const;
-
-export class DecodeError extends Error {
-	public extensions?: { [name: string]: any; };
-
-	constructor(
-		message: string,
-		extensions?: { [name: string]: any; },
-	) {
-		super(message);
-		this.name = this.constructor.name;
-
-		if (extensions) {
-			this.extensions = extensions;
-		}
-	}
-}
+} from "./types.js";
 
 function decodeNumber(value: string | undefined): number | undefined {
 	return value?.length ? Number(value) : undefined;
@@ -105,94 +80,96 @@ function decodeString(value: string | undefined): string | undefined {
  * @see 3.14
  * @see Table 15
  */
-export function deserialize(qr: string): DataModel {
-	const data = qr.split("\t");
-	const invoiceId = data.shift();
+export function deserialize(tabString: string): DataModel {
+	const data = tabString.split("\t");
+	let i = 0;
 
-	const output = {
-		invoiceId: invoiceId?.length ? invoiceId : undefined,
-		payments: new Array<Payment>(),
-	} satisfies DataModel;
+	function next(): string | undefined {
+		return data[i++];
+	}
 
-	const paymentslen = Number(data.shift());
-	for (let i = 0; i < paymentslen; i++) {
-		const paymentOptions = data.shift();
-		const ammount = data.shift();
-		const currency = data.shift();
-		const dueDate = data.shift();
-		const variableSymbol = data.shift();
-		const constantSymbol = data.shift();
-		const specificSymbol = data.shift();
-		const originatorRefInfo = data.shift();
-		const paymentNote = data.shift();
+	// Base fields
+	const invoiceId = decodeString(next());
+	const paymentsCount = Number(next());
 
-		let payment = {
-			type: Number(paymentOptions),
-			currencyCode: currency ?? CurrencyCode.EUR,
-			amount: Number(ammount),
-			paymentDueDate: dueDate || undefined,
-			variableSymbol: variableSymbol || undefined,
-			constantSymbol: constantSymbol || undefined,
-			specificSymbol: specificSymbol || undefined,
-			originatorsReferenceInformation: originatorRefInfo || undefined,
-			paymentNote: paymentNote || undefined,
-			beneficiary: { name: "" },
-			bankAccounts: [],
-		} as Payment;
+	const payments = new Array<Payment>();
 
-		const numberOfAccounts = Number(data.shift());
+	for (let p = 0; p < paymentsCount; p++) {
+		// Payment fields
+		const type = Number(next()) as PaymentOptions;
+		const amount = Number(next());
+		const currencyCode = next() ?? CurrencyCode.EUR;
+		const paymentDueDate = decodeString(next());
+		const variableSymbol = decodeString(next());
+		const constantSymbol = decodeString(next());
+		const specificSymbol = decodeString(next());
+		const originatorsReferenceInformation = decodeString(next());
+		const paymentNote = decodeString(next());
 
-		for (let j = 0; j < numberOfAccounts; j++) {
-			const iban = data.shift();
+		// Bank accounts
+		const bankAccountsCount = Number(next());
+		const bankAccounts: BankAccount[] = [];
+
+		for (let j = 0; j < bankAccountsCount; j++) {
+			const iban = next();
 			if (iban === undefined || iban.length === 0) {
 				throw new DecodeError(DecodeErrorMessage.MissingIBAN);
 			}
 
-			const bic = data.shift();
-			const account = {
-				iban: iban,
-				bic: bic || undefined,
-			} satisfies BankAccount;
-
-			payment.bankAccounts.push(account);
+			const bic = decodeString(next());
+			bankAccounts.push({ iban, bic });
 		}
+
+		let payment = {
+			type: type,
+			amount: amount,
+			currencyCode: currencyCode,
+			paymentDueDate: paymentDueDate,
+			variableSymbol: variableSymbol,
+			constantSymbol: constantSymbol,
+			specificSymbol: specificSymbol,
+			originatorsReferenceInformation: originatorsReferenceInformation,
+			paymentNote: paymentNote,
+			bankAccounts: bankAccounts,
+			beneficiary: { name: "" },
+		} as Payment;
 
 		// Standing order extension — fields must be consumed whenever the
 		// flag is "1" regardless of payment type to keep data aligned.
-		const standingOrderExt = data.shift();
+		const standingOrderExt = next();
 		if (standingOrderExt === "1") {
-			const day = decodeNumber(data.shift());
-			const month = decodeNumber(data.shift());
-			const periodicity = decodeString(data.shift()) as Periodicity;
-			const lastDate = decodeString(data.shift());
+			const day = decodeNumber(next());
+			const month = decodeNumber(next());
+			const periodicity = decodeString(next()) as Periodicity;
+			const lastDate = decodeString(next());
 
-			if (payment.type === PaymentOptions.StandingOrder) {
+			if (type === PaymentOptions.StandingOrder) {
 				payment = {
 					...payment,
 					day: day,
 					month: month,
 					periodicity: periodicity,
 					lastDate: lastDate,
-				} satisfies StandingOrder;
+				} as StandingOrder;
 			}
 		}
 
 		// Direct debit extension — fields must be consumed whenever the
 		// flag is "1" regardless of payment type to keep data aligned.
-		const directDebitExt = data.shift();
+		const directDebitExt = next();
 		if (directDebitExt === "1") {
-			const directDebitScheme = decodeNumber(data.shift());
-			const directDebitType = decodeNumber(data.shift());
-			const ddVariableSymbol = decodeString(data.shift());
-			const ddSpecificSymbol = decodeString(data.shift());
-			const ddOriginatorsReferenceInformation = decodeString(data.shift());
-			const mandateId = decodeString(data.shift());
-			const creditorId = decodeString(data.shift());
-			const contractId = decodeString(data.shift());
-			const maxAmount = decodeNumber(data.shift());
-			const validTillDate = decodeString(data.shift());
+			const directDebitScheme = decodeNumber(next());
+			const directDebitType = decodeNumber(next());
+			const ddVariableSymbol = decodeString(next());
+			const ddSpecificSymbol = decodeString(next());
+			const ddOriginatorsReferenceInformation = decodeString(next());
+			const mandateId = decodeString(next());
+			const creditorId = decodeString(next());
+			const contractId = decodeString(next());
+			const maxAmount = decodeNumber(next());
+			const validTillDate = decodeString(next());
 
-			if (payment.type === PaymentOptions.DirectDebit) {
+			if (type === PaymentOptions.DirectDebit) {
 				payment = {
 					...payment,
 					directDebitScheme: directDebitScheme,
@@ -205,66 +182,29 @@ export function deserialize(qr: string): DataModel {
 					contractId: contractId,
 					maxAmount: maxAmount,
 					validTillDate: validTillDate,
-				} satisfies DirectDebit;
+				} as DirectDebit;
 			}
 		}
 
-		output.payments.push(payment);
+		payments.push(payment);
 	}
 
-	for (let i = 0; i < paymentslen; i++) {
-		const name = data.shift() ?? "";
-		const addressLine1 = data.shift() ?? "";
-		const addressLine2 = data.shift() ?? "";
+	// Beneficiary block (after all payments)
+	for (let p = 0; p < paymentsCount; p++) {
+		const name = next() ?? "";
+		const street = decodeString(next());
+		const city = decodeString(next());
 
-		const beneficiary = {
+		payments[p].beneficiary = {
 			name: name,
-			street: addressLine1 || undefined,
-			city: addressLine2 || undefined,
-		} satisfies Beneficiary;
-
-		output.payments[i].beneficiary = beneficiary;
+			street: street,
+			city: city,
+		};
 	}
-
-	return output;
-}
-
-interface Header {
-	bysquareType: number;
-	version: number;
-	documentType: number;
-	reserved: number;
-}
-
-/**
- * Extracts the 4 nibbles from a 2-byte bysquare header using bit-shifting and
- * masking.
- *
- * ```
- * Byte 0                  Byte 1
- * +----------+----------+----------+----------+
- * |   4 bit  |   4 bit  |   4 bit  |   4 bit  |
- * +----------+----------+----------+----------+
- * | BySqType | Version  | DocType  | Reserved |
- * | (0-15)   | (0-15)   | (0-15)   | (0-15)   |
- * +----------+----------+----------+----------+
- * ```
- *
- * @param header 2-bytes size
- * @see 3.5.
- */
-function bysquareHeaderDecoder(header: Uint8Array): Header {
-	const bytes = (header[0] << 8) | header[1];
-	const bysquareType = bytes >> 12;
-	const version = (bytes >> 8) & 0b0000_1111;
-	const documentType = (bytes >> 4) & 0b0000_1111;
-	const reserved = bytes & 0b0000_1111;
 
 	return {
-		bysquareType,
-		version,
-		documentType,
-		reserved,
+		invoiceId,
+		payments,
 	};
 }
 
@@ -297,7 +237,7 @@ function bysquareHeaderDecoder(header: Uint8Array): Header {
 export function decode(qr: string): DataModel {
 	const bytes = base32hex.decode(qr);
 	const headerBytes = bytes.slice(0, 2);
-	const headerData = bysquareHeaderDecoder(headerBytes);
+	const headerData = decodeHeader(headerBytes);
 
 	if ((headerData.version > Version["1.2.0"])) {
 		throw new DecodeError(DecodeErrorMessage.UnsupportedVersion, {

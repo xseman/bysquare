@@ -16,12 +16,14 @@ import {
 } from "bun:test";
 
 import { decompress } from "lzma1";
-import * as base32hex from "./base32hex.js";
-import { crc32 } from "./crc32.js";
+import * as base32hex from "../base32hex.js";
+import { crc32 } from "../crc32.js";
 import {
-	decode,
 	DecodeError,
 	DecodeErrorMessage,
+} from "../header.js";
+import {
+	decode,
 	deserialize,
 } from "./decode.js";
 import { encode } from "./encode.js";

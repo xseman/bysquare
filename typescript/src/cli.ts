@@ -8,11 +8,11 @@ import {
 import process from "node:process";
 import { parseArgs } from "node:util";
 
-import { decode } from "./decode.js";
+import { decode } from "./pay/decode.js";
 import {
 	encode,
 	type EncodeOptions,
-} from "./encode.js";
+} from "./pay/encode.js";
 import { Version } from "./types.js";
 
 const version = "3.1.0";

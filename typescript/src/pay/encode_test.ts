@@ -4,7 +4,6 @@
  * Covers:
  * - Basic encoding of payment orders, standing orders, and direct debits
  * - Serialization to tab-separated format
- * - Header creation and checksum calculation
  * - Diacritics removal (deburr)
  * - Error handling for invalid inputs
  * - Property-based tests for encoding consistency
@@ -16,15 +15,10 @@ import {
 	test,
 } from "bun:test";
 
+import { Version } from "../types.js";
 import { decode } from "./decode.js";
 import {
-	addChecksum,
-	buildBysquareHeader,
-	buildPayloadLength,
 	encode,
-	EncodeError,
-	EncodeErrorMessage,
-	MAX_COMPRESSED_SIZE,
 	removeDiacritics,
 	serialize,
 } from "./encode.js";
@@ -45,10 +39,7 @@ import {
 	TEST_IBANS,
 	VALID_PAYMENT_ORDER,
 } from "./testdata/index.js";
-import {
-	CurrencyCode,
-	Version,
-} from "./types.js";
+import { CurrencyCode } from "./types.js";
 
 describe("encode basic functionality", () => {
 	test("encodes valid payment order", () => {
@@ -129,8 +120,7 @@ describe("encode property based", () => {
 				payments: [buildPaymentOrder({
 					amount: Math.round(Math.random() * 10_000) / 100,
 					variableSymbol: String(Math.floor(Math.random() * 999_999)),
-					currencyCode:
-						validCurrencies[Math.floor(Math.random() * validCurrencies.length)],
+					currencyCode: validCurrencies[Math.floor(Math.random() * validCurrencies.length)],
 					bankAccounts: [{
 						iban: validIbans[Math.floor(Math.random() * validIbans.length)],
 					}],
@@ -160,145 +150,6 @@ describe("encode serialization", () => {
 	test("serializes direct debit", () => {
 		const result = serialize(DIRECT_DEBIT_FIXTURE);
 		expect(result).toBe(DIRECT_DEBIT_SERIALIZED);
-	});
-});
-
-describe("addChecksum", () => {
-	test("returns Uint8Array with correct length", () => {
-		const payload = "test\tpayload";
-		const payloadBytes = new TextEncoder().encode(payload).length;
-
-		const result = addChecksum(payload);
-
-		expect(result).toBeInstanceOf(Uint8Array);
-		expect(result.byteLength).toBe(4 + payloadBytes);
-	});
-
-	test("first 4 bytes contain CRC32 checksum", () => {
-		const payload = "test\tpayload";
-
-		const result = addChecksum(payload);
-		const checksumBytes = result.slice(0, 4);
-		const checksum = new DataView(checksumBytes.buffer, checksumBytes.byteOffset, 4)
-			.getUint32(0, true);
-
-		expect(checksum).toBeGreaterThan(0);
-		expect(checksum).toBeLessThanOrEqual(4_294_967_295);
-	});
-
-	test("remaining bytes match UTF-8 encoded input", () => {
-		const payload = "test\tpayload";
-		const expectedPayloadBytes = new TextEncoder().encode(payload);
-
-		const result = addChecksum(payload);
-		const payloadBytes = result.slice(4);
-
-		expect(payloadBytes).toEqual(expectedPayloadBytes);
-	});
-
-	test("handles empty string", () => {
-		const payload = "";
-
-		const result = addChecksum(payload);
-
-		expect(result.byteLength).toBe(4);
-		expect(result.slice(4)).toEqual(new Uint8Array([]));
-	});
-
-	test("handles unicode characters", () => {
-		const payload = "Žltý kôň úpel ďábelské ódy";
-		const payloadBytes = new TextEncoder().encode(payload).length;
-
-		const result = addChecksum(payload);
-
-		expect(result.byteLength).toBe(4 + payloadBytes);
-		const decodedPayload = new TextDecoder().decode(result.slice(4));
-		expect(decodedPayload).toBe(payload);
-	});
-
-	test("different payloads produce different checksums", () => {
-		const payload1 = "test1";
-		const payload2 = "test2";
-
-		const result1 = addChecksum(payload1);
-		const result2 = addChecksum(payload2);
-
-		const checksum1 = new DataView(result1.buffer, result1.byteOffset, 4)
-			.getUint32(0, true);
-		const checksum2 = new DataView(result2.buffer, result2.byteOffset, 4)
-			.getUint32(0, true);
-
-		expect(checksum1).not.toBe(checksum2);
-	});
-});
-
-describe("encode header building", () => {
-	test("builds bysquare header", () => {
-		const expected = [0x00, 0x00];
-		const result = buildBysquareHeader();
-		expect(result).toEqual(expected);
-	});
-
-	test("builds bysquare header from binary data", () => {
-		/** dprint-ignore - formátovanie binárnych dát */
-		const inputData = [
-			0b0000_0001, 0b0000_0010,
-			0b0000_0011, 0b0000_0100,
-		] as [number, number, number, number];
-
-		const expected = [
-			0b0001_0010,
-			0b0011_0100,
-		];
-
-		const result = buildBysquareHeader(inputData);
-		expect(result).toEqual(expected);
-	});
-
-	const invalidHeaderTestCases = [
-		{
-			name: "invalid type",
-			input: [0xFF, Version["1.0.0"], 0x00, 0x00],
-			error: EncodeErrorMessage.BySquareType,
-		},
-		{
-			name: "invalid version",
-			input: [0x00, 0xFF, 0x00, 0x00],
-			error: EncodeErrorMessage.Version,
-		},
-		{
-			name: "invalid document type",
-			input: [0x00, 0x00, 0xFF, 0x00],
-			error: EncodeErrorMessage.DocumentType,
-		},
-		{
-			name: "invalid reserved nibble",
-			input: [0x00, 0x00, 0x00, 0xFF],
-			error: EncodeErrorMessage.Reserved,
-		},
-	];
-
-	test.each(invalidHeaderTestCases)("throws for $name", ({ input, error }) => {
-		expect(() => {
-			buildBysquareHeader(input as [number, number, number, number]);
-		}).toThrow(EncodeError);
-	});
-
-	test("builds payload length", () => {
-		const length = MAX_COMPRESSED_SIZE - 1;
-		const dataView = new DataView(new ArrayBuffer(2));
-		dataView.setUint16(0, length, true);
-
-		const expected = new Uint8Array(dataView.buffer);
-		const result = buildPayloadLength(length);
-
-		expect(result).toEqual(expected);
-	});
-
-	test("throws for oversized payload", () => {
-		expect(() => {
-			buildPayloadLength(MAX_COMPRESSED_SIZE);
-		}).toThrow(EncodeError);
 	});
 });
 

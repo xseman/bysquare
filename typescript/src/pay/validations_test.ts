@@ -18,6 +18,7 @@ import {
 	test,
 } from "bun:test";
 
+import { ValidationError } from "../errors.js";
 import {
 	buildDataModel,
 	buildPaymentOrder,
@@ -36,7 +37,6 @@ import {
 	validateBankAccount,
 	validateDataModel,
 	validateSimplePayment,
-	ValidationError,
 } from "./validations.js";
 
 describe("validateBankAccount", () => {

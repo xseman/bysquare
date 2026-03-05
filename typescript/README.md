@@ -345,11 +345,11 @@ page:
 ```typescript
 import {
 	encode,
-	type InvoiceDataModel,
+	type DataModel,
 	InvoiceDocumentType,
 } from "bysquare/invoice";
 
-const invoice: InvoiceDataModel = {
+const invoice: DataModel = {
 	documentType: InvoiceDocumentType.Invoice,
 	invoiceId: "FV2024001",
 	issueDate: "20240115",

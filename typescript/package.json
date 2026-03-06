@@ -22,8 +22,8 @@
 		"fmt": "dprint fmt",
 		"fmt:check": "dprint check",
 		"typecheck": "tsc --noEmit",
-		"test": "bun test src/ --coverage --coverage-reporter=text --coverage-reporter=lcov",
-		"test:watch": "bun test src/ --watch --coverage"
+		"test": "bun test src/ --coverage --coverage-reporter=text --coverage-reporter=lcov --concurrent",
+		"test:watch": "bun test src/ --watch --coverage --concurrent"
 	},
 	"dependencies": {
 		"lzma1": "0.2.0",

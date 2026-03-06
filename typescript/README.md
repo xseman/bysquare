@@ -344,8 +344,8 @@ page:
 
 ```typescript
 import {
-	encode,
 	type DataModel,
+	encode,
 	InvoiceDocumentType,
 } from "bysquare/invoice";
 

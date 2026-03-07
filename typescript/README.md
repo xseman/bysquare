@@ -38,7 +38,7 @@ $ npm install bysquare
 
 ```html
 <script type="module">
-	import { encode, decode } from "https://esm.sh/bysquare@latest/pay";
+	import { encode, decode } from "https://esm.sh/bysquare@4/pay";
 </script>
 ```
 
@@ -67,7 +67,7 @@ page:
 
 		<script type="module">
 			import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
-			import { encode, PaymentOptions, CurrencyCode } from "https://esm.sh/bysquare@latest/pay";
+			import { encode, PaymentOptions, CurrencyCode } from "https://esm.sh/bysquare@4/pay";
 
 			const qrstring = encode({
 				payments: [
@@ -289,7 +289,7 @@ page:
 
 		<script type="module">
 			import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
-			import { encode, InvoiceDocumentType } from "https://esm.sh/bysquare@latest/invoice";
+			import { encode, InvoiceDocumentType } from "https://esm.sh/bysquare@4/invoice";
 
 			const qrstring = encode({
 				documentType: InvoiceDocumentType.Invoice,
@@ -446,22 +446,27 @@ console.log(encoded); // 577 (1 + 64 + 512)
 $ npm install --global bysquare
 ```
 
-### Encode
-
-Encode JSON or JSONL data from files and print the corresponding QR code.
+### PAY
 
 ```sh
-$ bysquare --encode file1.json file2.json...
-$ bysquare --encode file.jsonl
+$ bysquare pay encode [OPTIONS] file1.json file2.json...
+$ bysquare pay encode file.jsonl
+$ bysquare pay decode <qrstring>
 ```
 
-### Decode
-
-Decode the specified QR code string and print the corresponding JSON data. The
-qrstring argument should be a valid QR code string.
+### Invoice
 
 ```sh
-$ bysquare --decode <qrstring>
+$ bysquare invoice encode [OPTIONS] invoice.json
+$ bysquare invoice decode <qrstring>
+```
+
+### Auto-detect Decode
+
+Decode any BySquare QR string by auto-detecting the type from the header.
+
+```sh
+$ bysquare decode <qrstring>
 ```
 
 ## How it works

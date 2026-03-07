@@ -55,7 +55,9 @@ test("help command", async () => {
 
 	expect(result.exitCode).toBe(0);
 	expect(result.stdout).toContain("USAGE:");
-	expect(result.stdout).toContain("bysquare encode");
+	expect(result.stdout).toContain("bysquare pay encode");
+	expect(result.stdout).toContain("bysquare pay decode");
+	expect(result.stdout).toContain("bysquare invoice encode");
 	expect(result.stdout).toContain("bysquare decode");
 });
 
@@ -73,16 +75,16 @@ test("unknown command shows error", async () => {
 	expect(result.stderr).toContain("Unknown command: invalid");
 });
 
-test("encode with JSON file", async () => {
-	const result = await runCli(["encode", EXAMPLE_JSON]);
+test("pay encode with JSON file", async () => {
+	const result = await runCli(["pay", "encode", EXAMPLE_JSON]);
 
 	expect(result.exitCode).toBe(0);
 	expect(result.stdout).toMatch(BASE32HEX_PATTERN);
 	expect(result.stdout.length).toBeGreaterThan(50);
 });
 
-test("encode with JSONL file", async () => {
-	const result = await runCli(["encode", EXAMPLE_JSONL]);
+test("pay encode with JSONL file", async () => {
+	const result = await runCli(["pay", "encode", EXAMPLE_JSONL]);
 
 	expect(result.exitCode).toBe(0);
 	const lines = result.stdout.split("\n");
@@ -91,7 +93,7 @@ test("encode with JSONL file", async () => {
 	expect(lines[1]).toMatch(BASE32HEX_PATTERN);
 });
 
-test("encode from stdin", async () => {
+test("pay encode from stdin", async () => {
 	const input = JSON.stringify({
 		invoiceId: "test",
 		payments: [{
@@ -103,15 +105,15 @@ test("encode from stdin", async () => {
 		}],
 	});
 
-	const result = await runCli(["encode", "-"], input);
+	const result = await runCli(["pay", "encode", "-"], input);
 
 	expect(result.exitCode).toBe(0);
 	expect(result.stdout).toMatch(BASE32HEX_PATTERN);
 });
 
 for (const flag of ["--no-deburr", "--no-validate"]) {
-	test(`encode with ${flag} flag`, async () => {
-		const result = await runCli(["encode", flag, EXAMPLE_JSON]);
+	test(`pay encode with ${flag} flag`, async () => {
+		const result = await runCli(["pay", "encode", flag, EXAMPLE_JSON]);
 
 		expect(result.exitCode).toBe(0);
 		expect(result.stdout).toMatch(BASE32HEX_PATTERN);
@@ -125,37 +127,37 @@ for (
 		{ version: "1.2.0", prefix: "08" },
 	]
 ) {
-	test(`encode with --spec-version ${version}`, async () => {
-		const result = await runCli(["encode", "-s", version, EXAMPLE_JSON]);
+	test(`pay encode with --spec-version ${version}`, async () => {
+		const result = await runCli(["pay", "encode", "-s", version, EXAMPLE_JSON]);
 
 		expect(result.exitCode).toBe(0);
 		expect(result.stdout).toMatch(new RegExp(`^${prefix}`));
 	});
 }
 
-test("encode with invalid spec version", async () => {
-	const result = await runCli(["encode", "-s", "9.9.9", EXAMPLE_JSON]);
+test("pay encode with invalid spec version", async () => {
+	const result = await runCli(["pay", "encode", "-s", "9.9.9", EXAMPLE_JSON]);
 
 	expect(result.exitCode).toBe(1);
 	expect(result.stderr).toContain("unsupported spec version");
 });
 
-test("encode with missing file", async () => {
-	const result = await runCli(["encode", "nonexistent.json"]);
+test("pay encode with missing file", async () => {
+	const result = await runCli(["pay", "encode", "nonexistent.json"]);
 
 	expect(result.exitCode).toBe(1);
 	expect(result.stderr).toContain("doesn't exist");
 });
 
-test("encode with no file argument", async () => {
-	const result = await runCli(["encode"]);
+test("pay encode with no file argument", async () => {
+	const result = await runCli(["pay", "encode"]);
 
 	expect(result.exitCode).toBe(1);
 	expect(result.stderr).toContain("missing input file argument");
 });
 
-test("decode QR string", async () => {
-	const result = await runCli(["decode", EXAMPLE_QR]);
+test("pay decode QR string", async () => {
+	const result = await runCli(["pay", "decode", EXAMPLE_QR]);
 
 	expect(result.exitCode).toBe(0);
 
@@ -165,8 +167,8 @@ test("decode QR string", async () => {
 	expect(parsed.payments[0].amount).toBe(100);
 });
 
-test("decode from stdin", async () => {
-	const result = await runCli(["decode", "-"], EXAMPLE_QR);
+test("pay decode from stdin", async () => {
+	const result = await runCli(["pay", "decode", "-"], EXAMPLE_QR);
 
 	expect(result.exitCode).toBe(0);
 
@@ -174,22 +176,33 @@ test("decode from stdin", async () => {
 	expect(parsed.invoiceId).toBe("random-id");
 });
 
-test("decode with no argument", async () => {
-	const result = await runCli(["decode"]);
+test("pay decode with no argument", async () => {
+	const result = await runCli(["pay", "decode"]);
 
 	expect(result.exitCode).toBe(1);
 	expect(result.stderr).toContain("missing QR string argument");
 });
 
-test("encode and decode round trip", async () => {
-	const encodeResult = await runCli(["encode", EXAMPLE_JSON]);
+test("pay encode and decode round trip", async () => {
+	const encodeResult = await runCli(["pay", "encode", EXAMPLE_JSON]);
 	expect(encodeResult.exitCode).toBe(0);
 
 	const qrString = encodeResult.stdout;
-	const decodeResult = await runCli(["decode", qrString]);
+	const decodeResult = await runCli(["pay", "decode", qrString]);
 	expect(decodeResult.exitCode).toBe(0);
 
 	const decoded = JSON.parse(decodeResult.stdout);
 	expect(decoded.invoiceId).toBe("random-id");
 	expect(decoded.payments[0].variableSymbol).toBe("123");
+});
+
+test("auto-detect decode pay QR string", async () => {
+	const result = await runCli(["decode", EXAMPLE_QR]);
+
+	expect(result.exitCode).toBe(0);
+
+	const parsed = JSON.parse(result.stdout);
+	expect(parsed.invoiceId).toBe("random-id");
+	expect(parsed.payments).toHaveLength(1);
+	expect(parsed.payments[0].amount).toBe(100);
 });

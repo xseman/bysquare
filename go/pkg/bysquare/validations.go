@@ -18,131 +18,8 @@ var (
 	dateRegex = regexp.MustCompile(`^\d{8}$`)
 )
 
-// ValidationError represents a validation error with path information.
-type ValidationError struct {
-	Message string
-	Path    string
-}
-
-func (e *ValidationError) Error() string {
-	return fmt.Sprintf("%s (path: %s)", e.Message, e.Path)
-}
-
-// validateDataModel validates the complete data model.
-func validateDataModel(model *DataModel, version ...Version) error {
-	v := Version120
-	if len(version) > 0 {
-		v = version[0]
-	}
-
-	if len(model.Payments) == 0 {
-		return &ValidationError{
-			Message: "at least one payment required",
-			Path:    "payments",
-		}
-	}
-
-	for i, payment := range model.Payments {
-		path := fmt.Sprintf("payments[%d]", i)
-		if err := validateSimplePayment(&payment, path, v); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// validateSimplePayment validates a single payment.
-func validateSimplePayment(payment *SimplePayment, path string, version Version) error {
-	// Validate bank accounts
-	if len(payment.BankAccounts) == 0 {
-		return &ValidationError{
-			Message: "at least one bank account required",
-			Path:    fmt.Sprintf("%s.bankAccounts", path),
-		}
-	}
-
-	for i, account := range payment.BankAccounts {
-		accountPath := fmt.Sprintf("%s.bankAccounts[%d]", path, i)
-		if err := validateBankAccount(&account, accountPath); err != nil {
-			return err
-		}
-	}
-
-	// Validate currency code if provided
-	if payment.CurrencyCode != "" {
-		if !isValidCurrencyCode(string(payment.CurrencyCode)) {
-			return &ValidationError{
-				Message: "invalid currency code (ISO 4217)",
-				Path:    fmt.Sprintf("%s.currencyCode", path),
-			}
-		}
-	}
-
-	// Validate payment due date if provided
-	if payment.PaymentDueDate != "" {
-		if !isValidDate(payment.PaymentDueDate) {
-			return &ValidationError{
-				Message: "invalid date format (YYYYMMDD per v1.2 specification)",
-				Path:    fmt.Sprintf("%s.paymentDueDate", path),
-			}
-		}
-	}
-
-	// Validate lastDate for standing orders
-	if payment.Type == PaymentTypeStandingOrder && payment.StandingOrderExt != nil {
-		if payment.StandingOrderExt.LastDate != "" && !isValidDate(payment.StandingOrderExt.LastDate) {
-			return &ValidationError{
-				Message: "invalid date format (YYYYMMDD per v1.2 specification)",
-				Path:    fmt.Sprintf("%s.standingOrderExt.lastDate", path),
-			}
-		}
-	}
-
-	// Validate validTillDate for direct debits
-	if payment.Type == PaymentTypeDirectDebit && payment.DirectDebitExt != nil {
-		if payment.DirectDebitExt.ValidTillDate != "" && !isValidDate(payment.DirectDebitExt.ValidTillDate) {
-			return &ValidationError{
-				Message: "invalid date format (YYYYMMDD per v1.2 specification)",
-				Path:    fmt.Sprintf("%s.directDebitExt.validTillDate", path),
-			}
-		}
-	}
-
-	// Validate beneficiary name (required since v1.2.0)
-	if version >= Version120 && (payment.Beneficiary == nil || payment.Beneficiary.Name == "") {
-		return &ValidationError{
-			Message: "beneficiary name is required",
-			Path:    fmt.Sprintf("%s.beneficiary.name", path),
-		}
-	}
-
-	return nil
-}
-
-// validateBankAccount validates IBAN and BIC.
-func validateBankAccount(account *BankAccount, path string) error {
-	// Validate IBAN
-	if !isValidIBAN(account.IBAN) {
-		return &ValidationError{
-			Message: "invalid IBAN (ISO 13616)",
-			Path:    fmt.Sprintf("%s.iban", path),
-		}
-	}
-
-	// Validate BIC if provided
-	if account.BIC != "" && !isValidBIC(account.BIC) {
-		return &ValidationError{
-			Message: "invalid BIC (ISO 9362)",
-			Path:    fmt.Sprintf("%s.bic", path),
-		}
-	}
-
-	return nil
-}
-
-// isValidIBAN checks if IBAN is valid using MOD-97 algorithm.
-func isValidIBAN(iban string) bool {
+// IsValidIBAN checks if IBAN is valid using MOD-97 algorithm.
+func IsValidIBAN(iban string) bool {
 	// Remove spaces and convert to uppercase
 	iban = strings.ReplaceAll(strings.ToUpper(iban), " ", "")
 
@@ -175,16 +52,14 @@ func isValidIBAN(iban string) bool {
 	return remainder == 1
 }
 
-// isValidBIC checks if BIC is valid.
-func isValidBIC(bic string) bool {
+// IsValidBIC checks if BIC is valid.
+func IsValidBIC(bic string) bool {
 	bic = strings.ToUpper(bic)
 	return bicRegex.MatchString(bic)
 }
 
-// isValidCurrencyCode checks if currency code is valid (ISO 4217).
-func isValidCurrencyCode(code string) bool {
-	// Simple validation: 3 uppercase letters
-	// Full validation would require checking against ISO 4217 list
+// IsValidCurrencyCode checks if currency code is valid (ISO 4217).
+func IsValidCurrencyCode(code string) bool {
 	if len(code) != 3 {
 		return false
 	}
@@ -196,14 +71,13 @@ func isValidCurrencyCode(code string) bool {
 	return true
 }
 
-// isValidDate checks if date is in YYYYMMDD format per v1.2 specification.
+// IsValidDate checks if date is in YYYYMMDD format per v1.2 specification.
 // It performs both format validation and semantic calendar validation.
-func isValidDate(date string) bool {
+func IsValidDate(date string) bool {
 	if !dateRegex.MatchString(date) {
 		return false
 	}
 
-	// Parse year, month, day
 	year := 0
 	month := 0
 	day := 0
@@ -218,19 +92,13 @@ func isValidDate(date string) bool {
 		return false
 	}
 
-	// Validate month range
 	if month < 1 || month > 12 {
 		return false
 	}
-
-	// Validate day range
 	if day < 1 || day > 31 {
 		return false
 	}
 
-	// Check if the date is valid using time package
-	// Create a time.Time and verify it matches the input
 	t := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
-
 	return t.Year() == year && int(t.Month()) == month && t.Day() == day
 }

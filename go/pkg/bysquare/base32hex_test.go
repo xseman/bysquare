@@ -50,7 +50,7 @@ func TestEncodeBase32Hex(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := encodeBase32Hex(tc.input, true)
+			result := EncodeBase32Hex(tc.input, true)
 			if result != tc.expected {
 				t.Errorf("expected %q, got %q", tc.expected, result)
 			}
@@ -83,7 +83,7 @@ func TestEncodeBase32HexNoPadding(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := encodeBase32Hex(tc.input, false)
+			result := EncodeBase32Hex(tc.input, false)
 			if result != tc.expected {
 				t.Errorf("expected %q, got %q", tc.expected, result)
 			}
@@ -144,7 +144,7 @@ func TestDecodeBase32Hex(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := decodeBase32Hex(tc.input, false)
+			result, err := DecodeBase32Hex(tc.input, false)
 			if tc.hasError {
 				if err == nil {
 					t.Error("expected error, got nil")
@@ -197,7 +197,7 @@ func TestDecodeBase32HexLooseMode(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := decodeBase32Hex(tc.input, true)
+			result, err := DecodeBase32Hex(tc.input, true)
 			if tc.hasError {
 				if err == nil {
 					t.Error("expected error, got nil")
@@ -227,8 +227,8 @@ func TestBase32HexRoundTrip(t *testing.T) {
 	}
 
 	for _, original := range testCases {
-		encoded := encodeBase32Hex(original, true)
-		decoded, err := decodeBase32Hex(encoded, false)
+		encoded := EncodeBase32Hex(original, true)
+		decoded, err := DecodeBase32Hex(encoded, false)
 		if err != nil {
 			t.Errorf("decode error for %v: %v", original, err)
 			continue
@@ -257,7 +257,7 @@ func TestDecodeBase32HexInvalidInput(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := decodeBase32Hex(tc.input, false)
+			_, err := DecodeBase32Hex(tc.input, false)
 			if err == nil {
 				t.Error("expected error for invalid input, got nil")
 			}

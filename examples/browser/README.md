@@ -45,7 +45,7 @@ import {
 	CurrencyCode,
 	encode,
 	PaymentOptions,
-} from "https://esm.sh/bysquare@latest/";
+} from "https://esm.sh/bysquare@4/pay";
 ```
 
 ## Related Documentation

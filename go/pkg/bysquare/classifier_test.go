@@ -2,6 +2,22 @@ package bysquare
 
 import "testing"
 
+// Bit flag values matching pay.Month* constants for test convenience.
+const (
+	monthJanuary   uint16 = 1 << 0
+	monthFebruary  uint16 = 1 << 1
+	monthMarch     uint16 = 1 << 2
+	monthApril     uint16 = 1 << 3
+	monthMay       uint16 = 1 << 4
+	monthJune      uint16 = 1 << 5
+	monthJuly      uint16 = 1 << 6
+	monthAugust    uint16 = 1 << 7
+	monthSeptember uint16 = 1 << 8
+	monthOctober   uint16 = 1 << 9
+	monthNovember  uint16 = 1 << 10
+	monthDecember  uint16 = 1 << 11
+)
+
 func TestEncodeClassifierOptions(t *testing.T) {
 	testCases := []struct {
 		name     string
@@ -15,12 +31,12 @@ func TestEncodeClassifierOptions(t *testing.T) {
 		},
 		{
 			name:     "single month",
-			options:  []uint16{uint16(MonthJanuary)},
+			options:  []uint16{monthJanuary},
 			expected: 1,
 		},
 		{
 			name:     "multiple months",
-			options:  []uint16{uint16(MonthJanuary), uint16(MonthJuly), uint16(MonthOctober)},
+			options:  []uint16{monthJanuary, monthJuly, monthOctober},
 			expected: 577, // 1 + 64 + 512
 		},
 		{
@@ -32,7 +48,7 @@ func TestEncodeClassifierOptions(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := encodeClassifierOptions(tc.options)
+			result := EncodeClassifierOptions(tc.options)
 			if result != tc.expected {
 				t.Errorf("expected %d, got %d", tc.expected, result)
 			}
@@ -41,13 +57,6 @@ func TestEncodeClassifierOptions(t *testing.T) {
 }
 
 func TestDecodeClassifierOptions(t *testing.T) {
-	allMonths := []uint16{
-		uint16(MonthJanuary), uint16(MonthFebruary), uint16(MonthMarch),
-		uint16(MonthApril), uint16(MonthMay), uint16(MonthJune),
-		uint16(MonthJuly), uint16(MonthAugust), uint16(MonthSeptember),
-		uint16(MonthOctober), uint16(MonthNovember), uint16(MonthDecember),
-	}
-
 	testCases := []struct {
 		name     string
 		encoded  uint16
@@ -61,23 +70,28 @@ func TestDecodeClassifierOptions(t *testing.T) {
 		{
 			name:     "January only",
 			encoded:  1,
-			expected: []uint16{uint16(MonthJanuary)},
+			expected: []uint16{monthJanuary},
 		},
 		{
-			name:     "January, July, October",
+			name:     "January, July, October (descending)",
 			encoded:  577,
-			expected: []uint16{uint16(MonthJanuary), uint16(MonthJuly), uint16(MonthOctober)},
+			expected: []uint16{monthOctober, monthJuly, monthJanuary},
 		},
 		{
-			name:     "all months",
+			name:     "all months (descending)",
 			encoded:  4095,
-			expected: allMonths,
+			expected: []uint16{
+				monthDecember, monthNovember, monthOctober,
+				monthSeptember, monthAugust, monthJuly,
+				monthJune, monthMay, monthApril,
+				monthMarch, monthFebruary, monthJanuary,
+			},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := decodeClassifierOptions(tc.encoded, allMonths)
+			result := DecodeClassifierOptions(tc.encoded)
 			if len(result) != len(tc.expected) {
 				t.Errorf("expected %d months, got %d", len(tc.expected), len(result))
 				return
@@ -92,24 +106,26 @@ func TestDecodeClassifierOptions(t *testing.T) {
 }
 
 func TestClassifierOptionsRoundTrip(t *testing.T) {
-	allMonths := []uint16{
-		uint16(MonthJanuary), uint16(MonthFebruary), uint16(MonthMarch),
-		uint16(MonthApril), uint16(MonthMay), uint16(MonthJune),
-		uint16(MonthJuly), uint16(MonthAugust), uint16(MonthSeptember),
-		uint16(MonthOctober), uint16(MonthNovember), uint16(MonthDecember),
-	}
-
 	testCases := [][]uint16{
 		{},
-		{uint16(MonthJanuary)},
-		{uint16(MonthJanuary), uint16(MonthDecember)},
-		{uint16(MonthJanuary), uint16(MonthJuly), uint16(MonthOctober)},
-		allMonths,
+		{monthJanuary},
+		{
+			monthJanuary, monthDecember,
+		},
+		{
+			monthJanuary, monthJuly, monthOctober,
+		},
+		{
+			monthJanuary, monthFebruary, monthMarch,
+			monthApril, monthMay, monthJune,
+			monthJuly, monthAugust, monthSeptember,
+			monthOctober, monthNovember, monthDecember,
+		},
 	}
 
 	for _, original := range testCases {
-		encoded := encodeClassifierOptions(original)
-		decoded := decodeClassifierOptions(encoded, allMonths)
+		encoded := EncodeClassifierOptions(original)
+		decoded := DecodeClassifierOptions(encoded)
 
 		if len(decoded) != len(original) {
 			t.Errorf("round trip failed: original length=%d, decoded length=%d",
@@ -117,10 +133,14 @@ func TestClassifierOptionsRoundTrip(t *testing.T) {
 			continue
 		}
 
-		for i := range original {
-			if decoded[i] != original[i] {
-				t.Errorf("round trip failed at index %d: original=%d, decoded=%d",
-					i, original[i], decoded[i])
+		// Decoded returns descending order, so compare sets not order
+		originalMap := make(map[uint16]bool)
+		for _, v := range original {
+			originalMap[v] = true
+		}
+		for _, v := range decoded {
+			if !originalMap[v] {
+				t.Errorf("round trip failed: decoded contains %d not in original", v)
 			}
 		}
 	}

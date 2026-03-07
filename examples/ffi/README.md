@@ -35,8 +35,11 @@ flowchart TB
     end
 
     subgraph FFI["C FFI Layer"]
-        ENC["encode(json, config)"]
-        DEC["decode(qrString)"]
+        ENC["pay_encode(json, config)"]
+        DEC["pay_decode(qrString)"]
+        ENCI["invoice_encode(json, config)"]
+        DECI["invoice_decode(qrString)"]
+        DETECT["detect_type(qrString)"]
         FREE["free(ptr)"]
         VER["version()"]
     end
@@ -45,12 +48,15 @@ flowchart TB
         LIB["libbysquare.so/dll"]
     end
 
-    ANY --> ENC & DEC & VER
-    ENC & DEC & VER --> LIB
+    ANY --> ENC & DEC & ENCI & DECI & DETECT & VER
+    ENC & DEC & ENCI & DECI & VER --> LIB
     LIB --> FREE
 
     style ENC fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
     style DEC fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
+    style ENCI fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
+    style DECI fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
+    style DETECT fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
     style FREE fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
     style VER fill:#E1BEE7,stroke:#7B1FA2,stroke-width:1.5px
     style LIB fill:#A5EAFF,stroke:#00838F,stroke-width:1.5px
@@ -65,9 +71,8 @@ flowchart TB
 
 **Default values when `config=-1`:**
 
-- `deburr = true` (remove diacritics)
-- `validate = true` (validate input data)
-- `version = 2` (PAY by square v1.2.0)
+- PAY: `deburr = true`, `validate = true`, `version = 2` (PAY by square v1.2.0)
+- Invoice: `deburr = false`, `validate = true`, `version = 0` (Invoice by square v1.0.0)
 
 ## Prerequisites
 
@@ -89,13 +94,27 @@ This creates `libbysquare.so` in `../../go/bin/`.
 // config: 32-bit integer bitflags, or -1 for defaults
 //   - Bits 0-23: Feature flags (deburr=0x01, validate=0x02)
 //   - Bits 24-31: Version (0=v1.0.0, 1=v1.1.0, 2=v1.2.0)
-//   - Special: -1 for auto-defaults (v1.2.0 + deburr + validate)
+//   - Special: -1 for auto-defaults (PAY: v1.2.0 + deburr + validate)
 // Returns: QR string on success, "ERROR:<message>" on failure
-char* bysquare_encode(char* jsonData, int config);
+char* bysquare_pay_encode(char* jsonData, int config);
 
-// Decode QR string to JSON
+// Decode PAY by square QR string to JSON
 // Returns: JSON string on success, "ERROR:<message>" on failure
-char* bysquare_decode(char* qrString);
+char* bysquare_pay_decode(char* qrString);
+
+// Encode JSON invoice data to QR string with configuration
+// config: 32-bit integer bitflags, or -1 for defaults
+//   - Special: -1 for auto-defaults (Invoice: v1.0.0 + validate, no deburr)
+// Returns: QR string on success, "ERROR:<message>" on failure
+char* bysquare_invoice_encode(char* jsonData, int config);
+
+// Decode Invoice by square QR string to JSON
+// Returns: JSON string on success, "ERROR:<message>" on failure
+char* bysquare_invoice_decode(char* qrString);
+
+// Detect the type of a BySquare QR string
+// Returns: 0 for PAY by square, 1 for Invoice by square, -1 on error
+int bysquare_detect_type(char* qrString);
 
 // Free memory allocated by the library
 void bysquare_free(char* ptr);
@@ -127,7 +146,7 @@ config = BYSQUARE_DEBURR | BYSQUARE_VERSION_110;  // Custom: v1.1.0 + deburr
 Errors are returned as strings with "ERROR:" prefix:
 
 ```c
-char* result = bysquare_encode(json, -1);
+char* result = bysquare_pay_encode(json, -1);
 if (strncmp(result, "ERROR:", 6) == 0) {
     fprintf(stderr, "Encoding failed: %s\n", result + 6);
     bysquare_free(result);

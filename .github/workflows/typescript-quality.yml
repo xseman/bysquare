@@ -46,22 +46,12 @@ jobs:
               working-directory: ./typescript
               run: bun run typecheck
 
-            - name: bunfig.toml
-              shell: bash
-              run: |
-                  cat > "${GITHUB_WORKSPACE}/typescript/bunfig.toml" <<'EOF'
-                  [test]
-                  coveragePathIgnorePatterns = [
-                      "src/testdata/**",
-                  ]
-                  EOF
-
             - name: test
               working-directory: ./typescript
               run: bun run test
 
             - name: Coverage report
-              if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+              if: (github.event_name == 'pull_request' && github.actor != 'release-please[bot]') || github.event_name == 'workflow_dispatch'
               uses: xseman/coverage@v0.3.0
               with:
                   pull-request-number: ${{ github.event.inputs.pr_number }}

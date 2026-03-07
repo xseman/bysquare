@@ -6,6 +6,7 @@ import {
 
 import { ValidationError } from "../errors.js";
 import { buildInvoiceDataModel } from "./testdata/invoices.js";
+import type { DataModel } from "./types.js";
 import { InvoiceDocumentType } from "./types.js";
 import { validateDataModel } from "./validations.js";
 
@@ -58,6 +59,24 @@ describe("validateDataModel", () => {
 					},
 				},
 			});
+			expect(() => validateDataModel(model)).toThrow(ValidationError);
+		});
+
+		test("rejects missing supplierParty", () => {
+			const model = { ...buildInvoiceDataModel(), supplierParty: undefined } as unknown as DataModel;
+			expect(() => validateDataModel(model)).toThrow(ValidationError);
+		});
+
+		test("rejects missing supplierParty.postalAddress", () => {
+			const model = {
+				...buildInvoiceDataModel(),
+				supplierParty: { partyName: "Test", postalAddress: undefined },
+			} as unknown as DataModel;
+			expect(() => validateDataModel(model)).toThrow(ValidationError);
+		});
+
+		test("rejects missing customerParty", () => {
+			const model = { ...buildInvoiceDataModel(), customerParty: undefined } as unknown as DataModel;
 			expect(() => validateDataModel(model)).toThrow(ValidationError);
 		});
 

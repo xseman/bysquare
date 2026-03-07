@@ -72,7 +72,9 @@ export function validateDataModel(model: DataModel): void {
 	}
 
 	// Supplier party
+	validateRequired(model.supplierParty, "supplierParty");
 	validateRequired(model.supplierParty.partyName, "supplierParty.partyName");
+	validateRequired(model.supplierParty.postalAddress, "supplierParty.postalAddress");
 
 	validateRequired(
 		model.supplierParty.postalAddress.streetName,
@@ -102,6 +104,7 @@ export function validateDataModel(model: DataModel): void {
 	}
 
 	// Customer party
+	validateRequired(model.customerParty, "customerParty");
 	validateRequired(model.customerParty.partyName, "customerParty.partyName");
 
 	// Invoice line choice

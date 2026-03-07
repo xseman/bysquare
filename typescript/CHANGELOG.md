@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.0.0](https://github.com/xseman/bysquare/compare/typescript/v3.2.0...typescript/v4.0.0) (2026-03-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* implement invoice bysquare & refactor project structure ([#106](https://github.com/xseman/bysquare/issues/106))
+
+### Features
+
+* implement invoice bysquare & refactor project structure ([#106](https://github.com/xseman/bysquare/issues/106)) ([9b32716](https://github.com/xseman/bysquare/commit/9b32716389fd3992c205fb79ff88d7afbcb8f14c))
+
+
+### Bug Fixes
+
+* specification compliance and data integrity ([#104](https://github.com/xseman/bysquare/issues/104)) ([7ae38da](https://github.com/xseman/bysquare/commit/7ae38daf5c7c2325dc8829c3eb429cf88a266569))
+
+
+### Maintenance
+
+* test file naming convention ([edf1917](https://github.com/xseman/bysquare/commit/edf1917339bfda7b9d07d6a12a7cdd0fdea33a2b))
+
 ## [3.2.0](https://github.com/xseman/bysquare/compare/typescript/v3.1.0...typescript/v3.2.0) (2026-02-08)
 
 

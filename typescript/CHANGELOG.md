@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/xseman/bysquare/compare/typescript/v4.0.0...typescript/v4.0.1) (2026-03-07)
+
+
+### Maintenance
+
+* revert back to package-lock.json for provenance publish ([61e7501](https://github.com/xseman/bysquare/commit/61e75015ce4387a4c1561af6a78744d4f1ef1f98))
+
 ## [4.0.0](https://github.com/xseman/bysquare/compare/typescript/v3.2.0...typescript/v4.0.0) (2026-03-07)
 
 

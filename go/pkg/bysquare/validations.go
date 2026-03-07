@@ -36,7 +36,7 @@ func IsValidIBAN(iban string) bool {
 	var numeric strings.Builder
 	for _, ch := range rearranged {
 		if ch >= 'A' && ch <= 'Z' {
-			numeric.WriteString(fmt.Sprintf("%d", int(ch)-'A'+10))
+			fmt.Fprintf(&numeric, "%d", int(ch)-'A'+10)
 		} else {
 			numeric.WriteByte(byte(ch))
 		}

@@ -14,7 +14,7 @@ C#, PHP, Python, and Swift.
 
 **Configuration Options:**
 
-Pass an integer config value to `bysquare_encode()`:
+Pass an integer config value to `bysquare_pay_encode()`:
 
 - `config = -1` → Use automatic defaults (deburr + validate + v1.2.0)
 - `config = 0` → v1.0.0 with no flags
@@ -33,9 +33,9 @@ Pass an integer config value to `bysquare_encode()`:
 #define BYSQUARE_VERSION_120 (2 << 24)  // v1.2.0
 
 // Usage examples:
-char* qr1 = bysquare_encode(json, -1);  // Auto-defaults
-char* qr2 = bysquare_encode(json, 0);  // v1.0.0, no flags
-char* qr3 = bysquare_encode(json, BYSQUARE_DEBURR | BYSQUARE_VERSION_110);
+char* qr1 = bysquare_pay_encode(json, -1);  // Auto-defaults
+char* qr2 = bysquare_pay_encode(json, 0);  // v1.0.0, no flags
+char* qr3 = bysquare_pay_encode(json, BYSQUARE_DEBURR | BYSQUARE_VERSION_110);
 ```
 
 ## Installation
@@ -97,19 +97,37 @@ ln -s libbysquare-linux-amd64.so bin/libbysquare.so
 The library provides a simple, bitflag-based configuration API:
 
 ```c
-// Encode JSON payment data to QR string
+// PAY by square: Encode JSON payment data to QR string
 // jsonData: JSON string containing payment information
 // config: 32-bit integer configuration (-1 for defaults)
 //   - Bits 0-23: Feature flags (deburr=0x01, validate=0x02)
 //   - Bits 24-31: Version field (0=v1.0.0, 1=v1.1.0, 2=v1.2.0)
 //   - Special: -1 for auto-defaults (v1.2.0 + deburr + validate)
 // Returns: QR string on success, "ERROR:<message>" on failure
-char* bysquare_encode(char* jsonData, int config);
+char* bysquare_pay_encode(char* jsonData, int config);
 
-// Decode QR string to JSON payment data
+// PAY by square: Decode QR string to JSON payment data
 // qrString: PAY by square QR code string
 // Returns: JSON string on success, "ERROR:<message>" on failure
-char* bysquare_decode(char* qrString);
+char* bysquare_pay_decode(char* qrString);
+
+// Invoice by square: Encode JSON invoice data to QR string
+// jsonData: JSON string containing invoice information
+// config: 32-bit integer configuration (-1 for defaults)
+//   - Config layout same as bysquare_pay_encode
+//   - Invoice defaults: v1.0.0 + validate (no deburr)
+// Returns: QR string on success, "ERROR:<message>" on failure
+char* bysquare_invoice_encode(char* jsonData, int config);
+
+// Invoice by square: Decode QR string to JSON invoice data
+// qrString: Invoice by square QR code string
+// Returns: JSON string on success, "ERROR:<message>" on failure
+char* bysquare_invoice_decode(char* qrString);
+
+// Auto-detect BySquare type from QR header
+// qrString: Any BySquare QR code string
+// Returns: 0=pay, 1=invoice, -1=error
+int bysquare_detect_type(char* qrString);
 
 // Free memory allocated by the library
 // ptr: String returned by encode, decode, or version
@@ -146,7 +164,7 @@ BYSQUARE_VERSION_120 = (2 << 24)  // 0x02000000 - v1.2.0 (2025-04-01)
 Errors are returned as strings with "ERROR:" prefix:
 
 ```c
-char* result = bysquare_encode(json, -1);
+char* result = bysquare_pay_encode(json, -1);
 if (strncmp(result, "ERROR:", 6) == 0) {
     // Error occurred - message starts at result[6]
     fprintf(stderr, "Encoding failed: %s\n", result + 6);

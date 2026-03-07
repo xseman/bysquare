@@ -21,13 +21,20 @@ individuals and businesses to create QR codes for their invoices.
 - Isomorphic Browser & Runtime-independent (Browser, Node.js, Bun, Deno)
 - Compatible with any system language using C Foreign Function Interface (CFFI)
 
-
 ## Specification Versions
+
+Pay BySquare
 
 | Specification | TypeScript      | Go      |
 | ------------- | --------------- | ------- |
 | v1.1          | v1.0.0 – v3.0.0 | v0.1.0  |
 | v1.2          | v3.1.0+         | v0.2.0+ |
+
+Invoice BySquare
+
+| Specification | TypeScript | Go  |
+| ------------- | ---------- | --- |
+| -             | v4.0.0+    | -   |
 
 ## Implementations
 
@@ -92,6 +99,113 @@ The Go implementation provides a C-compatible Foreign Function Interface (FFI), 
 - **[Swift](examples/ffi/swift/)** - Using Swift's C interoperability
 
 See [FFI examples](examples/ffi/) for setup and usage instructions.
+
+## How it works
+
+Both Pay BySquare and Invoice BySquare share the same wire format and encoding
+pipeline. The only difference is in the header nibbles — `BySquareType` and
+`DocType`.
+
+**LZMA uncompressed content** (data before compression):
+
+```mermaid
+---
+title: "LZMA uncompressed data"
+config:
+  theme: neutral
+---
+packet-beta
+0-31: "CRC32 Checksum"
+32-63: "Serialized Data"
+64-95: "(variable...)"
+```
+
+**Pay BySquare**
+
+| BySquareType | DocType | Document |
+| ------------ | ------- | -------- |
+| 0x00         | 0x00    | Payment  |
+
+**Invoice BySquare**
+
+| BySquareType | DocType | Document         |
+| ------------ | ------- | ---------------- |
+| 0x01         | 0x00    | Invoice          |
+| 0x01         | 0x01    | Proforma Invoice |
+| 0x01         | 0x02    | Credit Note      |
+| 0x01         | 0x03    | Debit Note       |
+| 0x01         | 0x04    | Advance Invoice  |
+
+
+**QR code wire format** (bytes passed to Base32Hex encoding):
+
+```mermaid
+---
+title: "QR wire format"
+config:
+  theme: neutral
+---
+packet-beta
+0-3: "BySquareType"
+4-7: "Version"
+8-11: "DocType"
+12-15: "Reserved"
+16-31: "Data Length"
+32-63: "LZMA Body"
+64-95: "(variable...)"
+```
+
+**Encoding process:**
+
+```mermaid
+---
+config:
+  theme: neutral
+  themeVariables:
+    fontFamily: monospace
+    fontSize: "12px"
+---
+
+flowchart TB
+    subgraph Header["Header Track"]
+        H_INPUT("   Header Info     ")
+        BS_HEAD["  BySquare Header  "]
+    end
+
+    subgraph Payload["Payload Track"]
+        P_INPUT("  Serialized Data  ")
+        CRC["   CRC32 Checksum  "]
+        UNCOMPRESSED["  CRC32 + Payload  "]
+        D_LEN["    Data Length    "]
+        LZMA_COMP[" LZMA Compression  "]
+        LZMA_STRIP[" Strip LZMA Header "]
+        LZMA_BODY["     LZMA Body     "]
+    end
+
+    subgraph Assemble["Assemble"]
+        COMBINED["  Combined Binary  "]
+    end
+
+    subgraph Encode["Encode"]
+        B32H["     Base32Hex     "]
+        QR["      QR Code      "]
+    end
+
+    H_INPUT --> BS_HEAD
+    P_INPUT -.-> CRC
+    CRC --> UNCOMPRESSED
+    P_INPUT --> UNCOMPRESSED
+    UNCOMPRESSED -.-> D_LEN
+    UNCOMPRESSED --> LZMA_COMP
+    LZMA_COMP --> LZMA_STRIP
+    LZMA_STRIP --> LZMA_BODY
+
+    BS_HEAD --> COMBINED
+    D_LEN --> COMBINED
+    LZMA_BODY --> COMBINED
+    COMBINED --> B32H
+    B32H --> QR
+```
 
 ## Related
 

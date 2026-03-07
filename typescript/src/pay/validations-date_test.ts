@@ -18,15 +18,13 @@ import {
 	test,
 } from "bun:test";
 
+import { ValidationError } from "../errors.js";
 import { buildPaymentOrder } from "./testdata/index.js";
 import {
 	type Payment,
 	PaymentOptions,
 } from "./types.js";
-import {
-	validateSimplePayment,
-	ValidationError,
-} from "./validations.js";
+import { validateSimplePayment } from "./validations.js";
 
 /**
  * Helper to build standing order payment for testing.

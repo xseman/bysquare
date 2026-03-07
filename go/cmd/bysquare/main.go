@@ -9,49 +9,54 @@ import (
 	"strings"
 
 	"github.com/xseman/bysquare/go/pkg/bysquare"
+	"github.com/xseman/bysquare/go/pkg/bysquare/invoice"
+	"github.com/xseman/bysquare/go/pkg/bysquare/pay"
 )
 
 // version is set by ldflags at build time
 var version = "dev"
 
 const (
-	usage = `bysquare - Slovak PAY by square QR payment standard
+	usage = `bysquare - Slovak BySquare QR standard
 
 USAGE:
-    bysquare encode [OPTIONS] <input.json>
+    bysquare pay encode [OPTIONS] <input.json>
+    bysquare pay decode <qr-string>
+    bysquare invoice encode [OPTIONS] <input.json>
+    bysquare invoice decode <qr-string>
     bysquare decode <qr-string>
     bysquare version
 
 COMMANDS:
-    encode    Encode JSON payment data to BySquare QR string
-    decode    Decode BySquare QR string to JSON payment data
-    version   Print version information
+    pay          PAY by square operations
+    invoice      Invoice by square operations
+    decode       Auto-detect and decode any BySquare QR string
+    version      Print version information
 
-ENCODE OPTIONS:
+PAY ENCODE OPTIONS:
     -D, --no-deburr           Keep diacritics (deburr enabled by default)
     -V, --no-validate         Skip validation (validation enabled by default)
     -s, --spec-version VER    Specification version: 1.0.0, 1.1.0, 1.2.0 (default: 1.2.0)
 
+INVOICE ENCODE OPTIONS:
+    -V, --no-validate         Skip validation (validation enabled by default)
+    -s, --spec-version VER    Specification version: 1.0.0 (default: 1.0.0)
+
 EXAMPLES:
-    # Encode with defaults (deburr=true, validate=true, version=1.2.0)
-    $ bysquare encode payment.json
+    # PAY: Encode with defaults
+    $ bysquare pay encode payment.json
 
-    # Encode with specific options
-    $ bysquare encode --no-deburr payment.json
-    $ bysquare encode --spec-version 1.1.0 payment.json
-    $ bysquare encode -s 1.0.0 --no-validate payment.json
+    # PAY: Encode from stdin
+    $ echo '{"payments":[...]}' | bysquare pay encode -
 
-    # Encode from stdin
-    $ echo '{"payments":[...]}' | bysquare encode -
+    # PAY: Decode QR string
+    $ bysquare pay decode "00D80..."
 
-    # Encode multiple files (including JSONL)
-    $ bysquare encode file1.json file2.jsonl
+    # Invoice: Encode
+    $ bysquare invoice encode invoice.json
 
-    # Decode QR string
+    # Auto-detect and decode any BySquare QR
     $ bysquare decode "00D80..."
-
-    # Decode from file
-    $ bysquare decode qr.txt
 
 For more information, visit: https://github.com/xseman/bysquare
 `
@@ -66,13 +71,18 @@ func main() {
 	command := os.Args[1]
 
 	switch command {
-	case "encode":
-		if err := cmdEncode(os.Args[2:]); err != nil {
+	case "pay":
+		if err := cmdPay(os.Args[2:]); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+	case "invoice":
+		if err := cmdInvoice(os.Args[2:]); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
 	case "decode":
-		if err := cmdDecode(os.Args[2:]); err != nil {
+		if err := cmdDecodeAuto(os.Args[2:]); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -87,8 +97,23 @@ func main() {
 	}
 }
 
-func cmdEncode(args []string) error {
-	fs := flag.NewFlagSet("encode", flag.ExitOnError)
+func cmdPay(args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("missing subcommand: encode or decode")
+	}
+
+	switch args[0] {
+	case "encode":
+		return cmdPayEncode(args[1:])
+	case "decode":
+		return cmdPayDecode(args[1:])
+	default:
+		return fmt.Errorf("unknown pay subcommand: %s", args[0])
+	}
+}
+
+func cmdPayEncode(args []string) error {
+	fs := flag.NewFlagSet("pay encode", flag.ExitOnError)
 
 	noDeburr := fs.Bool("no-deburr", false, "Keep diacritics")
 	fs.BoolVar(noDeburr, "D", false, "Keep diacritics (shorthand)")
@@ -108,26 +133,19 @@ func cmdEncode(args []string) error {
 		return fmt.Errorf("missing input file argument")
 	}
 
-	var ver bysquare.Version
-	switch *specVersion {
-	case "1.0.0":
-		ver = bysquare.Version100
-	case "1.1.0":
-		ver = bysquare.Version110
-	case "1.2.0":
-		ver = bysquare.Version120
-	default:
-		return fmt.Errorf("unsupported spec version: %s (use 1.0.0, 1.1.0, or 1.2.0)", *specVersion)
+	ver, err := parseVersion(*specVersion)
+	if err != nil {
+		return err
 	}
 
-	cfg := bysquare.EncodeOptions{
+	cfg := pay.EncodeOptions{
 		Deburr:   !*noDeburr,
 		Validate: !*noValidate,
 		Version:  ver,
 	}
 
 	for _, inputFile := range positionals {
-		if err := processFile(inputFile, cfg); err != nil {
+		if err := processPayFile(inputFile, cfg); err != nil {
 			return err
 		}
 	}
@@ -135,13 +153,13 @@ func cmdEncode(args []string) error {
 	return nil
 }
 
-func encodeAndPrint(data []byte, cfg bysquare.EncodeOptions) error {
-	var model bysquare.DataModel
+func encodePayAndPrint(data []byte, cfg pay.EncodeOptions) error {
+	var model pay.DataModel
 	if err := json.Unmarshal(data, &model); err != nil {
 		return fmt.Errorf("failed to parse JSON: %w", err)
 	}
 
-	qr, err := bysquare.Encode(model, cfg)
+	qr, err := pay.Encode(model, cfg)
 	if err != nil {
 		return fmt.Errorf("encoding failed: %w", err)
 	}
@@ -150,17 +168,10 @@ func encodeAndPrint(data []byte, cfg bysquare.EncodeOptions) error {
 	return nil
 }
 
-func processFile(inputFile string, cfg bysquare.EncodeOptions) error {
-	var input []byte
-	var err error
-
-	if inputFile == "-" {
-		input, err = io.ReadAll(os.Stdin)
-	} else {
-		input, err = os.ReadFile(inputFile)
-	}
+func processPayFile(inputFile string, cfg pay.EncodeOptions) error {
+	input, err := readInput(inputFile)
 	if err != nil {
-		return fmt.Errorf("failed to read input: %w", err)
+		return err
 	}
 
 	if strings.HasSuffix(inputFile, ".jsonl") {
@@ -169,50 +180,207 @@ func processFile(inputFile string, cfg bysquare.EncodeOptions) error {
 			if line == "" {
 				continue
 			}
-			if err := encodeAndPrint([]byte(line), cfg); err != nil {
+			if err := encodePayAndPrint([]byte(line), cfg); err != nil {
 				return err
 			}
 		}
 		return nil
 	}
 
-	return encodeAndPrint(input, cfg)
+	return encodePayAndPrint(input, cfg)
 }
 
-func cmdDecode(args []string) error {
-	if len(args) < 1 {
-		return fmt.Errorf("missing QR string argument")
+func cmdPayDecode(args []string) error {
+	qr, err := readQRInput(args)
+	if err != nil {
+		return err
 	}
 
-	qrInput := args[0]
-
-	var qr string
-	if qrInput == "-" {
-		input, err := io.ReadAll(os.Stdin)
-		if err != nil {
-			return fmt.Errorf("failed to read stdin: %w", err)
-		}
-		qr = strings.TrimSpace(string(input))
-	} else if fileInfo, err := os.Stat(qrInput); err == nil && !fileInfo.IsDir() {
-		content, err := os.ReadFile(qrInput)
-		if err != nil {
-			return fmt.Errorf("failed to read file: %w", err)
-		}
-		qr = strings.TrimSpace(string(content))
-	} else {
-		qr = qrInput
-	}
-
-	model, err := bysquare.Decode(qr)
+	model, err := pay.Decode(qr)
 	if err != nil {
 		return fmt.Errorf("decoding failed: %w", err)
 	}
 
-	output, err := json.MarshalIndent(model, "", "  ")
+	return printJSON(model)
+}
+
+func cmdInvoice(args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("missing subcommand: encode or decode")
+	}
+
+	switch args[0] {
+	case "encode":
+		return cmdInvoiceEncode(args[1:])
+	case "decode":
+		return cmdInvoiceDecode(args[1:])
+	default:
+		return fmt.Errorf("unknown invoice subcommand: %s", args[0])
+	}
+}
+
+func cmdInvoiceEncode(args []string) error {
+	fs := flag.NewFlagSet("invoice encode", flag.ExitOnError)
+
+	noValidate := fs.Bool("no-validate", false, "Skip validation")
+	fs.BoolVar(noValidate, "V", false, "Skip validation (shorthand)")
+
+	specVersion := fs.String("spec-version", "1.0.0", "Specification version (1.0.0)")
+	fs.StringVar(specVersion, "s", "1.0.0", "Specification version (shorthand)")
+
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+
+	positionals := fs.Args()
+	if len(positionals) < 1 {
+		return fmt.Errorf("missing input file argument")
+	}
+
+	ver, err := parseVersion(*specVersion)
+	if err != nil {
+		return err
+	}
+
+	cfg := invoice.EncodeOptions{
+		Validate: !*noValidate,
+		Version:  ver,
+	}
+
+	for _, inputFile := range positionals {
+		input, err := readInput(inputFile)
+		if err != nil {
+			return err
+		}
+
+		var model invoice.DataModel
+		if err := json.Unmarshal(input, &model); err != nil {
+			return fmt.Errorf("failed to parse JSON: %w", err)
+		}
+
+		qr, err := invoice.Encode(&model, cfg)
+		if err != nil {
+			return fmt.Errorf("encoding failed: %w", err)
+		}
+
+		fmt.Println(qr)
+	}
+
+	return nil
+}
+
+func cmdInvoiceDecode(args []string) error {
+	qr, err := readQRInput(args)
+	if err != nil {
+		return err
+	}
+
+	model, err := invoice.Decode(qr)
+	if err != nil {
+		return fmt.Errorf("decoding failed: %w", err)
+	}
+
+	return printJSON(model)
+}
+
+// cmdDecodeAuto auto-detects the BySquare type from the header and decodes.
+func cmdDecodeAuto(args []string) error {
+	qr, err := readQRInput(args)
+	if err != nil {
+		return err
+	}
+
+	rawBytes, err := bysquare.DecodeBase32Hex(qr, true)
+	if err != nil {
+		return fmt.Errorf("decoding failed: invalid base32hex: %w", err)
+	}
+
+	if len(rawBytes) < 2 {
+		return fmt.Errorf("decoding failed: input too short")
+	}
+
+	header := bysquare.ParseBysquareHeader(rawBytes[:2])
+
+	switch header.BySquareType {
+	case 0x00:
+		model, err := pay.Decode(qr)
+		if err != nil {
+			return fmt.Errorf("decoding failed: %w", err)
+		}
+		return printJSON(model)
+	case 0x01:
+		model, err := invoice.Decode(qr)
+		if err != nil {
+			return fmt.Errorf("decoding failed: %w", err)
+		}
+		return printJSON(model)
+	default:
+		return fmt.Errorf("unsupported bysquareType: %d", header.BySquareType)
+	}
+}
+
+// readInput reads file contents or stdin.
+func readInput(path string) ([]byte, error) {
+	if path == "-" {
+		data, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read stdin: %w", err)
+		}
+		return data, nil
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read input: %w", err)
+	}
+	return data, nil
+}
+
+// readQRInput extracts a QR string from args (literal, file, or stdin).
+func readQRInput(args []string) (string, error) {
+	if len(args) < 1 {
+		return "", fmt.Errorf("missing QR string argument")
+	}
+
+	qrInput := args[0]
+
+	if qrInput == "-" {
+		input, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return "", fmt.Errorf("failed to read stdin: %w", err)
+		}
+		return strings.TrimSpace(string(input)), nil
+	}
+
+	if fileInfo, err := os.Stat(qrInput); err == nil && !fileInfo.IsDir() {
+		content, err := os.ReadFile(qrInput)
+		if err != nil {
+			return "", fmt.Errorf("failed to read file: %w", err)
+		}
+		return strings.TrimSpace(string(content)), nil
+	}
+
+	return qrInput, nil
+}
+
+func parseVersion(s string) (bysquare.Version, error) {
+	switch s {
+	case "1.0.0":
+		return bysquare.Version100, nil
+	case "1.1.0":
+		return bysquare.Version110, nil
+	case "1.2.0":
+		return bysquare.Version120, nil
+	default:
+		return 0, fmt.Errorf("unsupported spec version: %s (use 1.0.0, 1.1.0, or 1.2.0)", s)
+	}
+}
+
+func printJSON(v interface{}) error {
+	output, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal JSON: %w", err)
 	}
-
 	fmt.Println(string(output))
 	return nil
 }

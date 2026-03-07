@@ -8,52 +8,62 @@ import {
 import process from "node:process";
 import { parseArgs } from "node:util";
 
-import { decode } from "./decode.js";
+import * as base32hex from "./base32hex.js";
+import { decodeHeader } from "./header.js";
+import { decode as invoiceDecode } from "./invoice/decode.js";
 import {
-	encode,
-	type EncodeOptions,
-} from "./encode.js";
+	encode as invoiceEncode,
+	type EncodeOptions as InvoiceEncodeOptions,
+} from "./invoice/encode.js";
+import { decode as payDecode } from "./pay/decode.js";
+import {
+	encode as payEncode,
+	type EncodeOptions as PayEncodeOptions,
+} from "./pay/encode.js";
 import { Version } from "./types.js";
 
-const version = "3.1.0";
+const version = "3.2.0";
 
-const usage = `bysquare - Slovak PAY by square QR payment standard
+const usage = `bysquare - Slovak BySquare QR standard
 
 USAGE:
-    bysquare encode [OPTIONS] <input.json>
+    bysquare pay encode [OPTIONS] <input.json>
+    bysquare pay decode <qr-string>
+    bysquare invoice encode [OPTIONS] <input.json>
+    bysquare invoice decode <qr-string>
     bysquare decode <qr-string>
     bysquare version
 
 COMMANDS:
-    encode    Encode JSON payment data to BySquare QR string
-    decode    Decode BySquare QR string to JSON payment data
-    version   Print version information
+    pay          PAY by square operations
+    invoice      Invoice by square operations
+    decode       Auto-detect and decode any BySquare QR string
+    version      Print version information
 
-ENCODE OPTIONS:
+PAY ENCODE OPTIONS:
     -D, --no-deburr           Keep diacritics (deburr enabled by default)
     -V, --no-validate         Skip validation (validation enabled by default)
     -s, --spec-version VER    Specification version: 1.0.0, 1.1.0, 1.2.0 (default: 1.2.0)
 
+INVOICE ENCODE OPTIONS:
+    -V, --no-validate         Skip validation (validation enabled by default)
+    -s, --spec-version VER    Specification version: 1.0.0 (default: 1.0.0)
+
 EXAMPLES:
-    # Encode with defaults (deburr=true, validate=true, version=1.2.0)
-    $ bysquare encode payment.json
+    # PAY: Encode with defaults
+    $ bysquare pay encode payment.json
 
-    # Encode with specific options
-    $ bysquare encode --no-deburr payment.json
-    $ bysquare encode --spec-version 1.1.0 payment.json
-    $ bysquare encode -s 1.0.0 --no-validate payment.json
+    # PAY: Encode from stdin
+    $ echo '{"payments":[...]}' | bysquare pay encode -
 
-    # Encode from stdin
-    $ echo '{"payments":[...]}' | bysquare encode -
+    # PAY: Decode QR string
+    $ bysquare pay decode "00D80..."
 
-    # Encode multiple files (including JSONL)
-    $ bysquare encode file1.json file2.jsonl
+    # Invoice: Encode
+    $ bysquare invoice encode invoice.json
 
-    # Decode QR string
+    # Auto-detect and decode any BySquare QR
     $ bysquare decode "00D80..."
-
-    # Decode from file
-    $ bysquare decode qr.txt
 
 For more information, visit: https://github.com/xseman/bysquare
 `;
@@ -82,9 +92,26 @@ async function readInput(path: string): Promise<string> {
 	return readFileSync(path, "utf8");
 }
 
-async function cmdEncode(args: string[]): Promise<void> {
+async function readQrInput(args: string[]): Promise<string> {
+	if (args.length === 0) {
+		console.error("Error: missing QR string argument");
+		process.exit(1);
+	}
+
+	const qrInput = args[0];
+
+	if (qrInput === "-") {
+		return (await readStdin()).trim();
+	}
+	if (existsSync(qrInput) && statSync(qrInput).isFile()) {
+		return readFileSync(qrInput, "utf8").trim();
+	}
+	return qrInput;
+}
+
+async function cmdPayEncode(args: string[]): Promise<void> {
 	const parsed = parseArgs({
-		args,
+		args: args,
 		allowPositionals: true,
 		options: {
 			"no-deburr": {
@@ -118,7 +145,7 @@ async function cmdEncode(args: string[]): Promise<void> {
 		validate: !parsed.values["no-validate"],
 		deburr: !parsed.values["no-deburr"],
 		version: Version[versionStr],
-	} satisfies EncodeOptions;
+	} satisfies PayEncodeOptions;
 
 	for (const inputFile of parsed.positionals) {
 		let input: string;
@@ -132,19 +159,19 @@ async function cmdEncode(args: string[]): Promise<void> {
 		if (inputFile.endsWith(".jsonl")) {
 			for (const line of input.split("\n")) {
 				if (!line.trim()) continue;
-				encodeAndPrint(line, encodeOpts);
+				payEncodeAndPrint(line, encodeOpts);
 			}
 			continue;
 		}
 
-		encodeAndPrint(input.trim(), encodeOpts);
+		payEncodeAndPrint(input.trim(), encodeOpts);
 	}
 }
 
-function encodeAndPrint(jsonStr: string, opts: EncodeOptions): void {
+function payEncodeAndPrint(jsonStr: string, opts: PayEncodeOptions): void {
 	try {
 		const data = JSON.parse(jsonStr);
-		const result = encode(data, opts);
+		const result = payEncode(data, opts);
 		console.log(result);
 	} catch (error) {
 		console.error("Error:", errorMessage(error));
@@ -152,27 +179,148 @@ function encodeAndPrint(jsonStr: string, opts: EncodeOptions): void {
 	}
 }
 
-async function cmdDecode(args: string[]): Promise<void> {
+async function cmdPayDecode(args: string[]): Promise<void> {
+	try {
+		const qr = await readQrInput(args);
+		const model = payDecode(qr);
+		console.log(JSON.stringify(model, null, 2));
+	} catch (error) {
+		console.error("Error:", errorMessage(error));
+		process.exit(1);
+	}
+}
+
+async function cmdPay(args: string[]): Promise<void> {
 	if (args.length === 0) {
-		console.error("Error: missing QR string argument");
+		console.error("Error: missing subcommand: encode or decode");
 		process.exit(1);
 	}
 
-	const qrInput = args[0];
+	const subcommand = args[0];
 
-	try {
-		let qr: string;
+	switch (subcommand) {
+		case "encode":
+			await cmdPayEncode(args.slice(1));
+			break;
+		case "decode":
+			await cmdPayDecode(args.slice(1));
+			break;
+		default:
+			console.error("Error: unknown pay subcommand:", subcommand);
+			process.exit(1);
+	}
+}
 
-		if (qrInput === "-") {
-			qr = await readStdin();
-		} else if (existsSync(qrInput) && statSync(qrInput).isFile()) {
-			qr = readFileSync(qrInput, "utf8");
-		} else {
-			qr = qrInput;
+async function cmdInvoiceEncode(args: string[]): Promise<void> {
+	const parsed = parseArgs({
+		args: args,
+		allowPositionals: true,
+		options: {
+			"no-validate": {
+				type: "boolean",
+				short: "V",
+			},
+			"spec-version": {
+				type: "string",
+				short: "s",
+				default: "1.0.0",
+			},
+		},
+	});
+
+	if (parsed.positionals.length === 0) {
+		console.error("Error: missing input file argument");
+		process.exit(1);
+	}
+
+	const versionStr = parsed.values["spec-version"] as keyof typeof Version;
+	if (!(versionStr in Version)) {
+		console.error("Error: unsupported spec version:", parsed.values["spec-version"]);
+		process.exit(1);
+	}
+
+	const encodeOpts = {
+		validate: !parsed.values["no-validate"],
+		version: Version[versionStr],
+	} satisfies InvoiceEncodeOptions;
+
+	for (const inputFile of parsed.positionals) {
+		let input: string;
+		try {
+			input = await readInput(inputFile);
+		} catch (error) {
+			console.error("Error:", errorMessage(error));
+			process.exit(1);
 		}
 
-		const model = decode(qr.trim());
+		try {
+			const data = JSON.parse(input.trim());
+			const result = invoiceEncode(data, encodeOpts);
+			console.log(result);
+		} catch (error) {
+			console.error("Error:", errorMessage(error));
+			process.exit(1);
+		}
+	}
+}
+
+async function cmdInvoiceDecode(args: string[]): Promise<void> {
+	try {
+		const qr = await readQrInput(args);
+		const model = invoiceDecode(qr);
 		console.log(JSON.stringify(model, null, 2));
+	} catch (error) {
+		console.error("Error:", errorMessage(error));
+		process.exit(1);
+	}
+}
+
+async function cmdInvoice(args: string[]): Promise<void> {
+	if (args.length === 0) {
+		console.error("Error: missing subcommand: encode or decode");
+		process.exit(1);
+	}
+
+	const subcommand = args[0];
+
+	switch (subcommand) {
+		case "encode":
+			await cmdInvoiceEncode(args.slice(1));
+			break;
+		case "decode":
+			await cmdInvoiceDecode(args.slice(1));
+			break;
+		default:
+			console.error("Error: unknown invoice subcommand:", subcommand);
+			process.exit(1);
+	}
+}
+
+async function cmdDecodeAuto(args: string[]): Promise<void> {
+	try {
+		const qr = await readQrInput(args);
+		const rawBytes = base32hex.decode(qr, true);
+
+		if (rawBytes.length < 2) {
+			throw new Error("input too short");
+		}
+
+		const header = decodeHeader(rawBytes.subarray(0, 2));
+
+		switch (header.bysquareType) {
+			case 0x00: {
+				const model = payDecode(qr);
+				console.log(JSON.stringify(model, null, 2));
+				break;
+			}
+			case 0x01: {
+				const model = invoiceDecode(qr);
+				console.log(JSON.stringify(model, null, 2));
+				break;
+			}
+			default:
+				throw new Error(`unsupported bysquareType: ${header.bysquareType}`);
+		}
 	} catch (error) {
 		console.error("Error:", errorMessage(error));
 		process.exit(1);
@@ -188,11 +336,14 @@ async function main(): Promise<void> {
 	const command = process.argv[2];
 
 	switch (command) {
-		case "encode":
-			await cmdEncode(process.argv.slice(3));
+		case "pay":
+			await cmdPay(process.argv.slice(3));
+			break;
+		case "invoice":
+			await cmdInvoice(process.argv.slice(3));
 			break;
 		case "decode":
-			await cmdDecode(process.argv.slice(3));
+			await cmdDecodeAuto(process.argv.slice(3));
 			break;
 		case "version":
 		case "-v":

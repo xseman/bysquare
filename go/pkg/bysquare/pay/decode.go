@@ -1,11 +1,15 @@
-package bysquare
+package pay
 
 import (
 	"encoding/binary"
 	"fmt"
-	"strconv"
 	"strings"
+
+	"github.com/xseman/bysquare/go/pkg/bysquare"
 )
+
+// ErrMissingBankAccount indicates no bank accounts provided.
+var ErrMissingBankAccount = fmt.Errorf("at least one bank account required")
 
 // Decode parses a BySquare QR string back to DataModel.
 //
@@ -29,8 +33,7 @@ import (
 //
 // @see 3.16.
 func Decode(qr string) (DataModel, error) {
-	// Decode Base32Hex
-	bytes, err := decodeBase32Hex(qr, true)
+	bytes, err := bysquare.DecodeBase32Hex(qr, true)
 	if err != nil {
 		return DataModel{}, fmt.Errorf("base32hex decode failed: %w", err)
 	}
@@ -39,24 +42,19 @@ func Decode(qr string) (DataModel, error) {
 		return DataModel{}, fmt.Errorf("invalid data: too short")
 	}
 
-	// Parse header (first 2 bytes)
 	headerBytes := bytes[0:2]
-	header := parseBysquareHeader(headerBytes)
+	header := bysquare.ParseBysquareHeader(headerBytes)
 
-	// Validate version
-	if header.Version > uint8(Version120) {
+	if header.Version > uint8(bysquare.Version120) {
 		return DataModel{}, fmt.Errorf("unsupported version: %d", header.Version)
 	}
 
-	// Parse payload length (bytes 2-3)
 	payloadLengthBytes := bytes[2:4]
 	payloadLength := binary.LittleEndian.Uint16(payloadLengthBytes)
 
-	// Extract compressed data (skip 4-byte header)
 	compressed := bytes[4:]
 
-	// Decompress LZMA
-	decompressed, err := decompressLZMA(compressed, int(payloadLength))
+	decompressed, err := bysquare.DecompressLZMA(compressed, int(payloadLength))
 	if err != nil {
 		return DataModel{}, fmt.Errorf("LZMA decompression failed: %w", err)
 	}
@@ -65,59 +63,23 @@ func Decode(qr string) (DataModel, error) {
 		return DataModel{}, fmt.Errorf("decompressed data too short")
 	}
 
-	// Extract and verify CRC32 checksum
 	checksumBytes := decompressed[0:4]
 	expectedChecksum := binary.LittleEndian.Uint32(checksumBytes)
 
-	// Extract payload
 	payload := decompressed[4:]
 	payloadStr := string(payload)
 
-	// Verify checksum
-	actualChecksum := crc32Checksum(payloadStr)
+	actualChecksum := bysquare.Crc32Checksum(payloadStr)
 	if actualChecksum != expectedChecksum {
 		return DataModel{}, fmt.Errorf("CRC32 checksum mismatch")
 	}
 
-	// Deserialize tab-separated data
 	model, err := deserialize(payloadStr)
 	if err != nil {
 		return DataModel{}, fmt.Errorf("deserialization failed: %w", err)
 	}
 
 	return model, nil
-}
-
-// BysquareHeader represents parsed header fields.
-type BysquareHeader struct {
-	BySquareType uint8
-	Version      uint8
-	DocumentType uint8
-	Reserved     uint8
-}
-
-// parseBysquareHeader extracts header fields from 2 bytes.
-//
-//	Byte 0                  Byte 1
-//	+----------+----------+----------+----------+
-//	|   4 bit  |   4 bit  |   4 bit  |   4 bit  |
-//	+----------+----------+----------+----------+
-//	| BySqType | Version  | DocType  | Reserved |
-//	| (0-15)   | (0-15)   | (0-15)   | (0-15)   |
-//	+----------+----------+----------+----------+
-//
-// @see 3.5.
-func parseBysquareHeader(header []byte) BysquareHeader {
-	if len(header) < 2 {
-		panic("header must be 2 bytes")
-	}
-
-	return BysquareHeader{
-		BySquareType: (header[0] >> 4) & 0x0F,
-		Version:      header[0] & 0x0F,
-		DocumentType: (header[1] >> 4) & 0x0F,
-		Reserved:     header[1] & 0x0F,
-	}
 }
 
 // deserialize parses tab-separated format to DataModel.
@@ -129,11 +91,10 @@ func deserialize(data string) (DataModel, error) {
 		return DataModel{}, fmt.Errorf("insufficient data fields")
 	}
 
-	// Base fields
 	invoiceID := parts[idx]
 	idx++
 
-	paymentsCount, err := parseNumber(parts[idx])
+	paymentsCount, err := bysquare.ParseNumber(parts[idx])
 	if err != nil {
 		return DataModel{}, fmt.Errorf("invalid payments count: %w", err)
 	}
@@ -144,15 +105,14 @@ func deserialize(data string) (DataModel, error) {
 		Payments:  make([]SimplePayment, 0, paymentsCount),
 	}
 
-	// Parse payments
 	for i := 0; i < paymentsCount; i++ {
 		if idx+9 > len(parts) {
 			return DataModel{}, fmt.Errorf("insufficient payment fields")
 		}
 
-		paymentType, _ := parseNumber(parts[idx])
+		paymentType, _ := bysquare.ParseNumber(parts[idx])
 		idx++
-		amount, _ := parseFloat(parts[idx])
+		amount, _ := bysquare.ParseFloat(parts[idx])
 		idx++
 		currencyCode := parts[idx]
 		idx++
@@ -182,8 +142,7 @@ func deserialize(data string) (DataModel, error) {
 			BankAccounts:                    []BankAccount{},
 		}
 
-		// Parse bank accounts
-		accountsCount, _ := parseNumber(parts[idx])
+		accountsCount, _ := bysquare.ParseNumber(parts[idx])
 		idx++
 
 		for j := 0; j < accountsCount; j++ {
@@ -206,9 +165,7 @@ func deserialize(data string) (DataModel, error) {
 			})
 		}
 
-		// Standing order extension — fields must be consumed whenever
-		// the flag is "1" regardless of payment type to keep the index
-		// aligned for subsequent fields.
+		// Standing order extension
 		if idx >= len(parts) {
 			return DataModel{}, fmt.Errorf("missing standing order extension field")
 		}
@@ -220,9 +177,9 @@ func deserialize(data string) (DataModel, error) {
 				return DataModel{}, fmt.Errorf("insufficient standing order fields")
 			}
 
-			day, _ := parseNumber(parts[idx])
+			day, _ := bysquare.ParseNumber(parts[idx])
 			idx++
-			month, _ := parseNumber(parts[idx])
+			month, _ := bysquare.ParseNumber(parts[idx])
 			idx++
 			periodicity := parts[idx]
 			idx++
@@ -239,9 +196,7 @@ func deserialize(data string) (DataModel, error) {
 			}
 		}
 
-		// Direct debit extension — fields must be consumed whenever
-		// the flag is "1" regardless of payment type to keep the index
-		// aligned for subsequent fields.
+		// Direct debit extension
 		if idx >= len(parts) {
 			return DataModel{}, fmt.Errorf("missing direct debit extension field")
 		}
@@ -253,9 +208,9 @@ func deserialize(data string) (DataModel, error) {
 				return DataModel{}, fmt.Errorf("insufficient direct debit fields")
 			}
 
-			scheme, _ := parseNumber(parts[idx])
+			scheme, _ := bysquare.ParseNumber(parts[idx])
 			idx++
-			ddType, _ := parseNumber(parts[idx])
+			ddType, _ := bysquare.ParseNumber(parts[idx])
 			idx++
 			varSymbol := parts[idx]
 			idx++
@@ -269,7 +224,7 @@ func deserialize(data string) (DataModel, error) {
 			idx++
 			contractID := parts[idx]
 			idx++
-			maxAmount, _ := parseFloat(parts[idx])
+			maxAmount, _ := bysquare.ParseFloat(parts[idx])
 			idx++
 			validTillDate := parts[idx]
 			idx++
@@ -296,8 +251,6 @@ func deserialize(data string) (DataModel, error) {
 	// Parse beneficiary blocks (one per payment)
 	for i := 0; i < paymentsCount; i++ {
 		if idx+3 > len(parts) {
-			// Beneficiary fields might be missing in older versions
-			// Create empty beneficiary for v1.2.0 compliance
 			model.Payments[i].Beneficiary = &Beneficiary{
 				Name:   "",
 				Street: "",
@@ -321,22 +274,4 @@ func deserialize(data string) (DataModel, error) {
 	}
 
 	return model, nil
-}
-
-// parseNumber parses a string to int, returning 0 if empty or invalid.
-func parseNumber(s string) (int, error) {
-	if s == "" {
-		return 0, nil
-	}
-	return strconv.Atoi(s)
-}
-
-// parseFloat parses a string to float64, returning 0 if empty or invalid.
-func parseFloat(s string) (float64, error) {
-	if s == "" {
-		return 0, nil
-	}
-	var f float64
-	_, err := fmt.Sscanf(s, "%f", &f)
-	return f, err
 }

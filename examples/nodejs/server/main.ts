@@ -4,7 +4,7 @@ import {
 	encode,
 	PaymentOptions,
 	Periodicity,
-} from "bysquare";
+} from "bysquare/pay";
 
 const data = {
 	invoiceId: "random-id",

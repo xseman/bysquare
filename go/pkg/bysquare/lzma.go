@@ -8,7 +8,7 @@ import (
 	"github.com/ulikunitz/xz/lzma"
 )
 
-// compressLZMA compresses data using LZMA1 with custom settings.
+// CompressLZMA compresses data using LZMA1 with custom settings.
 //
 // LZMA stream output (13-byte header + compressed body):
 //
@@ -24,7 +24,7 @@ import (
 // BySquare stores only the body (skips the 13-byte header)
 //
 // @see 3.11.
-func compressLZMA(data []byte) ([]byte, error) {
+func CompressLZMA(data []byte) ([]byte, error) {
 	var buf bytes.Buffer
 
 	// Create LZMA writer with custom properties
@@ -55,7 +55,7 @@ func compressLZMA(data []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// decompressLZMA decompresses LZMA data.
+// DecompressLZMA decompresses LZMA data.
 //
 // The input is the LZMA body without the 13-byte header. The header must be
 // reconstructed before the LZMA library can decompress:
@@ -70,7 +70,7 @@ func compressLZMA(data []byte) ([]byte, error) {
 // Properties byte: (pb * 5 + lp) * 9 + lc = (2 * 5 + 0) * 9 + 3 = 0x5D
 //
 // @see 3.11.
-func decompressLZMA(compressed []byte, uncompressedSize int) ([]byte, error) {
+func DecompressLZMA(compressed []byte, uncompressedSize int) ([]byte, error) {
 	header := make([]byte, 13)
 
 	// Properties: 0x5D (lc=3, lp=0, pb=2)

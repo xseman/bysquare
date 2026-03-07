@@ -16,7 +16,10 @@
 
 ## Features
 
-- CLI tooling
+- PAY by square encoding and decoding
+- Invoice by square encoding and decoding
+- Auto-detection of BySquare type from QR data
+- CLI tooling with pay and invoice subcommands
 - Compatible with Slovak banking apps
 - C-compatible FFI for Java, PHP, Python and other languages
 
@@ -102,9 +105,13 @@ Invoke-WebRequest -Uri $url -OutFile "libbysquare.dll"
 
 ## Usage
 
-See [`pkg/bysquare/types.go`](pkg/bysquare/types.go) for complete type definitions.
+See [`pkg/bysquare/pay/types.go`](pkg/bysquare/pay/types.go) and
+[`pkg/bysquare/invoice/types.go`](pkg/bysquare/invoice/types.go) for complete
+type definitions.
 
 ### Library
+
+#### PAY by square
 
 ```go
 package main
@@ -113,20 +120,20 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/xseman/bysquare/go/pkg/bysquare"
+	"github.com/xseman/bysquare/go/pkg/bysquare/pay"
 )
 
 func main() {
 	// Create payment data
-	payment := bysquare.DataModel{
-		Payments: []bysquare.SimplePayment{
+	payment := pay.DataModel{
+		Payments: []pay.SimplePayment{
 			{
-				Type:           bysquare.PaymentTypePaymentOrder,
+				Type:           pay.PaymentTypePaymentOrder,
 				Amount:         123.45,
-				CurrencyCode:   bysquare.CurrencyEUR,
+				CurrencyCode:   pay.CurrencyEUR,
 				VariableSymbol: "987654",
-				Beneficiary: &bysquare.Beneficiary{Name: "John Doe"},
-				BankAccounts: []bysquare.BankAccount{
+				Beneficiary:    &pay.Beneficiary{Name: "John Doe"},
+				BankAccounts: []pay.BankAccount{
 					{IBAN: "SK9611000000002918599669"},
 				},
 			},
@@ -134,14 +141,14 @@ func main() {
 	}
 
 	// Encode to QR string
-	qr, err := bysquare.Encode(payment)
+	qr, err := pay.Encode(payment)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("QR String: %s\n", qr)
 
 	// Decode QR string
-	decoded, err := bysquare.Decode(qr)
+	decoded, err := pay.Decode(qr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -149,32 +156,102 @@ func main() {
 }
 ```
 
+#### Invoice by square
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/xseman/bysquare/go/pkg/bysquare/invoice"
+)
+
+func main() {
+	numLines := 5
+	model := invoice.DataModel{
+		DocumentType:      invoice.InvoiceDocumentTypeInvoice,
+		InvoiceID:         "INV-2025-001",
+		IssueDate:         "20250101",
+		LocalCurrencyCode: "EUR",
+		SupplierParty: invoice.SupplierParty{
+			Party: invoice.Party{PartyName: "Supplier s.r.o."},
+			PostalAddress: invoice.PostalAddress{
+				StreetName: "Main Street 1",
+				CityName:   "Bratislava",
+				PostalZone: "81101",
+				Country:    "SVK",
+			},
+		},
+		CustomerParty: invoice.CustomerParty{
+			Party: invoice.Party{PartyName: "Customer a.s."},
+		},
+		NumberOfInvoiceLines: &numLines,
+		TaxCategorySummaries: []invoice.TaxCategorySummary{
+			{
+				ClassifiedTaxCategory: 0.2,
+				TaxExclusiveAmount:    1000,
+				TaxAmount:             200,
+			},
+		},
+		MonetarySummary: invoice.MonetarySummary{},
+	}
+
+	qr, err := invoice.Encode(&model)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("QR String: %s\n", qr)
+}
+```
+
 ### CLI
 
-#### Encode
+#### PAY Encode
 
 Encode JSON or JSONL data from files and print the corresponding QR code.
 
 ```bash
-bysquare encode payment.json
-bysquare encode file1.json file2.json...
-bysquare encode file.jsonl
+bysquare pay encode payment.json
+bysquare pay encode file1.json file2.json...
+bysquare pay encode file.jsonl
 ```
 
 Encode from stdin:
 
 ```bash
-echo '{"payments":[{"type":1,"amount":123.45,"currencyCode":"EUR","bankAccounts":[{"iban":"SK9611000000002918599669"}],"beneficiary":{"name":"John Doe"}}]}' | bysquare encode -
+echo '{"payments":[{"type":1,"amount":123.45,"currencyCode":"EUR","bankAccounts":[{"iban":"SK9611000000002918599669"}],"beneficiary":{"name":"John Doe"}}]}' | bysquare pay encode -
 ```
 
-#### Decode
+#### PAY Decode
 
-Decode the specified QR code string and print the corresponding JSON data. The
-qrstring argument should be a valid QR code string.
+Decode the specified QR code string and print the corresponding JSON data.
+
+```bash
+bysquare pay decode "00D80..."
+bysquare pay decode qr.txt
+```
+
+#### Invoice Encode
+
+```bash
+bysquare invoice encode invoice.json
+```
+
+#### Invoice Decode
+
+```bash
+bysquare invoice decode "10D80..."
+```
+
+#### Auto-detect Decode
+
+Automatically detects the BySquare type (PAY or Invoice) from the header and
+decodes accordingly.
 
 ```bash
 bysquare decode "00D80..."
-bysquare decode qr.txt
 ```
 
 ### FFI Usage
@@ -182,11 +259,16 @@ bysquare decode qr.txt
 **C Function Signatures:**
 
 ```c
-// Encode payment data (JSON) to QR string
-char* bysquare_encode(char* jsonData);
+// PAY by square
+char* bysquare_pay_encode(char* jsonData);
+char* bysquare_pay_decode(char* qrString);
 
-// Decode QR string to payment data (JSON)
-char* bysquare_decode(char* qrString);
+// Invoice by square
+char* bysquare_invoice_encode(char* jsonData);
+char* bysquare_invoice_decode(char* qrString);
+
+// Auto-detect type from QR header (returns 0=pay, 1=invoice, -1=error)
+int bysquare_detect_type(char* qrString);
 
 // Free memory allocated by library
 void bysquare_free(char* ptr);
@@ -200,7 +282,7 @@ char* bysquare_version();
 Always call `bysquare_free()` on returned strings to prevent memory leaks:
 
 ```python
-result = lib.bysquare_encode(data)
+result = lib.bysquare_pay_encode(data)
 # Use result...
 lib.bysquare_free(result)  # Important!
 ```

@@ -44,7 +44,7 @@ cd nodejs/server && npm install && npm start
 **CLI:**
 
 ```bash
-npx bysquare --encode cli/nodejs/example.json
+npx bysquare pay encode cli/example.json
 ```
 
 **FFI:** Build the library first:

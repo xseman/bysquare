@@ -75,12 +75,12 @@ func isCombiningMark(r rune) bool {
 		(r >= '\u20d0' && r <= '\u20f0')
 }
 
-// deburr removes diacritics from a string.
+// Deburr removes diacritics from a string.
 //
 // Two-step process matching the TypeScript implementation:
 // 1. Replace precomposed Latin letters via lookup map
 // 2. Strip combining diacritical marks
-func deburr(s string) string {
+func Deburr(s string) string {
 	var result strings.Builder
 	result.Grow(len(s))
 
@@ -94,33 +94,4 @@ func deburr(s string) string {
 	}
 
 	return result.String()
-}
-
-// removeDiacritics removes diacritics from text fields in DataModel.
-//
-// Only specific fields are deburred to match TypeScript implementation:
-// - paymentNote
-// - beneficiary.name
-// - beneficiary.street
-// - beneficiary.city
-func removeDiacritics(model *DataModel) {
-	for i := range model.Payments {
-		payment := &model.Payments[i]
-
-		if payment.PaymentNote != "" {
-			payment.PaymentNote = deburr(payment.PaymentNote)
-		}
-
-		if payment.Beneficiary != nil {
-			if payment.Beneficiary.Name != "" {
-				payment.Beneficiary.Name = deburr(payment.Beneficiary.Name)
-			}
-			if payment.Beneficiary.Street != "" {
-				payment.Beneficiary.Street = deburr(payment.Beneficiary.Street)
-			}
-			if payment.Beneficiary.City != "" {
-				payment.Beneficiary.City = deburr(payment.Beneficiary.City)
-			}
-		}
-	}
 }

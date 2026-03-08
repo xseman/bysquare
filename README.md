@@ -32,9 +32,9 @@ Pay BySquare
 
 Invoice BySquare
 
-| Specification | TypeScript | Go  |
-| ------------- | ---------- | --- |
-| -             | v4.0.0+    | -   |
+| Specification | TypeScript | Go      |
+| ------------- | ---------- | ------- |
+| none          | v4.0.0+    | v0.4.0+ |
 
 ## Implementations
 

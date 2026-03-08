@@ -469,14 +469,6 @@ Decode any BySquare QR string by auto-detecting the type from the header.
 $ bysquare decode <qrstring>
 ```
 
-## How it works
-
-### Data Flow
-
-### Encoding/Decoding Architecture
-
-<image src="./docs/logic.excalidraw.svg" alt="encode" width="500px">
-
 ## Validation
 
 This library uses **permissive validation** to ensure maximum compatibility with
@@ -518,11 +510,3 @@ by this library):
 | `creditorId`                      | 35         | -             |
 | `contractId`                      | 35         | -             |
 | `amount`                          | 15         | `>= 0`        |
-
-## Related
-
-- <https://bysquare.com/>
-- <https://devel.cz/otazka/qr-kod-pay-by-square>
-- <https://github.com/matusf/pay-by-square>
-- <https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf>
-- <https://www.vutbr.cz/studenti/zav-prace/detail/78439>

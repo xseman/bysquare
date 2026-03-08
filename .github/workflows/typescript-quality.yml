@@ -32,6 +32,10 @@ permissions:
 jobs:
     test:
         runs-on: ubuntu-latest
+        concurrency:
+            group: coverage-comment-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.ref }}
+            cancel-in-progress: false
+
         steps:
             - uses: actions/checkout@v6
             - uses: oven-sh/setup-bun@v2
@@ -52,10 +56,10 @@ jobs:
 
             - name: Coverage report
               if: (github.event_name == 'pull_request' && github.actor != 'release-please[bot]') || github.event_name == 'workflow_dispatch'
-              uses: xseman/coverage@v0.3.0
+              uses: xseman/coverage@v0.4.0
               with:
                   pull-request-number: ${{ github.event.inputs.pr_number }}
-                  update-comment-marker: "<!-- coverage-reporter-ts -->"
+                  update-comment-marker: "<!-- coverage-reporter-bysquare -->"
                   coverage-artifact-paths: |
                       bun:typescript/coverage/lcov.info
 

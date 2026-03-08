@@ -27,6 +27,9 @@ jobs:
     test:
         name: Test
         runs-on: ubuntu-latest
+        concurrency:
+            group: coverage-comment-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.ref }}
+            cancel-in-progress: false
 
         steps:
             - uses: actions/checkout@v6
@@ -42,10 +45,10 @@ jobs:
 
             - name: Coverage report
               if: (github.event_name == 'pull_request' && github.actor != 'release-please[bot]') || github.event_name == 'workflow_dispatch'
-              uses: xseman/coverage@v0.3.0
+              uses: xseman/coverage@v0.4.0
               with:
                   pull-request-number: ${{ github.event.inputs.pr_number }}
-                  update-comment-marker: "<!-- coverage-reporter-go -->"
+                  update-comment-marker: "<!-- coverage-reporter-bysquare -->"
                   coverage-artifact-paths: |
                       go:go/coverage.out
 

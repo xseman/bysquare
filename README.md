@@ -23,14 +23,14 @@ individuals and businesses to create QR codes for their invoices.
 
 ## Specification Versions
 
-Pay BySquare
+**Pay BySquare**
 
 | Specification | TypeScript      | Go      |
 | ------------- | --------------- | ------- |
 | v1.1          | v1.0.0 – v3.0.0 | v0.1.0  |
 | v1.2          | v3.1.0+         | v0.2.0+ |
 
-Invoice BySquare
+**Invoice BySquare**
 
 | Specification | TypeScript | Go      |
 | ------------- | ---------- | ------- |

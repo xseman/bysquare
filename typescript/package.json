@@ -18,6 +18,7 @@
 		"url": "git+https://github.com/xseman/bysquare.git"
 	},
 	"scripts": {
+		"prebuild": "tsc --build --clean",
 		"build": "tsc --build",
 		"fmt": "dprint fmt",
 		"fmt:check": "dprint check",
@@ -27,15 +28,16 @@
 	},
 	"dependencies": {
 		"lzma1": "0.2.0",
-		"validator": "^13.15.26"
+		"validator": "^13.15.35"
 	},
 	"devDependencies": {
-		"@types/bun": "latest",
-		"@types/node": "latest",
+		"@types/bun": "^1.3.11",
+		"@types/node": "^25.5.2",
 		"@types/validator": "^13.15.10",
-		"dprint": "~0.52.0",
-		"typescript": "~5.9.3"
+		"dprint": "~0.53.2",
+		"typescript": "~6.0.2"
 	},
+	"sideEffects": false,
 	"bin": "./lib/cli.js",
 	"exports": {
 		"./package.json": "./package.json",
@@ -63,7 +65,7 @@
 		"lib/**/*.d.ts",
 		"!lib/**/*test*",
 		"src/**/*.ts",
-		"!src/**/*.test.ts",
+		"!src/**/*_test.ts",
 		"!src/**/testdata"
 	]
 }

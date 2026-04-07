@@ -59,22 +59,24 @@ jobs:
             id-token: write
         steps:
             - uses: actions/checkout@v6
+            - uses: oven-sh/setup-bun@v2
 
             - uses: actions/setup-node@v6
               with:
-                  cache: npm
-                  cache-dependency-path: typescript/package-lock.json
                   node-version: 24
-                  registry-url: "https://registry.npmjs.org"
 
-            - name: Build and publish
+            - name: Install and build
+              working-directory: typescript
+              run: |
+                  bun install --frozen-lockfile
+                  bun run build
+                  ls -lah ./lib
+
+            - name: Publish to npm
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
               working-directory: typescript
-              run: |
-                  npm install
-                  node --run build
-                  npm publish --provenance --access public
+              run: npm publish --provenance --access public
 
     go-build:
         name: Build Go Artifacts

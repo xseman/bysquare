@@ -1,20 +1,16 @@
 {
-	"typescript.tsdk": "node_modules/typescript/lib",
-	"typescript.preferences.preferTypeOnlyAutoImports": true,
-
+	"js/ts.tsdk.path": "node_modules/typescript/lib",
+	"js/ts.preferences.preferTypeOnlyAutoImports": true,
 	"workbench.editorAssociations": {
 		"*.svg": "editor.excalidraw"
 	},
-
 	"editor.codeActionsOnSave": {
 		"source.organizeImports": "explicit"
 	},
-
 	"files.associations": {
 		"tsconfig.json": "jsonc",
 		"dprint.json": "jsonc"
 	},
-
 	"[typescript][javascript][markdown][json][yaml][yml][github-actions-workflow][html]": {
 		"editor.defaultFormatter": "dprint.dprint",
 		"editor.formatOnSave": true

@@ -38,7 +38,17 @@ $ npm install bysquare
 
 ```html
 <script type="module">
-	import { encode, decode } from "https://esm.sh/bysquare@4/pay";
+// payments
+import {
+	decode,
+	encode,
+} from "https://esm.sh/bysquare@4/pay";
+
+// invoices
+import {
+	decode,
+	encode,
+} from "https://esm.sh/bysquare@4/invoice";
 </script>
 ```
 
@@ -63,27 +73,34 @@ page:
 		<title>Payment QR Code</title>
 	</head>
 	<body>
-		<div id="qrcode" style="width: 200px"></div>
+		<div
+			id="qrcode"
+			style="width: 200px"
+		/>
 
 		<script type="module">
-			import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
-			import { encode, PaymentOptions, CurrencyCode } from "https://esm.sh/bysquare@4/pay";
+		import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
+		import {
+			CurrencyCode,
+			encode,
+			PaymentOptions,
+		} from "https://esm.sh/bysquare@4/pay";
 
-			const qrstring = encode({
-				payments: [
-					{
-						type: PaymentOptions.PaymentOrder,
-						amount: 123.45,
-						variableSymbol: "987654",
-						currencyCode: CurrencyCode.EUR,
-						beneficiary: { name: "John Doe" },
-						bankAccounts: [{ iban: "SK9611000000002918599669" }],
-					},
-				],
-			});
+		const qrstring = encode({
+			payments: [
+				{
+					type: PaymentOptions.PaymentOrder,
+					amount: 123.45,
+					variableSymbol: "987654",
+					currencyCode: CurrencyCode.EUR,
+					beneficiary: { name: "John Doe" },
+					bankAccounts: [{ iban: "SK9611000000002918599669" }],
+				},
+			],
+		});
 
-			const qrElement = document.getElementById("qrcode");
-			qrElement.appendChild(QRCode.generateSVG(qrstring));
+		const qrElement = document.getElementById("qrcode");
+		qrElement.appendChild(QRCode.generateSVG(qrstring));
 		</script>
 	</body>
 </html>
@@ -285,40 +302,46 @@ page:
 		<title>Invoice QR Code</title>
 	</head>
 	<body>
-		<div id="qrcode" style="width: 200px"></div>
+		<div
+			id="qrcode"
+			style="width: 200px"
+		/>
 
 		<script type="module">
-			import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
-			import { encode, InvoiceDocumentType } from "https://esm.sh/bysquare@4/invoice";
+		import { QRCode } from "https://esm.sh/@lostinbrittany/qr-esm@latest";
+		import {
+			encode,
+			InvoiceDocumentType,
+		} from "https://esm.sh/bysquare@4/invoice";
 
-			const qrstring = encode({
-				documentType: InvoiceDocumentType.Invoice,
-				invoiceId: "FV2024001",
-				issueDate: "20240115",
-				localCurrencyCode: "EUR",
-				supplierParty: {
-					partyName: "Supplier s.r.o.",
-					postalAddress: {
-						streetName: "Hlavna",
-						cityName: "Bratislava",
-						postalZone: "81101",
-						country: "SVK",
-					},
+		const qrstring = encode({
+			documentType: InvoiceDocumentType.Invoice,
+			invoiceId: "FV2024001",
+			issueDate: "20240115",
+			localCurrencyCode: "EUR",
+			supplierParty: {
+				partyName: "Supplier s.r.o.",
+				postalAddress: {
+					streetName: "Hlavna",
+					cityName: "Bratislava",
+					postalZone: "81101",
+					country: "SVK",
 				},
-				customerParty: {
-					partyName: "Customer a.s.",
-				},
-				numberOfInvoiceLines: 1,
-				taxCategorySummaries: [{
-					classifiedTaxCategory: 0.2,
-					taxExclusiveAmount: 100,
-					taxAmount: 20,
-				}],
-				monetarySummary: {},
-			});
+			},
+			customerParty: {
+				partyName: "Customer a.s.",
+			},
+			numberOfInvoiceLines: 1,
+			taxCategorySummaries: [{
+				classifiedTaxCategory: 0.2,
+				taxExclusiveAmount: 100,
+				taxAmount: 20,
+			}],
+			monetarySummary: {},
+		});
 
-			const qrElement = document.getElementById("qrcode");
-			qrElement.appendChild(QRCode.generateSVG(qrstring));
+		const qrElement = document.getElementById("qrcode");
+		qrElement.appendChild(QRCode.generateSVG(qrstring));
 		</script>
 	</body>
 </html>

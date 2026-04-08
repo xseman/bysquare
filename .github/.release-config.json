@@ -27,23 +27,49 @@
 		}
 	},
 	"changelog-sections": [
-		{ "type": "feat", "section": "Features" },
-		{ "type": "fix", "section": "Bug Fixes" },
-		{ "type": "perf", "section": "Performance Improvements" },
-		{ "type": "type", "section": "Types" },
-		{ "type": "deps", "section": "Dependency Updates" },
-		{ "type": "docs", "section": "Documentation" },
-		{ "type": "ops", "section": "Operations" },
-		{ "type": "build", "section": "Build System" },
-		{ "type": "ci", "section": "Maintenance" },
-		{ "type": "qol", "section": "Quality of life" },
-		{ "type": "chore", "section": "Maintenance" },
-		{ "type": "config", "section": "Maintenance" },
-		{ "type": "refactor", "section": "Maintenance" },
-		{ "type": "revert", "section": "Reverts" },
-		{ "type": "security", "section": "Security" },
-		{ "type": "test", "section": "Testing" },
-		{ "type": "style", "section": "Code Style", "hidden": true },
-		{ "type": "examples", "section": "Examples", "hidden": true }
+		{
+			"type": "feat",
+			"section": "Features"
+		},
+		{
+			"type": "fix",
+			"section": "Bug Fixes"
+		},
+		{
+			"type": "perf",
+			"section": "Performance Improvements"
+		},
+		{
+			"type": "deps",
+			"section": "Dependency Updates"
+		},
+		{
+			"type": "docs",
+			"section": "Documentation"
+		},
+		{
+			"type": "build",
+			"section": "Build System"
+		},
+		{
+			"type": "ci",
+			"section": "Maintenance"
+		},
+		{
+			"type": "chore",
+			"section": "Maintenance"
+		},
+		{
+			"type": "refactor",
+			"section": "Maintenance"
+		},
+		{
+			"type": "security",
+			"section": "Security"
+		},
+		{
+			"type": "test",
+			"section": "Testing"
+		}
 	]
 }

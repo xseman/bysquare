@@ -136,7 +136,6 @@ packet-beta
 | 0x01         | 0x03    | Debit Note       |
 | 0x01         | 0x04    | Advance Invoice  |
 
-
 **QR code wire format** (bytes passed to Base32Hex encoding):
 
 ```mermaid

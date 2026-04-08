@@ -1,11 +1,11 @@
 {
 	"js/ts.tsdk.path": "node_modules/typescript/lib",
 	"js/ts.preferences.preferTypeOnlyAutoImports": true,
-	"workbench.editorAssociations": {
-		"*.svg": "editor.excalidraw"
-	},
 	"editor.codeActionsOnSave": {
-		"source.organizeImports": "explicit"
+		"source.fixAll.ts": "always",
+		"source.sortImports": "always",
+		"source.organizeImports": "explicit",
+		"source.removeUnusedImports": "always"
 	},
 	"files.associations": {
 		"tsconfig.json": "jsonc",

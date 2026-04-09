@@ -74,7 +74,7 @@ flowchart LR
 
     subgraph FFI["Universal via C FFI"]
         GO --> CFFI[libbysquare.so/dll]
-        CFFI --> ANY[Python, PHP, Java, Swift, etc.]
+        CFFI --> ANY[Java, Python, PHP, Swift, Dart...]
     end
 
     style TS            fill:#A5D8FF, stroke:#1976D2, stroke-width:1.5px
@@ -213,3 +213,4 @@ flowchart TB
 - <https://devel.cz/otazka/qr-kod-pay-by-square>
 - <https://github.com/matusf/pay-by-square>
 - <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
+- <https://github.com/mattbosak/bysquare_dart>

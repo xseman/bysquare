@@ -38,7 +38,7 @@ DynamicLibrary _loadLibrary() {
         return DynamicLibrary.open('$libDir/libbysquare.dylib');
     }
     if (Platform.isWindows) {
-        return DynamicLibrary.open('$libDir/bysquare.dll');
+        return DynamicLibrary.open('$libDir/libbysquare.dll');
     }
     throw UnsupportedError('Unsupported platform: ${Platform.operatingSystem}');
 }

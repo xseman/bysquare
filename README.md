@@ -74,7 +74,7 @@ flowchart LR
 
     subgraph FFI["Universal via C FFI"]
         GO --> CFFI[libbysquare.so/dll]
-        CFFI --> ANY[Java, Python, PHP, Swift, Dart...]
+        CFFI --> ANY[Java, Python, PHP, C#, Swift, Dart]
     end
 
     style TS            fill:#A5D8FF, stroke:#1976D2, stroke-width:1.5px
@@ -97,6 +97,7 @@ The Go implementation provides a C-compatible Foreign Function Interface (FFI), 
 - **[PHP](examples/ffi/php/)** - Using FFI extension
 - **[Python](examples/ffi/python/)** - Using `ctypes`
 - **[Swift](examples/ffi/swift/)** - Using Swift's C interoperability
+- **[Dart](examples/ffi/dart/)** - Using `dart:ffi`
 
 See [FFI examples](examples/ffi/) for setup and usage instructions.
 

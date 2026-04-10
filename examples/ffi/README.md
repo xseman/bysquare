@@ -17,6 +17,7 @@ from any language supporting C FFI.
 | [PHP](php/)       | Built-in FFI              | PHP 7.4+ with FFI |
 | [Python](python/) | ctypes                    | Python 3.6+       |
 | [Swift](swift/)   | C interoperability        | Swift 5+          |
+| [Dart](dart/)     | dart:ffi                  | Dart SDK 3.7.0+   |
 
 ## Architecture
 

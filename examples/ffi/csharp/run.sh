@@ -4,9 +4,15 @@ set -e
 
 cd "$(dirname "${0}")" || exit 1
 
-# Check if library exists in go/bin/
-if [ ! -f "../../../go/bin/libbysquare.so" ]; then
-    echo "Error: libbysquare.so not found in go/bin."
+# Check if library exists in go/bin/ (platform-specific name)
+case "$(uname -s)" in
+    Darwin) LIB_NAME="libbysquare.dylib" ;;
+    MINGW*|CYGWIN*|MSYS*) LIB_NAME="libbysquare.dll" ;;
+    *) LIB_NAME="libbysquare.so" ;;
+esac
+
+if [ ! -f "../../../go/bin/${LIB_NAME}" ]; then
+    echo "Error: ${LIB_NAME} not found in go/bin."
     echo "Run ../../build.sh first."
     exit 1
 fi

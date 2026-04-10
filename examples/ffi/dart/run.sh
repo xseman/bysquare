@@ -17,21 +17,17 @@ if [ ! -f "../../../go/bin/${LIB_NAME}" ]; then
     exit 1
 fi
 
-# Check if Swift is available
-if ! command -v swiftc &> /dev/null; then
-    echo "Error: swiftc not found. Please install Swift."
+# Check if Dart is available
+if ! command -v dart &> /dev/null; then
+    echo "Error: dart not found. Please install Dart SDK."
     exit 1
 fi
 
-echo "Compiling Swift example..."
-swiftc Example.swift -o example
+echo "Installing dependencies..."
+dart pub get
 
 echo ""
-echo "Running Swift FFI example..."
-echo "============================"
-export LD_LIBRARY_PATH=../../../go/bin:$LD_LIBRARY_PATH
-export DYLD_LIBRARY_PATH=../../../go/bin:$DYLD_LIBRARY_PATH
-./example
-
-# Cleanup
-rm -f example
+echo "Running Dart FFI example..."
+echo "==========================="
+export LD_LIBRARY_PATH=../../../go/bin:${LD_LIBRARY_PATH}
+dart run example.dart

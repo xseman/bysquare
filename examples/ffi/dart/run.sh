@@ -11,8 +11,8 @@ case "$(uname -s)" in
     *) LIB_NAME="libbysquare.so" ;;
 esac
 
-if [ ! -f "../../../go/bin/$LIB_NAME" ]; then
-    echo "Error: $LIB_NAME not found in go/bin."
+if [ ! -f "../../../go/bin/${LIB_NAME}" ]; then
+    echo "Error: ${LIB_NAME} not found in go/bin."
     echo "Run ../../build.sh first."
     exit 1
 fi
@@ -29,5 +29,5 @@ dart pub get
 echo ""
 echo "Running Dart FFI example..."
 echo "==========================="
-export LD_LIBRARY_PATH=../../../go/bin:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=../../../go/bin:${LD_LIBRARY_PATH}
 dart run example.dart

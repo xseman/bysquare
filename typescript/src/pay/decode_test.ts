@@ -165,6 +165,10 @@ describe("decode deserialization", () => {
 		lzmaHeader[3] = 0x02;
 		lzmaHeader[4] = 0x00;
 
+		const payloadLength = decoded_base32[2] | (decoded_base32[3] << 8);
+		lzmaHeader[5] = payloadLength & 0xFF;
+		lzmaHeader[6] = (payloadLength >> 8) & 0xFF;
+
 		const lzmaFull = new Uint8Array([...lzmaHeader, ...compressed]);
 		const decompressed = decompress(lzmaFull);
 

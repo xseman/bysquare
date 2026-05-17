@@ -48,6 +48,7 @@ Both implementations are fully compatible with each other and follow the same sp
 
 ```mermaid
 ---
+title: "Implementations Overview"
 config:
   theme: neutral
   themeVariables:
@@ -61,14 +62,15 @@ flowchart LR
         GO[Go]
     end
 
-    subgraph Runtime["Runtime Environments"]
+    subgraph Runtime["Runtime"]
         TS --> Browser
         TS --> Node/Bun/Deno
     end
 
-    TS & GO --> CLI[CLI encoder/decoder tools<br/>.rpm, .deb, binaries]
+    TS & GO --> CLI[CLI encoder/decoder tools]
 
-    subgraph Native["Go Library"]
+
+    subgraph Native["Runtime"]
         GO --> GO_LIB[Go Applications]
     end
 
@@ -76,6 +78,8 @@ flowchart LR
         GO --> CFFI[libbysquare.so/dll]
         CFFI --> ANY[Java, Python, PHP, C#, Swift, Dart]
     end
+
+    GO --> Artifacts[.rpm, .deb, CLI binaries]
 
     style TS            fill:#A5D8FF, stroke:#1976D2, stroke-width:1.5px
     style Browser       fill:#A5D8FF, stroke:#1976D2, stroke-width:1.5px
@@ -141,7 +145,6 @@ packet-beta
 
 ```mermaid
 ---
-title: "QR wire format"
 config:
   theme: neutral
 ---
@@ -168,12 +171,12 @@ config:
 
 flowchart TB
     subgraph Header["Header Track"]
-        H_INPUT("   Header Info     ")
+        H_INPUT["   Header Info     "]
         BS_HEAD["  BySquare Header  "]
     end
 
     subgraph Payload["Payload Track"]
-        P_INPUT("  Serialized Data  ")
+        P_INPUT["  Serialized Data  "]
         CRC["   CRC32 Checksum  "]
         UNCOMPRESSED["  CRC32 + Payload  "]
         D_LEN["    Data Length    "]

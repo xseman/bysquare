@@ -213,8 +213,8 @@ flowchart TB
 ## Related
 
 - <https://bysquare.com/>
-- <https://app.bysquare.com/App/api>
-- <https://devel.cz/otazka/qr-kod-pay-by-square>
 - <https://github.com/matusf/pay-by-square>
-- <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
 - <https://github.com/mattbosak/bysquare_dart>
+- <https://devel.cz/otazka/qr-kod-pay-by-square>
+- <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
+- <https://portal.bysquare.com/files/bysquare-PAYspecifications-1.2.0.pdf>

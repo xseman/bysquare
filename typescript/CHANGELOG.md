@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.0.1](https://github.com/xseman/bysquare/compare/typescript/v4.0.0...typescript/v4.0.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* lzma truncated payload guard ([#134](https://github.com/xseman/bysquare/issues/134)) ([12b2248](https://github.com/xseman/bysquare/commit/12b2248f7a7ee25657b98d1a3e142528d3138058))
+
+
+### Documentation
+
+* cleanup ([9e33f19](https://github.com/xseman/bysquare/commit/9e33f197bf0aac1c4cdadb99637cb18b0655f18b))
+* fix incorrect api, binding and download references ([eebd47a](https://github.com/xseman/bysquare/commit/eebd47ad0b79ed1e41b15b79b1db89bb48bf9180))
+
+
+### Maintenance
+
+* **dependencies:** update lzma1 ([1ae4004](https://github.com/xseman/bysquare/commit/1ae400429639f54b4ba1dbc3a7cd3433cbf60776))
+* **release:** update release workflow, package management & other improvements ([d934846](https://github.com/xseman/bysquare/commit/d934846900d6d90eeec952e389e264e4f11455de))
+* revert back to package-lock.json for provenance publish ([61e7501](https://github.com/xseman/bysquare/commit/61e75015ce4387a4c1561af6a78744d4f1ef1f98))
+
 ## [4.0.0](https://github.com/xseman/bysquare/compare/typescript/v3.2.0...typescript/v4.0.0) (2026-03-07)
 
 

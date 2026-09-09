@@ -1,7 +1,7 @@
 # Test Creation and Maintenance Guidelines
 
 - After each change make sure all README.md files are up to date
-- Makre sure all tests pass after significant changes
+- Make sure all tests pass after significant changes
 - If there is logical change analyze if there should be new tests added or existing modified
 
 # Testing Pattern Instructions
@@ -123,16 +123,13 @@ Related resources:
 - Don't add comments for each step, as the code should be clear enough
 
 ```typescript
-it("should calculate total price with tax correctly", () => {
-	// Arrange
+test("should calculate total price with tax correctly", () => {
 	const basePrice = 100;
 	const taxRate = 0.08;
 	const expected = 108;
 
-	// Act
 	const result = calculateTotal(basePrice, taxRate);
 
-	// Assert
 	expect(result).toBe(expected);
 });
 ```

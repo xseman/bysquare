@@ -43,64 +43,83 @@ go get github.com/xseman/bysquare/go@latest
 go install github.com/xseman/bysquare/go/cmd/bysquare@latest
 ```
 
-Or download pre-built binaries from [GitHub Releases](https://github.com/xseman/bysquare/releases):
+Or download pre-built binaries from [GitHub Releases](https://github.com/xseman/bysquare/releases).
+
+> [!NOTE]
+> Go and TypeScript are released independently from this repository, so
+> `releases/latest` may point at a TypeScript release with no Go assets.
+> Set `VERSION` to the Go release you want and use the tagged URL below.
 
 #### Debian/Ubuntu (.deb)
 
 ```bash
+VERSION=0.4.0
+BASE=https://github.com/xseman/bysquare/releases/download/go/v${VERSION}
+
 # AMD64
-curl -LO https://github.com/xseman/bysquare/releases/latest/download/bysquare_0.1.0_amd64.deb
-sudo dpkg -i bysquare_0.1.0_amd64.deb
+curl -LO ${BASE}/bysquare_${VERSION}_amd64.deb
+sudo dpkg -i bysquare_${VERSION}_amd64.deb
 
 # ARM64
-curl -LO https://github.com/xseman/bysquare/releases/latest/download/bysquare_0.1.0_arm64.deb
-sudo dpkg -i bysquare_0.1.0_arm64.deb
+curl -LO ${BASE}/bysquare_${VERSION}_arm64.deb
+sudo dpkg -i bysquare_${VERSION}_arm64.deb
 ```
 
 #### RHEL/Fedora/CentOS (.rpm)
 
 ```bash
+VERSION=0.4.0
+BASE=https://github.com/xseman/bysquare/releases/download/go/v${VERSION}
+
 # AMD64 (x86_64)
-curl -LO https://github.com/xseman/bysquare/releases/latest/download/bysquare-0.1.0-1.x86_64.rpm
-sudo rpm -i bysquare-0.1.0-1.x86_64.rpm
+curl -LO ${BASE}/bysquare-${VERSION}-1.x86_64.rpm
+sudo rpm -i bysquare-${VERSION}-1.x86_64.rpm
 
 # ARM64 (aarch64)
-curl -LO https://github.com/xseman/bysquare/releases/latest/download/bysquare-0.1.0-1.aarch64.rpm
-sudo rpm -i bysquare-0.1.0-1.aarch64.rpm
+curl -LO ${BASE}/bysquare-${VERSION}-1.aarch64.rpm
+sudo rpm -i bysquare-${VERSION}-1.aarch64.rpm
 ```
 
 #### Standalone Binaries
 
 ```bash
+BASE=https://github.com/xseman/bysquare/releases/download/go/v0.4.0
+
 # Linux AMD64
-curl -LO https://github.com/xseman/bysquare/releases/latest/download/bysquare-linux-amd64
+curl -LO ${BASE}/bysquare-linux-amd64
 chmod +x bysquare-linux-amd64
 sudo mv bysquare-linux-amd64 /usr/local/bin/bysquare
 
 # macOS ARM64
-curl -LO https://github.com/xseman/bysquare/releases/latest/download/bysquare-darwin-arm64
+curl -LO ${BASE}/bysquare-darwin-arm64
 chmod +x bysquare-darwin-arm64
 sudo mv bysquare-darwin-arm64 /usr/local/bin/bysquare
 
 # Windows AMD64
-curl -LO https://github.com/xseman/bysquare/releases/latest/download/bysquare-windows-amd64.exe
+curl -LO ${BASE}/bysquare-windows-amd64.exe
 ```
 
 ### FFI Shared Library
 
-Download platform-specific shared libraries from [GitHub Releases](https://github.com/xseman/bysquare/releases):
+Download platform-specific shared libraries from [GitHub Releases](https://github.com/xseman/bysquare/releases).
+Each library ships with a matching C header (`libbysquare-<os>-<arch>.h`).
 
 ```bash
+BASE=https://github.com/xseman/bysquare/releases/download/go/v0.4.0
+
 # Linux
-curl -LO https://github.com/xseman/bysquare/releases/latest/download/libbysquare-linux-amd64.so
+curl -LO ${BASE}/libbysquare-linux-amd64.so
+curl -LO ${BASE}/libbysquare-linux-amd64.h
 
 # macOS
-curl -LO https://github.com/xseman/bysquare/releases/latest/download/libbysquare-darwin-arm64.dylib
+curl -LO ${BASE}/libbysquare-darwin-arm64.dylib
+curl -LO ${BASE}/libbysquare-darwin-arm64.h
+```
 
+```powershell
 # Windows
-$url = "https://github.com/xseman/bysquare/releases/" +
-  "latest/download/libbysquare-windows-amd64.dll"
-Invoke-WebRequest -Uri $url -OutFile "libbysquare.dll"
+$base = "https://github.com/xseman/bysquare/releases/download/go/v0.4.0"
+Invoke-WebRequest -Uri "$base/libbysquare-windows-amd64.dll" -OutFile "libbysquare.dll"
 ```
 
 ## Usage
@@ -260,11 +279,13 @@ bysquare decode "00D80..."
 
 ```c
 // PAY by square
-char* bysquare_pay_encode(char* jsonData);
+// config: bitflags, or -1 for defaults (deburr + validate + v1.2.0)
+char* bysquare_pay_encode(char* jsonData, int config);
 char* bysquare_pay_decode(char* qrString);
 
 // Invoice by square
-char* bysquare_invoice_encode(char* jsonData);
+// config: bitflags, or -1 for defaults (validate + v1.0.0, no deburr)
+char* bysquare_invoice_encode(char* jsonData, int config);
 char* bysquare_invoice_decode(char* qrString);
 
 // Auto-detect type from QR header (returns 0=pay, 1=invoice, -1=error)
@@ -289,7 +310,9 @@ lib.bysquare_free(result)  # Important!
 
 See detailed examples in [`../examples/ffi/`](../examples/ffi/):
 
-- **Python**: [`../examples/ffi/python/example.py`](../examples/ffi/python/example.py)
-- **PHP**: [`../examples/ffi/php/example.php`](../examples/ffi/php/example.php)
-- **Java**: [`../examples/ffi/java/Example.java`](../examples/ffi/java/Example.java)
-- **Swift**: [`../examples/ffi/swift/Example.swift`](../examples/ffi/swift/Example.swift)
+- **Java**: [`../examples/ffi/java/`](../examples/ffi/java/)
+- **C#**: [`../examples/ffi/csharp/`](../examples/ffi/csharp/)
+- **PHP**: [`../examples/ffi/php/`](../examples/ffi/php/)
+- **Python**: [`../examples/ffi/python/`](../examples/ffi/python/)
+- **Swift**: [`../examples/ffi/swift/`](../examples/ffi/swift/)
+- **Dart**: [`../examples/ffi/dart/`](../examples/ffi/dart/)

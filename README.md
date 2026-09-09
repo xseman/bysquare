@@ -96,7 +96,7 @@ The Go implementation provides a C-compatible Foreign Function Interface (FFI), 
 
 **Available examples:**
 
-- **[Java](examples/ffi/java/)** - Using `JNA` (Java Native Access)
+- **[Java](examples/ffi/java/)** - Using the Foreign Function & Memory API (JDK 19+)
 - **[C#](examples/ffi/csharp/)** - Using P/Invoke (`DllImport`)
 - **[PHP](examples/ffi/php/)** - Using FFI extension
 - **[Python](examples/ffi/python/)** - Using `ctypes`

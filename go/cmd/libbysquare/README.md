@@ -1,6 +1,7 @@
 # Foreign Function Interface (FFI)
 
-C-compatible FFI layer for using library from other programming languages.
+C-compatible FFI layer for using the library from other programming languages.
+This is the canonical reference for the C API.
 
 ## Requirements
 
@@ -9,71 +10,43 @@ C-compatible FFI layer for using library from other programming languages.
 
 ## Usage Examples
 
-See [../../examples/ffi/](../../examples/ffi/) for complete examples in Java,
-C#, PHP, Python, and Swift.
-
-**Configuration Options:**
-
-Pass an integer config value to `bysquare_pay_encode()`:
-
-- `config = -1` → Use automatic defaults (deburr + validate + v1.2.0)
-- `config = 0` → v1.0.0 with no flags
-- `config = <bitflags>` → Custom configuration using bitflags
-
-**Bitflag Configuration:**
-
-```c
-// Feature flags (bits 0-23)
-#define BYSQUARE_DEBURR   0x00000001  // Bit 0: Remove diacritics
-#define BYSQUARE_VALIDATE 0x00000002  // Bit 1: Validate input data
-
-// Version values (bits 24-31)
-#define BYSQUARE_VERSION_100 (0 << 24)  // v1.0.0
-#define BYSQUARE_VERSION_110 (1 << 24)  // v1.1.0
-#define BYSQUARE_VERSION_120 (2 << 24)  // v1.2.0
-
-// Usage examples:
-char* qr1 = bysquare_pay_encode(json, -1);  // Auto-defaults
-char* qr2 = bysquare_pay_encode(json, 0);  // v1.0.0, no flags
-char* qr3 = bysquare_pay_encode(json, BYSQUARE_DEBURR | BYSQUARE_VERSION_110);
-```
+See [../../../examples/ffi/](../../../examples/ffi/) for complete examples in
+Java, C#, PHP, Python, Swift and Dart.
 
 ## Installation
 
 ### Download Pre-built Libraries
 
-Download platform-specific shared libraries from [GitHub Releases](https://github.com/xseman/bysquare/releases):
+Download platform-specific shared libraries from
+[GitHub Releases](https://github.com/xseman/bysquare/releases). Each library
+ships with a matching C header (`libbysquare-<os>-<arch>.h`).
 
-**Linux (AMD64):**
-
-```bash
-curl -LO https://github.com/xseman/bysquare/releases/latest/download/libbysquare-linux-amd64.so
-# Rename for easier usage (optional)
-mv libbysquare-linux-amd64.so libbysquare.so
-```
-
-**macOS (ARM64):**
+> [!NOTE]
+> Go and TypeScript are released independently from this repository, so
+> `releases/latest` may point at a TypeScript release with no Go assets.
+> Use the tagged URL below and bump `BASE` to the Go release you want.
 
 ```bash
-curl -LO https://github.com/xseman/bysquare/releases/latest/download/libbysquare-darwin-arm64.dylib
-# Rename for easier usage (optional)
-mv libbysquare-darwin-arm64.dylib libbysquare.dylib
+BASE=https://github.com/xseman/bysquare/releases/download/go/v0.4.0
+
+# Linux (AMD64)
+curl -LO ${BASE}/libbysquare-linux-amd64.so
+curl -LO ${BASE}/libbysquare-linux-amd64.h
+mv libbysquare-linux-amd64.so libbysquare.so  # optional, for easier usage
+
+# macOS (ARM64)
+curl -LO ${BASE}/libbysquare-darwin-arm64.dylib
+curl -LO ${BASE}/libbysquare-darwin-arm64.h
+
+# macOS (AMD64)
+curl -LO ${BASE}/libbysquare-darwin-amd64.dylib
+curl -LO ${BASE}/libbysquare-darwin-amd64.h
 ```
-
-**macOS (AMD64):**
-
-```bash
-curl -LO https://github.com/xseman/bysquare/releases/latest/download/libbysquare-darwin-amd64.dylib
-# Rename for easier usage (optional)
-mv libbysquare-darwin-amd64.dylib libbysquare.dylib
-```
-
-**Windows (AMD64):**
 
 ```powershell
-$url = "https://github.com/xseman/bysquare/releases/" +
-  "latest/download/libbysquare-windows-amd64.dll"
-Invoke-WebRequest -Uri $url -OutFile "libbysquare.dll"
+# Windows (AMD64)
+$base = "https://github.com/xseman/bysquare/releases/download/go/v0.4.0"
+Invoke-WebRequest -Uri "$base/libbysquare-windows-amd64.dll" -OutFile "libbysquare.dll"
 ```
 
 ### Build from Source
@@ -81,20 +54,12 @@ Invoke-WebRequest -Uri $url -OutFile "libbysquare.dll"
 ```bash
 cd go
 make build-ffi
-# Output: bin/libbysquare.so (current platform)
 ```
 
-The build script generates platform-specific filenames. You may want to create
-a symlink or rename the file for easier usage:
-
-```bash
-# Linux example
-ln -s libbysquare-linux-amd64.so bin/libbysquare.so
-```
+Outputs `bin/libbysquare.so` on Linux, `bin/libbysquare.dylib` on macOS and
+`bin/libbysquare.dll` on Windows, alongside the generated C header.
 
 ## API Reference
-
-The library provides a simple, bitflag-based configuration API:
 
 ```c
 // PAY by square: Encode JSON payment data to QR string
@@ -134,34 +99,46 @@ int bysquare_detect_type(char* qrString);
 void bysquare_free(char* ptr);
 
 // Get library version
-// Returns: Version string (e.g., "0.1.0") - caller must free
+// Returns: Version string of the release the library was built from,
+//          or "dev" for a local build without -ldflags - caller must free
 char* bysquare_version();
 ```
 
-**Configuration Bitflags:**
+## Configuration
+
+Pass an integer config value to `bysquare_pay_encode()` and
+`bysquare_invoice_encode()`:
+
+- `config = -1` → automatic defaults
+- `config = 0` → v1.0.0 with no flags
+- `config = <bitflags>` → custom configuration
 
 ```c
-// Feature flags (bits 0-1)
-BYSQUARE_DEBURR   = 0x00000001  // Remove diacritics (ľščťž → lstz)
-BYSQUARE_VALIDATE = 0x00000002  // Validate input before encoding
+// Feature flags (bits 0-23)
+#define BYSQUARE_DEBURR   0x00000001  // Bit 0: Remove diacritics (ľščťž -> lstz)
+#define BYSQUARE_VALIDATE 0x00000002  // Bit 1: Validate input before encoding
 
 // Version values (bits 24-31)
-BYSQUARE_VERSION_100 = (0 << 24)  // 0x00000000 - v1.0.0 (2013-02-22)
-BYSQUARE_VERSION_110 = (1 << 24)  // 0x01000000 - v1.1.0 (2015-06-24)
-BYSQUARE_VERSION_120 = (2 << 24)  // 0x02000000 - v1.2.0 (2025-04-01)
+#define BYSQUARE_VERSION_100 (0 << 24)  // v1.0.0 (released 2013-02-22)
+#define BYSQUARE_VERSION_110 (1 << 24)  // v1.1.0 (released 2015-06-24)
+#define BYSQUARE_VERSION_120 (2 << 24)  // v1.2.0 (released 2025-04-01)
+
+// Usage examples:
+char* qr1 = bysquare_pay_encode(json, -1);  // Auto-defaults
+char* qr2 = bysquare_pay_encode(json, 0);   // v1.0.0, no flags
+char* qr3 = bysquare_pay_encode(json, BYSQUARE_DEBURR | BYSQUARE_VERSION_110);
 ```
 
-### Version Constants
+**Defaults when `config = -1`:**
 
-| Value | Version | Release Date |
-| ----- | ------- | ------------ |
-| 0     | 1.0.0   | 2013-02-22   |
-| 1     | 1.1.0   | 2015-06-24   |
-| 2     | 1.2.0   | 2025-04-01   |
+| Function                  | deburr | validate | version        |
+| ------------------------- | ------ | -------- | -------------- |
+| `bysquare_pay_encode`     | true   | true     | 2 (PAY v1.2.0) |
+| `bysquare_invoice_encode` | false  | true     | 0 (v1.0.0)     |
 
-### Error Handling
+## Error Handling
 
-Errors are returned as strings with "ERROR:" prefix:
+Errors are returned as strings with an `ERROR:` prefix:
 
 ```c
 char* result = bysquare_pay_encode(json, -1);
@@ -183,3 +160,13 @@ bysquare_free(result);
 - `ERROR:amount must be positive`
 - `ERROR:invalid JSON: unexpected end of input`
 - `ERROR:panic: runtime error: index out of range` (internal panic recovery)
+
+## Memory Management
+
+Always call `bysquare_free()` on strings returned by the encode, decode and
+version functions, including error strings.
+
+## Thread Safety
+
+All functions are fully thread-safe and can be called concurrently from
+multiple threads.

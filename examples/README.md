@@ -24,16 +24,18 @@ Server-side examples:
 
 Use bysquare from other programming languages via C FFI:
 
-- [Java](ffi/java/) - Using JNA
+- [Java](ffi/java/) - Using the Foreign Function & Memory API (JDK 19+)
+- [C#](ffi/csharp/) - Using P/Invoke
 - [PHP](ffi/php/) - Using FFI extension
 - [Python](ffi/python/) - Using ctypes
 - [Swift](ffi/swift/) - Using C interoperability
+- [Dart](ffi/dart/) - Using dart:ffi
 
 See [FFI README](ffi/README.md) for setup instructions.
 
 ## Quick Start
 
-**Browser:** Open any HTML file directly in a browser
+**Browser:** Serve the directory over HTTP, e.g. `cd browser && python3 -m http.server 8000`
 
 **Node.js:**
 

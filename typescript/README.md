@@ -225,9 +225,10 @@ const qrstring2 = encode({
 ```
 
 > [!NOTE]
-> **Date Format:** Provide date inputs (e.g., `paymentDueDate`, `lastDate`)
-> in ISO 8601 format (`YYYY-MM-DD`). They are automatically converted to
-> `YYYYMMDD` during encoding to match the Pay by Square specification.
+> **Date Format:** Provide date inputs (e.g., `paymentDueDate`, `lastDate`,
+> `validTillDate`) in `YYYYMMDD` format, as required by the Pay by Square
+> specification. Other formats, including ISO 8601 `YYYY-MM-DD`, are rejected
+> by validation.
 
 </details>
 

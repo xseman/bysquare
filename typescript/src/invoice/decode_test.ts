@@ -4,6 +4,12 @@ import {
 	test,
 } from "bun:test";
 
+import * as base32hex from "../base32hex.js";
+import {
+	addChecksum,
+	DecodeError,
+	DecodeErrorMessage,
+} from "../header.js";
 import {
 	decode,
 	deserialize,
@@ -230,5 +236,35 @@ describe("decode", () => {
 		expect(decoded.taxCategorySummaries[0].taxExclusiveAmount).toBe(1);
 		expect(decoded.taxCategorySummaries[0].taxAmount).toBe(0.2);
 		expect(decoded.paymentMeans).toBe(1);
+	});
+});
+
+describe("decode payload length header", () => {
+	test("throws DecodeError when the payload length header is zero", () => {
+		const bytes = base32hex.decode(FORSYS_INVOICE_ENCODED);
+		bytes[2] = 0x00;
+		bytes[3] = 0x00;
+
+		expect(() => decode(base32hex.encode(bytes, false))).toThrow(
+			DecodeErrorMessage.LZMADecompressionFailed,
+		);
+	});
+
+	test("throws DecodeError when the payload length header does not match the payload", () => {
+		const bytes = base32hex.decode(FORSYS_INVOICE_ENCODED);
+		bytes[2] = 0xFF;
+		bytes[3] = 0xFF;
+
+		expect(() => decode(base32hex.encode(bytes, false))).toThrow(DecodeError);
+	});
+
+	test("stores the uncompressed payload length in the header", () => {
+		const model = structuredClone(FORSYS_INVOICE_FIXTURE);
+		const expected = addChecksum(serialize(model)).byteLength;
+
+		const bytes = base32hex.decode(encode(model, { validate: false }));
+		const payloadLength = bytes[2] | (bytes[3] << 8);
+
+		expect(payloadLength).toBe(expected);
 	});
 });

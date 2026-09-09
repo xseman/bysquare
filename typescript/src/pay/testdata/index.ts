@@ -6,3 +6,4 @@ export * from "./payment-orders.js";
 export * from "./round-trip-test-data.js";
 export * from "./standing-orders.js";
 export { CURRENCY_TEST_CASES, IBAN_TEST_CASES } from "./utility-test-data.js";
+export * from "./wire-format-test-data.js";

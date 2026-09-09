@@ -15,6 +15,8 @@ import {
 	test,
 } from "bun:test";
 
+import * as base32hex from "../base32hex.js";
+import { addChecksum } from "../header.js";
 import { Version } from "../types.js";
 import { decode } from "./decode.js";
 import {
@@ -38,6 +40,7 @@ import {
 	STANDING_ORDER_SERIALIZED,
 	TEST_IBANS,
 	VALID_PAYMENT_ORDER,
+	WIRE_FORMAT_TEST_CASES,
 } from "./testdata/index.js";
 import { CurrencyCode } from "./types.js";
 
@@ -248,5 +251,25 @@ describe("date conversion", () => {
 
 		const standingOrder = decoded.payments[0] as any;
 		expect(standingOrder.lastDate).toBe("20241011");
+	});
+});
+
+describe("encode wire format stability", () => {
+	test("produces the expected QR string for known fixtures", () => {
+		for (const [name, model, expected] of WIRE_FORMAT_TEST_CASES) {
+			const result = encode(structuredClone(model));
+
+			expect(result, name).toBe(expected);
+		}
+	});
+
+	test("stores the uncompressed payload length in the header", () => {
+		const model = structuredClone(VALID_PAYMENT_ORDER);
+		const expected = addChecksum(serialize(model)).byteLength;
+
+		const bytes = base32hex.decode(encode(model));
+		const payloadLength = bytes[2] | (bytes[3] << 8);
+
+		expect(payloadLength).toBe(expected);
 	});
 });

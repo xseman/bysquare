@@ -126,6 +126,44 @@ describe("decode error cases", () => {
 			decode(encoded);
 		}).toThrow();
 	});
+
+	test("throws DecodeError when the payload length header is zero", () => {
+		const bytes = base32hex.decode(encode(structuredClone(VALID_PAYMENT_ORDER)));
+		bytes[2] = 0x00;
+		bytes[3] = 0x00;
+
+		expect(() => decode(base32hex.encode(bytes, false))).toThrow(
+			DecodeErrorMessage.LZMADecompressionFailed,
+		);
+	});
+
+	test("throws DecodeError when the payload length header is shorter than the checksum", () => {
+		const bytes = base32hex.decode(encode(structuredClone(VALID_PAYMENT_ORDER)));
+		bytes[2] = 0x02;
+		bytes[3] = 0x00;
+
+		expect(() => decode(base32hex.encode(bytes, false))).toThrow(
+			DecodeErrorMessage.LZMADecompressionFailed,
+		);
+	});
+
+	test("throws DecodeError when the payload length header truncates the payload", () => {
+		const bytes = base32hex.decode(encode(structuredClone(VALID_PAYMENT_ORDER)));
+		bytes[2] = 0x10;
+		bytes[3] = 0x00;
+
+		expect(() => decode(base32hex.encode(bytes, false))).toThrow(DecodeError);
+	});
+
+	test("decodes when the payload length header exceeds the real payload", () => {
+		const bytes = base32hex.decode(encode(structuredClone(VALID_PAYMENT_ORDER)));
+		bytes[2] = 0xFF;
+		bytes[3] = 0xFF;
+
+		const result = decode(base32hex.encode(bytes, false));
+
+		expect(result.payments[0].bankAccounts[0].iban).toBe(TEST_IBANS.SK_VALID);
+	});
 });
 
 describe("decode deserialization", () => {

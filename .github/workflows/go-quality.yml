@@ -44,7 +44,9 @@ jobs:
               run: make cover
 
             - name: Coverage report
-              if: (github.event_name == 'pull_request' && github.actor != 'release-please[bot]') || github.event_name == 'workflow_dispatch'
+              # Release PRs only bump versions and changelogs, the actor check
+              # misses them because release-please runs under a personal token.
+              if: (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')) || github.event_name == 'workflow_dispatch'
               uses: xseman/coverage@v0.4.0
               with:
                   pull-request-number: ${{ github.event.inputs.pr_number }}

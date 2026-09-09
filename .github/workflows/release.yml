@@ -33,9 +33,23 @@ permissions:
     pull-requests: write
 
 jobs:
+    check-npm-token:
+        name: Verify NPM Token
+        runs-on: ubuntu-latest
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.typescript_release == true }}
+        steps:
+            - name: Check token validity
+              env:
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+              run: |
+                  response=$(curl -sf -H "Authorization: Bearer ${NPM_TOKEN}" https://registry.npmjs.org/-/whoami)
+                  echo "Authenticated as: ${response}"
+
     release-please:
         name: Release Please
         runs-on: ubuntu-latest
+        needs: [check-npm-token]
+        if: ${{ needs.check-npm-token.result == 'success' || needs.check-npm-token.result == 'skipped' }}
         outputs:
             typescript_release_created: ${{ steps.release.outputs['typescript--release_created'] }}
             typescript_tag_name: ${{ steps.release.outputs['typescript--tag_name'] }}
@@ -51,8 +65,8 @@ jobs:
 
     typescript-publish:
         name: Publish TypeScript Package
-        needs: release-please
-        if: ${{ (github.event_name == 'push' && needs.release-please.outputs.typescript_release_created) || (github.event_name == 'workflow_dispatch' && inputs.typescript_release == true) }}
+        needs: [release-please, check-npm-token]
+        if: ${{ (needs.check-npm-token.result == 'success' || needs.check-npm-token.result == 'skipped') && ((github.event_name == 'push' && needs.release-please.outputs.typescript_release_created) || (github.event_name == 'workflow_dispatch' && inputs.typescript_release == true)) }}
         runs-on: ubuntu-latest
         permissions:
             contents: read

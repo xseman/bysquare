@@ -14,18 +14,17 @@ Client-side examples demonstrating the bysquare library in web browsers.
 
 ## Quick Start
 
-Open any HTML file directly in your browser:
+The examples import ES modules from a CDN, so they need to be served over
+HTTP - opening the files via `file://` will not work.
 
 ```bash
-# Using a simple HTTP server
-bun *.html
+python3 -m http.server 8000
 # or
 npx serve
-# or
-python3 -m http.server 8000
 ```
 
-Then navigate to `http://localhost:8000/native-example.html`
+Then open the example you want, e.g. `http://localhost:8000/native-example.html`
+(adjust the port if your server picks a different one).
 
 ## Features
 

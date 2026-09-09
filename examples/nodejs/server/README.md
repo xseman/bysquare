@@ -38,4 +38,4 @@ deno run --allow-read main.ts
 ## Related Documentation
 
 - [TypeScript Library](../../../typescript/README.md) - Full API documentation
-- [CLI Examples](../cli/README.md) - Command-line usage
+- [CLI Examples](../../cli/README.md) - Command-line usage

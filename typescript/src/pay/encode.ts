@@ -254,8 +254,8 @@ export function encode(
 	 * The LZMA files has a 13-byte header that is followed by the LZMA
 	 * compressed data.
 	 *
-	 * NOTE: We use a custom compression function that sets dictionary size to 2^17
-	 * This is required for compatibility with existing QR codes
+	 * NOTE: The header is rebuilt on decode with a fixed dictionary size of
+	 * 2^17, which always covers the match distances of a QR sized payload.
 	 *
 	 * @see https://docs.fileformat.com/compression/lzma/
 	 *

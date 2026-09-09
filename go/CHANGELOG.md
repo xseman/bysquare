@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/xseman/bysquare/compare/go/v0.4.0...go/v0.4.1) (2026-09-09)
+
+
+### Documentation
+
+* fix incorrect api, binding and download references ([eebd47a](https://github.com/xseman/bysquare/commit/eebd47ad0b79ed1e41b15b79b1db89bb48bf9180))
+
 ## [0.4.0](https://github.com/xseman/bysquare/compare/go/v0.3.0...go/v0.4.0) (2026-03-07)
 
 

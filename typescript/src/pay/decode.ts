@@ -299,6 +299,12 @@ export function decode(qr: string): DataModel {
 		});
 	}
 
+	if (decompressed.byteLength < 4) {
+		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, {
+			error: "Decompressed payload is shorter than the CRC32 checksum",
+		});
+	}
+
 	// Extract checksum and body
 	const checksumBytes = decompressed.slice(0, 4);
 	const decompressedBody = decompressed.slice(4);

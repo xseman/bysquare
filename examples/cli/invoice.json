@@ -1,0 +1,21 @@
+{
+	"documentType": 0,
+	"invoiceId": "FV2024001",
+	"issueDate": "20240115",
+	"localCurrencyCode": "EUR",
+	"supplierParty": {
+		"partyName": "Supplier s.r.o.",
+		"postalAddress": {
+			"streetName": "Hlavna",
+			"cityName": "Bratislava",
+			"postalZone": "81101",
+			"country": "SVK"
+		}
+	},
+	"customerParty": { "partyName": "Customer a.s." },
+	"numberOfInvoiceLines": 1,
+	"taxCategorySummaries": [
+		{ "classifiedTaxCategory": 0.2, "taxExclusiveAmount": 100, "taxAmount": 20 }
+	],
+	"monetarySummary": {}
+}

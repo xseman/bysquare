@@ -63,18 +63,6 @@ flowchart TB
     style LIB fill:#A5EAFF,stroke:#00838F,stroke-width:1.5px
 ```
 
-**Configuration Pattern:**
-
-1. Define configuration bitflags (or use `config=-1` for defaults)
-2. Encode payment data with chosen config
-3. Decode QR strings (no config needed)
-4. Free allocated memory
-
-**Default values when `config=-1`:**
-
-- PAY: `deburr = true`, `validate = true`, `version = 2` (PAY by square v1.2.0)
-- Invoice: `deburr = false`, `validate = true`, `version = 0` (Invoice by square v1.0.0)
-
 ## Prerequisites
 
 **Note:** These examples are designed for Linux. For macOS/Windows support, you'll
@@ -90,76 +78,14 @@ This creates `libbysquare.so` in `../../go/bin/`.
 
 ## C API
 
-```c
-// Encode JSON payment data to QR string with configuration
-// config: 32-bit integer bitflags, or -1 for defaults
-//   - Bits 0-23: Feature flags (deburr=0x01, validate=0x02)
-//   - Bits 24-31: Version (0=v1.0.0, 1=v1.1.0, 2=v1.2.0)
-//   - Special: -1 for auto-defaults (PAY: v1.2.0 + deburr + validate)
-// Returns: QR string on success, "ERROR:<message>" on failure
-char* bysquare_pay_encode(char* jsonData, int config);
+The full C API reference - function signatures, configuration bitflags, error
+handling, memory management and thread safety - lives next to the
+implementation in
+[`../../go/cmd/libbysquare/README.md`](../../go/cmd/libbysquare/README.md).
 
-// Decode PAY by square QR string to JSON
-// Returns: JSON string on success, "ERROR:<message>" on failure
-char* bysquare_pay_decode(char* qrString);
-
-// Encode JSON invoice data to QR string with configuration
-// config: 32-bit integer bitflags, or -1 for defaults
-//   - Special: -1 for auto-defaults (Invoice: v1.0.0 + validate, no deburr)
-// Returns: QR string on success, "ERROR:<message>" on failure
-char* bysquare_invoice_encode(char* jsonData, int config);
-
-// Decode Invoice by square QR string to JSON
-// Returns: JSON string on success, "ERROR:<message>" on failure
-char* bysquare_invoice_decode(char* qrString);
-
-// Detect the type of a BySquare QR string
-// Returns: 0 for PAY by square, 1 for Invoice by square, -1 on error
-int bysquare_detect_type(char* qrString);
-
-// Free memory allocated by the library
-void bysquare_free(char* ptr);
-
-// Get library version
-char* bysquare_version(void);
-```
-
-**Configuration Bitflags:**
-
-```c
-// Feature flags (bits 0-23)
-#define BYSQUARE_DEBURR   0x00000001  // Bit 0: Remove diacritics
-#define BYSQUARE_VALIDATE 0x00000002  // Bit 1: Validate input data
-
-// Version values (bits 24-31)
-#define BYSQUARE_VERSION_100 (0 << 24)  // v1.0.0 (released 2013-02-22)
-#define BYSQUARE_VERSION_110 (1 << 24)  // v1.1.0 (released 2015-06-24)
-#define BYSQUARE_VERSION_120 (2 << 24)  // v1.2.0 (released 2025-04-01)
-
-// Usage examples:
-config = -1;  // Auto-defaults: deburr + validate + v1.2.0
-config = 0;   // v1.0.0 with no flags
-config = BYSQUARE_DEBURR | BYSQUARE_VERSION_110;  // Custom: v1.1.0 + deburr
-```
-
-**Error Handling:**
-
-Errors are returned as strings with "ERROR:" prefix:
-
-```c
-char* result = bysquare_pay_encode(json, -1);
-if (strncmp(result, "ERROR:", 6) == 0) {
-    fprintf(stderr, "Encoding failed: %s\n", result + 6);
-    bysquare_free(result);
-    return 1;
-}
-```
-
-**Memory Management:** Always call `bysquare_free()` on returned strings from
-encode, decode, and version functions.
-
-**Thread Safety:** All functions are fully thread-safe and can be called
-concurrently from multiple threads.
+In short: encode functions take a `config` bitflag argument (`-1` for
+defaults), every function returns a heap string that must be released with
+`bysquare_free()`, and failures come back as `"ERROR:<message>"`.
 
 ## Troubleshooting
 

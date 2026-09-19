@@ -15,7 +15,6 @@ linters:
         - exhaustive # a switch over our own enums covers it or says default
         - forcetypeassert # no unchecked x.(T)
         - gocritic # diagnostics and idiom checks
-        - godot # top-level comments end in a period
         - govet
         - iface # no redundant or unused interfaces
         - ineffassign
@@ -56,9 +55,6 @@ linters:
             allow-first-in-block: true
             allow-whole-block: false
             case-max-lines: 2
-        godot:
-            exclude:
-                - '^ @see ' # a reference to the specification, not a sentence
         gocritic:
             enabled-tags:
                 - diagnostic

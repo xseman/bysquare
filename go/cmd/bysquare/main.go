@@ -16,7 +16,7 @@ import (
 	"github.com/xseman/bysquare/go/pkg/bysquare/pay"
 )
 
-// version is set by ldflags at build time.
+// version is set by ldflags at build time
 var version = "dev"
 
 const (

@@ -36,7 +36,7 @@ test:
 
 ## cover: Run tests with coverage
 cover:
-	@go test -race -coverpkg=./... -coverprofile=coverage.out -covermode=atomic ./...
+	@go test -race -coverprofile=coverage.out -covermode=atomic ./...
 
 ## fmt: gofumpt everything
 fmt:

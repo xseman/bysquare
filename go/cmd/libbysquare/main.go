@@ -54,19 +54,19 @@ import (
 // rather than reading the CLI's: nothing here should pull in an HTTP client.
 var version = "dev"
 
-// Bitflags and configuration constants.
+// Bitflags and configuration constants
 const (
 	FlagDeburr   = 0b00000000_00000000_00000000_00000001 // Bit 0: Enable diacritics removal
 	FlagValidate = 0b00000000_00000000_00000000_00000010 // Bit 1: Enable input validation
 	MaskVersion  = 0b11111111_00000000_00000000_00000000 // Bits 24-31: Version field (uint8, 0-255)
 
-	// VersionShift is the bit position where version starts (high byte).
+	// VersionShift is the bit position where version starts (high byte)
 	VersionShift = 24
 
-	// PayDefaults: version=2 (v1.2.0), deburr=true, validate=true.
+	// PayDefaults: version=2 (v1.2.0), deburr=true, validate=true
 	PayDefaults = (int(bysquare.Version120) << VersionShift) | FlagDeburr | FlagValidate
 
-	// InvoiceDefaults: version=0 (v1.0.0), validate=true (no deburr).
+	// InvoiceDefaults: version=0 (v1.0.0), validate=true (no deburr)
 	InvoiceDefaults = (int(bysquare.Version100) << VersionShift) | FlagValidate
 )
 

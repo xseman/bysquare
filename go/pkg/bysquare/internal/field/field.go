@@ -68,10 +68,10 @@ var (
 	// IBAN regex: 2 letters + 2 digits + up to 30 alphanumeric.
 	ibanRegex = regexp.MustCompile(`^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$`)
 
-	// BIC regex: 4 letters + 2 letters + 2 alphanumeric + optional 3 alphanumeric.
+	// BIC regex: 4 letters + 2 letters + 2 alphanumeric + optional 3 alphanumeric
 	bicRegex = regexp.MustCompile(`^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$`)
 
-	// YYYYMMDD date regex per v1.2 specification.
+	// YYYYMMDD date regex per v1.2 specification
 	dateRegex = regexp.MustCompile(`^\d{8}$`)
 )
 

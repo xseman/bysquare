@@ -1,26 +1,20 @@
 package bysquare
 
-import (
-	"encoding/binary"
-	"fmt"
-	"strconv"
-	"strings"
-)
+import "encoding/binary"
 
-const (
-	// MaxCompressedSize is the maximum allowed payload size (2^17).
-	MaxCompressedSize = 131_072
-)
+// MaxCompressedSize is the largest payload a header can describe: 2^17.
+const MaxCompressedSize = 131_072
 
-// BysquareHeader represents parsed header fields.
-type BysquareHeader struct {
-	BySquareType uint8
+// Header is the four nibbles of the first two bytes.
+type Header struct {
+	BysquareType uint8
 	Version      uint8
 	DocumentType uint8
 	Reserved     uint8
 }
 
-// BuildBysquareHeader creates a 2-byte header.
+// BuildBysquareHeader returns the 2-byte header of the bysquare
+// specification; a nibble outside 0-15 is an EncodeError.
 //
 //	Byte 0                  Byte 1
 //	+----------+----------+----------+----------+
@@ -31,43 +25,49 @@ type BysquareHeader struct {
 //	+----------+----------+----------+----------+
 //
 // @see 3.5.
-func BuildBysquareHeader(bySquareType, version, docType, reserved uint8) []byte {
-	if bySquareType > 0x0F || version > 0x0F || docType > 0x0F || reserved > 0x0F {
-		panic("header values must be 4-bit (0-15)")
+func BuildBysquareHeader(bySquareType, version, documentType, reserved uint8) ([]byte, error) {
+	for _, n := range []struct {
+		value   uint8
+		message string
+	}{
+		{bySquareType, EncodeErrorMessage.BySquareType},
+		{version, EncodeErrorMessage.Version},
+		{documentType, EncodeErrorMessage.DocumentType},
+		{reserved, EncodeErrorMessage.Reserved},
+	} {
+		if n.value > 15 {
+			return nil, &EncodeError{Message: n.message, Extensions: map[string]any{"invalidValue": n.value}}
+		}
 	}
 
-	header := make([]byte, 2)
-	header[0] = (bySquareType << 4) | version
-	header[1] = (docType << 4) | reserved
-
-	return header
+	return []byte{bySquareType<<4 | version, documentType<<4 | reserved}, nil
 }
 
-// ParseBysquareHeader extracts header fields from 2 bytes.
-//
-//	Byte 0                  Byte 1
-//	+----------+----------+----------+----------+
-//	|   4 bit  |   4 bit  |   4 bit  |   4 bit  |
-//	+----------+----------+----------+----------+
-//	| BySqType | Version  | DocType  | Reserved |
-//	| (0-15)   | (0-15)   | (0-15)   | (0-15)   |
-//	+----------+----------+----------+----------+
+// DecodeHeader extracts the four nibbles from a 2-byte header. A shorter
+// input reads as zeros, the way the TypeScript implementation's does.
 //
 // @see 3.5.
-func ParseBysquareHeader(header []byte) BysquareHeader {
-	if len(header) < 2 {
-		panic("header must be 2 bytes")
+func DecodeHeader(header []byte) Header {
+	var b0, b1 uint8
+	if len(header) > 0 {
+		b0 = header[0]
 	}
 
-	return BysquareHeader{
-		BySquareType: (header[0] >> 4) & 0x0F,
-		Version:      header[0] & 0x0F,
-		DocumentType: (header[1] >> 4) & 0x0F,
-		Reserved:     header[1] & 0x0F,
+	if len(header) > 1 {
+		b1 = header[1]
+	}
+
+	return Header{
+		BysquareType: b0 >> 4,
+		Version:      b0 & 0x0F,
+		DocumentType: b1 >> 4,
+		Reserved:     b1 & 0x0F,
 	}
 }
 
-// BuildPayloadLength creates a 2-byte little-endian length field.
+// BuildPayloadLength is the 2-byte little-endian length of the compressed
+// payload with its CRC32; a length of MaxCompressedSize or more is an
+// EncodeError.
 //
 //	+---------------+---------------+
 //	|    Byte 0     |    Byte 1     |
@@ -79,61 +79,21 @@ func ParseBysquareHeader(header []byte) BysquareHeader {
 //	+-------------------------------+
 //
 // @see 3.6.
-func BuildPayloadLength(length int) []byte {
+func BuildPayloadLength(length int) ([]byte, error) {
 	if length >= MaxCompressedSize {
-		panic(fmt.Sprintf("payload length %d exceeds maximum %d", length, MaxCompressedSize))
+		return nil, &EncodeError{
+			Message:    EncodeErrorMessage.HeaderDataSize,
+			Extensions: map[string]any{"actualSize": length, "allowedSize": MaxCompressedSize},
+		}
 	}
 
 	buf := make([]byte, 2)
 	binary.LittleEndian.PutUint16(buf, uint16(length))
-	return buf
+
+	return buf, nil
 }
 
-// Sanitize replaces tab characters in field values with space.
-//
-// @see 3.8.
-func Sanitize(s string) string {
-	return strings.ReplaceAll(s, "\t", " ")
-}
-
-// FormatFloat formats a float64 to string, omitting if zero.
-// Use for optional numeric fields where zero means "not set".
-func FormatFloat(f float64) string {
-	if f == 0 {
-		return ""
-	}
-	s := fmt.Sprintf("%f", f)
-	s = strings.TrimRight(s, "0")
-	s = strings.TrimRight(s, ".")
-	return s
-}
-
-// FormatFloatRequired formats a float64 to string, always producing output
-// even for zero. Use for required numeric fields where 0 is a valid value.
-func FormatFloatRequired(f float64) string {
-	s := fmt.Sprintf("%f", f)
-	s = strings.TrimRight(s, "0")
-	s = strings.TrimRight(s, ".")
-	return s
-}
-
-// ParseNumber parses a string to int, returning 0 if empty or invalid.
-func ParseNumber(s string) (int, error) {
-	if s == "" {
-		return 0, nil
-	}
-	return strconv.Atoi(s)
-}
-
-// ParseFloat parses a string to float64, returning 0 if empty or invalid.
-func ParseFloat(s string) (float64, error) {
-	if s == "" {
-		return 0, nil
-	}
-	return strconv.ParseFloat(s, 64)
-}
-
-// AddChecksum prepends CRC32 checksum to payload.
+// AddChecksum prepends the payload's CRC32, little-endian.
 //
 //	+------------------+---------------------------+
 //	|      4 bytes     |        Variable           |
@@ -143,12 +103,10 @@ func ParseFloat(s string) (float64, error) {
 //	+------------------+---------------------------+
 //
 // @see 3.10.
-func AddChecksum(payload string) []byte {
-	checksum := Crc32Checksum(payload)
-
-	result := make([]byte, 4+len(payload))
-	binary.LittleEndian.PutUint32(result[0:4], checksum)
-	copy(result[4:], []byte(payload))
+func AddChecksum(tabbedPayload string) []byte {
+	result := make([]byte, 4+len(tabbedPayload))
+	binary.LittleEndian.PutUint32(result[0:4], CRC32(tabbedPayload))
+	copy(result[4:], tabbedPayload)
 
 	return result
 }

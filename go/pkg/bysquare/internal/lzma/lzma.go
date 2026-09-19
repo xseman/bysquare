@@ -1,14 +1,19 @@
-package bysquare
+// Package lzma is the LZMA1 framing the specification uses: lc=3, lp=0,
+// pb=2, a 2^17 dictionary, and a stream whose 13-byte header the QR payload
+// omits and Decompress puts back.
+package lzma
 
 import (
 	"bytes"
 	"fmt"
 	"io"
+	"slices"
 
 	"github.com/ulikunitz/xz/lzma"
 )
 
-// CompressLZMA compresses data using LZMA1 with custom settings.
+// Compress packs data as an LZMA1 stream (lc=3, lp=0, pb=2, 128 KiB
+// dictionary), the 13-byte stream header included.
 //
 // LZMA stream output (13-byte header + compressed body):
 //
@@ -24,7 +29,7 @@ import (
 // BySquare stores only the body (skips the 13-byte header)
 //
 // @see 3.11.
-func CompressLZMA(data []byte) ([]byte, error) {
+func Compress(data []byte) ([]byte, error) {
 	var buf bytes.Buffer
 
 	// Create LZMA writer with custom properties
@@ -55,7 +60,8 @@ func CompressLZMA(data []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// DecompressLZMA decompresses LZMA data.
+// Decompress unpacks a headerless LZMA1 body of the given uncompressed
+// size, rebuilding the stream header the QR leaves out.
 //
 // The input is the LZMA body without the 13-byte header. The header must be
 // reconstructed before the LZMA library can decompress:
@@ -70,7 +76,7 @@ func CompressLZMA(data []byte) ([]byte, error) {
 // Properties byte: (pb * 5 + lp) * 9 + lc = (2 * 5 + 0) * 9 + 3 = 0x5D
 //
 // @see 3.11.
-func DecompressLZMA(compressed []byte, uncompressedSize int) ([]byte, error) {
+func Decompress(compressed []byte, uncompressedSize int) ([]byte, error) {
 	header := make([]byte, 13)
 
 	// Properties: 0x5D (lc=3, lp=0, pb=2)
@@ -92,8 +98,7 @@ func DecompressLZMA(compressed []byte, uncompressedSize int) ([]byte, error) {
 	header[11] = 0x00
 	header[12] = 0x00
 
-	// Combine header with compressed data
-	fullData := append(header, compressed...)
+	fullData := slices.Concat(header, compressed)
 
 	// Create LZMA reader
 	reader, err := lzma.NewReader(bytes.NewReader(fullData))

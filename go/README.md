@@ -50,36 +50,6 @@ Or download pre-built binaries from [GitHub Releases](https://github.com/xseman/
 > `releases/latest` may point at a TypeScript release with no Go assets.
 > Set `VERSION` to the Go release you want and use the tagged URL below.
 
-#### Debian/Ubuntu (.deb)
-
-```bash
-VERSION=0.4.0
-BASE=https://github.com/xseman/bysquare/releases/download/go/v${VERSION}
-
-# AMD64
-curl -LO ${BASE}/bysquare_${VERSION}_amd64.deb
-sudo dpkg -i bysquare_${VERSION}_amd64.deb
-
-# ARM64
-curl -LO ${BASE}/bysquare_${VERSION}_arm64.deb
-sudo dpkg -i bysquare_${VERSION}_arm64.deb
-```
-
-#### RHEL/Fedora/CentOS (.rpm)
-
-```bash
-VERSION=0.4.0
-BASE=https://github.com/xseman/bysquare/releases/download/go/v${VERSION}
-
-# AMD64 (x86_64)
-curl -LO ${BASE}/bysquare-${VERSION}-1.x86_64.rpm
-sudo rpm -i bysquare-${VERSION}-1.x86_64.rpm
-
-# ARM64 (aarch64)
-curl -LO ${BASE}/bysquare-${VERSION}-1.aarch64.rpm
-sudo rpm -i bysquare-${VERSION}-1.aarch64.rpm
-```
-
 #### Standalone Binaries
 
 ```bash
@@ -98,6 +68,8 @@ sudo mv bysquare-darwin-arm64 /usr/local/bin/bysquare
 # Windows AMD64
 curl -LO ${BASE}/bysquare-windows-amd64.exe
 ```
+
+Every binary is listed in the release's `CHECKSUMS.txt`.
 
 ### FFI Shared Library
 
@@ -145,15 +117,17 @@ import (
 func main() {
 	// Create payment data
 	payment := pay.DataModel{
-		Payments: []pay.SimplePayment{
+		Payments: []pay.Payment{
 			{
-				Type:           pay.PaymentTypePaymentOrder,
-				Amount:         123.45,
-				CurrencyCode:   pay.CurrencyEUR,
-				VariableSymbol: "987654",
-				Beneficiary:    &pay.Beneficiary{Name: "John Doe"},
-				BankAccounts: []pay.BankAccount{
-					{IBAN: "SK9611000000002918599669"},
+				Type: pay.PaymentOptionsPaymentOrder,
+				SimplePayment: pay.SimplePayment{
+					Amount:         123.45,
+					CurrencyCode:   pay.CurrencyEUR,
+					VariableSymbol: "987654",
+					Beneficiary:    pay.Beneficiary{Name: "John Doe"},
+					BankAccounts: []pay.BankAccount{
+						{IBAN: "SK9611000000002918599669"},
+					},
 				},
 			},
 		},
@@ -217,7 +191,7 @@ func main() {
 		MonetarySummary: invoice.MonetarySummary{},
 	}
 
-	qr, err := invoice.Encode(&model)
+	qr, err := invoice.Encode(model)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -316,3 +290,17 @@ See detailed examples in [`../examples/ffi/`](../examples/ffi/):
 - **Python**: [`../examples/ffi/python/`](../examples/ffi/python/)
 - **Swift**: [`../examples/ffi/swift/`](../examples/ffi/swift/)
 - **Dart**: [`../examples/ffi/dart/`](../examples/ffi/dart/)
+
+## Development
+
+```sh
+make build              # bin/bysquare
+make build-ffi          # the C shared library, needs cgo
+make test               # go vet + go test -race ./...
+make lint               # golangci-lint, config in .golangci.yml
+make fmt                # gofumpt
+make cover              # coverage report
+```
+
+`CLAUDE.md` maps the packages and states the conventions, for people and
+agents alike.

@@ -1,7 +1,10 @@
+// Command bysquare encodes and decodes the Slovak PAY by square and
+// Invoice by square QR payloads.
 package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -13,7 +16,7 @@ import (
 	"github.com/xseman/bysquare/go/pkg/bysquare/pay"
 )
 
-// version is set by ldflags at build time
+// version is set by ldflags at build time.
 var version = "dev"
 
 const (
@@ -76,16 +79,19 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
+
 	case "invoice":
 		if err := cmdInvoice(os.Args[2:]); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
+
 	case "decode":
 		if err := cmdDecodeAuto(os.Args[2:]); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
+
 	case "version", "-v", "--version":
 		fmt.Printf("bysquare version %s\n", version)
 	case "help", "-h", "--help":
@@ -99,7 +105,7 @@ func main() {
 
 func cmdPay(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("missing subcommand: encode or decode")
+		return errors.New("missing subcommand: encode or decode")
 	}
 
 	switch args[0] {
@@ -130,7 +136,7 @@ func cmdPayEncode(args []string) error {
 
 	positionals := fs.Args()
 	if len(positionals) < 1 {
-		return fmt.Errorf("missing input file argument")
+		return errors.New("missing input file argument")
 	}
 
 	ver, err := parseVersion(*specVersion)
@@ -165,6 +171,7 @@ func encodePayAndPrint(data []byte, cfg pay.EncodeOptions) error {
 	}
 
 	fmt.Println(qr)
+
 	return nil
 }
 
@@ -180,10 +187,12 @@ func processPayFile(inputFile string, cfg pay.EncodeOptions) error {
 			if line == "" {
 				continue
 			}
+
 			if err := encodePayAndPrint([]byte(line), cfg); err != nil {
 				return err
 			}
 		}
+
 		return nil
 	}
 
@@ -206,7 +215,7 @@ func cmdPayDecode(args []string) error {
 
 func cmdInvoice(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("missing subcommand: encode or decode")
+		return errors.New("missing subcommand: encode or decode")
 	}
 
 	switch args[0] {
@@ -234,7 +243,7 @@ func cmdInvoiceEncode(args []string) error {
 
 	positionals := fs.Args()
 	if len(positionals) < 1 {
-		return fmt.Errorf("missing input file argument")
+		return errors.New("missing input file argument")
 	}
 
 	ver, err := parseVersion(*specVersion)
@@ -258,7 +267,7 @@ func cmdInvoiceEncode(args []string) error {
 			return fmt.Errorf("failed to parse JSON: %w", err)
 		}
 
-		qr, err := invoice.Encode(&model, cfg)
+		qr, err := invoice.Encode(model, cfg)
 		if err != nil {
 			return fmt.Errorf("encoding failed: %w", err)
 		}
@@ -295,27 +304,27 @@ func cmdDecodeAuto(args []string) error {
 		return fmt.Errorf("decoding failed: invalid base32hex: %w", err)
 	}
 
-	if len(rawBytes) < 2 {
-		return fmt.Errorf("decoding failed: input too short")
-	}
+	header := bysquare.DecodeHeader(rawBytes)
 
-	header := bysquare.ParseBysquareHeader(rawBytes[:2])
-
-	switch header.BySquareType {
+	switch header.BysquareType {
 	case 0x00:
 		model, err := pay.Decode(qr)
 		if err != nil {
 			return fmt.Errorf("decoding failed: %w", err)
 		}
+
 		return printJSON(model)
+
 	case 0x01:
 		model, err := invoice.Decode(qr)
 		if err != nil {
 			return fmt.Errorf("decoding failed: %w", err)
 		}
+
 		return printJSON(model)
+
 	default:
-		return fmt.Errorf("unsupported bysquareType: %d", header.BySquareType)
+		return fmt.Errorf("unsupported bysquareType: %d", header.BysquareType)
 	}
 }
 
@@ -326,6 +335,7 @@ func readInput(path string) ([]byte, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to read stdin: %w", err)
 		}
+
 		return data, nil
 	}
 
@@ -333,13 +343,14 @@ func readInput(path string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read input: %w", err)
 	}
+
 	return data, nil
 }
 
 // readQRInput extracts a QR string from args (literal, file, or stdin).
 func readQRInput(args []string) (string, error) {
 	if len(args) < 1 {
-		return "", fmt.Errorf("missing QR string argument")
+		return "", errors.New("missing QR string argument")
 	}
 
 	qrInput := args[0]
@@ -349,6 +360,7 @@ func readQRInput(args []string) (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("failed to read stdin: %w", err)
 		}
+
 		return strings.TrimSpace(string(input)), nil
 	}
 
@@ -357,6 +369,7 @@ func readQRInput(args []string) (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("failed to read file: %w", err)
 		}
+
 		return strings.TrimSpace(string(content)), nil
 	}
 
@@ -381,6 +394,8 @@ func printJSON(v interface{}) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal JSON: %w", err)
 	}
+
 	fmt.Println(string(output))
+
 	return nil
 }

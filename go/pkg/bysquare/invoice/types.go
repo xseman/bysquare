@@ -7,6 +7,7 @@ package invoice
 // InvoiceDocumentType represents the document type within bysquareType=1.
 type InvoiceDocumentType uint8
 
+// The document types, @see Appendix A.
 const (
 	InvoiceDocumentTypeInvoice         InvoiceDocumentType = 0x00
 	InvoiceDocumentTypeProformaInvoice InvoiceDocumentType = 0x01
@@ -22,6 +23,7 @@ const (
 // declaration order defined in the specification.
 type PaymentMean uint8
 
+// The payment means, combined with bitwise OR.
 const (
 	PaymentMeanMoneyTransfer  PaymentMean = 0b0000001
 	PaymentMeanCash           PaymentMean = 0b0000010

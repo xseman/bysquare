@@ -1,69 +1,88 @@
 package invoice
 
 import (
-	"fmt"
 	"regexp"
+	"strconv"
 
 	"github.com/xseman/bysquare/go/pkg/bysquare"
+	"github.com/xseman/bysquare/go/pkg/bysquare/internal/field"
 )
 
-// ValidationError represents a validation error with path information.
-type ValidationError struct {
-	Message string
-	Path    string
-}
-
-func (e *ValidationError) Error() string {
-	return fmt.Sprintf("%s (path: %s)", e.Message, e.Path)
+var errorMessages = struct {
+	Required                     string
+	CurrencyCode                 string
+	CountryCode                  string
+	ForeignCurrencyGroup         string
+	InvoiceLineChoice            string
+	ItemChoice                   string
+	TaxCategorySummariesEmpty    string
+	ClassifiedTaxCategory        string
+	Date                         string
+	PeriodDateConsistency        string
+	NumberOfInvoiceLinesPositive string
+}{
+	Required:                     "Field is required.",
+	CurrencyCode:                 "Invalid currency code. Must be 3 uppercase letters (ISO 4217).",
+	CountryCode:                  "Invalid country code. Must be 3 uppercase letters.",
+	ForeignCurrencyGroup:         "When any of foreignCurrencyCode, currRate, or referenceCurrRate is set, all three are required.",
+	InvoiceLineChoice:            "Exactly one of numberOfInvoiceLines or singleInvoiceLine must be set.",
+	ItemChoice:                   "Exactly one of itemName or itemEanCode must be set.",
+	TaxCategorySummariesEmpty:    "At least one tax category summary is required.",
+	ClassifiedTaxCategory:        "classifiedTaxCategory must be a number in range [0, 1].",
+	Date:                         "Invalid date. Make sure YYYYMMDD format is used.",
+	PeriodDateConsistency:        "Both periodFromDate and periodToDate must be set together, and periodFromDate must not be after periodToDate.",
+	NumberOfInvoiceLinesPositive: "numberOfInvoiceLines must be a positive integer.",
 }
 
 var currencyCodeRegex = regexp.MustCompile(`^[A-Z]{3}$`)
 
-func isValidYyyymmdd(date string) bool {
-	return bysquare.IsValidDate(date)
-}
-
-func validateRequired(value string, path string) error {
+func validateRequired(value, path string) error {
 	if value == "" {
-		return &ValidationError{
-			Message: "field is required",
+		return &bysquare.ValidationError{
+			Message: errorMessages.Required,
 			Path:    path,
 		}
 	}
+
 	return nil
 }
 
-func validateDate(value string, path string) error {
-	if value != "" && !isValidYyyymmdd(value) {
-		return &ValidationError{
-			Message: "invalid date format (YYYYMMDD)",
+func validateDate(value, path string) error {
+	if value != "" && !field.IsValidDate(value) {
+		return &bysquare.ValidationError{
+			Message: errorMessages.Date,
 			Path:    path,
 		}
 	}
+
 	return nil
 }
 
 // ValidateDataModel validates the complete invoice data model.
-func ValidateDataModel(model *DataModel) error {
+func ValidateDataModel(model DataModel) error {
 	if err := validateRequired(model.InvoiceID, "invoiceId"); err != nil {
 		return err
 	}
+
 	if err := validateRequired(model.IssueDate, "issueDate"); err != nil {
 		return err
 	}
+
 	if err := validateDate(model.IssueDate, "issueDate"); err != nil {
 		return err
 	}
+
 	if err := validateDate(model.TaxPointDate, "taxPointDate"); err != nil {
 		return err
 	}
+
 	if err := validateRequired(model.LocalCurrencyCode, "localCurrencyCode"); err != nil {
 		return err
 	}
 
 	if !currencyCodeRegex.MatchString(model.LocalCurrencyCode) {
-		return &ValidationError{
-			Message: "invalid currency code (ISO 4217)",
+		return &bysquare.ValidationError{
+			Message: errorMessages.CurrencyCode,
 			Path:    "localCurrencyCode",
 		}
 	}
@@ -74,15 +93,15 @@ func ValidateDataModel(model *DataModel) error {
 	hasRefRate := model.ReferenceCurrRate != 0
 
 	if hasForeign != hasCurrRate || hasForeign != hasRefRate {
-		return &ValidationError{
-			Message: "when any of foreignCurrencyCode, currRate, or referenceCurrRate is set, all three are required",
+		return &bysquare.ValidationError{
+			Message: errorMessages.ForeignCurrencyGroup,
 			Path:    "foreignCurrencyCode",
 		}
 	}
 
 	if hasForeign && !currencyCodeRegex.MatchString(model.ForeignCurrencyCode) {
-		return &ValidationError{
-			Message: "invalid currency code (ISO 4217)",
+		return &bysquare.ValidationError{
+			Message: errorMessages.CurrencyCode,
 			Path:    "foreignCurrencyCode",
 		}
 	}
@@ -91,22 +110,26 @@ func ValidateDataModel(model *DataModel) error {
 	if err := validateRequired(model.SupplierParty.PartyName, "supplierParty.partyName"); err != nil {
 		return err
 	}
+
 	if err := validateRequired(model.SupplierParty.PostalAddress.StreetName, "supplierParty.postalAddress.streetName"); err != nil {
 		return err
 	}
+
 	if err := validateRequired(model.SupplierParty.PostalAddress.CityName, "supplierParty.postalAddress.cityName"); err != nil {
 		return err
 	}
+
 	if err := validateRequired(model.SupplierParty.PostalAddress.PostalZone, "supplierParty.postalAddress.postalZone"); err != nil {
 		return err
 	}
+
 	if err := validateRequired(model.SupplierParty.PostalAddress.Country, "supplierParty.postalAddress.country"); err != nil {
 		return err
 	}
 
 	if model.SupplierParty.PostalAddress.Country != "" && !currencyCodeRegex.MatchString(model.SupplierParty.PostalAddress.Country) {
-		return &ValidationError{
-			Message: "invalid country code (3 uppercase letters)",
+		return &bysquare.ValidationError{
+			Message: errorMessages.CountryCode,
 			Path:    "supplierParty.postalAddress.country",
 		}
 	}
@@ -118,71 +141,84 @@ func ValidateDataModel(model *DataModel) error {
 
 	// Invoice line choice: exactly one of numberOfInvoiceLines or singleInvoiceLine
 	hasLineCount := model.NumberOfInvoiceLines != nil
+
 	hasSingleLine := model.SingleInvoiceLine != nil
 	if hasLineCount == hasSingleLine {
-		return &ValidationError{
-			Message: "exactly one of numberOfInvoiceLines or singleInvoiceLine must be set",
+		return &bysquare.ValidationError{
+			Message: errorMessages.InvoiceLineChoice,
 			Path:    "numberOfInvoiceLines",
 		}
 	}
 
 	if hasLineCount && *model.NumberOfInvoiceLines <= 0 {
-		return &ValidationError{
-			Message: "numberOfInvoiceLines must be a positive integer",
+		return &bysquare.ValidationError{
+			Message: errorMessages.NumberOfInvoiceLinesPositive,
 			Path:    "numberOfInvoiceLines",
 		}
 	}
 
-	// Single invoice line validation
-	if model.SingleInvoiceLine != nil {
-		line := model.SingleInvoiceLine
-		hasName := line.ItemName != ""
-		hasEan := line.ItemEanCode != ""
-		if hasName == hasEan {
-			return &ValidationError{
-				Message: "exactly one of itemName or itemEanCode must be set",
-				Path:    "singleInvoiceLine.itemName",
-			}
-		}
-
-		hasFrom := line.PeriodFromDate != ""
-		hasTo := line.PeriodToDate != ""
-		if hasFrom != hasTo {
-			return &ValidationError{
-				Message: "both periodFromDate and periodToDate must be set together",
-				Path:    "singleInvoiceLine.periodFromDate",
-			}
-		}
-		if hasFrom && hasTo {
-			if err := validateDate(line.PeriodFromDate, "singleInvoiceLine.periodFromDate"); err != nil {
-				return err
-			}
-			if err := validateDate(line.PeriodToDate, "singleInvoiceLine.periodToDate"); err != nil {
-				return err
-			}
-			if line.PeriodFromDate > line.PeriodToDate {
-				return &ValidationError{
-					Message: "periodFromDate must not be after periodToDate",
-					Path:    "singleInvoiceLine.periodFromDate",
-				}
-			}
-		}
+	if err := validateSingleInvoiceLine(model.SingleInvoiceLine); err != nil {
+		return err
 	}
 
 	// Tax category summaries
 	if len(model.TaxCategorySummaries) == 0 {
-		return &ValidationError{
-			Message: "at least one tax category summary is required",
+		return &bysquare.ValidationError{
+			Message: errorMessages.TaxCategorySummariesEmpty,
 			Path:    "taxCategorySummaries",
 		}
 	}
 
 	for idx, summary := range model.TaxCategorySummaries {
 		if summary.ClassifiedTaxCategory < 0 || summary.ClassifiedTaxCategory > 1 {
-			return &ValidationError{
-				Message: "classifiedTaxCategory must be a number in range [0, 1]",
-				Path:    fmt.Sprintf("taxCategorySummaries[%d].classifiedTaxCategory", idx),
+			return &bysquare.ValidationError{
+				Message: errorMessages.ClassifiedTaxCategory,
+				Path:    "taxCategorySummaries[" + strconv.Itoa(idx) + "].classifiedTaxCategory",
 			}
+		}
+	}
+
+	return nil
+}
+
+// validateSingleInvoiceLine checks the optional single line: exactly one of
+// the name or the EAN code, and a period given as both dates or neither.
+func validateSingleInvoiceLine(line *SingleInvoiceLine) error {
+	if line == nil {
+		return nil
+	}
+
+	if hasName, hasEan := line.ItemName != "", line.ItemEanCode != ""; hasName == hasEan {
+		return &bysquare.ValidationError{
+			Message: errorMessages.ItemChoice,
+			Path:    "singleInvoiceLine.itemName",
+		}
+	}
+
+	hasFrom, hasTo := line.PeriodFromDate != "", line.PeriodToDate != ""
+	if hasFrom != hasTo {
+		return &bysquare.ValidationError{
+			Message: errorMessages.PeriodDateConsistency,
+			Path:    "singleInvoiceLine.periodFromDate",
+		}
+	}
+
+	if !hasFrom {
+		return nil
+	}
+
+	if err := validateDate(line.PeriodFromDate, "singleInvoiceLine.periodFromDate"); err != nil {
+		return err
+	}
+
+	if err := validateDate(line.PeriodToDate, "singleInvoiceLine.periodToDate"); err != nil {
+		return err
+	}
+
+	if line.PeriodFromDate > line.PeriodToDate {
+		return &bysquare.ValidationError{
+			Message: errorMessages.PeriodDateConsistency,
+			Path:    "singleInvoiceLine.periodFromDate",
 		}
 	}
 

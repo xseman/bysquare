@@ -27,7 +27,7 @@ func TestDecodeInvalidInput(t *testing.T) {
 
 func TestRoundTrip(t *testing.T) {
 	numLines := 3
-	model := &DataModel{
+	model := DataModel{
 		DocumentType:        InvoiceDocumentTypeInvoice,
 		InvoiceID:           "INV-2024-001",
 		IssueDate:           "20240115",
@@ -99,21 +99,27 @@ func TestRoundTrip(t *testing.T) {
 	if decoded.InvoiceID != model.InvoiceID {
 		t.Errorf("InvoiceID: got %q, want %q", decoded.InvoiceID, model.InvoiceID)
 	}
+
 	if decoded.DocumentType != model.DocumentType {
 		t.Errorf("DocumentType: got %d, want %d", decoded.DocumentType, model.DocumentType)
 	}
+
 	if decoded.IssueDate != model.IssueDate {
 		t.Errorf("IssueDate: got %q, want %q", decoded.IssueDate, model.IssueDate)
 	}
+
 	if decoded.LocalCurrencyCode != model.LocalCurrencyCode {
 		t.Errorf("LocalCurrencyCode: got %q, want %q", decoded.LocalCurrencyCode, model.LocalCurrencyCode)
 	}
+
 	if decoded.ForeignCurrencyCode != model.ForeignCurrencyCode {
 		t.Errorf("ForeignCurrencyCode: got %q, want %q", decoded.ForeignCurrencyCode, model.ForeignCurrencyCode)
 	}
+
 	if decoded.SupplierParty.PartyName != model.SupplierParty.PartyName {
 		t.Errorf("SupplierParty.PartyName: got %q, want %q", decoded.SupplierParty.PartyName, model.SupplierParty.PartyName)
 	}
+
 	if decoded.CustomerParty.PartyName != model.CustomerParty.PartyName {
 		t.Errorf("CustomerParty.PartyName: got %q, want %q", decoded.CustomerParty.PartyName, model.CustomerParty.PartyName)
 	}
@@ -121,6 +127,7 @@ func TestRoundTrip(t *testing.T) {
 	if decoded.SupplierParty.Contact == nil {
 		t.Fatal("SupplierParty.Contact should not be nil")
 	}
+
 	if decoded.SupplierParty.Contact.Email != model.SupplierParty.Contact.Email {
 		t.Errorf("Contact.Email: got %q, want %q", decoded.SupplierParty.Contact.Email, model.SupplierParty.Contact.Email)
 	}
@@ -128,6 +135,7 @@ func TestRoundTrip(t *testing.T) {
 	if len(decoded.TaxCategorySummaries) != len(model.TaxCategorySummaries) {
 		t.Fatalf("TaxCategorySummaries count: got %d, want %d", len(decoded.TaxCategorySummaries), len(model.TaxCategorySummaries))
 	}
+
 	if decoded.TaxCategorySummaries[0].TaxAmount != model.TaxCategorySummaries[0].TaxAmount {
 		t.Errorf("TaxAmount: got %v, want %v", decoded.TaxCategorySummaries[0].TaxAmount, model.TaxCategorySummaries[0].TaxAmount)
 	}
@@ -138,7 +146,7 @@ func TestRoundTrip(t *testing.T) {
 }
 
 func TestRoundTripWithSingleInvoiceLine(t *testing.T) {
-	model := &DataModel{
+	model := DataModel{
 		DocumentType:      InvoiceDocumentTypeInvoice,
 		InvoiceID:         "INV-LINE",
 		IssueDate:         "20240201",
@@ -181,9 +189,11 @@ func TestRoundTripWithSingleInvoiceLine(t *testing.T) {
 	if decoded.SingleInvoiceLine == nil {
 		t.Fatal("SingleInvoiceLine should not be nil")
 	}
+
 	if decoded.SingleInvoiceLine.ItemName != "Service XYZ" {
 		t.Errorf("ItemName: got %q, want %q", decoded.SingleInvoiceLine.ItemName, "Service XYZ")
 	}
+
 	if decoded.SingleInvoiceLine.InvoicedQuantity != 10 {
 		t.Errorf("InvoicedQuantity: got %v, want 10", decoded.SingleInvoiceLine.InvoicedQuantity)
 	}

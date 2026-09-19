@@ -1,4 +1,4 @@
-package bysquare
+package field
 
 import "testing"
 

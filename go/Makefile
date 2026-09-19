@@ -1,5 +1,8 @@
 .PHONY: help build build-ffi test cover fmt vet lint quality clean
 
+GOFUMPT ?= go run mvdan.cc/gofumpt@v0.12.0
+GOLANGCI ?= go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.0
+
 OUTPUT_DIR ?= bin
 VERSION ?= $(shell jq -r '.go' ../.github/.release-manifest.json 2>/dev/null || echo "dev")
 
@@ -26,28 +29,29 @@ build-ffi:
 		CGO_ENABLED=1 go build -buildmode=c-shared -ldflags="-X main.version=$(VERSION)" -o $(OUTPUT_DIR)/libbysquare.so ./cmd/libbysquare; \
 	fi
 
-## test: Run tests
+## test: go vet, then every test with the race detector (what CI runs)
 test:
-	@go test -v -race ./...
+	@go vet ./...
+	@go test -race ./...
 
 ## cover: Run tests with coverage
 cover:
-	@go test -race -coverprofile=coverage.out -covermode=atomic ./...
+	@go test -race -coverpkg=./... -coverprofile=coverage.out -covermode=atomic ./...
 
-## fmt: Format code
+## fmt: gofumpt everything
 fmt:
-	@gofmt -s -w .
+	@$(GOFUMPT) -w .
 
 ## vet: Run go vet
 vet:
 	@go vet ./...
 
-## lint: Run golangci-lint
+## lint: golangci-lint with .golangci.yml, the style gate CI runs; must be clean
 lint:
-	@golangci-lint run ./...
+	@$(GOLANGCI) run
 
-## quality: Run formatting and vet
-quality: fmt vet
+## quality: fmt, vet and lint
+quality: fmt vet lint
 
 ## clean: Remove build artifacts
 clean:

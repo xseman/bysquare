@@ -122,6 +122,24 @@ func deserialize(tabString string) (DataModel, error) {
 // header and the two-byte payload length, LZMA body, then the CRC32 the
 // payload was checksummed with.
 //
+// Input binary structure (after base32hex decoding):
+//
+//	+------------------+------------------+-----------------------------+
+//	|     2 bytes      |     2 bytes      |          Variable           |
+//	+------------------+------------------+-----------------------------+
+//	| Bysquare Header  | Payload Length   |         LZMA Body           |
+//	| (4 nibbles)      | (little-endian)  |  (compressed CRC+payload)   |
+//	+------------------+------------------+-----------------------------+
+//
+// After LZMA decompression:
+//
+//	+------------------+---------------------------+
+//	|      4 bytes     |        Variable           |
+//	+------------------+---------------------------+
+//	| CRC32 Checksum   | Tab-separated payload     |
+//	| (little-endian)  | (UTF-8 encoded)           |
+//	+------------------+---------------------------+
+//
 // @see 3.16.
 func Decode(qr string) (DataModel, error) {
 	bytes, err := bysquare.DecodeBase32Hex(qr, true)

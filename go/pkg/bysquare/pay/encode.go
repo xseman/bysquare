@@ -98,6 +98,30 @@ func removeDiacritics(model *DataModel) {
 // default, serialized, checksummed, LZMA-compressed without the stream
 // header, framed by the bysquare header and the payload length, then
 // base32hex without padding.
+//
+// Complete BySquare QR binary structure:
+//
+//	+------------------+------------------+-----------------------------+
+//	|     2 bytes      |     2 bytes      |          Variable           |
+//	+------------------+------------------+-----------------------------+
+//	| Bysquare Header  | Payload Length   |         LZMA Body           |
+//	| (4 nibbles)      | (little-endian)  |  (compressed CRC+payload)   |
+//	+------------------+------------------+-----------------------------+
+//	        |                  |                       |
+//	        v                  v                       v
+//	+-----+-----+-----+-----+  +-----+-----+  +---------+-----------+
+//	| 4b  | 4b  | 4b  | 4b  |  | LSB | MSB |  | Header  | Body      |
+//	+-----+-----+-----+-----+  +-----+-----+  | (13B)   | (var)     |
+//	| Type| Ver | Doc |Resv |  |   Length  |  | omitted |           |
+//	+-----+-----+-----+-----+  +-----------+  +---------+-----------+
+//	                                                      |
+//	                                                      v
+//	                                          +--------+-------------+
+//	                                          | CRC32  | Tab-sep     |
+//	                                          | (4B)   | payload     |
+//	                                          +--------+-------------+
+//
+// @see 3.16.
 func Encode(model DataModel, opts ...EncodeOptions) (string, error) {
 	options := defaultEncodeOptions()
 	if len(opts) > 0 {

@@ -46,6 +46,14 @@ func BuildBysquareHeader(bySquareType, version, documentType, reserved uint8) ([
 // DecodeHeader extracts the four nibbles from a 2-byte header. A shorter
 // input reads as zeros, the way the TypeScript implementation's does.
 //
+//	Byte 0                  Byte 1
+//	+----------+----------+----------+----------+
+//	|   4 bit  |   4 bit  |   4 bit  |   4 bit  |
+//	+----------+----------+----------+----------+
+//	| BySqType | Version  | DocType  | Reserved |
+//	| (0-15)   | (0-15)   | (0-15)   | (0-15)   |
+//	+----------+----------+----------+----------+
+//
 // @see 3.5.
 func DecodeHeader(header []byte) Header {
 	var b0, b1 uint8

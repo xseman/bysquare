@@ -45,24 +45,14 @@ var DecodeErrorMessage = struct {
 
 // DecodeError is a QR string that does not decode: bad base32hex, a version
 // this implementation does not know, a failed decompression or a checksum
-// that does not match. Extensions carry the details, the wrapped cause
-// among them under "error".
+// that does not match. Extensions carry the details, the cause among them
+// under "error".
 type DecodeError struct {
 	Message    string
 	Extensions map[string]any
 }
 
 func (e *DecodeError) Error() string { return e.Message }
-
-// Unwrap exposes the cause stored under Extensions["error"], so errors.Is
-// and errors.As see through a DecodeError.
-func (e *DecodeError) Unwrap() error {
-	if err, ok := e.Extensions["error"].(error); ok {
-		return err
-	}
-
-	return nil
-}
 
 // ValidationError is a field that fails validation: Message explains what is
 // wrong, Path leads to the field in the data model, as in

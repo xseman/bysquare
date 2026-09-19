@@ -95,9 +95,3 @@ func Deburr(s string) string {
 
 	return result.String()
 }
-
-// DeburrLetter is the Latin-1 letter or ligature r deburrs to, "" for a rune
-// that is not in the table.
-func DeburrLetter(r rune) string {
-	return deburredLettersMap[r]
-}

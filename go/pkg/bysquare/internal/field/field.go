@@ -38,30 +38,24 @@ func FormatFloat(f float64) string {
 }
 
 // FormatFloatRequired prints a number that is always present, zero included,
-// without trailing zeros.
+// the shortest way that reads back exactly, as Number.toString does.
 func FormatFloatRequired(f float64) string {
-	s := fmt.Sprintf("%f", f)
-	s = strings.TrimRight(s, "0")
-
-	return strings.TrimRight(s, ".")
+	return strconv.FormatFloat(f, 'f', -1, 64)
 }
 
-// ParseNumber reads an int field, 0 for an empty one.
-func ParseNumber(s string) (int, error) {
-	if s == "" {
-		return 0, nil
-	}
+// ParseNumber reads an int field: 0 for an empty or unreadable one, the way
+// Number() yields NaN and the TypeScript decoder moves on.
+func ParseNumber(s string) int {
+	n, _ := strconv.Atoi(s)
 
-	return strconv.Atoi(s)
+	return n
 }
 
-// ParseFloat reads a float field, 0 for an empty one.
-func ParseFloat(s string) (float64, error) {
-	if s == "" {
-		return 0, nil
-	}
+// ParseFloat reads a float field, 0 for an empty or unreadable one.
+func ParseFloat(s string) float64 {
+	f, _ := strconv.ParseFloat(s, 64)
 
-	return strconv.ParseFloat(s, 64)
+	return f
 }
 
 var (
@@ -70,9 +64,6 @@ var (
 
 	// BIC regex: 4 letters + 2 letters + 2 alphanumeric + optional 3 alphanumeric
 	bicRegex = regexp.MustCompile(`^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$`)
-
-	// YYYYMMDD date regex per v1.2 specification
-	dateRegex = regexp.MustCompile(`^\d{8}$`)
 )
 
 // IsValidIBAN checks if IBAN is valid using MOD-97 algorithm.
@@ -132,38 +123,9 @@ func IsValidCurrencyCode(code string) bool {
 	return true
 }
 
-// IsValidDate checks if date is in YYYYMMDD format per v1.2 specification.
-// It performs both format validation and semantic calendar validation.
+// IsValidDate checks that date is YYYYMMDD and names a real calendar day.
 func IsValidDate(date string) bool {
-	if !dateRegex.MatchString(date) {
-		return false
-	}
+	_, err := time.Parse("20060102", date)
 
-	year := 0
-	month := 0
-	day := 0
-
-	if _, err := fmt.Sscanf(date[0:4], "%d", &year); err != nil {
-		return false
-	}
-
-	if _, err := fmt.Sscanf(date[4:6], "%d", &month); err != nil {
-		return false
-	}
-
-	if _, err := fmt.Sscanf(date[6:8], "%d", &day); err != nil {
-		return false
-	}
-
-	if month < 1 || month > 12 {
-		return false
-	}
-
-	if day < 1 || day > 31 {
-		return false
-	}
-
-	t := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
-
-	return t.Year() == year && int(t.Month()) == month && t.Day() == day
+	return err == nil
 }

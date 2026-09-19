@@ -27,13 +27,13 @@ func deserialize(tabString string) (DataModel, error) {
 	}
 
 	invoiceID := next()
-	paymentsCount, _ := field.ParseNumber(next())
+	paymentsCount := field.ParseNumber(next())
 
 	payments := make([]Payment, 0, max(paymentsCount, 0))
 
 	for range paymentsCount {
-		paymentType, _ := field.ParseNumber(next())
-		amount, _ := field.ParseFloat(next())
+		paymentType := field.ParseNumber(next())
+		amount := field.ParseFloat(next())
 
 		payment := Payment{
 			Type: PaymentOptions(paymentType),
@@ -50,7 +50,7 @@ func deserialize(tabString string) (DataModel, error) {
 			},
 		}
 
-		bankAccountsCount, _ := field.ParseNumber(next())
+		bankAccountsCount := field.ParseNumber(next())
 
 		for range bankAccountsCount {
 			iban := next()
@@ -64,8 +64,8 @@ func deserialize(tabString string) (DataModel, error) {
 		// The extension fields are consumed whenever the flag is "1", whatever
 		// the payment type, to keep the rest aligned.
 		if next() == "1" {
-			day, _ := field.ParseNumber(next())
-			month, _ := field.ParseNumber(next())
+			day := field.ParseNumber(next())
+			month := field.ParseNumber(next())
 			periodicity := Periodicity(next())
 			lastDate := next()
 
@@ -78,15 +78,15 @@ func deserialize(tabString string) (DataModel, error) {
 		}
 
 		if next() == "1" {
-			scheme, _ := field.ParseNumber(next())
-			ddType, _ := field.ParseNumber(next())
+			scheme := field.ParseNumber(next())
+			ddType := field.ParseNumber(next())
 			ddVariableSymbol := next()
 			ddSpecificSymbol := next()
 			ddOriginatorsReferenceInformation := next()
 			mandateID := next()
 			creditorID := next()
 			contractID := next()
-			maxAmount, _ := field.ParseFloat(next())
+			maxAmount := field.ParseFloat(next())
 			validTillDate := next()
 
 			if payment.Type == PaymentOptionsDirectDebit {

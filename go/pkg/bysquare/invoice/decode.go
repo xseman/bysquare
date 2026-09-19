@@ -31,15 +31,11 @@ func deserialize(tabString string, documentType InvoiceDocumentType) DataModel {
 	}
 
 	nextFloat := func() float64 {
-		value, _ := field.ParseFloat(next())
-
-		return value
+		return field.ParseFloat(next())
 	}
 
 	nextInt := func() int {
-		value, _ := field.ParseNumber(next())
-
-		return value
+		return field.ParseNumber(next())
 	}
 
 	model := DataModel{DocumentType: documentType}

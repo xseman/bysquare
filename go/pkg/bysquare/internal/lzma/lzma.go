@@ -5,6 +5,7 @@ package lzma
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"slices"
@@ -78,25 +79,9 @@ func Compress(data []byte) ([]byte, error) {
 // @see 3.11.
 func Decompress(compressed []byte, uncompressedSize int) ([]byte, error) {
 	header := make([]byte, 13)
-
-	// Properties: 0x5D (lc=3, lp=0, pb=2)
-	header[0] = 0x5D
-
-	// Dictionary size: 2^17 = 0x00020000 (little-endian)
-	header[1] = 0x00
-	header[2] = 0x00
-	header[3] = 0x02
-	header[4] = 0x00
-
-	// Uncompressed size (8 bytes, little-endian)
-	header[5] = byte(uncompressedSize & 0xFF)
-	header[6] = byte((uncompressedSize >> 8) & 0xFF)
-	header[7] = byte((uncompressedSize >> 16) & 0xFF)
-	header[8] = byte((uncompressedSize >> 24) & 0xFF)
-	header[9] = 0x00
-	header[10] = 0x00
-	header[11] = 0x00
-	header[12] = 0x00
+	header[0] = 0x5D                                   // lc=3, lp=0, pb=2
+	binary.LittleEndian.PutUint32(header[1:], 131_072) // dictionary size 2^17
+	binary.LittleEndian.PutUint64(header[5:], uint64(uncompressedSize))
 
 	fullData := slices.Concat(header, compressed)
 

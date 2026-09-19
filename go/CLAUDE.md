@@ -51,7 +51,7 @@ pure Go; only the FFI target needs cgo.
   keeps private (field helpers, LZMA framing) lives under
   `pkg/bysquare/internal`. Check `typescript/src` before adding an export.
 - Domain terms come from the Slovak specification: cite the section
-  (`@see Appendix A, Table 12.`) instead of writing Slovak in a comment.
+  (`@see Appendix A, Table 12`) instead of writing Slovak in a comment.
   Every comment is in English.
 - The serializers must stay byte-identical to the TypeScript
   implementation: the same model has to produce the same tab-separated

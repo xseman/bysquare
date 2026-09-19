@@ -31,7 +31,7 @@ const (
 
 // Periodicity is how often a standing order pays.
 //
-// @see Appendix A, Table 9.
+// @see Appendix A, Table 9
 type Periodicity string
 
 // The periodicities.
@@ -83,7 +83,7 @@ type BankAccount struct {
 
 // DirectDebitScheme is the direct debit scheme.
 //
-// @see Appendix A, Table 13.
+// @see Appendix A, Table 13
 type DirectDebitScheme uint8
 
 // The direct debit schemes.
@@ -94,7 +94,7 @@ const (
 
 // DirectDebitType is the direct debit type.
 //
-// @see Appendix A, Table 12.
+// @see Appendix A, Table 12
 type DirectDebitType uint8
 
 // The direct debit types.

@@ -56,6 +56,9 @@ linters:
             allow-first-in-block: true
             allow-whole-block: false
             case-max-lines: 2
+        godot:
+            exclude:
+                - '^ @see ' # a reference to the specification, not a sentence
         gocritic:
             enabled-tags:
                 - diagnostic

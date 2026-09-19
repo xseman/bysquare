@@ -52,9 +52,7 @@ func deserialize(tabString string, documentType InvoiceDocumentType) DataModel {
 	model.DeliveryNoteID = next()
 	model.LocalCurrencyCode = next()
 	model.ForeignCurrencyCode = next()
-
 	model.CurrRate = nextFloat()
-
 	model.ReferenceCurrRate = nextFloat()
 
 	// Supplier party (13 fields)
@@ -105,7 +103,6 @@ func deserialize(tabString string, documentType InvoiceDocumentType) DataModel {
 	lineItemEanCode := next()
 	linePeriodFrom := next()
 	linePeriodTo := next()
-
 	lineQuantity := nextFloat()
 
 	hasSingleLine := lineOrderID != "" ||
@@ -133,20 +130,17 @@ func deserialize(tabString string, documentType InvoiceDocumentType) DataModel {
 
 	model.TaxCategorySummaries = make([]TaxCategorySummary, taxCount)
 	for t := range taxCount {
-		model.TaxCategorySummaries[t].ClassifiedTaxCategory = nextFloat()
-
-		model.TaxCategorySummaries[t].TaxExclusiveAmount = nextFloat()
-
-		model.TaxCategorySummaries[t].TaxAmount = nextFloat()
-
-		model.TaxCategorySummaries[t].AlreadyClaimedTaxExclusiveAmount = nextFloat()
-
-		model.TaxCategorySummaries[t].AlreadyClaimedTaxAmount = nextFloat()
+		model.TaxCategorySummaries[t] = TaxCategorySummary{
+			ClassifiedTaxCategory:            nextFloat(),
+			TaxExclusiveAmount:               nextFloat(),
+			TaxAmount:                        nextFloat(),
+			AlreadyClaimedTaxExclusiveAmount: nextFloat(),
+			AlreadyClaimedTaxAmount:          nextFloat(),
+		}
 	}
 
 	// Monetary summary (2 fields)
 	model.MonetarySummary.PayableRoundingAmount = nextFloat()
-
 	model.MonetarySummary.PaidDepositsAmount = nextFloat()
 
 	// Payment means bitmask

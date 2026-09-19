@@ -7,6 +7,7 @@ import (
 
 func minimalInvoice() *DataModel {
 	numLines := 5
+
 	return &DataModel{
 		DocumentType:      InvoiceDocumentTypeInvoice,
 		InvoiceID:         "INV-001",

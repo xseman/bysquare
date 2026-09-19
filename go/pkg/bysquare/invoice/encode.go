@@ -1,7 +1,9 @@
 package invoice
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/xseman/bysquare/go/pkg/bysquare"
@@ -77,10 +79,11 @@ func serialize(data *DataModel) string {
 
 	// Invoice detail
 	if data.NumberOfInvoiceLines != nil {
-		push(fmt.Sprintf("%d", *data.NumberOfInvoiceLines))
+		push(strconv.Itoa(*data.NumberOfInvoiceLines))
 	} else {
 		push("")
 	}
+
 	push(bysquare.Sanitize(data.InvoiceDescription))
 
 	// Single invoice line (7 fields)
@@ -94,13 +97,14 @@ func serialize(data *DataModel) string {
 		push(bysquare.Sanitize(line.PeriodToDate))
 		pushFloat(line.InvoicedQuantity)
 	} else {
-		for i := 0; i < 7; i++ {
+		for range 7 {
 			push("")
 		}
 	}
 
 	// Tax category summaries
-	push(fmt.Sprintf("%d", len(data.TaxCategorySummaries)))
+	push(strconv.Itoa(len(data.TaxCategorySummaries)))
+
 	for _, tcs := range data.TaxCategorySummaries {
 		// classifiedTaxCategory, taxExclusiveAmount, taxAmount are required
 		// fields where 0 is a valid value, so always serialize them (not
@@ -118,7 +122,7 @@ func serialize(data *DataModel) string {
 
 	// Payment means bitmask
 	if data.PaymentMeans != 0 {
-		push(fmt.Sprintf("%d", data.PaymentMeans))
+		push(strconv.FormatUint(uint64(data.PaymentMeans), 10))
 	} else {
 		push("")
 	}
@@ -174,8 +178,9 @@ func Encode(model *DataModel, opts ...EncodeOptions) (string, error) {
 	}
 
 	if len(payloadCompressed) < 13 {
-		return "", fmt.Errorf("compressed payload too short")
+		return "", errors.New("compressed payload too short")
 	}
+
 	lzmaBody := payloadCompressed[13:]
 
 	bysquareType := uint8(0x01)

@@ -2,6 +2,7 @@ package invoice
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -19,9 +20,12 @@ func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel
 		if i < len(data) {
 			v := data[i]
 			i++
+
 			return v
 		}
+
 		i++
+
 		return ""
 	}
 
@@ -30,6 +34,7 @@ func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel
 		if v == "" {
 			return ""
 		}
+
 		return v
 	}
 
@@ -54,10 +59,12 @@ func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel
 	model.ForeignCurrencyCode = nextString()
 
 	var err error
+
 	model.CurrRate, err = nextFloat()
 	if err != nil {
 		return nil, fmt.Errorf("invalid currRate: %w", err)
 	}
+
 	model.ReferenceCurrRate, err = nextFloat()
 	if err != nil {
 		return nil, fmt.Errorf("invalid referenceCurrRate: %w", err)
@@ -78,6 +85,7 @@ func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel
 
 	contactName := nextString()
 	contactTelephone := nextString()
+
 	contactEmail := nextString()
 	if contactName != "" || contactTelephone != "" || contactEmail != "" {
 		model.SupplierParty.Contact = &Contact{
@@ -99,9 +107,11 @@ func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel
 	if err != nil {
 		return nil, fmt.Errorf("invalid numberOfInvoiceLines: %w", err)
 	}
+
 	if numLines > 0 {
 		model.NumberOfInvoiceLines = &numLines
 	}
+
 	model.InvoiceDescription = nextString()
 
 	// Single invoice line (7 fields)
@@ -111,6 +121,7 @@ func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel
 	lineItemEanCode := nextString()
 	linePeriodFrom := nextString()
 	linePeriodTo := nextString()
+
 	lineQuantity, err := nextFloat()
 	if err != nil {
 		return nil, fmt.Errorf("invalid invoicedQuantity: %w", err)
@@ -143,23 +154,27 @@ func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel
 	}
 
 	model.TaxCategorySummaries = make([]TaxCategorySummary, taxCount)
-	for t := 0; t < taxCount; t++ {
+	for t := range taxCount {
 		model.TaxCategorySummaries[t].ClassifiedTaxCategory, err = nextFloat()
 		if err != nil {
 			return nil, fmt.Errorf("invalid classifiedTaxCategory[%d]: %w", t, err)
 		}
+
 		model.TaxCategorySummaries[t].TaxExclusiveAmount, err = nextFloat()
 		if err != nil {
 			return nil, fmt.Errorf("invalid taxExclusiveAmount[%d]: %w", t, err)
 		}
+
 		model.TaxCategorySummaries[t].TaxAmount, err = nextFloat()
 		if err != nil {
 			return nil, fmt.Errorf("invalid taxAmount[%d]: %w", t, err)
 		}
+
 		model.TaxCategorySummaries[t].AlreadyClaimedTaxExclusiveAmount, err = nextFloat()
 		if err != nil {
 			return nil, fmt.Errorf("invalid alreadyClaimedTaxExclusiveAmount[%d]: %w", t, err)
 		}
+
 		model.TaxCategorySummaries[t].AlreadyClaimedTaxAmount, err = nextFloat()
 		if err != nil {
 			return nil, fmt.Errorf("invalid alreadyClaimedTaxAmount[%d]: %w", t, err)
@@ -171,6 +186,7 @@ func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel
 	if err != nil {
 		return nil, fmt.Errorf("invalid payableRoundingAmount: %w", err)
 	}
+
 	model.MonetarySummary.PaidDepositsAmount, err = nextFloat()
 	if err != nil {
 		return nil, fmt.Errorf("invalid paidDepositsAmount: %w", err)
@@ -181,6 +197,7 @@ func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel
 	if err != nil {
 		return nil, fmt.Errorf("invalid paymentMeans: %w", err)
 	}
+
 	model.PaymentMeans = uint8(pm)
 
 	return model, nil
@@ -221,7 +238,7 @@ func Decode(qr string) (*DataModel, error) {
 	}
 
 	if len(decompressed) < 4 {
-		return nil, fmt.Errorf("decompressed data too short for checksum")
+		return nil, errors.New("decompressed data too short for checksum")
 	}
 
 	checksum := binary.LittleEndian.Uint32(decompressed[:4])

@@ -20,6 +20,7 @@ func TestValidateDataModel(t *testing.T) {
 			model: func() *DataModel {
 				m := minimalInvoice()
 				m.InvoiceID = ""
+
 				return m
 			}(),
 			wantErr: true,
@@ -29,6 +30,7 @@ func TestValidateDataModel(t *testing.T) {
 			model: func() *DataModel {
 				m := minimalInvoice()
 				m.IssueDate = ""
+
 				return m
 			}(),
 			wantErr: true,
@@ -38,6 +40,7 @@ func TestValidateDataModel(t *testing.T) {
 			model: func() *DataModel {
 				m := minimalInvoice()
 				m.SupplierParty.PartyName = ""
+
 				return m
 			}(),
 			wantErr: true,
@@ -47,6 +50,7 @@ func TestValidateDataModel(t *testing.T) {
 			model: func() *DataModel {
 				m := minimalInvoice()
 				m.CustomerParty.PartyName = ""
+
 				return m
 			}(),
 			wantErr: true,
@@ -58,6 +62,7 @@ func TestValidateDataModel(t *testing.T) {
 				m.SingleInvoiceLine = &SingleInvoiceLine{
 					ItemName: "Test",
 				}
+
 				return m
 			}(),
 			wantErr: true,
@@ -67,6 +72,7 @@ func TestValidateDataModel(t *testing.T) {
 			model: func() *DataModel {
 				m := minimalInvoice()
 				m.TaxCategorySummaries = []TaxCategorySummary{}
+
 				return m
 			}(),
 			wantErr: true,
@@ -76,6 +82,7 @@ func TestValidateDataModel(t *testing.T) {
 			model: func() *DataModel {
 				m := minimalInvoice()
 				m.TaxCategorySummaries[0].ClassifiedTaxCategory = 1.5
+
 				return m
 			}(),
 			wantErr: true,
@@ -85,6 +92,7 @@ func TestValidateDataModel(t *testing.T) {
 			model: func() *DataModel {
 				m := minimalInvoice()
 				m.ForeignCurrencyCode = "USD"
+
 				return m
 			}(),
 			wantErr: true,
@@ -96,6 +104,7 @@ func TestValidateDataModel(t *testing.T) {
 				m.ForeignCurrencyCode = "USD"
 				m.CurrRate = 1.1
 				m.ReferenceCurrRate = 1
+
 				return m
 			}(),
 			wantErr: false,
@@ -108,6 +117,7 @@ func TestValidateDataModel(t *testing.T) {
 				m.SingleInvoiceLine = &SingleInvoiceLine{
 					ItemName: "Service",
 				}
+
 				return m
 			}(),
 			wantErr: false,
@@ -118,6 +128,7 @@ func TestValidateDataModel(t *testing.T) {
 				m := minimalInvoice()
 				m.NumberOfInvoiceLines = nil
 				m.SingleInvoiceLine = &SingleInvoiceLine{}
+
 				return m
 			}(),
 			wantErr: true,

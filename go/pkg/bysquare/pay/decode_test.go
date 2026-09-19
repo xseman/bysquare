@@ -170,12 +170,15 @@ func TestRoundTrip(t *testing.T) {
 				if got.Type != want.Type {
 					t.Errorf("payment[%d].Type: got %d, want %d", i, got.Type, want.Type)
 				}
+
 				if got.Amount != want.Amount {
 					t.Errorf("payment[%d].Amount: got %v, want %v", i, got.Amount, want.Amount)
 				}
+
 				if got.CurrencyCode != want.CurrencyCode {
 					t.Errorf("payment[%d].CurrencyCode: got %q, want %q", i, got.CurrencyCode, want.CurrencyCode)
 				}
+
 				if len(got.BankAccounts) != len(want.BankAccounts) {
 					t.Errorf("payment[%d].BankAccounts count: got %d, want %d", i, len(got.BankAccounts), len(want.BankAccounts))
 				}

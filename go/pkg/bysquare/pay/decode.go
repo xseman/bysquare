@@ -2,6 +2,7 @@ package pay
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -9,7 +10,7 @@ import (
 )
 
 // ErrMissingBankAccount indicates no bank accounts provided.
-var ErrMissingBankAccount = fmt.Errorf("at least one bank account required")
+var ErrMissingBankAccount = errors.New("at least one bank account required")
 
 // Decode parses a BySquare QR string back to DataModel.
 //
@@ -39,7 +40,7 @@ func Decode(qr string) (DataModel, error) {
 	}
 
 	if len(bytes) < 4 {
-		return DataModel{}, fmt.Errorf("invalid data: too short")
+		return DataModel{}, errors.New("invalid data: too short")
 	}
 
 	headerBytes := bytes[0:2]
@@ -60,7 +61,7 @@ func Decode(qr string) (DataModel, error) {
 	}
 
 	if len(decompressed) < 4 {
-		return DataModel{}, fmt.Errorf("decompressed data too short")
+		return DataModel{}, errors.New("decompressed data too short")
 	}
 
 	checksumBytes := decompressed[0:4]
@@ -71,7 +72,7 @@ func Decode(qr string) (DataModel, error) {
 
 	actualChecksum := bysquare.Crc32Checksum(payloadStr)
 	if actualChecksum != expectedChecksum {
-		return DataModel{}, fmt.Errorf("CRC32 checksum mismatch")
+		return DataModel{}, errors.New("CRC32 checksum mismatch")
 	}
 
 	model, err := deserialize(payloadStr)
@@ -88,7 +89,7 @@ func deserialize(data string) (DataModel, error) {
 	idx := 0
 
 	if len(parts) < 2 {
-		return DataModel{}, fmt.Errorf("insufficient data fields")
+		return DataModel{}, errors.New("insufficient data fields")
 	}
 
 	invoiceID := parts[idx]
@@ -98,6 +99,7 @@ func deserialize(data string) (DataModel, error) {
 	if err != nil {
 		return DataModel{}, fmt.Errorf("invalid payments count: %w", err)
 	}
+
 	idx++
 
 	model := DataModel{
@@ -105,9 +107,9 @@ func deserialize(data string) (DataModel, error) {
 		Payments:  make([]SimplePayment, 0, paymentsCount),
 	}
 
-	for i := 0; i < paymentsCount; i++ {
+	for range paymentsCount {
 		if idx+9 > len(parts) {
-			return DataModel{}, fmt.Errorf("insufficient payment fields")
+			return DataModel{}, errors.New("insufficient payment fields")
 		}
 
 		paymentType, _ := bysquare.ParseNumber(parts[idx])
@@ -145,13 +147,14 @@ func deserialize(data string) (DataModel, error) {
 		accountsCount, _ := bysquare.ParseNumber(parts[idx])
 		idx++
 
-		for j := 0; j < accountsCount; j++ {
+		for range accountsCount {
 			if idx+2 > len(parts) {
-				return DataModel{}, fmt.Errorf("insufficient bank account fields")
+				return DataModel{}, errors.New("insufficient bank account fields")
 			}
 
 			iban := parts[idx]
 			idx++
+
 			if iban == "" {
 				return DataModel{}, ErrMissingBankAccount
 			}
@@ -167,14 +170,15 @@ func deserialize(data string) (DataModel, error) {
 
 		// Standing order extension
 		if idx >= len(parts) {
-			return DataModel{}, fmt.Errorf("missing standing order extension field")
+			return DataModel{}, errors.New("missing standing order extension field")
 		}
+
 		standingOrderExt := parts[idx]
 		idx++
 
 		if standingOrderExt == "1" {
 			if idx+4 > len(parts) {
-				return DataModel{}, fmt.Errorf("insufficient standing order fields")
+				return DataModel{}, errors.New("insufficient standing order fields")
 			}
 
 			day, _ := bysquare.ParseNumber(parts[idx])
@@ -198,14 +202,15 @@ func deserialize(data string) (DataModel, error) {
 
 		// Direct debit extension
 		if idx >= len(parts) {
-			return DataModel{}, fmt.Errorf("missing direct debit extension field")
+			return DataModel{}, errors.New("missing direct debit extension field")
 		}
+
 		directDebitExt := parts[idx]
 		idx++
 
 		if directDebitExt == "1" {
 			if idx+10 > len(parts) {
-				return DataModel{}, fmt.Errorf("insufficient direct debit fields")
+				return DataModel{}, errors.New("insufficient direct debit fields")
 			}
 
 			scheme, _ := bysquare.ParseNumber(parts[idx])
@@ -249,13 +254,14 @@ func deserialize(data string) (DataModel, error) {
 	}
 
 	// Parse beneficiary blocks (one per payment)
-	for i := 0; i < paymentsCount; i++ {
+	for i := range paymentsCount {
 		if idx+3 > len(parts) {
 			model.Payments[i].Beneficiary = &Beneficiary{
 				Name:   "",
 				Street: "",
 				City:   "",
 			}
+
 			continue
 		}
 

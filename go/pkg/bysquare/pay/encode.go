@@ -1,7 +1,9 @@
 package pay
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/xseman/bysquare/go/pkg/bysquare"
@@ -70,8 +72,9 @@ func Encode(model DataModel, opts ...EncodeOptions) (string, error) {
 	}
 
 	if len(payloadCompressed) < 13 {
-		return "", fmt.Errorf("compressed payload too short")
+		return "", errors.New("compressed payload too short")
 	}
+
 	lzmaBody := payloadCompressed[13:]
 
 	header := bysquare.BuildBysquareHeader(0x00, uint8(options.Version), 0x00, 0x00)
@@ -89,48 +92,57 @@ func Encode(model DataModel, opts ...EncodeOptions) (string, error) {
 func serialize(model DataModel) string {
 	parts := make([]string, 0, 100)
 
-	parts = append(parts, bysquare.Sanitize(model.InvoiceID))
-	parts = append(parts, fmt.Sprintf("%d", len(model.Payments)))
+	parts = append(parts,
+		bysquare.Sanitize(model.InvoiceID),
+		strconv.Itoa(len(model.Payments)),
+	)
 
 	for _, payment := range model.Payments {
-		parts = append(parts, fmt.Sprintf("%d", payment.Type))
-		parts = append(parts, bysquare.FormatFloat(payment.Amount))
-		parts = append(parts, bysquare.Sanitize(string(payment.CurrencyCode)))
-		parts = append(parts, bysquare.Sanitize(payment.PaymentDueDate))
-		parts = append(parts, bysquare.Sanitize(payment.VariableSymbol))
-		parts = append(parts, bysquare.Sanitize(payment.ConstantSymbol))
-		parts = append(parts, bysquare.Sanitize(payment.SpecificSymbol))
-		parts = append(parts, bysquare.Sanitize(payment.OriginatorsReferenceInformation))
-		parts = append(parts, bysquare.Sanitize(payment.PaymentNote))
-
-		parts = append(parts, fmt.Sprintf("%d", len(payment.BankAccounts)))
+		parts = append(parts,
+			fmt.Sprintf("%d", payment.Type),
+			bysquare.FormatFloat(payment.Amount),
+			bysquare.Sanitize(string(payment.CurrencyCode)),
+			bysquare.Sanitize(payment.PaymentDueDate),
+			bysquare.Sanitize(payment.VariableSymbol),
+			bysquare.Sanitize(payment.ConstantSymbol),
+			bysquare.Sanitize(payment.SpecificSymbol),
+			bysquare.Sanitize(payment.OriginatorsReferenceInformation),
+			bysquare.Sanitize(payment.PaymentNote),
+			strconv.Itoa(len(payment.BankAccounts)),
+		)
 		for _, account := range payment.BankAccounts {
-			parts = append(parts, bysquare.Sanitize(account.IBAN))
-			parts = append(parts, bysquare.Sanitize(account.BIC))
+			parts = append(parts,
+				bysquare.Sanitize(account.IBAN),
+				bysquare.Sanitize(account.BIC),
+			)
 		}
 
 		if payment.Type == PaymentTypeStandingOrder && payment.StandingOrderExt != nil {
-			parts = append(parts, "1")
-			parts = append(parts, fmt.Sprintf("%d", payment.StandingOrderExt.Day))
-			parts = append(parts, fmt.Sprintf("%d", payment.StandingOrderExt.Month))
-			parts = append(parts, bysquare.Sanitize(string(payment.StandingOrderExt.Periodicity)))
-			parts = append(parts, bysquare.Sanitize(payment.StandingOrderExt.LastDate))
+			parts = append(parts,
+				"1",
+				strconv.FormatUint(uint64(payment.StandingOrderExt.Day), 10),
+				strconv.FormatUint(uint64(payment.StandingOrderExt.Month), 10),
+				bysquare.Sanitize(string(payment.StandingOrderExt.Periodicity)),
+				bysquare.Sanitize(payment.StandingOrderExt.LastDate),
+			)
 		} else {
 			parts = append(parts, "0")
 		}
 
 		if payment.Type == PaymentTypeDirectDebit && payment.DirectDebitExt != nil {
-			parts = append(parts, "1")
-			parts = append(parts, fmt.Sprintf("%d", payment.DirectDebitExt.DirectDebitScheme))
-			parts = append(parts, fmt.Sprintf("%d", payment.DirectDebitExt.DirectDebitType))
-			parts = append(parts, bysquare.Sanitize(payment.DirectDebitExt.VariableSymbol))
-			parts = append(parts, bysquare.Sanitize(payment.DirectDebitExt.SpecificSymbol))
-			parts = append(parts, bysquare.Sanitize(payment.DirectDebitExt.OriginatorsReferenceInfo))
-			parts = append(parts, bysquare.Sanitize(payment.DirectDebitExt.MandateID))
-			parts = append(parts, bysquare.Sanitize(payment.DirectDebitExt.CreditorID))
-			parts = append(parts, bysquare.Sanitize(payment.DirectDebitExt.ContractID))
-			parts = append(parts, bysquare.FormatFloat(payment.DirectDebitExt.MaxAmount))
-			parts = append(parts, bysquare.Sanitize(payment.DirectDebitExt.ValidTillDate))
+			parts = append(parts,
+				"1",
+				strconv.FormatUint(uint64(payment.DirectDebitExt.DirectDebitScheme), 10),
+				strconv.FormatUint(uint64(payment.DirectDebitExt.DirectDebitType), 10),
+				bysquare.Sanitize(payment.DirectDebitExt.VariableSymbol),
+				bysquare.Sanitize(payment.DirectDebitExt.SpecificSymbol),
+				bysquare.Sanitize(payment.DirectDebitExt.OriginatorsReferenceInfo),
+				bysquare.Sanitize(payment.DirectDebitExt.MandateID),
+				bysquare.Sanitize(payment.DirectDebitExt.CreditorID),
+				bysquare.Sanitize(payment.DirectDebitExt.ContractID),
+				bysquare.FormatFloat(payment.DirectDebitExt.MaxAmount),
+				bysquare.Sanitize(payment.DirectDebitExt.ValidTillDate),
+			)
 		} else {
 			parts = append(parts, "0")
 		}
@@ -138,9 +150,11 @@ func serialize(model DataModel) string {
 
 	for _, payment := range model.Payments {
 		if payment.Beneficiary != nil {
-			parts = append(parts, bysquare.Sanitize(payment.Beneficiary.Name))
-			parts = append(parts, bysquare.Sanitize(payment.Beneficiary.Street))
-			parts = append(parts, bysquare.Sanitize(payment.Beneficiary.City))
+			parts = append(parts,
+				bysquare.Sanitize(payment.Beneficiary.Name),
+				bysquare.Sanitize(payment.Beneficiary.Street),
+				bysquare.Sanitize(payment.Beneficiary.City),
+			)
 		} else {
 			parts = append(parts, "", "", "")
 		}
@@ -156,13 +170,16 @@ func removeDiacritics(model *DataModel) {
 		if payment.PaymentNote != "" {
 			payment.PaymentNote = bysquare.Deburr(payment.PaymentNote)
 		}
+
 		if payment.Beneficiary != nil {
 			if payment.Beneficiary.Name != "" {
 				payment.Beneficiary.Name = bysquare.Deburr(payment.Beneficiary.Name)
 			}
+
 			if payment.Beneficiary.Street != "" {
 				payment.Beneficiary.Street = bysquare.Deburr(payment.Beneficiary.Street)
 			}
+
 			if payment.Beneficiary.City != "" {
 				payment.Beneficiary.City = bysquare.Deburr(payment.Beneficiary.City)
 			}

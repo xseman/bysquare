@@ -36,7 +36,7 @@ jobs:
 
             - uses: actions/setup-go@v6
               with:
-                  go-version: "stable"
+                  go-version-file: go/go.mod
                   cache-dependency-path: go/go.sum
 
             - name: Run tests with coverage
@@ -63,14 +63,11 @@ jobs:
 
             - uses: actions/setup-go@v6
               with:
-                  go-version: "stable"
+                  go-version-file: go/go.mod
                   cache-dependency-path: go/go.sum
 
-            - name: golangci-lint
-              uses: golangci/golangci-lint-action@v9
-              with:
-                  version: latest
-                  working-directory: ./go
+            - working-directory: ./go
+              run: make lint
 
     build:
         name: Build
@@ -81,7 +78,7 @@ jobs:
 
             - uses: actions/setup-go@v6
               with:
-                  go-version: "stable"
+                  go-version-file: go/go.mod
                   cache-dependency-path: go/go.sum
 
             - name: Build binaries

@@ -1,3 +1,6 @@
+// Command libbysquare is the C shared library: the encoders and decoders
+// behind a handful of extern functions, with every result on the C heap for
+// the caller to free.
 package main
 
 // FFI Lifecycle:
@@ -36,6 +39,7 @@ package main
 #include <string.h>
 */
 import "C"
+
 import (
 	"encoding/json"
 	"fmt"
@@ -46,7 +50,8 @@ import (
 	"github.com/xseman/bysquare/go/pkg/bysquare/pay"
 )
 
-// version is set by ldflags at build time
+// version is set by ldflags at build time. The shared library keeps its own
+// rather than reading the CLI's: nothing here should pull in an HTTP client.
 var version = "dev"
 
 // Bitflags and configuration constants
@@ -82,7 +87,7 @@ func bysquare_pay_encode(input *C.char, config C.int) (ret *C.char) {
 
 	var model pay.DataModel
 	if err := json.Unmarshal(inputBytes, &model); err != nil {
-		return C.CString(fmt.Sprintf("ERROR:JSON parse error: %s", err.Error()))
+		return C.CString("ERROR:JSON parse error: " + err.Error())
 	}
 
 	if config == -1 {
@@ -97,7 +102,7 @@ func bysquare_pay_encode(input *C.char, config C.int) (ret *C.char) {
 
 	result, err := pay.Encode(model, opts)
 	if err != nil {
-		return C.CString(fmt.Sprintf("ERROR:%s", err.Error()))
+		return C.CString("ERROR:" + err.Error())
 	}
 
 	return C.CString(result)
@@ -119,12 +124,12 @@ func bysquare_pay_decode(qrString *C.char) (ret *C.char) {
 
 	model, err := pay.Decode(input)
 	if err != nil {
-		return C.CString(fmt.Sprintf("ERROR:%s", err.Error()))
+		return C.CString("ERROR:" + err.Error())
 	}
 
 	output, err := json.Marshal(model)
 	if err != nil {
-		return C.CString(fmt.Sprintf("ERROR:JSON marshal error: %s", err.Error()))
+		return C.CString("ERROR:JSON marshal error: " + err.Error())
 	}
 
 	return C.CString(string(output))
@@ -147,7 +152,7 @@ func bysquare_invoice_encode(input *C.char, config C.int) (ret *C.char) {
 
 	var model invoice.DataModel
 	if err := json.Unmarshal(inputBytes, &model); err != nil {
-		return C.CString(fmt.Sprintf("ERROR:JSON parse error: %s", err.Error()))
+		return C.CString("ERROR:JSON parse error: " + err.Error())
 	}
 
 	if config == -1 {
@@ -161,7 +166,7 @@ func bysquare_invoice_encode(input *C.char, config C.int) (ret *C.char) {
 
 	result, err := invoice.Encode(&model, opts)
 	if err != nil {
-		return C.CString(fmt.Sprintf("ERROR:%s", err.Error()))
+		return C.CString("ERROR:" + err.Error())
 	}
 
 	return C.CString(result)
@@ -183,12 +188,12 @@ func bysquare_invoice_decode(qrString *C.char) (ret *C.char) {
 
 	model, err := invoice.Decode(input)
 	if err != nil {
-		return C.CString(fmt.Sprintf("ERROR:%s", err.Error()))
+		return C.CString("ERROR:" + err.Error())
 	}
 
 	output, err := json.Marshal(model)
 	if err != nil {
-		return C.CString(fmt.Sprintf("ERROR:JSON marshal error: %s", err.Error()))
+		return C.CString("ERROR:JSON marshal error: " + err.Error())
 	}
 
 	return C.CString(string(output))
@@ -208,6 +213,7 @@ func bysquare_detect_type(qrString *C.char) C.int {
 	}
 
 	header := bysquare.ParseBysquareHeader(rawBytes[:2])
+
 	return C.int(header.BySquareType)
 }
 

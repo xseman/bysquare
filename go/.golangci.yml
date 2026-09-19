@@ -1,0 +1,130 @@
+# Style gate for the Go module. Run it with `make lint`; `golangci-lint fmt` rewrites
+# what the formatters section covers.
+version: "2"
+
+linters:
+    default: none
+    enable:
+        - contextcheck # a context reaches the call that should carry it
+        - copyloopvar # no stale loop-variable captures
+        - dupl # no copy-pasted blocks
+        - durationcheck # no multiplied durations
+        - errcheck # every returned error is handled or explicitly dropped
+        - errname # error types end in Error, sentinels start with Err
+        - errorlint # errors.Is/As instead of == and type asserts
+        - exhaustive # a switch over our own enums covers it or says default
+        - forcetypeassert # no unchecked x.(T)
+        - gocritic # diagnostics and idiom checks
+        - govet
+        - iface # no redundant or unused interfaces
+        - ineffassign
+        - intrange # range over an int instead of the three-clause form
+        - makezero # no append to a len-initialised slice
+        - misspell
+        - nakedret # no naked return past a screenful
+        - nestif # guard clauses instead of a staircase
+        - nilerr # never return nil after a non-nil error
+        - nilnil # no (nil, nil): return a sentinel
+        - nolintlint # every //nolint names a linter and a reason
+        - perfsprint # strconv over fmt, a Builder over += in a loop
+        - predeclared # no shadowing of builtins
+        - recvcheck # one receiver kind per type
+        - revive # Go Code Review Comments
+        - staticcheck
+        - thelper # every test helper calls t.Helper()
+        - unconvert
+        - unparam # no always-constant parameters or results
+        - unused
+        - usestdlibvars
+        - usetesting # t.TempDir/t.Setenv/t.Context over the os calls
+        - wastedassign
+        - whitespace
+        - wsl_v5 # blank lines between logical steps: a block cuddles only with what it uses
+        - nlreturn # blank line before return/break/continue in a longer block
+
+    settings:
+        dupl:
+            threshold: 150
+        exhaustive:
+            default-signifies-exhaustive: true
+        nakedret:
+            max-func-lines: 20
+        nlreturn:
+            block-size: 3
+        wsl_v5:
+            allow-first-in-block: true
+            allow-whole-block: false
+            case-max-lines: 2
+        gocritic:
+            enabled-tags:
+                - diagnostic
+                - style
+                - performance
+            disabled-checks:
+                - rangeValCopy # payments are 176-byte values ranged over a few times; indexing would obscure the loops for nothing measurable
+                - whyNoLint # nolintlint already covers this
+        govet:
+            enable-all: true
+            disable:
+                - fieldalignment # readability beats padding here
+                - shadow
+        nolintlint:
+            require-explanation: true
+            require-specific: true
+            allow-unused: false
+        revive:
+            rules:
+                - name: blank-imports
+                - name: context-as-argument
+                - name: dot-imports
+                - name: empty-block
+                - name: error-naming
+                - name: error-return
+                - name: error-strings
+                - name: errorf
+                - name: exported
+                - name: increment-decrement
+                - name: indent-error-flow
+                - name: package-comments
+                - name: range
+                - name: receiver-naming
+                - name: redefines-builtin-id
+                - name: superfluous-else
+                - name: time-naming
+                - name: unexported-return
+                - name: unreachable-code
+                - name: unused-parameter
+                - name: var-declaration
+                - name: var-naming
+
+    exclusions:
+        presets:
+            - common-false-positives
+        rules:
+            # Test helpers name their receiver after the thing under test and
+            # keep unused parameters to match the production signature.
+            - path: _test\.go$
+              linters:
+                  - unparam
+            # cgo rewrites this file before the linter sees it, so anything
+            # position-based reports what is not there: a checked error reads
+            # as unchecked, the lone import "C" reads as a duplicate, and
+            # nlreturn points past the end of the file.
+            - path: cmd/libbysquare/
+              linters:
+                  - gocritic
+                  - nlreturn
+                  - wsl_v5
+            # pkg is the published API: BysquareHeader and InvoiceDocumentType
+            # are the specification's own terms, and renaming an export is a
+            # breaking change either way.
+            - path: pkg/
+              linters:
+                  - revive
+              text: stutters
+            # Table tests repeat their shape on purpose: the cases are the
+            # point, and folding two tables into one helper hides them.
+            - path: _test\.go$
+              linters:
+                  - dupl
+                  - forcetypeassert # a bad assertion panics, which fails the test loudly

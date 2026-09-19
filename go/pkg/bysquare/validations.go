@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	// IBAN regex: 2 letters + 2 digits + up to 30 alphanumeric
-	ibanRegex = regexp.MustCompile(`^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$`)
+	// IBAN regex: 2 letters + 2 digits + up to 30 alphanumeric.
+	ibanRegex = regexp.MustCompile(`^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$`)
 
 	// BIC regex: 4 letters + 2 letters + 2 alphanumeric + optional 3 alphanumeric
 	bicRegex = regexp.MustCompile(`^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$`)
@@ -34,6 +34,7 @@ func IsValidIBAN(iban string) bool {
 
 	// Convert letters to numbers (A=10, B=11, ..., Z=35)
 	var numeric strings.Builder
+
 	for _, ch := range rearranged {
 		if ch >= 'A' && ch <= 'Z' {
 			fmt.Fprintf(&numeric, "%d", int(ch)-'A'+10)
@@ -44,6 +45,7 @@ func IsValidIBAN(iban string) bool {
 
 	// Calculate mod 97
 	numStr := numeric.String()
+
 	remainder := 0
 	for _, digit := range numStr {
 		remainder = (remainder*10 + int(digit-'0')) % 97
@@ -63,11 +65,13 @@ func IsValidCurrencyCode(code string) bool {
 	if len(code) != 3 {
 		return false
 	}
+
 	for _, ch := range code {
 		if ch < 'A' || ch > 'Z' {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -85,9 +89,11 @@ func IsValidDate(date string) bool {
 	if _, err := fmt.Sscanf(date[0:4], "%d", &year); err != nil {
 		return false
 	}
+
 	if _, err := fmt.Sscanf(date[4:6], "%d", &month); err != nil {
 		return false
 	}
+
 	if _, err := fmt.Sscanf(date[6:8], "%d", &day); err != nil {
 		return false
 	}
@@ -95,10 +101,12 @@ func IsValidDate(date string) bool {
 	if month < 1 || month > 12 {
 		return false
 	}
+
 	if day < 1 || day > 31 {
 		return false
 	}
 
 	t := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
+
 	return t.Year() == year && int(t.Month()) == month && t.Day() == day
 }

@@ -20,6 +20,7 @@ func EncodeClassifierOptions(options []uint16) uint16 {
 	for _, option := range options {
 		sum += option
 	}
+
 	return sum
 }
 
@@ -39,6 +40,7 @@ func DecodeClassifierOptions(encoded uint16) []uint16 {
 	}
 
 	var result []uint16
+
 	sum := encoded
 
 	totalOptions := int(math.Floor(math.Log2(float64(sum)))) + 1

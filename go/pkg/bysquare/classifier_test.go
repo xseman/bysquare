@@ -78,8 +78,8 @@ func TestDecodeClassifierOptions(t *testing.T) {
 			expected: []uint16{monthOctober, monthJuly, monthJanuary},
 		},
 		{
-			name:     "all months (descending)",
-			encoded:  4095,
+			name:    "all months (descending)",
+			encoded: 4095,
 			expected: []uint16{
 				monthDecember, monthNovember, monthOctober,
 				monthSeptember, monthAugust, monthJuly,
@@ -96,6 +96,7 @@ func TestDecodeClassifierOptions(t *testing.T) {
 				t.Errorf("expected %d months, got %d", len(tc.expected), len(result))
 				return
 			}
+
 			for i := range result {
 				if result[i] != tc.expected[i] {
 					t.Errorf("at index %d: expected %d, got %d", i, tc.expected[i], result[i])
@@ -130,6 +131,7 @@ func TestClassifierOptionsRoundTrip(t *testing.T) {
 		if len(decoded) != len(original) {
 			t.Errorf("round trip failed: original length=%d, decoded length=%d",
 				len(original), len(decoded))
+
 			continue
 		}
 
@@ -138,6 +140,7 @@ func TestClassifierOptionsRoundTrip(t *testing.T) {
 		for _, v := range original {
 			originalMap[v] = true
 		}
+
 		for _, v := range decoded {
 			if !originalMap[v] {
 				t.Errorf("round trip failed: decoded contains %d not in original", v)

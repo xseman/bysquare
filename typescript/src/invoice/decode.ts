@@ -134,7 +134,7 @@ export function deserialize(
 		: undefined;
 
 	// Tax category summaries
-	const taxCount = Number(next() ?? "0");
+	const taxCount = Math.min(Number(next() ?? "0"), data.length);
 	const taxCategorySummaries: TaxCategorySummary[] = [];
 
 	for (let t = 0; t < taxCount; t++) {

@@ -29,6 +29,14 @@ import {
 import { InvoiceDocumentType } from "./types.js";
 
 describe("deserialize", () => {
+	test("caps the tax summary count at the fields available", () => {
+		const payload = Array(36).fill("").join("\t") + "\t99999999";
+
+		const result = deserialize(payload, InvoiceDocumentType.Invoice);
+
+		expect(result.taxCategorySummaries.length).toBeLessThanOrEqual(37);
+	});
+
 	test("deserializes basic invoice from tab-separated string", () => {
 		const result = deserialize(INVOICE_SERIALIZED, InvoiceDocumentType.Invoice);
 

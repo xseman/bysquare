@@ -85,7 +85,9 @@ export function deserialize(tabString: string): DataModel {
 
 	// Base fields
 	const invoiceId = decodeString(next());
-	const paymentsCount = Number(next());
+	// A count never exceeds the fields left; a foreign payload (an invoice fed
+	// to this decoder) would otherwise ask for millions of empty payments.
+	const paymentsCount = Math.min(Number(next()), data.length);
 
 	const payments = new Array<Payment>();
 
@@ -102,7 +104,7 @@ export function deserialize(tabString: string): DataModel {
 		const paymentNote = decodeString(next());
 
 		// Bank accounts
-		const bankAccountsCount = Number(next());
+		const bankAccountsCount = Math.min(Number(next()), data.length);
 		const bankAccounts: BankAccount[] = [];
 
 		for (let j = 0; j < bankAccountsCount; j++) {

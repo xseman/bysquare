@@ -205,7 +205,7 @@ export function decode(qr: string): DataModel {
 		});
 	}
 
-	const payloadLength = new DataView(bytes.buffer, bytes.byteOffset + 2, 2).getUint16(0, true);
+	const payloadLength = bytes[2] | (bytes[3] << 8);
 	const decompressed = lzma.decompress(bytes.slice(4), payloadLength);
 
 	if (decompressed.byteLength < 4) {

@@ -122,9 +122,9 @@ func deserialize(tabString string, documentType InvoiceDocumentType) DataModel {
 	}
 
 	// Tax category summaries
-	taxCount := nextInt()
+	taxCount := min(nextInt(), len(data))
 
-	model.TaxCategorySummaries = make([]TaxCategorySummary, taxCount)
+	model.TaxCategorySummaries = make([]TaxCategorySummary, max(taxCount, 0))
 	for t := range taxCount {
 		model.TaxCategorySummaries[t] = TaxCategorySummary{
 			ClassifiedTaxCategory:            nextFloat(),

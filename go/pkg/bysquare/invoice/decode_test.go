@@ -1,6 +1,7 @@
 package invoice
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -22,6 +23,16 @@ func TestDecodeInvalidInput(t *testing.T) {
 				t.Errorf("expected error for input %q", tt.input)
 			}
 		})
+	}
+}
+
+func TestDeserializeCapsTaxCount(t *testing.T) {
+	payload := strings.Repeat("\t", 36) + "99999999"
+
+	model := deserialize(payload, InvoiceDocumentTypeInvoice)
+
+	if len(model.TaxCategorySummaries) > 37 {
+		t.Errorf("got %d summaries from 37 fields", len(model.TaxCategorySummaries))
 	}
 }
 

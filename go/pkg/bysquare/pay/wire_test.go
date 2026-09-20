@@ -156,6 +156,17 @@ func TestDecodeTypeScriptFixtures(t *testing.T) {
 }
 
 func TestDecodeErrors(t *testing.T) {
+	t.Run("caps the payment count at the fields available", func(t *testing.T) {
+		model, err := deserialize("\t99999999")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(model.Payments) > 2 {
+			t.Errorf("got %d payments from two fields", len(model.Payments))
+		}
+	})
+
 	t.Run("missing IBAN", func(t *testing.T) {
 		serialized := "random-id\t1\t1\t100\tEUR\t\t123\t\t\t\t\t1\t\t\t0\t0\t\t\t"
 

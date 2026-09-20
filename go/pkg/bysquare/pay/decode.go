@@ -27,7 +27,10 @@ func deserialize(tabString string) (DataModel, error) {
 	}
 
 	invoiceID := next()
-	paymentsCount := field.ParseNumber(next())
+
+	// A count never exceeds the fields left; a foreign payload (an invoice fed
+	// to this decoder) would otherwise ask for millions of empty payments.
+	paymentsCount := min(field.ParseNumber(next()), len(data))
 
 	payments := make([]Payment, 0, max(paymentsCount, 0))
 
@@ -50,7 +53,7 @@ func deserialize(tabString string) (DataModel, error) {
 			},
 		}
 
-		bankAccountsCount := field.ParseNumber(next())
+		bankAccountsCount := min(field.ParseNumber(next()), len(data))
 
 		for range bankAccountsCount {
 			iban := next()

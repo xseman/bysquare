@@ -14,6 +14,7 @@ func EncodeBase32Hex(input []byte, addPadding bool) string {
 	if !addPadding {
 		enc = enc.WithPadding(base32.NoPadding)
 	}
+
 	return enc.EncodeToString(input)
 }
 
@@ -22,7 +23,7 @@ func EncodeBase32Hex(input []byte, addPadding bool) string {
 // Uses the standard library encoding/base32.HexEncoding with preprocessing for loose mode.
 // Loose mode handles lowercase input and missing padding for QR code compatibility.
 func DecodeBase32Hex(input string, loose bool) ([]byte, error) {
-	if len(input) == 0 {
+	if input == "" {
 		return []byte{}, nil
 	}
 
@@ -43,5 +44,6 @@ func DecodeBase32Hex(input string, loose bool) ([]byte, error) {
 	if err != nil {
 		return nil, ErrInvalidBase32Hex
 	}
+
 	return result, nil
 }

@@ -86,6 +86,7 @@ func BuildPayloadLength(length int) []byte {
 
 	buf := make([]byte, 2)
 	binary.LittleEndian.PutUint16(buf, uint16(length))
+
 	return buf
 }
 
@@ -102,9 +103,11 @@ func FormatFloat(f float64) string {
 	if f == 0 {
 		return ""
 	}
+
 	s := fmt.Sprintf("%f", f)
 	s = strings.TrimRight(s, "0")
 	s = strings.TrimRight(s, ".")
+
 	return s
 }
 
@@ -114,6 +117,7 @@ func FormatFloatRequired(f float64) string {
 	s := fmt.Sprintf("%f", f)
 	s = strings.TrimRight(s, "0")
 	s = strings.TrimRight(s, ".")
+
 	return s
 }
 
@@ -122,6 +126,7 @@ func ParseNumber(s string) (int, error) {
 	if s == "" {
 		return 0, nil
 	}
+
 	return strconv.Atoi(s)
 }
 
@@ -130,6 +135,7 @@ func ParseFloat(s string) (float64, error) {
 	if s == "" {
 		return 0, nil
 	}
+
 	return strconv.ParseFloat(s, 64)
 }
 
@@ -148,7 +154,7 @@ func AddChecksum(payload string) []byte {
 
 	result := make([]byte, 4+len(payload))
 	binary.LittleEndian.PutUint32(result[0:4], checksum)
-	copy(result[4:], []byte(payload))
+	copy(result[4:], payload)
 
 	return result
 }

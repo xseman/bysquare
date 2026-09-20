@@ -7,6 +7,7 @@ package pay
 // PaymentType represents the type of payment.
 type PaymentType uint8
 
+// The payment types, @see Appendix A.
 const (
 	PaymentTypePaymentOrder  PaymentType = 1
 	PaymentTypeStandingOrder PaymentType = 2
@@ -20,6 +21,7 @@ const (
 // but any valid currency code can be used by casting a string to CurrencyCode.
 type CurrencyCode string
 
+// Central European currencies, for convenience; any ISO 4217 code works.
 const (
 	CurrencyEUR CurrencyCode = "EUR"
 	CurrencyCZK CurrencyCode = "CZK"
@@ -30,6 +32,7 @@ const (
 // Periodicity represents payment frequency.
 type Periodicity string
 
+// The standing order periodicities, @see Appendix A.
 const (
 	PeriodicityDaily        Periodicity = "d"
 	PeriodicityWeekly       Periodicity = "w"
@@ -44,6 +47,7 @@ const (
 // Month represents calendar months as bit flags.
 type Month uint16
 
+// The months, as the bit flags a standing order combines.
 const (
 	MonthJanuary   Month = 1 << 0
 	MonthFebruary  Month = 1 << 1
@@ -64,6 +68,7 @@ const (
 // @see Appendix A, Table 13
 type DirectDebitScheme uint8
 
+// The direct debit schemes, @see Appendix A, Table 13.
 const (
 	DirectDebitSchemeOther DirectDebitScheme = 0x00
 	DirectDebitSchemeSepa  DirectDebitScheme = 0x01
@@ -74,6 +79,7 @@ const (
 // @see Appendix A, Table 12
 type DirectDebitType uint8
 
+// The direct debit types, @see Appendix A, Table 12.
 const (
 	DirectDebitTypeOneOff    DirectDebitType = 0x00
 	DirectDebitTypeRecurrent DirectDebitType = 0x01

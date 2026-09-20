@@ -45,7 +45,7 @@ func ValidateSimplePayment(payment *SimplePayment, path string, version bysquare
 	if len(payment.BankAccounts) == 0 {
 		return &ValidationError{
 			Message: "at least one bank account required",
-			Path:    fmt.Sprintf("%s.bankAccounts", path),
+			Path:    path + ".bankAccounts",
 		}
 	}
 
@@ -60,7 +60,7 @@ func ValidateSimplePayment(payment *SimplePayment, path string, version bysquare
 		if !bysquare.IsValidCurrencyCode(string(payment.CurrencyCode)) {
 			return &ValidationError{
 				Message: "invalid currency code (ISO 4217)",
-				Path:    fmt.Sprintf("%s.currencyCode", path),
+				Path:    path + ".currencyCode",
 			}
 		}
 	}
@@ -69,7 +69,7 @@ func ValidateSimplePayment(payment *SimplePayment, path string, version bysquare
 		if !bysquare.IsValidDate(payment.PaymentDueDate) {
 			return &ValidationError{
 				Message: "invalid date format (YYYYMMDD per v1.2 specification)",
-				Path:    fmt.Sprintf("%s.paymentDueDate", path),
+				Path:    path + ".paymentDueDate",
 			}
 		}
 	}
@@ -78,7 +78,7 @@ func ValidateSimplePayment(payment *SimplePayment, path string, version bysquare
 		if payment.StandingOrderExt.LastDate != "" && !bysquare.IsValidDate(payment.StandingOrderExt.LastDate) {
 			return &ValidationError{
 				Message: "invalid date format (YYYYMMDD per v1.2 specification)",
-				Path:    fmt.Sprintf("%s.standingOrderExt.lastDate", path),
+				Path:    path + ".standingOrderExt.lastDate",
 			}
 		}
 	}
@@ -87,7 +87,7 @@ func ValidateSimplePayment(payment *SimplePayment, path string, version bysquare
 		if payment.DirectDebitExt.ValidTillDate != "" && !bysquare.IsValidDate(payment.DirectDebitExt.ValidTillDate) {
 			return &ValidationError{
 				Message: "invalid date format (YYYYMMDD per v1.2 specification)",
-				Path:    fmt.Sprintf("%s.directDebitExt.validTillDate", path),
+				Path:    path + ".directDebitExt.validTillDate",
 			}
 		}
 	}
@@ -95,7 +95,7 @@ func ValidateSimplePayment(payment *SimplePayment, path string, version bysquare
 	if version >= bysquare.Version120 && (payment.Beneficiary == nil || payment.Beneficiary.Name == "") {
 		return &ValidationError{
 			Message: "beneficiary name is required",
-			Path:    fmt.Sprintf("%s.beneficiary.name", path),
+			Path:    path + ".beneficiary.name",
 		}
 	}
 
@@ -107,14 +107,14 @@ func ValidateBankAccount(account *BankAccount, path string) error {
 	if !bysquare.IsValidIBAN(account.IBAN) {
 		return &ValidationError{
 			Message: "invalid IBAN (ISO 13616)",
-			Path:    fmt.Sprintf("%s.iban", path),
+			Path:    path + ".iban",
 		}
 	}
 
 	if account.BIC != "" && !bysquare.IsValidBIC(account.BIC) {
 		return &ValidationError{
 			Message: "invalid BIC (ISO 9362)",
-			Path:    fmt.Sprintf("%s.bic", path),
+			Path:    path + ".bic",
 		}
 	}
 

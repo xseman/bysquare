@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"slices"
 
 	"github.com/ulikunitz/xz/lzma"
 )
@@ -92,8 +93,7 @@ func DecompressLZMA(compressed []byte, uncompressedSize int) ([]byte, error) {
 	header[11] = 0x00
 	header[12] = 0x00
 
-	// Combine header with compressed data
-	fullData := append(header, compressed...)
+	fullData := slices.Concat(header, compressed)
 
 	// Create LZMA reader
 	reader, err := lzma.NewReader(bytes.NewReader(fullData))

@@ -149,12 +149,15 @@ func TestDecodeBase32Hex(t *testing.T) {
 				if err == nil {
 					t.Error("expected error, got nil")
 				}
+
 				return
 			}
+
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
 				return
 			}
+
 			if !bytes.Equal(result, tc.expected) {
 				t.Errorf("expected %v, got %v", tc.expected, result)
 			}
@@ -202,12 +205,15 @@ func TestDecodeBase32HexLooseMode(t *testing.T) {
 				if err == nil {
 					t.Error("expected error, got nil")
 				}
+
 				return
 			}
+
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
 				return
 			}
+
 			if !bytes.Equal(result, tc.expected) {
 				t.Errorf("expected %v, got %v", tc.expected, result)
 			}
@@ -228,11 +234,13 @@ func TestBase32HexRoundTrip(t *testing.T) {
 
 	for _, original := range testCases {
 		encoded := EncodeBase32Hex(original, true)
+
 		decoded, err := DecodeBase32Hex(encoded, false)
 		if err != nil {
 			t.Errorf("decode error for %v: %v", original, err)
 			continue
 		}
+
 		if !bytes.Equal(decoded, original) {
 			t.Errorf("round trip failed: original=%v, encoded=%q, decoded=%v",
 				original, encoded, decoded)

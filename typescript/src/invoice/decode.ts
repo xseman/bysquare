@@ -1,12 +1,15 @@
-import { decompress } from "lzma1";
-
 import * as base32hex from "../base32hex.js";
 import { crc32 } from "../crc32.js";
+import {
+	decodeNumber,
+	decodeString,
+} from "../field.js";
 import {
 	DecodeError,
 	DecodeErrorMessage,
 	decodeHeader,
 } from "../header.js";
+import * as lzma from "../lzma.js";
 import { Version } from "../types.js";
 import type {
 	Contact,
@@ -19,14 +22,6 @@ import type {
 	SupplierParty,
 	TaxCategorySummary,
 } from "./types.js";
-
-function decodeNumber(value: string | undefined): number | undefined {
-	return value?.length ? Number(value) : undefined;
-}
-
-function decodeString(value: string | undefined): string | undefined {
-	return value?.length ? value : undefined;
-}
 
 /**
  * Parse a tab-separated intermediate format into DataModel.
@@ -210,43 +205,8 @@ export function decode(qr: string): DataModel {
 		});
 	}
 
-	// Reconstruct LZMA header for decompression
-	const defaultProperties = [0x5D]; // lc=3, lp=0, pb=2
-	const defaultDictionarySize = [0x00, 0x00, 0x02, 0x00]; // 2^17 = 131072
-
-	const payloadLengthBytes = bytes.slice(2, 4);
-	const payloadLength = payloadLengthBytes[0] | (payloadLengthBytes[1] << 8);
-
-	const uncompressedSize = new Uint8Array(8);
-	uncompressedSize[0] = payloadLength & 0xFF;
-	uncompressedSize[1] = (payloadLength >> 8) & 0xFF;
-	uncompressedSize[2] = (payloadLength >> 16) & 0xFF;
-	uncompressedSize[3] = (payloadLength >> 24) & 0xFF;
-
-	const header = [
-		...defaultProperties,
-		...defaultDictionarySize,
-		...uncompressedSize,
-	];
-
-	const payload = bytes.slice(4);
-	const body = new Uint8Array([
-		...header,
-		...payload,
-	]);
-
-	let decompressed: Uint8Array | undefined;
-	try {
-		decompressed = decompress(body);
-	} catch (error) {
-		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, { error });
-	}
-
-	if (!decompressed) {
-		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, {
-			error: "Decompression returned undefined",
-		});
-	}
+	const payloadLength = new DataView(bytes.buffer, bytes.byteOffset + 2, 2).getUint16(0, true);
+	const decompressed = lzma.decompress(bytes.slice(4), payloadLength);
 
 	if (decompressed.byteLength < 4) {
 		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, {

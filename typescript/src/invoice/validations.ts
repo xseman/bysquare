@@ -1,6 +1,5 @@
-import validator from "validator";
-
 import { ValidationError } from "../errors.js";
+import { isValidDate } from "../field.js";
 import type { DataModel } from "./types.js";
 
 const ErrorMessages = {
@@ -19,23 +18,6 @@ const ErrorMessages = {
 
 const CURRENCY_CODE_REGEX = /^[A-Z]{3}$/;
 
-function isValidYyyymmdd(date: string): boolean {
-	if (!/^\d{8}$/.test(date)) {
-		return false;
-	}
-
-	const year = date.substring(0, 4);
-	const month = date.substring(4, 6);
-	const day = date.substring(6, 8);
-	const isoFormat = `${year}-${month}-${day}`;
-
-	return validator.isDate(isoFormat, {
-		format: "YYYY-MM-DD",
-		strictMode: true,
-		delimiters: ["-"],
-	});
-}
-
 function validateRequired(value: unknown, path: string): void {
 	if (value === undefined || value === null || value === "") {
 		throw new ValidationError(ErrorMessages.Required, path);
@@ -43,7 +25,7 @@ function validateRequired(value: unknown, path: string): void {
 }
 
 function validateDate(value: string | undefined, path: string): void {
-	if (value !== undefined && !isValidYyyymmdd(value)) {
+	if (value !== undefined && !isValidDate(value)) {
 		throw new ValidationError(ErrorMessages.Date, path);
 	}
 }

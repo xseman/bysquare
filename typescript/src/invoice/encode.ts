@@ -1,23 +1,14 @@
-import { compress } from "lzma1";
-
 import * as base32hex from "../base32hex.js";
+import { sanitize } from "../field.js";
 import {
 	addChecksum,
 	buildBysquareHeader,
 	buildPayloadLength,
 } from "../header.js";
+import * as lzma from "../lzma.js";
 import { Version } from "../types.js";
 import type { DataModel } from "./types.js";
 import { validateDataModel } from "./validations.js";
-
-/**
- * Sanitize field value by replacing tab characters with space.
- *
- * @see 3.8.
- */
-function sanitize(value: string | undefined): string | undefined {
-	return value?.replaceAll("\t", " ");
-}
 
 /**
  * Transform DataModel to a tab-separated intermediate format.
@@ -177,10 +168,7 @@ export function encode(
 
 	const payloadTabbed = serialize(model);
 	const payloadChecked = addChecksum(payloadTabbed);
-	const payloadCompressed = compress(payloadChecked);
-
-	// Strip 13-byte LZMA header
-	const lzmaBody = payloadCompressed.subarray(13);
+	const lzmaBody = lzma.compress(payloadChecked);
 
 	const bysquareType = 0x01; // TYPE_INVOICE
 	const output = new Uint8Array([

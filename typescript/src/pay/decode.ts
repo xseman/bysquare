@@ -1,12 +1,15 @@
-import { decompress } from "lzma1";
-
 import * as base32hex from "../base32hex.js";
 import { crc32 } from "../crc32.js";
+import {
+	decodeNumber,
+	decodeString,
+} from "../field.js";
 import {
 	DecodeError,
 	DecodeErrorMessage,
 	decodeHeader,
 } from "../header.js";
+import * as lzma from "../lzma.js";
 import { Version } from "../types.js";
 import {
 	BankAccount,
@@ -18,14 +21,6 @@ import {
 	type Periodicity,
 	type StandingOrder,
 } from "./types.js";
-
-function decodeNumber(value: string | undefined): number | undefined {
-	return value?.length ? Number(value) : undefined;
-}
-
-function decodeString(value: string | undefined): string | undefined {
-	return value?.length ? value : undefined;
-}
 
 /**
  * Parse a tab-separated intermediate format into DataModel.
@@ -245,59 +240,8 @@ export function decode(qr: string): DataModel {
 		});
 	}
 
-	/**
-	 * The process of decompressing data requires the addition of an LZMA header
-	 * to the compressed data. This header is necessary for the decompression
-	 * algorithm to properly interpret and extract the original uncompressed
-	 * data. Bysquare only store properties
-	 *
-	 * @see https://docs.fileformat.com/compression/lzma/
-	 *
-	 * +---------------+---------------------------+-------------------+
-	 * |      1B       |           4B              |         8B        |
-	 * +---------------+---------------------------+-------------------+
-	 * | Properties    | Dictionary Size           | Uncompressed Size |
-	 * +---------------+---------------------------+-------------------+
-	 */
-	const defaultProperties = [0x5D]; // lc=3, lp=0, pb=2
-	const defaultDictionarySize = [0x00, 0x00, 0x02, 0x00]; // 2^17 = 131072
-
-	// Parse the payload length from bytes 2-3 and properly expand to 8-byte uncompressed size
-	const payloadLengthBytes = bytes.slice(2, 4);
-	const payloadLength = payloadLengthBytes[0] | (payloadLengthBytes[1] << 8);
-
-	const uncompressedSize = new Uint8Array(8);
-	// Set the full 32-bit value in little-endian format
-	uncompressedSize[0] = payloadLength & 0xFF;
-	uncompressedSize[1] = (payloadLength >> 8) & 0xFF;
-	uncompressedSize[2] = (payloadLength >> 16) & 0xFF;
-	uncompressedSize[3] = (payloadLength >> 24) & 0xFF;
-	// Bytes 4-7 remain 0 for sizes < 2^32
-
-	const header = [
-		...defaultProperties,
-		...defaultDictionarySize,
-		...uncompressedSize,
-	];
-
-	const payload = bytes.slice(4);
-	const body = new Uint8Array([
-		...header,
-		...payload,
-	]);
-
-	let decompressed: Uint8Array | undefined;
-	try {
-		decompressed = decompress(body);
-	} catch (error) {
-		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, { error });
-	}
-
-	if (!decompressed) {
-		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, {
-			error: "Decompression returned undefined",
-		});
-	}
+	const payloadLength = new DataView(bytes.buffer, bytes.byteOffset + 2, 2).getUint16(0, true);
+	const decompressed = lzma.decompress(bytes.slice(4), payloadLength);
 
 	if (decompressed.byteLength < 4) {
 		throw new DecodeError(DecodeErrorMessage.LZMADecompressionFailed, {

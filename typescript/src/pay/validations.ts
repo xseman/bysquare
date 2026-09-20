@@ -1,6 +1,7 @@
 import validator from "validator";
 
 import { ValidationError } from "../errors.js";
+import { isValidDate } from "../field.js";
 import { Version } from "../types.js";
 import {
 	BankAccount,
@@ -16,38 +17,6 @@ const ErrorMessages = {
 	Date: "Invalid date. Make sure YYYYMMDD format is used.",
 	BeneficiaryName: "Beneficiary name is required.",
 } as const;
-
-/**
- * TODO: remove after release https://github.com/validatorjs/validator.js/pull/2659
- *
- * Validates date string in YYYYMMDD format.
- *
- * Uses validator.js library for semantic date validation by converting
- * YYYYMMDD to YYYY-MM-DD format (ISO 8601) which validator.isDate supports.
- *
- * @param date - Date string to validate in YYYYMMDD format
- * @returns true if valid YYYYMMDD date, false otherwise
- */
-function isValidYYYYMMDD(date: string): boolean {
-	// Check format: exactly 8 digits
-	if (!/^\d{8}$/.test(date)) {
-		return false;
-	}
-
-	// Convert YYYYMMDD to YYYY-MM-DD for validator.js
-	const year = date.substring(0, 4);
-	const month = date.substring(4, 6);
-	const day = date.substring(6, 8);
-	const isoFormat = `${year}-${month}-${day}`;
-
-	// Use validator.js to check if it's a valid calendar date
-	// This handles leap years, month boundaries, and all edge cases
-	return validator.isDate(isoFormat, {
-		format: "YYYY-MM-DD",
-		strictMode: true,
-		delimiters: ["-"],
-	});
-}
 
 /**
  * validates bankAccount fields:
@@ -93,7 +62,7 @@ export function validateSimplePayment(
 
 	if (
 		simplePayment.paymentDueDate
-		&& !isValidYYYYMMDD(simplePayment.paymentDueDate)
+		&& !isValidDate(simplePayment.paymentDueDate)
 	) {
 		throw new ValidationError(
 			ErrorMessages.Date,
@@ -104,7 +73,7 @@ export function validateSimplePayment(
 	if (
 		simplePayment.type === PaymentOptions.StandingOrder
 		&& simplePayment.lastDate
-		&& !isValidYYYYMMDD(simplePayment.lastDate)
+		&& !isValidDate(simplePayment.lastDate)
 	) {
 		throw new ValidationError(
 			ErrorMessages.Date,
@@ -115,7 +84,7 @@ export function validateSimplePayment(
 	if (
 		simplePayment.type === PaymentOptions.DirectDebit
 		&& simplePayment.validTillDate
-		&& !isValidYYYYMMDD(simplePayment.validTillDate)
+		&& !isValidDate(simplePayment.validTillDate)
 	) {
 		throw new ValidationError(
 			ErrorMessages.Date,

@@ -154,15 +154,6 @@ func defaultEncodeOptions() EncodeOptions {
 // with bysquareType 1 and the model's documentType, the payload length, and
 // base32hex.
 //
-// Complete BySquare QR binary structure:
-//
-//	+------------------+------------------+-----------------------------+
-//	|     2 bytes      |     2 bytes      |          Variable           |
-//	+------------------+------------------+-----------------------------+
-//	| Bysquare Header  | Payload Length   |         LZMA Body           |
-//	| (4 nibbles)      | (little-endian)  |  (compressed CRC+payload)   |
-//	+------------------+------------------+-----------------------------+
-//
 // @see 3.16.
 func Encode(model DataModel, opts ...EncodeOptions) (string, error) {
 	options := defaultEncodeOptions()

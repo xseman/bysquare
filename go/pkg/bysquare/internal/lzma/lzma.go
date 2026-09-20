@@ -13,22 +13,22 @@ import (
 	"github.com/ulikunitz/xz/lzma"
 )
 
-// headerSize is the LZMA stream header the QR leaves out.
+// headerSize is the LZMA stream header the QR leaves out: Compress strips
+// it, Decompress rebuilds it from the fixed properties and the payload
+// length.
+//
+//	+---------------+---------------------------+-------------------+
+//	|      1B       |           4B              |         8B        |
+//	+---------------+---------------------------+-------------------+
+//	| Properties    | Dictionary Size           | Uncompressed Size |
+//	| 0x5D          | 0x00020000 (2^17)         | (little-endian)   |
+//	+---------------+---------------------------+-------------------+
+//
+// Properties byte: (pb * 5 + lp) * 9 + lc = (2 * 5 + 0) * 9 + 3 = 0x5D
 const headerSize = 13
 
 // Compress packs data as an LZMA1 stream (lc=3, lp=0, pb=2, 128 KiB
 // dictionary) and returns the body without the stream header.
-//
-// LZMA stream output (13-byte header + compressed body):
-//
-//	+---------------+---------------------------+-------------------+-----------+
-//	|      1B       |           4B              |         8B        | Variable  |
-//	+---------------+---------------------------+-------------------+-----------+
-//	| Properties    | Dictionary Size           | Uncompressed Size | Body      |
-//	| 0x5D          | 0x00020000 (2^17)         | (little-endian)   |           |
-//	+---------------+---------------------------+-------------------+-----------+
-//
-// Properties byte: (pb * 5 + lp) * 9 + lc = (2 * 5 + 0) * 9 + 3 = 0x5D
 //
 // @see 3.11.
 func Compress(data []byte) ([]byte, error) {
@@ -63,19 +63,8 @@ func Compress(data []byte) ([]byte, error) {
 }
 
 // Decompress unpacks a headerless LZMA1 body of the given uncompressed
-// size, rebuilding the stream header the QR leaves out.
-//
-// The input is the LZMA body without the 13-byte header. The header must be
-// reconstructed before the LZMA library can decompress:
-//
-//	+---------------+---------------------------+-------------------+
-//	|      1B       |           4B              |         8B        |
-//	+---------------+---------------------------+-------------------+
-//	| Properties    | Dictionary Size           | Uncompressed Size |
-//	| 0x5D          | 0x00020000 (2^17)         | (little-endian)   |
-//	+---------------+---------------------------+-------------------+
-//
-// Properties byte: (pb * 5 + lp) * 9 + lc = (2 * 5 + 0) * 9 + 3 = 0x5D
+// size: the decompressor needs the stream header to read the body, and
+// bysquare stores only the body, so the header is rebuilt first.
 //
 // @see 3.11.
 func Decompress(compressed []byte, uncompressedSize int) ([]byte, error) {

@@ -267,7 +267,7 @@ func cmdInvoiceEncode(args []string) error {
 			return fmt.Errorf("failed to parse JSON: %w", err)
 		}
 
-		qr, err := invoice.Encode(&model, cfg)
+		qr, err := invoice.Encode(model, cfg)
 		if err != nil {
 			return fmt.Errorf("encoding failed: %w", err)
 		}
@@ -304,13 +304,9 @@ func cmdDecodeAuto(args []string) error {
 		return fmt.Errorf("decoding failed: invalid base32hex: %w", err)
 	}
 
-	if len(rawBytes) < 2 {
-		return errors.New("decoding failed: input too short")
-	}
+	header := bysquare.DecodeHeader(rawBytes)
 
-	header := bysquare.ParseBysquareHeader(rawBytes[:2])
-
-	switch header.BySquareType {
+	switch header.BysquareType {
 	case 0x00:
 		model, err := pay.Decode(qr)
 		if err != nil {
@@ -328,7 +324,7 @@ func cmdDecodeAuto(args []string) error {
 		return printJSON(model)
 
 	default:
-		return fmt.Errorf("unsupported bysquareType: %d", header.BySquareType)
+		return fmt.Errorf("unsupported bysquareType: %d", header.BysquareType)
 	}
 }
 

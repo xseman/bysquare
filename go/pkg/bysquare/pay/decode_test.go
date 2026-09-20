@@ -68,19 +68,21 @@ func TestRoundTrip(t *testing.T) {
 			name: "payment order",
 			model: DataModel{
 				InvoiceID: "test-roundtrip",
-				Payments: []SimplePayment{{
-					Type:           PaymentTypePaymentOrder,
-					Amount:         123.45,
-					CurrencyCode:   CurrencyEUR,
-					VariableSymbol: "456789",
-					PaymentNote:    "Test payment",
-					BankAccounts: []BankAccount{
-						{IBAN: "SK9611000000002918599669"},
-					},
-					Beneficiary: &Beneficiary{
-						Name:   "Test Beneficiary",
-						Street: "Main Street 1",
-						City:   "Bratislava",
+				Payments: []Payment{{
+					Type: PaymentOptionsPaymentOrder,
+					SimplePayment: SimplePayment{
+						Amount:         123.45,
+						CurrencyCode:   CurrencyEUR,
+						VariableSymbol: "456789",
+						PaymentNote:    "Test payment",
+						BankAccounts: []BankAccount{
+							{IBAN: "SK9611000000002918599669"},
+						},
+						Beneficiary: Beneficiary{
+							Name:   "Test Beneficiary",
+							Street: "Main Street 1",
+							City:   "Bratislava",
+						},
 					},
 				}},
 			},
@@ -88,56 +90,58 @@ func TestRoundTrip(t *testing.T) {
 		{
 			name: "standing order",
 			model: DataModel{
-				Payments: []SimplePayment{{
-					Type:         PaymentTypeStandingOrder,
-					Amount:       50,
-					CurrencyCode: CurrencyEUR,
-					BankAccounts: []BankAccount{
-						{IBAN: "SK9611000000002918599669"},
+				Payments: []Payment{{
+					Type: PaymentOptionsStandingOrder,
+					SimplePayment: SimplePayment{
+						Amount:       50,
+						CurrencyCode: CurrencyEUR,
+						BankAccounts: []BankAccount{
+							{IBAN: "SK9611000000002918599669"},
+						},
+						Beneficiary: Beneficiary{Name: "Test"},
 					},
-					StandingOrderExt: &StandingOrder{
-						Day:         15,
-						Month:       1,
-						Periodicity: PeriodicityMonthly,
-						LastDate:    "20251231",
-					},
-					Beneficiary: &Beneficiary{Name: "Test"},
+					Day:         15,
+					Month:       1,
+					Periodicity: PeriodicityMonthly,
+					LastDate:    "20251231",
 				}},
 			},
 		},
 		{
 			name: "direct debit",
 			model: DataModel{
-				Payments: []SimplePayment{{
-					Type:         PaymentTypeDirectDebit,
-					Amount:       200,
-					CurrencyCode: CurrencyEUR,
-					BankAccounts: []BankAccount{
-						{IBAN: "SK9611000000002918599669"},
+				Payments: []Payment{{
+					Type: PaymentOptionsDirectDebit,
+					SimplePayment: SimplePayment{
+						Amount:       200,
+						CurrencyCode: CurrencyEUR,
+						BankAccounts: []BankAccount{
+							{IBAN: "SK9611000000002918599669"},
+						},
+						Beneficiary: Beneficiary{Name: "Test"},
 					},
-					DirectDebitExt: &DirectDebit{
-						DirectDebitScheme: 1,
-						DirectDebitType:   0,
-						MandateID:         "MANDATE-1",
-						CreditorID:        "CRED-1",
-						MaxAmount:         500,
-					},
-					Beneficiary: &Beneficiary{Name: "Test"},
+					DirectDebitScheme: 1,
+					DirectDebitType:   0,
+					MandateID:         "MANDATE-1",
+					CreditorID:        "CRED-1",
+					MaxAmount:         500,
 				}},
 			},
 		},
 		{
 			name: "multiple bank accounts",
 			model: DataModel{
-				Payments: []SimplePayment{{
-					Type:         PaymentTypePaymentOrder,
-					Amount:       10,
-					CurrencyCode: CurrencyEUR,
-					BankAccounts: []BankAccount{
-						{IBAN: "SK9611000000002918599669"},
-						{IBAN: "CZ5508000000001234567899", BIC: "GIBACZPX"},
+				Payments: []Payment{{
+					Type: PaymentOptionsPaymentOrder,
+					SimplePayment: SimplePayment{
+						Amount:       10,
+						CurrencyCode: CurrencyEUR,
+						BankAccounts: []BankAccount{
+							{IBAN: "SK9611000000002918599669"},
+							{IBAN: "CZ5508000000001234567899", BIC: "GIBACZPX"},
+						},
+						Beneficiary: Beneficiary{Name: "Test"},
 					},
-					Beneficiary: &Beneficiary{Name: "Test"},
 				}},
 			},
 		},

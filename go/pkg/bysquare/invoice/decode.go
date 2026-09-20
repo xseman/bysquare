@@ -2,17 +2,18 @@ package invoice
 
 import (
 	"encoding/binary"
-	"errors"
-	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/xseman/bysquare/go/pkg/bysquare"
+	"github.com/xseman/bysquare/go/pkg/bysquare/internal/field"
+	"github.com/xseman/bysquare/go/pkg/bysquare/internal/lzma"
 )
 
 // deserialize parses a tab-separated intermediate format into DataModel.
 //
 // Field order follows the specification (40 + N*5 fields).
-func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel, error) {
+func deserialize(tabString string, documentType InvoiceDocumentType) DataModel {
 	data := strings.Split(tabString, "	")
 	i := 0
 
@@ -29,64 +30,44 @@ func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel
 		return ""
 	}
 
-	nextString := func() string {
-		v := next()
-		if v == "" {
-			return ""
-		}
-
-		return v
+	nextFloat := func() float64 {
+		return field.ParseFloat(next())
 	}
 
-	nextFloat := func() (float64, error) {
-		return bysquare.ParseFloat(next())
+	nextInt := func() int {
+		return field.ParseNumber(next())
 	}
 
-	nextInt := func() (int, error) {
-		return bysquare.ParseNumber(next())
-	}
-
-	model := &DataModel{}
-	model.DocumentType = documentType
+	model := DataModel{DocumentType: documentType}
 
 	// Core fields (9)
-	model.InvoiceID = nextString()
-	model.IssueDate = nextString()
-	model.TaxPointDate = nextString()
-	model.OrderID = nextString()
-	model.DeliveryNoteID = nextString()
-	model.LocalCurrencyCode = nextString()
-	model.ForeignCurrencyCode = nextString()
-
-	var err error
-
-	model.CurrRate, err = nextFloat()
-	if err != nil {
-		return nil, fmt.Errorf("invalid currRate: %w", err)
-	}
-
-	model.ReferenceCurrRate, err = nextFloat()
-	if err != nil {
-		return nil, fmt.Errorf("invalid referenceCurrRate: %w", err)
-	}
+	model.InvoiceID = next()
+	model.IssueDate = next()
+	model.TaxPointDate = next()
+	model.OrderID = next()
+	model.DeliveryNoteID = next()
+	model.LocalCurrencyCode = next()
+	model.ForeignCurrencyCode = next()
+	model.CurrRate = nextFloat()
+	model.ReferenceCurrRate = nextFloat()
 
 	// Supplier party (13 fields)
-	model.SupplierParty.PartyName = nextString()
-	model.SupplierParty.CompanyTaxID = nextString()
-	model.SupplierParty.CompanyVatID = nextString()
-	model.SupplierParty.CompanyRegisterID = nextString()
+	model.SupplierParty.PartyName = next()
+	model.SupplierParty.CompanyTaxID = next()
+	model.SupplierParty.CompanyVatID = next()
+	model.SupplierParty.CompanyRegisterID = next()
 
-	model.SupplierParty.PostalAddress.StreetName = nextString()
-	model.SupplierParty.PostalAddress.BuildingNumber = nextString()
-	model.SupplierParty.PostalAddress.CityName = nextString()
-	model.SupplierParty.PostalAddress.PostalZone = nextString()
-	model.SupplierParty.PostalAddress.State = nextString()
-	model.SupplierParty.PostalAddress.Country = nextString()
+	model.SupplierParty.PostalAddress.StreetName = next()
+	model.SupplierParty.PostalAddress.BuildingNumber = next()
+	model.SupplierParty.PostalAddress.CityName = next()
+	model.SupplierParty.PostalAddress.PostalZone = next()
+	model.SupplierParty.PostalAddress.State = next()
+	model.SupplierParty.PostalAddress.Country = next()
 
-	contactName := nextString()
-	contactTelephone := nextString()
+	contactName := next()
+	contactTelephone := next()
 
-	contactEmail := nextString()
+	contactEmail := next()
 	if contactName != "" || contactTelephone != "" || contactEmail != "" {
 		model.SupplierParty.Contact = &Contact{
 			Name:      contactName,
@@ -96,36 +77,29 @@ func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel
 	}
 
 	// Customer party (5 fields)
-	model.CustomerParty.PartyName = nextString()
-	model.CustomerParty.CompanyTaxID = nextString()
-	model.CustomerParty.CompanyVatID = nextString()
-	model.CustomerParty.CompanyRegisterID = nextString()
-	model.CustomerParty.PartyIdentification = nextString()
+	model.CustomerParty.PartyName = next()
+	model.CustomerParty.CompanyTaxID = next()
+	model.CustomerParty.CompanyVatID = next()
+	model.CustomerParty.CompanyRegisterID = next()
+	model.CustomerParty.PartyIdentification = next()
 
 	// Invoice detail
-	numLines, err := nextInt()
-	if err != nil {
-		return nil, fmt.Errorf("invalid numberOfInvoiceLines: %w", err)
-	}
+	numLines := nextInt()
 
 	if numLines > 0 {
 		model.NumberOfInvoiceLines = &numLines
 	}
 
-	model.InvoiceDescription = nextString()
+	model.InvoiceDescription = next()
 
 	// Single invoice line (7 fields)
-	lineOrderID := nextString()
-	lineDeliveryNoteID := nextString()
-	lineItemName := nextString()
-	lineItemEanCode := nextString()
-	linePeriodFrom := nextString()
-	linePeriodTo := nextString()
-
-	lineQuantity, err := nextFloat()
-	if err != nil {
-		return nil, fmt.Errorf("invalid invoicedQuantity: %w", err)
-	}
+	lineOrderID := next()
+	lineDeliveryNoteID := next()
+	lineItemName := next()
+	lineItemEanCode := next()
+	linePeriodFrom := next()
+	linePeriodTo := next()
+	lineQuantity := nextFloat()
 
 	hasSingleLine := lineOrderID != "" ||
 		lineDeliveryNoteID != "" ||
@@ -148,106 +122,109 @@ func deserialize(tabString string, documentType InvoiceDocumentType) (*DataModel
 	}
 
 	// Tax category summaries
-	taxCount, err := nextInt()
-	if err != nil {
-		return nil, fmt.Errorf("invalid tax category count: %w", err)
-	}
+	taxCount := nextInt()
 
 	model.TaxCategorySummaries = make([]TaxCategorySummary, taxCount)
 	for t := range taxCount {
-		model.TaxCategorySummaries[t].ClassifiedTaxCategory, err = nextFloat()
-		if err != nil {
-			return nil, fmt.Errorf("invalid classifiedTaxCategory[%d]: %w", t, err)
-		}
-
-		model.TaxCategorySummaries[t].TaxExclusiveAmount, err = nextFloat()
-		if err != nil {
-			return nil, fmt.Errorf("invalid taxExclusiveAmount[%d]: %w", t, err)
-		}
-
-		model.TaxCategorySummaries[t].TaxAmount, err = nextFloat()
-		if err != nil {
-			return nil, fmt.Errorf("invalid taxAmount[%d]: %w", t, err)
-		}
-
-		model.TaxCategorySummaries[t].AlreadyClaimedTaxExclusiveAmount, err = nextFloat()
-		if err != nil {
-			return nil, fmt.Errorf("invalid alreadyClaimedTaxExclusiveAmount[%d]: %w", t, err)
-		}
-
-		model.TaxCategorySummaries[t].AlreadyClaimedTaxAmount, err = nextFloat()
-		if err != nil {
-			return nil, fmt.Errorf("invalid alreadyClaimedTaxAmount[%d]: %w", t, err)
+		model.TaxCategorySummaries[t] = TaxCategorySummary{
+			ClassifiedTaxCategory:            nextFloat(),
+			TaxExclusiveAmount:               nextFloat(),
+			TaxAmount:                        nextFloat(),
+			AlreadyClaimedTaxExclusiveAmount: nextFloat(),
+			AlreadyClaimedTaxAmount:          nextFloat(),
 		}
 	}
 
 	// Monetary summary (2 fields)
-	model.MonetarySummary.PayableRoundingAmount, err = nextFloat()
-	if err != nil {
-		return nil, fmt.Errorf("invalid payableRoundingAmount: %w", err)
-	}
-
-	model.MonetarySummary.PaidDepositsAmount, err = nextFloat()
-	if err != nil {
-		return nil, fmt.Errorf("invalid paidDepositsAmount: %w", err)
-	}
+	model.MonetarySummary.PayableRoundingAmount = nextFloat()
+	model.MonetarySummary.PaidDepositsAmount = nextFloat()
 
 	// Payment means bitmask
-	pm, err := nextInt()
-	if err != nil {
-		return nil, fmt.Errorf("invalid paymentMeans: %w", err)
-	}
+	pm := nextInt()
 
 	model.PaymentMeans = uint8(pm)
 
-	return model, nil
+	return model
 }
 
-// Decode decodes a QR string into an invoice DataModel.
+// Decode parses the QR string back into the model. The header must carry
+// bysquareType 1; its documentType nibble picks the invoice subtype.
 //
-// Expects bysquareType=1 in the header. The documentType nibble determines the
-// specific invoice subtype (Invoice, ProformaInvoice, CreditNote, DebitNote,
-// AdvanceInvoice).
+// Input binary structure (after base32hex decoding):
+//
+//	+------------------+------------------+-----------------------------+
+//	|     2 bytes      |     2 bytes      |          Variable           |
+//	+------------------+------------------+-----------------------------+
+//	| Bysquare Header  | Payload Length   |         LZMA Body           |
+//	| (4 nibbles)      | (little-endian)  |  (compressed CRC+payload)   |
+//	+------------------+------------------+-----------------------------+
+//
+// After LZMA decompression:
+//
+//	+------------------+---------------------------+
+//	|      4 bytes     |        Variable           |
+//	+------------------+---------------------------+
+//	| CRC32 Checksum   | Tab-separated payload     |
+//	| (little-endian)  | (UTF-8 encoded)           |
+//	+------------------+---------------------------+
 //
 // @see 3.16.
-func Decode(qr string) (*DataModel, error) {
+func Decode(qr string) (DataModel, error) {
 	bytes, err := bysquare.DecodeBase32Hex(qr, true)
 	if err != nil {
-		return nil, fmt.Errorf("base32hex decode failed: %w", err)
+		return DataModel{}, err
+	}
+
+	headerData := bysquare.DecodeHeader(bytes)
+
+	if headerData.BysquareType != 0x01 {
+		return DataModel{}, &bysquare.DecodeError{
+			Message:    "Expected bysquareType 1 (Invoice), got " + strconv.Itoa(int(headerData.BysquareType)),
+			Extensions: map[string]any{"bysquareType": headerData.BysquareType},
+		}
+	}
+
+	if headerData.Version > uint8(bysquare.Version120) {
+		return DataModel{}, &bysquare.DecodeError{
+			Message:    bysquare.DecodeErrorMessage.UnsupportedVersion,
+			Extensions: map[string]any{"version": headerData.Version},
+		}
 	}
 
 	if len(bytes) < 4 {
-		return nil, fmt.Errorf("input too short: need at least 4 bytes, got %d", len(bytes))
+		return DataModel{}, &bysquare.DecodeError{
+			Message:    bysquare.DecodeErrorMessage.LZMADecompressionFailed,
+			Extensions: map[string]any{"error": "Input is shorter than the header and payload length"},
+		}
 	}
 
-	header := bysquare.ParseBysquareHeader(bytes[:2])
+	payloadLength := binary.LittleEndian.Uint16(bytes[2:4])
 
-	if header.BySquareType != 0x01 {
-		return nil, fmt.Errorf("expected bysquareType 1 (Invoice), got %d", header.BySquareType)
-	}
-
-	if bysquare.Version(header.Version) > bysquare.Version120 {
-		return nil, fmt.Errorf("unsupported version: %d", header.Version)
-	}
-
-	payloadLength := int(binary.LittleEndian.Uint16(bytes[2:4]))
-
-	decompressed, err := bysquare.DecompressLZMA(bytes[4:], payloadLength)
+	decompressed, err := lzma.Decompress(bytes[4:], int(payloadLength))
 	if err != nil {
-		return nil, fmt.Errorf("LZMA decompression failed: %w", err)
+		return DataModel{}, &bysquare.DecodeError{
+			Message:    bysquare.DecodeErrorMessage.LZMADecompressionFailed,
+			Extensions: map[string]any{"error": err},
+		}
 	}
 
 	if len(decompressed) < 4 {
-		return nil, errors.New("decompressed data too short for checksum")
+		return DataModel{}, &bysquare.DecodeError{
+			Message:    bysquare.DecodeErrorMessage.LZMADecompressionFailed,
+			Extensions: map[string]any{"error": "Decompressed payload is shorter than the CRC32 checksum"},
+		}
 	}
 
-	checksum := binary.LittleEndian.Uint32(decompressed[:4])
-	body := string(decompressed[4:])
+	storedChecksum := binary.LittleEndian.Uint32(decompressed[0:4])
+	decoded := string(decompressed[4:])
 
-	computed := bysquare.Crc32Checksum(body)
-	if checksum != computed {
-		return nil, fmt.Errorf("CRC32 checksum mismatch: stored=%d computed=%d", checksum, computed)
+	computedChecksum := bysquare.CRC32(decoded)
+	if storedChecksum != computedChecksum {
+		return DataModel{}, &bysquare.DecodeError{
+			Message:    "CRC32 checksum mismatch",
+			Extensions: map[string]any{"stored": storedChecksum, "computed": computedChecksum},
+		}
 	}
 
-	return deserialize(body, InvoiceDocumentType(header.DocumentType))
+	return deserialize(decoded, InvoiceDocumentType(headerData.DocumentType)), nil
 }

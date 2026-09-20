@@ -27,7 +27,7 @@ func TestDecodeInvalidInput(t *testing.T) {
 
 func TestRoundTrip(t *testing.T) {
 	numLines := 3
-	model := &DataModel{
+	model := DataModel{
 		DocumentType:        InvoiceDocumentTypeInvoice,
 		InvoiceID:           "INV-2024-001",
 		IssueDate:           "20240115",
@@ -146,7 +146,7 @@ func TestRoundTrip(t *testing.T) {
 }
 
 func TestRoundTripWithSingleInvoiceLine(t *testing.T) {
-	model := &DataModel{
+	model := DataModel{
 		DocumentType:      InvoiceDocumentTypeInvoice,
 		InvoiceID:         "INV-LINE",
 		IssueDate:         "20240201",

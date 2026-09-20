@@ -2,20 +2,20 @@ package bysquare
 
 import "math"
 
-// EncodeClassifierOptions encodes multiple classifier options by summing their values.
+// EncodeOptions encodes multiple classifier options by summing their values.
 //
 // This is used for encoding bit-flag fields like months in standing orders.
 //
 // Example:
 //
 //	// Encode January + July + October months
-//	encoded := EncodeClassifierOptions([]uint16{
+//	encoded := EncodeOptions([]uint16{
 //	    uint16(MonthJanuary),
 //	    uint16(MonthJuly),
 //	    uint16(MonthOctober),
 //	})
 //	// Result: 577 (1 + 64 + 512)
-func EncodeClassifierOptions(options []uint16) uint16 {
+func EncodeOptions(options []uint16) uint16 {
 	var sum uint16
 	for _, option := range options {
 		sum += option
@@ -24,7 +24,7 @@ func EncodeClassifierOptions(options []uint16) uint16 {
 	return sum
 }
 
-// DecodeClassifierOptions decodes a summed value back to individual options.
+// DecodeOptions decodes a summed value back to individual options.
 //
 // Automatically detects the range based on the highest bit set and returns
 // values in descending order.
@@ -32,9 +32,9 @@ func EncodeClassifierOptions(options []uint16) uint16 {
 // Example:
 //
 //	// Decode 577 to get October, July, January
-//	months := DecodeClassifierOptions(577)
+//	months := DecodeOptions(577)
 //	// Result: [512, 64, 1] (October, July, January)
-func DecodeClassifierOptions(encoded uint16) []uint16 {
+func DecodeOptions(encoded uint16) []uint16 {
 	if encoded == 0 {
 		return []uint16{}
 	}

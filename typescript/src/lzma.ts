@@ -33,6 +33,10 @@ export function compress(data: Uint8Array): Uint8Array {
 /**
  * Decompresses a headerless LZMA body of the given uncompressed size.
  *
+ * The decompressor needs the stream header to read the body, and bysquare
+ * stores only the body, so the header is rebuilt first from the fixed
+ * properties and the payload length the QR carries.
+ *
  * @see 3.11.
  */
 export function decompress(body: Uint8Array, uncompressedSize: number): Uint8Array {

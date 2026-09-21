@@ -43,6 +43,13 @@ linters:
         - nlreturn # blank line before return/break/continue in a longer block
 
     settings:
+        errcheck:
+            exclude-functions:
+                # The CLI writes to stdout and stderr; a failed write there has
+                # nowhere to be reported, and main already exits by return code.
+                - fmt.Fprint
+                - fmt.Fprintf
+                - fmt.Fprintln
         dupl:
             threshold: 150
         exhaustive:

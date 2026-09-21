@@ -22,3 +22,7 @@ go.work
 # Build artifacts
 bin/
 dist/
+
+# go build without -o drops the binary next to go.mod
+/bysquare
+/libbysquare

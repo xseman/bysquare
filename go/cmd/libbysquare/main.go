@@ -164,7 +164,7 @@ func bysquare_invoice_encode(input *C.char, config C.int) (ret *C.char) {
 		Version:  bysquare.Version((uint32(config) & MaskVersion) >> VersionShift),
 	}
 
-	result, err := invoice.Encode(&model, opts)
+	result, err := invoice.Encode(model, opts)
 	if err != nil {
 		return C.CString("ERROR:" + err.Error())
 	}
@@ -212,9 +212,7 @@ func bysquare_detect_type(qrString *C.char) C.int {
 		return -1
 	}
 
-	header := bysquare.ParseBysquareHeader(rawBytes[:2])
-
-	return C.int(header.BySquareType)
+	return C.int(bysquare.DecodeHeader(rawBytes).BysquareType)
 }
 
 //export bysquare_free

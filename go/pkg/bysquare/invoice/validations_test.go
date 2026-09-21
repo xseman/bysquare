@@ -7,7 +7,7 @@ import (
 func TestValidateDataModel(t *testing.T) {
 	tests := []struct {
 		name    string
-		model   *DataModel
+		model   DataModel
 		wantErr bool
 	}{
 		{
@@ -17,7 +17,7 @@ func TestValidateDataModel(t *testing.T) {
 		},
 		{
 			name: "missing invoiceId",
-			model: func() *DataModel {
+			model: func() DataModel {
 				m := minimalInvoice()
 				m.InvoiceID = ""
 
@@ -27,7 +27,7 @@ func TestValidateDataModel(t *testing.T) {
 		},
 		{
 			name: "missing issueDate",
-			model: func() *DataModel {
+			model: func() DataModel {
 				m := minimalInvoice()
 				m.IssueDate = ""
 
@@ -37,7 +37,7 @@ func TestValidateDataModel(t *testing.T) {
 		},
 		{
 			name: "missing supplierParty name",
-			model: func() *DataModel {
+			model: func() DataModel {
 				m := minimalInvoice()
 				m.SupplierParty.PartyName = ""
 
@@ -47,7 +47,7 @@ func TestValidateDataModel(t *testing.T) {
 		},
 		{
 			name: "missing customerParty name",
-			model: func() *DataModel {
+			model: func() DataModel {
 				m := minimalInvoice()
 				m.CustomerParty.PartyName = ""
 
@@ -57,7 +57,7 @@ func TestValidateDataModel(t *testing.T) {
 		},
 		{
 			name: "both numberOfInvoiceLines and singleInvoiceLine",
-			model: func() *DataModel {
+			model: func() DataModel {
 				m := minimalInvoice()
 				m.SingleInvoiceLine = &SingleInvoiceLine{
 					ItemName: "Test",
@@ -69,7 +69,7 @@ func TestValidateDataModel(t *testing.T) {
 		},
 		{
 			name: "empty tax categories",
-			model: func() *DataModel {
+			model: func() DataModel {
 				m := minimalInvoice()
 				m.TaxCategorySummaries = []TaxCategorySummary{}
 
@@ -79,7 +79,7 @@ func TestValidateDataModel(t *testing.T) {
 		},
 		{
 			name: "tax category out of range",
-			model: func() *DataModel {
+			model: func() DataModel {
 				m := minimalInvoice()
 				m.TaxCategorySummaries[0].ClassifiedTaxCategory = 1.5
 
@@ -89,7 +89,7 @@ func TestValidateDataModel(t *testing.T) {
 		},
 		{
 			name: "partial foreign currency (missing rates)",
-			model: func() *DataModel {
+			model: func() DataModel {
 				m := minimalInvoice()
 				m.ForeignCurrencyCode = "USD"
 
@@ -99,7 +99,7 @@ func TestValidateDataModel(t *testing.T) {
 		},
 		{
 			name: "valid foreign currency group",
-			model: func() *DataModel {
+			model: func() DataModel {
 				m := minimalInvoice()
 				m.ForeignCurrencyCode = "USD"
 				m.CurrRate = 1.1
@@ -111,7 +111,7 @@ func TestValidateDataModel(t *testing.T) {
 		},
 		{
 			name: "single invoice line with item name",
-			model: func() *DataModel {
+			model: func() DataModel {
 				m := minimalInvoice()
 				m.NumberOfInvoiceLines = nil
 				m.SingleInvoiceLine = &SingleInvoiceLine{
@@ -124,7 +124,7 @@ func TestValidateDataModel(t *testing.T) {
 		},
 		{
 			name: "single invoice line missing both item identifiers",
-			model: func() *DataModel {
+			model: func() DataModel {
 				m := minimalInvoice()
 				m.NumberOfInvoiceLines = nil
 				m.SingleInvoiceLine = &SingleInvoiceLine{}

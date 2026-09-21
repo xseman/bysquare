@@ -43,6 +43,13 @@ linters:
         - nlreturn # blank line before return/break/continue in a longer block
 
     settings:
+        errcheck:
+            exclude-functions:
+                # The CLI writes to stdout and stderr; a failed write there has
+                # nowhere to be reported, and main already exits by return code.
+                - fmt.Fprint
+                - fmt.Fprintf
+                - fmt.Fprintln
         dupl:
             threshold: 150
         exhaustive:
@@ -61,7 +68,8 @@ linters:
                 - style
                 - performance
             disabled-checks:
-                - rangeValCopy # payments are 176-byte values ranged over a few times; indexing would obscure the loops for nothing measurable
+                - rangeValCopy # payments are values ranged over a few times; indexing would obscure the loops for nothing measurable
+                - hugeParam # the models pass by value like the TypeScript API's; a few hundred bytes per call is not worth a pointer in the signature
                 - whyNoLint # nolintlint already covers this
         govet:
             enable-all: true
@@ -115,8 +123,8 @@ linters:
                   - gocritic
                   - nlreturn
                   - wsl_v5
-            # pkg is the published API: BysquareHeader and InvoiceDocumentType
-            # are the specification's own terms, and renaming an export is a
+            # pkg is the published API: InvoiceDocumentType and the like are
+            # the specification's own terms, and renaming an export is a
             # breaking change either way.
             - path: pkg/
               linters:

@@ -2,17 +2,128 @@ package pay
 
 import (
 	"encoding/binary"
-	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/xseman/bysquare/go/pkg/bysquare"
+	"github.com/xseman/bysquare/go/pkg/bysquare/internal/field"
+	"github.com/xseman/bysquare/go/pkg/bysquare/internal/lzma"
 )
 
-// ErrMissingBankAccount indicates no bank accounts provided.
-var ErrMissingBankAccount = errors.New("at least one bank account required")
+// deserialize reads the tab-separated payload back into the model. Fields
+// past the end read as empty, as they do in the TypeScript implementation.
+func deserialize(tabString string) (DataModel, error) {
+	data := strings.Split(tabString, "\t")
+	i := 0
 
-// Decode parses a BySquare QR string back to DataModel.
+	next := func() string {
+		if i >= len(data) {
+			return ""
+		}
+
+		value := data[i]
+		i++
+
+		return value
+	}
+
+	invoiceID := next()
+
+	// A count never exceeds the fields left; a foreign payload (an invoice fed
+	// to this decoder) would otherwise ask for millions of empty payments.
+	paymentsCount := min(field.ParseNumber(next()), len(data))
+
+	payments := make([]Payment, 0, max(paymentsCount, 0))
+
+	for range paymentsCount {
+		paymentType := field.ParseNumber(next())
+		amount := field.ParseFloat(next())
+
+		payment := Payment{
+			Type: PaymentOptions(paymentType),
+			SimplePayment: SimplePayment{
+				Amount:                          amount,
+				CurrencyCode:                    CurrencyCode(next()),
+				PaymentDueDate:                  next(),
+				VariableSymbol:                  next(),
+				ConstantSymbol:                  next(),
+				SpecificSymbol:                  next(),
+				OriginatorsReferenceInformation: next(),
+				PaymentNote:                     next(),
+				BankAccounts:                    []BankAccount{},
+			},
+		}
+
+		bankAccountsCount := min(field.ParseNumber(next()), len(data))
+
+		for range bankAccountsCount {
+			iban := next()
+			if iban == "" {
+				return DataModel{}, &bysquare.DecodeError{Message: bysquare.DecodeErrorMessage.MissingIBAN}
+			}
+
+			payment.BankAccounts = append(payment.BankAccounts, BankAccount{IBAN: iban, BIC: next()})
+		}
+
+		// The extension fields are consumed whenever the flag is "1", whatever
+		// the payment type, to keep the rest aligned.
+		if next() == "1" {
+			day := field.ParseNumber(next())
+			month := field.ParseNumber(next())
+			periodicity := Periodicity(next())
+			lastDate := next()
+
+			if payment.Type == PaymentOptionsStandingOrder {
+				payment.Day = Day(day)
+				payment.Month = Month(month)
+				payment.Periodicity = periodicity
+				payment.LastDate = lastDate
+			}
+		}
+
+		if next() == "1" {
+			scheme := field.ParseNumber(next())
+			ddType := field.ParseNumber(next())
+			ddVariableSymbol := next()
+			ddSpecificSymbol := next()
+			ddOriginatorsReferenceInformation := next()
+			mandateID := next()
+			creditorID := next()
+			contractID := next()
+			maxAmount := field.ParseFloat(next())
+			validTillDate := next()
+
+			if payment.Type == PaymentOptionsDirectDebit {
+				payment.DirectDebitScheme = DirectDebitScheme(scheme)
+				payment.DirectDebitType = DirectDebitType(ddType)
+				payment.DdVariableSymbol = ddVariableSymbol
+				payment.DdSpecificSymbol = ddSpecificSymbol
+				payment.DdOriginatorsReferenceInformation = ddOriginatorsReferenceInformation
+				payment.MandateID = mandateID
+				payment.CreditorID = creditorID
+				payment.ContractID = contractID
+				payment.MaxAmount = maxAmount
+				payment.ValidTillDate = validTillDate
+			}
+		}
+
+		payments = append(payments, payment)
+	}
+
+	// The beneficiary block follows all payments.
+	for p := range payments {
+		payments[p].Beneficiary = Beneficiary{
+			Name:   next(),
+			Street: next(),
+			City:   next(),
+		}
+	}
+
+	return DataModel{InvoiceID: invoiceID, Payments: payments}, nil
+}
+
+// Decode parses the QR string back into the model: base32hex, the two-byte
+// header and the two-byte payload length, LZMA body, then the CRC32 the
+// payload was checksummed with.
 //
 // Input binary structure (after base32hex decoding):
 //
@@ -36,248 +147,52 @@ var ErrMissingBankAccount = errors.New("at least one bank account required")
 func Decode(qr string) (DataModel, error) {
 	bytes, err := bysquare.DecodeBase32Hex(qr, true)
 	if err != nil {
-		return DataModel{}, fmt.Errorf("base32hex decode failed: %w", err)
+		return DataModel{}, err
+	}
+
+	headerData := bysquare.DecodeHeader(bytes)
+
+	if headerData.Version > uint8(bysquare.Version120) {
+		return DataModel{}, &bysquare.DecodeError{
+			Message:    bysquare.DecodeErrorMessage.UnsupportedVersion,
+			Extensions: map[string]any{"version": headerData.Version},
+		}
 	}
 
 	if len(bytes) < 4 {
-		return DataModel{}, errors.New("invalid data: too short")
+		return DataModel{}, &bysquare.DecodeError{
+			Message:    bysquare.DecodeErrorMessage.LZMADecompressionFailed,
+			Extensions: map[string]any{"error": "Input is shorter than the header and payload length"},
+		}
 	}
 
-	headerBytes := bytes[0:2]
-	header := bysquare.ParseBysquareHeader(headerBytes)
+	payloadLength := binary.LittleEndian.Uint16(bytes[2:4])
 
-	if header.Version > uint8(bysquare.Version120) {
-		return DataModel{}, fmt.Errorf("unsupported version: %d", header.Version)
-	}
-
-	payloadLengthBytes := bytes[2:4]
-	payloadLength := binary.LittleEndian.Uint16(payloadLengthBytes)
-
-	compressed := bytes[4:]
-
-	decompressed, err := bysquare.DecompressLZMA(compressed, int(payloadLength))
+	decompressed, err := lzma.Decompress(bytes[4:], int(payloadLength))
 	if err != nil {
-		return DataModel{}, fmt.Errorf("LZMA decompression failed: %w", err)
+		return DataModel{}, &bysquare.DecodeError{
+			Message:    bysquare.DecodeErrorMessage.LZMADecompressionFailed,
+			Extensions: map[string]any{"error": err},
+		}
 	}
 
 	if len(decompressed) < 4 {
-		return DataModel{}, errors.New("decompressed data too short")
-	}
-
-	checksumBytes := decompressed[0:4]
-	expectedChecksum := binary.LittleEndian.Uint32(checksumBytes)
-
-	payload := decompressed[4:]
-	payloadStr := string(payload)
-
-	actualChecksum := bysquare.Crc32Checksum(payloadStr)
-	if actualChecksum != expectedChecksum {
-		return DataModel{}, errors.New("CRC32 checksum mismatch")
-	}
-
-	model, err := deserialize(payloadStr)
-	if err != nil {
-		return DataModel{}, fmt.Errorf("deserialization failed: %w", err)
-	}
-
-	return model, nil
-}
-
-// deserialize parses tab-separated format to DataModel.
-func deserialize(data string) (DataModel, error) {
-	parts := strings.Split(data, "\t")
-	idx := 0
-
-	if len(parts) < 2 {
-		return DataModel{}, errors.New("insufficient data fields")
-	}
-
-	invoiceID := parts[idx]
-	idx++
-
-	paymentsCount, err := bysquare.ParseNumber(parts[idx])
-	if err != nil {
-		return DataModel{}, fmt.Errorf("invalid payments count: %w", err)
-	}
-
-	idx++
-
-	model := DataModel{
-		InvoiceID: invoiceID,
-		Payments:  make([]SimplePayment, 0, paymentsCount),
-	}
-
-	for range paymentsCount {
-		if idx+9 > len(parts) {
-			return DataModel{}, errors.New("insufficient payment fields")
-		}
-
-		paymentType, _ := bysquare.ParseNumber(parts[idx])
-		idx++
-		amount, _ := bysquare.ParseFloat(parts[idx])
-		idx++
-		currencyCode := parts[idx]
-		idx++
-		paymentDueDate := parts[idx]
-		idx++
-		variableSymbol := parts[idx]
-		idx++
-		constantSymbol := parts[idx]
-		idx++
-		specificSymbol := parts[idx]
-		idx++
-		originatorsRefInfo := parts[idx]
-		idx++
-		paymentNote := parts[idx]
-		idx++
-
-		payment := SimplePayment{
-			Type:                            PaymentType(paymentType),
-			Amount:                          amount,
-			CurrencyCode:                    CurrencyCode(currencyCode),
-			PaymentDueDate:                  paymentDueDate,
-			VariableSymbol:                  variableSymbol,
-			ConstantSymbol:                  constantSymbol,
-			SpecificSymbol:                  specificSymbol,
-			OriginatorsReferenceInformation: originatorsRefInfo,
-			PaymentNote:                     paymentNote,
-			BankAccounts:                    []BankAccount{},
-		}
-
-		accountsCount, _ := bysquare.ParseNumber(parts[idx])
-		idx++
-
-		for range accountsCount {
-			if idx+2 > len(parts) {
-				return DataModel{}, errors.New("insufficient bank account fields")
-			}
-
-			iban := parts[idx]
-			idx++
-
-			if iban == "" {
-				return DataModel{}, ErrMissingBankAccount
-			}
-
-			bic := parts[idx]
-			idx++
-
-			payment.BankAccounts = append(payment.BankAccounts, BankAccount{
-				IBAN: iban,
-				BIC:  bic,
-			})
-		}
-
-		// Standing order extension
-		if idx >= len(parts) {
-			return DataModel{}, errors.New("missing standing order extension field")
-		}
-
-		standingOrderExt := parts[idx]
-		idx++
-
-		if standingOrderExt == "1" {
-			if idx+4 > len(parts) {
-				return DataModel{}, errors.New("insufficient standing order fields")
-			}
-
-			day, _ := bysquare.ParseNumber(parts[idx])
-			idx++
-			month, _ := bysquare.ParseNumber(parts[idx])
-			idx++
-			periodicity := parts[idx]
-			idx++
-			lastDate := parts[idx]
-			idx++
-
-			if payment.Type == PaymentTypeStandingOrder {
-				payment.StandingOrderExt = &StandingOrder{
-					Day:         uint8(day),
-					Month:       uint16(month),
-					Periodicity: Periodicity(periodicity),
-					LastDate:    lastDate,
-				}
-			}
-		}
-
-		// Direct debit extension
-		if idx >= len(parts) {
-			return DataModel{}, errors.New("missing direct debit extension field")
-		}
-
-		directDebitExt := parts[idx]
-		idx++
-
-		if directDebitExt == "1" {
-			if idx+10 > len(parts) {
-				return DataModel{}, errors.New("insufficient direct debit fields")
-			}
-
-			scheme, _ := bysquare.ParseNumber(parts[idx])
-			idx++
-			ddType, _ := bysquare.ParseNumber(parts[idx])
-			idx++
-			varSymbol := parts[idx]
-			idx++
-			specSymbol := parts[idx]
-			idx++
-			origRefInfo := parts[idx]
-			idx++
-			mandateID := parts[idx]
-			idx++
-			creditorID := parts[idx]
-			idx++
-			contractID := parts[idx]
-			idx++
-			maxAmount, _ := bysquare.ParseFloat(parts[idx])
-			idx++
-			validTillDate := parts[idx]
-			idx++
-
-			if payment.Type == PaymentTypeDirectDebit {
-				payment.DirectDebitExt = &DirectDebit{
-					DirectDebitScheme:        uint8(scheme),
-					DirectDebitType:          uint8(ddType),
-					VariableSymbol:           varSymbol,
-					SpecificSymbol:           specSymbol,
-					OriginatorsReferenceInfo: origRefInfo,
-					MandateID:                mandateID,
-					CreditorID:               creditorID,
-					ContractID:               contractID,
-					MaxAmount:                maxAmount,
-					ValidTillDate:            validTillDate,
-				}
-			}
-		}
-
-		model.Payments = append(model.Payments, payment)
-	}
-
-	// Parse beneficiary blocks (one per payment)
-	for i := range paymentsCount {
-		if idx+3 > len(parts) {
-			model.Payments[i].Beneficiary = &Beneficiary{
-				Name:   "",
-				Street: "",
-				City:   "",
-			}
-
-			continue
-		}
-
-		name := parts[idx]
-		idx++
-		street := parts[idx]
-		idx++
-		city := parts[idx]
-		idx++
-
-		model.Payments[i].Beneficiary = &Beneficiary{
-			Name:   name,
-			Street: street,
-			City:   city,
+		return DataModel{}, &bysquare.DecodeError{
+			Message:    bysquare.DecodeErrorMessage.LZMADecompressionFailed,
+			Extensions: map[string]any{"error": "Decompressed payload is shorter than the CRC32 checksum"},
 		}
 	}
 
-	return model, nil
+	storedChecksum := binary.LittleEndian.Uint32(decompressed[0:4])
+	decoded := string(decompressed[4:])
+
+	computedChecksum := bysquare.CRC32(decoded)
+	if storedChecksum != computedChecksum {
+		return DataModel{}, &bysquare.DecodeError{
+			Message:    "CRC32 checksum mismatch",
+			Extensions: map[string]any{"stored": storedChecksum, "computed": computedChecksum},
+		}
+	}
+
+	return deserialize(decoded)
 }

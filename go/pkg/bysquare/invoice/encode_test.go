@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-func minimalInvoice() *DataModel {
+func minimalInvoice() DataModel {
 	numLines := 5
 
-	return &DataModel{
+	return DataModel{
 		DocumentType:      InvoiceDocumentTypeInvoice,
 		InvoiceID:         "INV-001",
 		IssueDate:         "20240101",
@@ -136,7 +136,7 @@ func TestEncodeAllDocumentTypes(t *testing.T) {
 }
 
 func TestEncodeValidationError(t *testing.T) {
-	model := &DataModel{
+	model := DataModel{
 		DocumentType: InvoiceDocumentTypeInvoice,
 	}
 

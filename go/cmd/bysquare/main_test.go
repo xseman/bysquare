@@ -3,9 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -13,83 +12,31 @@ import (
 	"github.com/xseman/bysquare/go/pkg/bysquare/pay"
 )
 
-var (
-	binaryPath   string
-	exampleJSON  string
-	exampleJSONL string
-)
+var exampleJSON = filepath.Join("..", "..", "..", "examples", "cli", "example.json")
 
-func TestMain(m *testing.M) {
-	binaryPath = filepath.Join(os.TempDir(), "bysquare-test")
-
-	cmd := exec.Command("go", "build", "-o", binaryPath, ".")
-	if err := cmd.Run(); err != nil {
-		os.Exit(1)
-	}
-
-	exampleJSON = filepath.Join("..", "..", "..", "examples", "cli", "example.json")
-	exampleJSONL = filepath.Join("..", "..", "..", "examples", "cli", "example.jsonl")
-
-	// Not deferred: os.Exit would skip it.
-	code := m.Run()
-	_ = os.Remove(binaryPath)
-
-	os.Exit(code)
-}
-
-func captureStdout(t *testing.T, fn func()) string {
-	t.Helper()
-
-	oldStdout := os.Stdout
-
-	r, w, err := os.Pipe()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	os.Stdout = w
-
-	fn()
-
-	_ = w.Close()
-	os.Stdout = oldStdout
-
-	var buf bytes.Buffer
-
-	_, _ = buf.ReadFrom(r)
-
-	return strings.TrimSpace(buf.String())
-}
-
+// runCLI runs the command in-process the way main would, with stdin as its
+// input, and returns what a shell would see.
 func runCLI(t *testing.T, args []string, stdin string) (stdout, stderr string, exitCode int) {
 	t.Helper()
 
-	cmd := exec.Command(binaryPath, args...)
-	if stdin != "" {
-		cmd.Stdin = strings.NewReader(stdin)
-	}
+	var out, errOut bytes.Buffer
 
-	var outBuf, errBuf strings.Builder
+	exitCode = run(args, streams{in: strings.NewReader(stdin), out: &out, err: &errOut})
 
-	cmd.Stdout = &outBuf
-	cmd.Stderr = &errBuf
+	return strings.TrimSpace(out.String()), strings.TrimSpace(errOut.String()), exitCode
+}
 
-	err := cmd.Run()
-	stdout = strings.TrimSpace(outBuf.String())
-	stderr = strings.TrimSpace(errBuf.String())
+// discard is the I/O for a command whose output the test does not read.
+func discard() streams { return streams{in: strings.NewReader(""), out: io.Discard, err: io.Discard} }
 
-	if err != nil {
-		exitErr := &exec.ExitError{}
-		if errors.As(err, &exitErr) {
-			exitCode = exitErr.ExitCode()
-		} else {
-			t.Fatalf("Failed to run command: %v", err)
-		}
-	} else {
-		exitCode = 0
-	}
+// capture runs one command function with stdin as its input and returns its
+// stdout and error.
+func capture(stdin string, fn func(s streams) error) (string, error) {
+	var out, errOut bytes.Buffer
 
-	return stdout, stderr, exitCode
+	err := fn(streams{in: strings.NewReader(stdin), out: &out, err: &errOut})
+
+	return strings.TrimSpace(out.String()), err
 }
 
 func TestVersion(t *testing.T) {
@@ -180,7 +127,7 @@ func TestPayEncodeInvalidJSON(t *testing.T) {
 		Version:  0x02,
 	}
 
-	err := encodePayAndPrint(input, cfg)
+	err := encodePayAndPrint(input, cfg, io.Discard)
 	if err == nil {
 		t.Error("Expected error for invalid JSON, got nil")
 	}
@@ -230,12 +177,7 @@ func TestPayEncodeWithFlags(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var cmdErr error
-
-			output := captureStdout(t, func() {
-				cmdErr = cmdPayEncode(tt.args)
-			})
-
+			output, cmdErr := capture("", func(s streams) error { return cmdPayEncode(tt.args, s) })
 			if cmdErr != nil {
 				t.Errorf("cmdPayEncode(%v) failed: %v", tt.args, cmdErr)
 			}
@@ -248,7 +190,7 @@ func TestPayEncodeWithFlags(t *testing.T) {
 }
 
 func TestPayEncodeInvalidVersion(t *testing.T) {
-	err := cmdPayEncode([]string{"-s", "9.9.9", "dummy.json"})
+	err := cmdPayEncode([]string{"-s", "9.9.9", "dummy.json"}, discard())
 	if err == nil {
 		t.Error("Expected error for invalid version, got nil")
 	}
@@ -259,7 +201,7 @@ func TestPayEncodeInvalidVersion(t *testing.T) {
 }
 
 func TestPayEncodeMissingFile(t *testing.T) {
-	err := cmdPayEncode([]string{})
+	err := cmdPayEncode([]string{}, discard())
 	if err == nil {
 		t.Error("Expected error for missing file arg, got nil")
 	}
@@ -270,12 +212,7 @@ func TestPayEncodeMissingFile(t *testing.T) {
 }
 
 func TestPayEncodeFileNotFound(t *testing.T) {
-	var cmdErr error
-
-	_ = captureStdout(t, func() {
-		cmdErr = cmdPayEncode([]string{"nonexistent.json"})
-	})
-
+	_, cmdErr := capture("", func(s streams) error { return cmdPayEncode([]string{"nonexistent.json"}, s) })
 	if cmdErr == nil {
 		t.Error("Expected error for missing file, got nil")
 	}
@@ -288,12 +225,7 @@ func TestPayEncodeFileNotFound(t *testing.T) {
 func TestPayDecodeQRString(t *testing.T) {
 	qrString := "0804Q000AEM958SPQK31JJFA00H0OBFGMH6PKV0OQSNQPQK5K2BATU8DV6PA0G2P9U05QCF640MRVMTLLI3OJ8CEGOUEP5GR3LIJ4C0A8ERUI3JHM3VTNG00"
 
-	var cmdErr error
-
-	output := captureStdout(t, func() {
-		cmdErr = cmdPayDecode([]string{qrString})
-	})
-
+	output, cmdErr := capture("", func(s streams) error { return cmdPayDecode([]string{qrString}, s) })
 	if cmdErr != nil {
 		t.Errorf("cmdPayDecode failed: %v", cmdErr)
 	}
@@ -325,12 +257,7 @@ func TestPayDecodeFromFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var cmdErr error
-
-	output := captureStdout(t, func() {
-		cmdErr = cmdPayDecode([]string{tmpfile.Name()})
-	})
-
+	output, cmdErr := capture("", func(s streams) error { return cmdPayDecode([]string{tmpfile.Name()}, s) })
 	if cmdErr != nil {
 		t.Errorf("cmdPayDecode from file failed: %v", cmdErr)
 	}
@@ -348,28 +275,7 @@ func TestPayDecodeFromFile(t *testing.T) {
 func TestPayDecodeFromStdin(t *testing.T) {
 	qrString := "0804Q000AEM958SPQK31JJFA00H0OBFGMH6PKV0OQSNQPQK5K2BATU8DV6PA0G2P9U05QCF640MRVMTLLI3OJ8CEGOUEP5GR3LIJ4C0A8ERUI3JHM3VTNG00"
 
-	oldStdin := os.Stdin
-
-	r, w, err := os.Pipe()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	os.Stdin = r
-
-	go func() {
-		_, _ = w.WriteString(qrString)
-		_ = w.Close()
-	}()
-
-	var cmdErr error
-
-	output := captureStdout(t, func() {
-		cmdErr = cmdPayDecode([]string{"-"})
-	})
-
-	os.Stdin = oldStdin
-
+	output, cmdErr := capture(qrString, func(s streams) error { return cmdPayDecode([]string{"-"}, s) })
 	if cmdErr != nil {
 		t.Errorf("cmdPayDecode stdin failed: %v", cmdErr)
 	}
@@ -385,7 +291,7 @@ func TestPayDecodeFromStdin(t *testing.T) {
 }
 
 func TestPayDecodeMissingArg(t *testing.T) {
-	err := cmdPayDecode([]string{})
+	err := cmdPayDecode([]string{}, discard())
 	if err == nil {
 		t.Error("Expected error for missing QR string, got nil")
 	}
@@ -396,7 +302,7 @@ func TestPayDecodeMissingArg(t *testing.T) {
 }
 
 func TestPayDecodeInvalidQR(t *testing.T) {
-	err := cmdPayDecode([]string{"INVALIDQRSTRING"})
+	err := cmdPayDecode([]string{"INVALIDQRSTRING"}, discard())
 	if err == nil {
 		t.Error("Expected error for invalid QR string, got nil")
 	}
@@ -430,12 +336,7 @@ func TestPayProcessFileJSONL(t *testing.T) {
 		Version:  0x02,
 	}
 
-	var encErr error
-
-	output := captureStdout(t, func() {
-		encErr = processPayFile(tmpfile.Name(), cfg)
-	})
-
+	output, encErr := capture("", func(s streams) error { return processPayFile(tmpfile.Name(), cfg, s) })
 	if encErr != nil {
 		t.Errorf("processPayFile JSONL failed: %v", encErr)
 	}
@@ -458,34 +359,13 @@ func TestPayProcessFileFromStdin(t *testing.T) {
 		}]
 	}`
 
-	oldStdin := os.Stdin
-
-	r, w, err := os.Pipe()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	os.Stdin = r
-
-	go func() {
-		_, _ = w.WriteString(content)
-		_ = w.Close()
-	}()
-
 	cfg := pay.EncodeOptions{
 		Deburr:   true,
 		Validate: true,
 		Version:  0x02,
 	}
 
-	var encErr error
-
-	output := captureStdout(t, func() {
-		encErr = processPayFile("-", cfg)
-	})
-
-	os.Stdin = oldStdin
-
+	output, encErr := capture(content, func(s streams) error { return processPayFile("-", cfg, s) })
 	if encErr != nil {
 		t.Errorf("processPayFile stdin failed: %v", encErr)
 	}
@@ -513,7 +393,7 @@ func TestPayEncodeValidationError(t *testing.T) {
 		Version:  0x02,
 	}
 
-	err := encodePayAndPrint(input, cfg)
+	err := encodePayAndPrint(input, cfg, io.Discard)
 	if err == nil {
 		t.Error("Expected validation error for invalid IBAN, got nil")
 	}
@@ -522,12 +402,7 @@ func TestPayEncodeValidationError(t *testing.T) {
 func TestDecodeAutoDetect(t *testing.T) {
 	qrString := "0804Q000AEM958SPQK31JJFA00H0OBFGMH6PKV0OQSNQPQK5K2BATU8DV6PA0G2P9U05QCF640MRVMTLLI3OJ8CEGOUEP5GR3LIJ4C0A8ERUI3JHM3VTNG00"
 
-	var cmdErr error
-
-	output := captureStdout(t, func() {
-		cmdErr = cmdDecodeAuto([]string{qrString})
-	})
-
+	output, cmdErr := capture("", func(s streams) error { return cmdDecodeAuto([]string{qrString}, s) })
 	if cmdErr != nil {
 		t.Errorf("cmdDecodeAuto failed: %v", cmdErr)
 	}
@@ -543,7 +418,7 @@ func TestDecodeAutoDetect(t *testing.T) {
 }
 
 func TestDecodeAutoMissingArg(t *testing.T) {
-	err := cmdDecodeAuto([]string{})
+	err := cmdDecodeAuto([]string{}, discard())
 	if err == nil {
 		t.Error("Expected error for missing QR string, got nil")
 	}

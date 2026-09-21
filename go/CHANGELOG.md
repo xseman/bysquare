@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.5.0](https://github.com/xseman/bysquare/compare/go/v0.4.0...go/v0.5.0) (2026-09-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **go:** `pay.SimplePayment` no longer carries `Type`, `StandingOrderExt` or `DirectDebitExt`; use `pay.Payment`. Renamed: `PaymentType*` → `PaymentOptions*`, `ParseBysquareHeader` → `DecodeHeader`, `BysquareHeader` → `Header`, `BySquareType` → `BysquareType`, `Crc32Checksum` → `CRC32`, `EncodeClassifierOptions` → `EncodeOptions`, `DecodeClassifierOptions` → `DecodeOptions`. Removed from the public API: `CompressLZMA`, `DecompressLZMA`, `Sanitize`, `FormatFloat*`, `ParseNumber`, `ParseFloat`, `IsValid*`, `invoice.DefaultEncodeOptions`, `pay.ErrMissingBankAccount`, and the per-package `ValidationError` types (now `bysquare.ValidationError`). `invoice.Encode` takes a value and `invoice.Decode` returns one. `BuildBysquareHeader` and `BuildPayloadLength` return an error instead of panicking.
+
+### Features
+
+* **go:** mirror the TypeScript API name for name ([#138](https://github.com/xseman/bysquare/issues/138)) ([6772ba1](https://github.com/xseman/bysquare/commit/6772ba17904f79aafd4667f1eab8ac9aab70ffa4))
+
+
+### Documentation
+
+* fix incorrect api, binding and download references ([eebd47a](https://github.com/xseman/bysquare/commit/eebd47ad0b79ed1e41b15b79b1db89bb48bf9180))
+* split CLAUDE.md into a root router and per-implementation guides ([#141](https://github.com/xseman/bysquare/issues/141)) ([7fe186e](https://github.com/xseman/bysquare/commit/7fe186ebb3ac56f1ba6617baee3ab80d4c9e8a6b))
+
+
+### Build System
+
+* **go:** golangci-lint style gate and gofumpt ([#137](https://github.com/xseman/bysquare/issues/137)) ([bc08688](https://github.com/xseman/bysquare/commit/bc08688f36fa7088831dfff1b2e0d97391e1cf3b))
+
 ## [0.4.0](https://github.com/xseman/bysquare/compare/go/v0.3.0...go/v0.4.0) (2026-03-07)
 
 

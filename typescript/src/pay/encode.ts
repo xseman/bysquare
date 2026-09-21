@@ -1,6 +1,9 @@
 import * as base32hex from "../base32hex.js";
 import { deburr } from "../deburr.js";
-import { sanitize } from "../field.js";
+import {
+	formatDecimal,
+	sanitize,
+} from "../field.js";
 import {
 	addChecksum,
 	buildBysquareHeader,
@@ -77,7 +80,7 @@ export function serialize(data: DataModel): string {
 	for (const p of data.payments) {
 		// Payment fields
 		s.push(p.type.toString());
-		s.push(p.amount?.toString());
+		s.push(formatDecimal(p.amount));
 		s.push(sanitize(p.currencyCode));
 		s.push(sanitize(p.paymentDueDate));
 		s.push(sanitize(p.variableSymbol));
@@ -122,7 +125,7 @@ export function serialize(data: DataModel): string {
 			s.push(sanitize(p.mandateId?.toString()));
 			s.push(sanitize(p.creditorId?.toString()));
 			s.push(sanitize(p.contractId?.toString()));
-			s.push(p.maxAmount?.toString());
+			s.push(formatDecimal(p.maxAmount));
 			s.push(sanitize(p.validTillDate?.toString()));
 		} else {
 			s.push("0");

@@ -2,6 +2,31 @@ package field
 
 import "testing"
 
+func TestFormatFloatRequired(t *testing.T) {
+	tests := []struct {
+		name  string
+		input float64
+		want  string
+	}{
+		{"zero", 0, "0"},
+		{"whole number", 100, "100"},
+		{"two decimals", 100.5, "100.5"},
+		{"large amount", 999999.99, "999999.99"},
+		{"float artifact rounds away", 0.1 + 0.2, "0.3"},
+		{"nine decimals round to eight", 1.123456789, "1.12345679"},
+		{"below eight decimals is zero", 0.000000001, "0"},
+		{"negative", -12.34, "-12.34"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := FormatFloatRequired(tt.input); got != tt.want {
+				t.Errorf("FormatFloatRequired(%v) = %q, want %q", tt.input, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestIsValidIBAN(t *testing.T) {
 	testCases := []struct {
 		name  string

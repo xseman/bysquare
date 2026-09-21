@@ -37,10 +37,19 @@ func FormatFloat(f float64) string {
 	return FormatFloatRequired(f)
 }
 
+// maxDecimals is the decimal places a number field may carry: the
+// specification writes the format as #.########.
+//
+// @see Table 8
+const maxDecimals = 8
+
 // FormatFloatRequired prints a number that is always present, zero included,
-// the shortest way that reads back exactly, as Number.toString does.
+// rounded to maxDecimals and without the trailing zeros.
 func FormatFloatRequired(f float64) string {
-	return strconv.FormatFloat(f, 'f', -1, 64)
+	s := strconv.FormatFloat(f, 'f', maxDecimals, 64)
+	s = strings.TrimRight(s, "0")
+
+	return strings.TrimSuffix(s, ".")
 }
 
 // ParseNumber reads an int field: 0 for an empty or unreadable one, the way

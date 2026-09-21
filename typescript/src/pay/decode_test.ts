@@ -175,6 +175,12 @@ describe("decode deserialization", () => {
 		);
 	});
 
+	test("caps the payment count at the fields available", () => {
+		const result = deserialize("\t99999999");
+
+		expect(result.payments.length).toBeLessThanOrEqual(2);
+	});
+
 	test("deserializes payment order", () => {
 		const result = deserialize(PAYMENT_ORDER_SERIALIZED);
 		expect(result).toEqual(PAYMENT_ORDER_FIXTURE);

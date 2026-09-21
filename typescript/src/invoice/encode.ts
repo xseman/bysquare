@@ -1,23 +1,17 @@
-import { compress } from "lzma1";
-
 import * as base32hex from "../base32hex.js";
+import {
+	formatDecimal,
+	sanitize,
+} from "../field.js";
 import {
 	addChecksum,
 	buildBysquareHeader,
 	buildPayloadLength,
 } from "../header.js";
+import * as lzma from "../lzma.js";
 import { Version } from "../types.js";
 import type { DataModel } from "./types.js";
 import { validateDataModel } from "./validations.js";
-
-/**
- * Sanitize field value by replacing tab characters with space.
- *
- * @see 3.8.
- */
-function sanitize(value: string | undefined): string | undefined {
-	return value?.replaceAll("\t", " ");
-}
 
 /**
  * Transform DataModel to a tab-separated intermediate format.
@@ -71,8 +65,8 @@ export function serialize(data: DataModel): string {
 	s.push(sanitize(data.deliveryNoteId));
 	s.push(sanitize(data.localCurrencyCode));
 	s.push(sanitize(data.foreignCurrencyCode));
-	s.push(data.currRate?.toString());
-	s.push(data.referenceCurrRate?.toString());
+	s.push(formatDecimal(data.currRate));
+	s.push(formatDecimal(data.referenceCurrRate));
 
 	// Supplier party (13 fields)
 	const sp = data.supplierParty;
@@ -114,21 +108,21 @@ export function serialize(data: DataModel): string {
 	s.push(sanitize(line?.itemEanCode));
 	s.push(sanitize(line?.periodFromDate));
 	s.push(sanitize(line?.periodToDate));
-	s.push(line?.invoicedQuantity?.toString());
+	s.push(formatDecimal(line?.invoicedQuantity));
 
 	// Tax category summaries
 	s.push(data.taxCategorySummaries.length.toString());
 	for (const tcs of data.taxCategorySummaries) {
-		s.push(tcs.classifiedTaxCategory.toString());
-		s.push(tcs.taxExclusiveAmount.toString());
-		s.push(tcs.taxAmount.toString());
-		s.push(tcs.alreadyClaimedTaxExclusiveAmount?.toString());
-		s.push(tcs.alreadyClaimedTaxAmount?.toString());
+		s.push(formatDecimal(tcs.classifiedTaxCategory));
+		s.push(formatDecimal(tcs.taxExclusiveAmount));
+		s.push(formatDecimal(tcs.taxAmount));
+		s.push(formatDecimal(tcs.alreadyClaimedTaxExclusiveAmount));
+		s.push(formatDecimal(tcs.alreadyClaimedTaxAmount));
 	}
 
 	// Monetary summary (2 fields)
-	s.push(data.monetarySummary.payableRoundingAmount?.toString());
-	s.push(data.monetarySummary.paidDepositsAmount?.toString());
+	s.push(formatDecimal(data.monetarySummary.payableRoundingAmount));
+	s.push(formatDecimal(data.monetarySummary.paidDepositsAmount));
 
 	// Payment means bitmask
 	s.push(data.paymentMeans?.toString());
@@ -177,10 +171,7 @@ export function encode(
 
 	const payloadTabbed = serialize(model);
 	const payloadChecked = addChecksum(payloadTabbed);
-	const payloadCompressed = compress(payloadChecked);
-
-	// Strip 13-byte LZMA header
-	const lzmaBody = payloadCompressed.subarray(13);
+	const lzmaBody = lzma.compress(payloadChecked);
 
 	const bysquareType = 0x01; // TYPE_INVOICE
 	const output = new Uint8Array([

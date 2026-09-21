@@ -1,12 +1,15 @@
-import { compress } from "lzma1";
-
 import * as base32hex from "../base32hex.js";
 import { deburr } from "../deburr.js";
+import {
+	formatDecimal,
+	sanitize,
+} from "../field.js";
 import {
 	addChecksum,
 	buildBysquareHeader,
 	buildPayloadLength,
 } from "../header.js";
+import * as lzma from "../lzma.js";
 import { Version } from "../types.js";
 import {
 	DataModel,
@@ -14,15 +17,6 @@ import {
 	PaymentOptions,
 } from "./types.js";
 import { validateDataModel } from "./validations.js";
-
-/**
- * Sanitize field value by replacing tab characters with space.
- *
- * @see 3.8.
- */
-function sanitize(value: string | undefined): string | undefined {
-	return value?.replaceAll("\t", " ");
-}
 
 /**
  * Transform DataModel to a tab-separated intermediate format.
@@ -86,7 +80,7 @@ export function serialize(data: DataModel): string {
 	for (const p of data.payments) {
 		// Payment fields
 		s.push(p.type.toString());
-		s.push(p.amount?.toString());
+		s.push(formatDecimal(p.amount));
 		s.push(sanitize(p.currencyCode));
 		s.push(sanitize(p.paymentDueDate));
 		s.push(sanitize(p.variableSymbol));
@@ -131,7 +125,7 @@ export function serialize(data: DataModel): string {
 			s.push(sanitize(p.mandateId?.toString()));
 			s.push(sanitize(p.creditorId?.toString()));
 			s.push(sanitize(p.contractId?.toString()));
-			s.push(p.maxAmount?.toString());
+			s.push(formatDecimal(p.maxAmount));
 			s.push(sanitize(p.validTillDate?.toString()));
 		} else {
 			s.push("0");
@@ -245,28 +239,7 @@ export function encode(
 
 	const payloadTabbed = serialize(model);
 	const payloadChecked = addChecksum(payloadTabbed);
-	const payloadCompressed = compress(payloadChecked);
-
-	/**
-	 * Header is ommited, the bysquare doesn't include it in the output
-	 *
-	 * ---
-	 * The LZMA files has a 13-byte header that is followed by the LZMA
-	 * compressed data.
-	 *
-	 * NOTE: The header is rebuilt on decode with a fixed dictionary size of
-	 * 2^17, which always covers the match distances of a QR sized payload.
-	 *
-	 * @see https://docs.fileformat.com/compression/lzma/
-	 *
-	 * +---------------+---------------------------+-------------------+
-	 * |      1B       |           4B              |         8B        |
-	 * +---------------+---------------------------+-------------------+
-	 * | Properties    | Dictionary Size           | Uncompressed Size |
-	 * +---------------+---------------------------+-------------------+
-	 */
-	const _lzmaHeader = payloadCompressed.subarray(0, 13);
-	const lzmaBody = payloadCompressed.subarray(13);
+	const lzmaBody = lzma.compress(payloadChecked);
 
 	const output = new Uint8Array([
 		...buildBysquareHeader([0x00, version, 0x00, 0x00]),

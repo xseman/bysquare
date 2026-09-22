@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.0.2](https://github.com/xseman/bysquare/compare/typescript/v4.0.1...typescript/v4.0.2) (2026-09-22)
+
+
+### Documentation
+
+* split CLAUDE.md into a root router and per-implementation guides ([#141](https://github.com/xseman/bysquare/issues/141)) ([7fe186e](https://github.com/xseman/bysquare/commit/7fe186ebb3ac56f1ba6617baee3ab80d4c9e8a6b))
+
+
+### Maintenance
+
+* **typescript:** share the LZMA framing and the field helpers ([#139](https://github.com/xseman/bysquare/issues/139)) ([eba0646](https://github.com/xseman/bysquare/commit/eba0646b39b8c99198d3a1749462885df6b98dbb))
+
 ## [4.0.1](https://github.com/xseman/bysquare/compare/typescript/v4.0.0...typescript/v4.0.1) (2026-09-09)
 
 

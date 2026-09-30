@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/xseman/bysquare/compare/typescript/v4.0.2...typescript/v4.1.0) (2026-09-30)
+
+
+### Performance Improvements
+
+* **typescript:** update lzma1 to 0.4.0 ([#142](https://github.com/xseman/bysquare/issues/142)) ([25dba5e](https://github.com/xseman/bysquare/commit/25dba5ee4590bb5f1662d98ca55e881f34d7f14a))
+
 ## [4.0.2](https://github.com/xseman/bysquare/compare/typescript/v4.0.1...typescript/v4.0.2) (2026-09-22)
 
 

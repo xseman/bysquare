@@ -5,6 +5,7 @@
 		"typescript": {
 			"release-type": "node",
 			"component": "typescript",
+			"release-as": "4.1.0",
 			"tag-separator": "/",
 			"include-v-in-tag": true,
 			"include-component-in-tag": true,

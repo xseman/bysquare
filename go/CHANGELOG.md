@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/xseman/bysquare/compare/go/v0.5.0...go/v0.5.1) (2026-09-30)
+
+
+### Performance Improvements
+
+* **typescript:** update lzma1 to 0.4.0 ([#142](https://github.com/xseman/bysquare/issues/142)) ([25dba5e](https://github.com/xseman/bysquare/commit/25dba5ee4590bb5f1662d98ca55e881f34d7f14a))
+
 ## [0.5.0](https://github.com/xseman/bysquare/compare/go/v0.4.0...go/v0.5.0) (2026-09-21)
 
 

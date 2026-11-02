@@ -157,6 +157,23 @@ func TestBuildPayloadLength(t *testing.T) {
 		}
 	})
 
+	t.Run("encodes the largest 16-bit length", func(t *testing.T) {
+		got, err := BuildPayloadLength(65_535)
+
+		if err != nil || got[0] != 0xFF || got[1] != 0xFF {
+			t.Errorf("got %v, %v, want [0xFF 0xFF]", got, err)
+		}
+	})
+
+	t.Run("errors for a length past 16 bits", func(t *testing.T) {
+		_, err := BuildPayloadLength(65_536)
+
+		var encodeErr *EncodeError
+		if !errors.As(err, &encodeErr) || encodeErr.Message != EncodeErrorMessage.HeaderDataSize {
+			t.Fatalf("got %v, want EncodeError %q", err, EncodeErrorMessage.HeaderDataSize)
+		}
+	})
+
 	t.Run("encodes zero length", func(t *testing.T) {
 		got, err := BuildPayloadLength(0)
 		if err != nil || got[0] != 0 || got[1] != 0 {

@@ -2,8 +2,9 @@ package bysquare
 
 import "encoding/binary"
 
-// MaxCompressedSize is the largest payload a header can describe: 2^17.
-const MaxCompressedSize = 131_072
+// MaxCompressedSize is one past the largest payload length a header can
+// describe: 2^16.
+const MaxCompressedSize = 65_536
 
 // Header is the four nibbles of the first two bytes.
 type Header struct {
@@ -73,9 +74,9 @@ func DecodeHeader(header []byte) Header {
 	}
 }
 
-// BuildPayloadLength is the 2-byte little-endian length of the compressed
-// payload with its CRC32; a length of MaxCompressedSize or more is an
-// EncodeError.
+// BuildPayloadLength is the 2-byte little-endian length of the decompressed
+// data, the CRC32 checksum together with the payload; a length of
+// MaxCompressedSize or more is an EncodeError.
 //
 //	+---------------+---------------+
 //	|    Byte 0     |    Byte 1     |
@@ -83,10 +84,11 @@ func DecodeHeader(header []byte) Header {
 //	|      LSB      |      MSB      |
 //	+---------------+---------------+
 //	| Little-endian 16-bit unsigned |
-//	| max 2^17 = 131072             |
+//	| max 2^16 - 1 = 65535          |
 //	+-------------------------------+
 //
-// @see 3.6.
+// @see 3.9.2.
+// @see 3.11.
 func BuildPayloadLength(length int) ([]byte, error) {
 	if length >= MaxCompressedSize {
 		return nil, &EncodeError{

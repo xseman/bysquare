@@ -81,7 +81,7 @@ export interface Header {
 	reserved: number;
 }
 
-export const MAX_COMPRESSED_SIZE = 131_072; // 2^17
+export const MAX_COMPRESSED_SIZE = 65_536; // 2^16
 
 /**
  * Returns a 2 byte buffer that represents the header of the bysquare
@@ -171,8 +171,8 @@ export function decodeHeader(header: Uint8Array): Header {
 }
 
 /**
- * Creates a 2-byte array that represents the length of compressed data in
- * combination with CRC32 in bytes.
+ * Creates a 2-byte array that represents the length of the decompressed data,
+ * the CRC32 checksum together with the payload, in bytes.
  *
  * ```
  * +---------------+---------------+
@@ -181,11 +181,12 @@ export function decodeHeader(header: Uint8Array): Header {
  * |      LSB      |      MSB      |
  * +---------------+---------------+
  * | Little-endian 16-bit unsigned |
- * | max 2^17 = 131072             |
+ * | max 2^16 - 1 = 65535          |
  * +-------------------------------+
  * ```
  *
- * @see 3.6.
+ * @see 3.9.2.
+ * @see 3.11.
  */
 export function buildPayloadLength(length: number): Uint8Array {
 	if (length >= MAX_COMPRESSED_SIZE) {

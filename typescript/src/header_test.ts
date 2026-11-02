@@ -246,6 +246,18 @@ describe("buildPayloadLength", () => {
 		}).toThrow(EncodeError);
 	});
 
+	test("encodes the largest 16-bit length", () => {
+		const result = buildPayloadLength(65_535);
+
+		expect(result).toEqual(new Uint8Array([0xFF, 0xFF]));
+	});
+
+	test("throws for a length past 16 bits", () => {
+		expect(() => {
+			buildPayloadLength(65_536);
+		}).toThrow(EncodeError);
+	});
+
 	test("encodes zero length", () => {
 		const result = buildPayloadLength(0);
 		expect(result).toEqual(new Uint8Array([0x00, 0x00]));

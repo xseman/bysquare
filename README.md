@@ -23,12 +23,17 @@ individuals and businesses to create QR codes for their invoices.
 
 ## Specification Versions
 
+The specifications, XSD schemas and
+[terms of use](https://www.sbaonline.sk/wp-content/uploads/2020/03/podmienky-pouzitia-pay-by-square.pdf)
+are published by the
+[Slovak Banking Association](https://www.sbaonline.sk/projekt/projekty-z-oblasti-platobnych-sluzieb/).
+
 **Pay BySquare**
 
-| Specification | TypeScript      | Go      |
-| ------------- | --------------- | ------- |
-| v1.1          | v1.0.0 – v3.0.0 | v0.1.0  |
-| v1.2          | v3.1.0+         | v0.2.0+ |
+| Specification                                                                                      | Valid since | TypeScript      | Go      |
+| -------------------------------------------------------------------------------------------------- | ----------- | --------------- | ------- |
+| [v1.1](https://www.sbaonline.sk/wp-content/uploads/2020/03/pay-by-square-specifications-1_1_0.pdf) | 2015-06-24  | v1.0.0 – v3.0.0 | v0.1.0  |
+| [v1.2](https://www.sbaonline.sk/wp-content/uploads/2020/03/bysquare-PAYspecifications-1.2.0.pdf)   | 2025-10-09  | v3.1.0+         | v0.2.0+ |
 
 **Invoice BySquare**
 
@@ -216,5 +221,5 @@ flowchart TB
 - <https://github.com/matusf/pay-by-square>
 - <https://github.com/mattbosak/bysquare_dart>
 - <https://devel.cz/otazka/qr-kod-pay-by-square>
-- <https://www.vutbr.cz/studenti/zav-prace/detail/78439>
-- <https://portal.bysquare.com/files/bysquare-PAYspecifications-1.2.0.pdf>
+- <https://www.vut.cz/studenti/zav-prace/detail/78439>
+- <https://bsqr.co/schema/>

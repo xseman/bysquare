@@ -17,6 +17,8 @@
 ## Features
 
 - TypeScript support
+- [PAY by square 1.2.0](https://www.sbaonline.sk/wp-content/uploads/2020/03/bysquare-PAYspecifications-1.2.0.pdf)
+  specification, see [all versions](https://www.sbaonline.sk/projekt/projekty-z-oblasti-platobnych-sluzieb/)
 - CLI tooling
 - Compatible with Slovak banking apps
 - Isomorphic Browser & Runtime-independent (Browser, Node.js, Bun, Deno)

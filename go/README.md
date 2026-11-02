@@ -16,7 +16,9 @@
 
 ## Features
 
-- PAY by square encoding and decoding
+- PAY by square encoding and decoding, per the
+  [1.2.0 specification](https://www.sbaonline.sk/wp-content/uploads/2020/03/bysquare-PAYspecifications-1.2.0.pdf)
+  ([all versions](https://www.sbaonline.sk/projekt/projekty-z-oblasti-platobnych-sluzieb/))
 - Invoice by square encoding and decoding
 - Auto-detection of BySquare type from QR data
 - CLI tooling with pay and invoice subcommands

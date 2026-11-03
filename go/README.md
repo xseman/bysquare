@@ -58,7 +58,7 @@ Or download pre-built binaries from [GitHub Releases](https://github.com/xseman/
 #### Standalone Binaries
 
 ```bash
-BASE=https://github.com/xseman/bysquare/releases/download/go/v0.5.0
+BASE=https://github.com/xseman/bysquare/releases/download/go/v0.6.0
 
 # Linux AMD64
 curl -LO ${BASE}/bysquare-linux-amd64
@@ -82,7 +82,7 @@ Download platform-specific shared libraries from [GitHub Releases](https://githu
 Each library ships with a matching C header (`libbysquare-<os>-<arch>.h`).
 
 ```bash
-BASE=https://github.com/xseman/bysquare/releases/download/go/v0.5.0
+BASE=https://github.com/xseman/bysquare/releases/download/go/v0.6.0
 
 # Linux
 curl -LO ${BASE}/libbysquare-linux-amd64.so
@@ -95,7 +95,7 @@ curl -LO ${BASE}/libbysquare-darwin-arm64.h
 
 ```powershell
 # Windows
-$base = "https://github.com/xseman/bysquare/releases/download/go/v0.5.0"
+$base = "https://github.com/xseman/bysquare/releases/download/go/v0.6.0"
 Invoke-WebRequest -Uri "$base/libbysquare-windows-amd64.dll" -OutFile "libbysquare.dll"
 ```
 

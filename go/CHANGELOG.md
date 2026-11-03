@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.6.0](https://github.com/xseman/bysquare/compare/go/v0.5.0...go/v0.6.0) (2026-11-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **go:** invoice.DataModel.PaymentMeans is an invoice.PaymentMean instead of a uint8. Constants and untyped literals keep working; a uint8 variable needs invoice.PaymentMean(v).
+
+### Bug Fixes
+
+* **go:** cap the payload length at 65535 ([335493d](https://github.com/xseman/bysquare/commit/335493d6c00e42e056a83356198de6c860033d90))
+* reject non-PAY strings in pay decode ([#148](https://github.com/xseman/bysquare/issues/148)) ([5524a93](https://github.com/xseman/bysquare/commit/5524a93d0eca3798520685da6cf5b3e5aa918b5e))
+
+
+### Performance Improvements
+
+* **typescript:** update lzma1 to 0.4.0 ([#142](https://github.com/xseman/bysquare/issues/142)) ([25dba5e](https://github.com/xseman/bysquare/commit/25dba5ee4590bb5f1662d98ca55e881f34d7f14a))
+
+
+### Documentation
+
+* **go:** make the pkg.go.dev reference complete ([#147](https://github.com/xseman/bysquare/issues/147)) ([77e7bd9](https://github.com/xseman/bysquare/commit/77e7bd9a17fd140e16999b768ff89c81859a996a))
+* link the official SBA specifications ([e179e79](https://github.com/xseman/bysquare/commit/e179e79edd5539c1a6b9ceaddeb5af2dec7b643d))
+
 ## [0.5.0](https://github.com/xseman/bysquare/compare/go/v0.4.0...go/v0.5.0) (2026-09-21)
 
 

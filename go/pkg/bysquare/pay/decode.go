@@ -2,6 +2,7 @@ package pay
 
 import (
 	"encoding/binary"
+	"strconv"
 	"strings"
 
 	"github.com/xseman/bysquare/go/pkg/bysquare"
@@ -125,12 +126,9 @@ func deserialize(tabString string) (DataModel, error) {
 // header and the two-byte payload length, LZMA body, then the CRC32 the
 // payload was checksummed with.
 //
-// Input that is not base32hex is [bysquare.ErrInvalidBase32Hex]; anything
-// else that does not decode is a [*bysquare.DecodeError]. The bysquareType
-// is not checked, as in the TypeScript implementation: an Invoice by square
-// string is read as PAY, usually without an error, into a meaningless model.
-// Tell the two apart first with [bysquare.DecodeHeader] on the output of
-// [bysquare.DecodeBase32Hex].
+// The header must carry bysquareType 0. Input that is not base32hex is
+// [bysquare.ErrInvalidBase32Hex]; anything else that does not decode, an
+// Invoice by square string included, is a [*bysquare.DecodeError].
 //
 // Input binary structure (after base32hex decoding):
 //
@@ -158,6 +156,13 @@ func Decode(qr string) (DataModel, error) {
 	}
 
 	headerData := bysquare.DecodeHeader(bytes)
+
+	if headerData.BysquareType != 0x00 {
+		return DataModel{}, &bysquare.DecodeError{
+			Message:    "Expected bysquareType 0 (PAY), got " + strconv.Itoa(int(headerData.BysquareType)),
+			Extensions: map[string]any{"bysquareType": headerData.BysquareType},
+		}
+	}
 
 	if headerData.Version > uint8(bysquare.Version120) {
 		return DataModel{}, &bysquare.DecodeError{

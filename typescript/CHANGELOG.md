@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.1.1](https://github.com/xseman/bysquare/compare/typescript/v4.1.0...typescript/v4.1.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* reject non-PAY strings in pay decode ([#148](https://github.com/xseman/bysquare/issues/148)) ([5524a93](https://github.com/xseman/bysquare/commit/5524a93d0eca3798520685da6cf5b3e5aa918b5e))
+* **typescript:** cap the payload length at 65535 ([164ce5e](https://github.com/xseman/bysquare/commit/164ce5e986f49b4a0672100f0a3f8448eb1a8a48))
+
+
+### Dependency Updates
+
+* **typescript:** update lzma1 to 0.7.0 ([#149](https://github.com/xseman/bysquare/issues/149)) ([ea9df46](https://github.com/xseman/bysquare/commit/ea9df46e4d6a7790c6081197e3c4657fbb5f3658))
+
+
+### Documentation
+
+* link the official SBA specifications ([e179e79](https://github.com/xseman/bysquare/commit/e179e79edd5539c1a6b9ceaddeb5af2dec7b643d))
+
 ## [4.1.0](https://github.com/xseman/bysquare/compare/typescript/v4.0.2...typescript/v4.1.0) (2026-09-30)
 
 

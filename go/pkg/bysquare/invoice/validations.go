@@ -58,7 +58,8 @@ func validateDate(value, path string) error {
 	return nil
 }
 
-// ValidateDataModel validates the complete invoice data model.
+// ValidateDataModel validates the complete invoice data model. The first
+// field that fails is a [*bysquare.ValidationError] whose Path leads to it.
 func ValidateDataModel(model DataModel) error {
 	if err := validateRequired(model.InvoiceID, "invoiceId"); err != nil {
 		return err

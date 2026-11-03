@@ -1,7 +1,8 @@
 // Package invoice implements Invoice by square encoding and decoding.
 //
 // This package handles bysquareType=0x01 (Invoice by square) data according
-// to the Slovak Banking Association specification.
+// to the Slovak Banking Association specification. [Encode] turns a
+// [DataModel] into the QR string and [Decode] reads it back.
 package invoice
 
 // InvoiceDocumentType represents the document type within bysquareType=1.
@@ -59,14 +60,14 @@ type Party struct {
 	CompanyRegisterID string `json:"companyRegisterId,omitempty"`
 }
 
-// SupplierParty extends Party with postal address and optional contact.
+// SupplierParty extends [Party] with postal address and optional contact.
 type SupplierParty struct {
 	Party
 	PostalAddress PostalAddress `json:"postalAddress"`
 	Contact       *Contact      `json:"contact,omitempty"`
 }
 
-// CustomerParty extends Party with optional party identification.
+// CustomerParty extends [Party] with optional party identification.
 type CustomerParty struct {
 	Party
 	PartyIdentification string `json:"partyIdentification,omitempty"`

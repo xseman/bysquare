@@ -1,7 +1,8 @@
 // Package pay implements PAY by square encoding and decoding.
 //
 // This package handles bysquareType=0x00 (PAY by square) data according
-// to the Slovak Banking Association specification.
+// to the Slovak Banking Association specification. [Encode] turns a
+// [DataModel] into the QR string and [Decode] reads it back.
 package pay
 
 import "github.com/xseman/bysquare/go/pkg/bysquare"
@@ -67,11 +68,11 @@ const (
 	PaymentOptionsPaymentOrder PaymentOptions = 0b00000001
 
 	// PaymentOptionsStandingOrder is a recurring payment, its details in the
-	// standing order fields of Payment.
+	// standing order fields of [Payment].
 	PaymentOptionsStandingOrder PaymentOptions = 0b00000010
 
 	// PaymentOptionsDirectDebit is a direct debit, its details in the direct
-	// debit fields of Payment.
+	// debit fields of [Payment].
 	PaymentOptionsDirectDebit PaymentOptions = 0b00000100
 )
 
@@ -124,9 +125,9 @@ type SimplePayment struct {
 	Beneficiary                     Beneficiary   `json:"beneficiary"`
 }
 
-// Payment is one payment of any type: the SimplePayment fields, the standing
-// order fields read when Type is PaymentOptionsStandingOrder, and the direct
-// debit fields read when Type is PaymentOptionsDirectDebit. The TypeScript
+// Payment is one payment of any type: the [SimplePayment] fields, the
+// standing order fields read when Type is [PaymentOptionsStandingOrder], and
+// the direct debit fields read when Type is [PaymentOptionsDirectDebit]. The TypeScript
 // implementation spells this as the union PaymentOrder | StandingOrder |
 // DirectDebit; the JSON is the same.
 type Payment struct {
@@ -159,9 +160,14 @@ type DataModel struct {
 	Payments  []Payment `json:"payments"`
 }
 
-// EncodeOptions steer Encode: Deburr strips diacritics from the free-text
-// fields, Validate runs ValidateDataModel first, Version picks the header
+// EncodeOptions steer [Encode]: Deburr strips diacritics from the free-text
+// fields, Validate runs [ValidateDataModel] first, Version picks the header
 // version.
+//
+// Without options, Encode deburrs, validates and writes
+// [bysquare.Version120]. Options replace those defaults as a whole instead
+// of merging with them, so set every field: the zero value turns deburring
+// and validation off and writes [bysquare.Version100].
 type EncodeOptions struct {
 	Deburr   bool
 	Validate bool

@@ -125,6 +125,9 @@ func deserialize(tabString string) (DataModel, error) {
 // header and the two-byte payload length, LZMA body, then the CRC32 the
 // payload was checksummed with.
 //
+// Input that is not base32hex is [bysquare.ErrInvalidBase32Hex]; anything
+// else that does not decode is a [*bysquare.DecodeError].
+//
 // Input binary structure (after base32hex decoding):
 //
 //	+------------------+------------------+-----------------------------+

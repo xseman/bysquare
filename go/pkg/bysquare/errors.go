@@ -2,11 +2,11 @@ package bysquare
 
 import "errors"
 
-// ErrInvalidBase32Hex is what DecodeBase32Hex returns for input that is not
+// ErrInvalidBase32Hex is what [DecodeBase32Hex] returns for input that is not
 // base32hex.
 var ErrInvalidBase32Hex = errors.New("invalid base32hex string")
 
-// EncodeErrorMessage holds the messages an EncodeError carries; Extensions
+// EncodeErrorMessage holds the messages an [EncodeError] carries; Extensions
 // name the value that was wrong.
 var EncodeErrorMessage = struct {
 	BySquareType   string
@@ -23,7 +23,7 @@ var EncodeErrorMessage = struct {
 }
 
 // EncodeError is an input that cannot be encoded: a header nibble out of
-// range or a payload past MaxCompressedSize. Extensions carry the offending
+// range or a payload past [MaxCompressedSize]. Extensions carry the offending
 // values, as the TypeScript implementation's do.
 type EncodeError struct {
 	Message    string
@@ -32,7 +32,7 @@ type EncodeError struct {
 
 func (e *EncodeError) Error() string { return e.Message }
 
-// DecodeErrorMessage holds the messages a DecodeError carries.
+// DecodeErrorMessage holds the messages a [DecodeError] carries.
 var DecodeErrorMessage = struct {
 	MissingIBAN             string
 	LZMADecompressionFailed string
@@ -43,10 +43,11 @@ var DecodeErrorMessage = struct {
 	UnsupportedVersion:      "Unsupported version",
 }
 
-// DecodeError is a QR string that does not decode: bad base32hex, a version
-// this implementation does not know, a failed decompression or a checksum
-// that does not match. Extensions carry the details, the cause among them
-// under "error".
+// DecodeError is a QR string that does not decode: a version this
+// implementation does not know, a failed decompression or a checksum that
+// does not match. Extensions carry the details, the cause among them under
+// "error". Input that is not base32hex at all is [ErrInvalidBase32Hex]
+// instead.
 type DecodeError struct {
 	Message    string
 	Extensions map[string]any

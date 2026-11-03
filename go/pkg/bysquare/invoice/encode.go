@@ -130,7 +130,11 @@ func serialize(data DataModel) string {
 	return strings.Join(fields, "	")
 }
 
-// EncodeOptions configures invoice encoding behavior.
+// EncodeOptions configures [Encode].
+//
+// Without options, Encode validates and writes [bysquare.Version100].
+// Options replace those defaults as a whole instead of merging with them, so
+// set every field: the zero value turns validation off.
 type EncodeOptions struct {
 	// Validate the data model before encoding.
 	Validate bool
@@ -152,7 +156,11 @@ func defaultEncodeOptions() EncodeOptions {
 // Encode turns the model into the QR string, the same pipeline as PAY by
 // square: serialize, CRC32, LZMA without the stream header, then the header
 // with bysquareType 1 and the model's documentType, the payload length, and
-// base32hex.
+// base32hex. It validates unless [EncodeOptions] say otherwise.
+//
+// A model that fails validation is a [*bysquare.ValidationError]; a header
+// value out of range or a payload too long for the header is a
+// [*bysquare.EncodeError].
 //
 // @see 3.16.
 func Encode(model DataModel, opts ...EncodeOptions) (string, error) {

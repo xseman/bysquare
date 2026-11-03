@@ -75,19 +75,26 @@ type CustomerParty struct {
 
 // SingleInvoiceLine represents a single invoice line item.
 type SingleInvoiceLine struct {
-	OrderLineID        string  `json:"orderLineId,omitempty"`
-	DeliveryNoteLineID string  `json:"deliveryNoteLineId,omitempty"`
-	ItemName           string  `json:"itemName,omitempty"`
-	ItemEanCode        string  `json:"itemEanCode,omitempty"`
-	PeriodFromDate     string  `json:"periodFromDate,omitempty"`
-	PeriodToDate       string  `json:"periodToDate,omitempty"`
-	InvoicedQuantity   float64 `json:"invoicedQuantity,omitempty"`
+	OrderLineID        string `json:"orderLineId,omitempty"`
+	DeliveryNoteLineID string `json:"deliveryNoteLineId,omitempty"`
+	ItemName           string `json:"itemName,omitempty"`
+	ItemEanCode        string `json:"itemEanCode,omitempty"`
+
+	// PeriodFromDate is the start of the invoiced period, as YYYYMMDD.
+	PeriodFromDate string `json:"periodFromDate,omitempty"`
+
+	// PeriodToDate is the end of the invoiced period, as YYYYMMDD.
+	PeriodToDate string `json:"periodToDate,omitempty"`
+
+	InvoicedQuantity float64 `json:"invoicedQuantity,omitempty"`
 }
 
 // TaxCategorySummary represents a tax category with amounts.
 type TaxCategorySummary struct {
-	// ClassifiedTaxCategory is a decimal in range [0, 1] representing the tax rate.
-	ClassifiedTaxCategory            float64 `json:"classifiedTaxCategory"`
+	// ClassifiedTaxCategory is the tax rate as a decimal from 0 to 1, as in
+	// 0.2 for 20 %.
+	ClassifiedTaxCategory float64 `json:"classifiedTaxCategory"`
+
 	TaxExclusiveAmount               float64 `json:"taxExclusiveAmount"`
 	TaxAmount                        float64 `json:"taxAmount"`
 	AlreadyClaimedTaxExclusiveAmount float64 `json:"alreadyClaimedTaxExclusiveAmount,omitempty"`
@@ -102,22 +109,46 @@ type MonetarySummary struct {
 
 // DataModel represents the complete invoice data structure.
 type DataModel struct {
-	DocumentType         InvoiceDocumentType  `json:"documentType"`
-	InvoiceID            string               `json:"invoiceId"`
-	IssueDate            string               `json:"issueDate"`
-	TaxPointDate         string               `json:"taxPointDate,omitempty"`
-	OrderID              string               `json:"orderId,omitempty"`
-	DeliveryNoteID       string               `json:"deliveryNoteId,omitempty"`
-	LocalCurrencyCode    string               `json:"localCurrencyCode"`
-	ForeignCurrencyCode  string               `json:"foreignCurrencyCode,omitempty"`
-	CurrRate             float64              `json:"currRate,omitempty"`
-	ReferenceCurrRate    float64              `json:"referenceCurrRate,omitempty"`
-	SupplierParty        SupplierParty        `json:"supplierParty"`
-	CustomerParty        CustomerParty        `json:"customerParty"`
-	NumberOfInvoiceLines *int                 `json:"numberOfInvoiceLines,omitempty"`
-	InvoiceDescription   string               `json:"invoiceDescription,omitempty"`
-	SingleInvoiceLine    *SingleInvoiceLine   `json:"singleInvoiceLine,omitempty"`
+	DocumentType InvoiceDocumentType `json:"documentType"`
+
+	// InvoiceID is the invoice number. Required.
+	InvoiceID string `json:"invoiceId"`
+
+	// IssueDate is the issue date as YYYYMMDD. Required.
+	IssueDate string `json:"issueDate"`
+
+	// TaxPointDate is the tax point date as YYYYMMDD.
+	TaxPointDate string `json:"taxPointDate,omitempty"`
+
+	OrderID        string `json:"orderId,omitempty"`
+	DeliveryNoteID string `json:"deliveryNoteId,omitempty"`
+
+	// LocalCurrencyCode is the three-letter ISO 4217 code. Required.
+	LocalCurrencyCode string `json:"localCurrencyCode"`
+
+	// ForeignCurrencyCode is the three-letter ISO 4217 code of the foreign
+	// currency. It, CurrRate and ReferenceCurrRate are set together or not
+	// at all.
+	ForeignCurrencyCode string  `json:"foreignCurrencyCode,omitempty"`
+	CurrRate            float64 `json:"currRate,omitempty"`
+	ReferenceCurrRate   float64 `json:"referenceCurrRate,omitempty"`
+
+	SupplierParty SupplierParty `json:"supplierParty"`
+	CustomerParty CustomerParty `json:"customerParty"`
+
+	// NumberOfInvoiceLines is the number of lines the invoice has, above
+	// zero. Exactly one of NumberOfInvoiceLines and SingleInvoiceLine is set.
+	NumberOfInvoiceLines *int   `json:"numberOfInvoiceLines,omitempty"`
+	InvoiceDescription   string `json:"invoiceDescription,omitempty"`
+
+	// SingleInvoiceLine is the only line of a one-line invoice. Exactly one
+	// of NumberOfInvoiceLines and SingleInvoiceLine is set.
+	SingleInvoiceLine *SingleInvoiceLine `json:"singleInvoiceLine,omitempty"`
+
 	TaxCategorySummaries []TaxCategorySummary `json:"taxCategorySummaries"`
 	MonetarySummary      MonetarySummary      `json:"monetarySummary"`
-	PaymentMeans         uint8                `json:"paymentMeans,omitempty"`
+
+	// PaymentMeans is the accepted payment means, PaymentMean values
+	// combined with bitwise OR.
+	PaymentMeans uint8 `json:"paymentMeans,omitempty"`
 }

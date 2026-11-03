@@ -77,9 +77,22 @@ const (
 )
 
 // BankAccount is where the money goes.
+//
+// @see Table 15 fields #13-14
 type BankAccount struct {
+	// IBAN is the account number in IBAN format, 15 to 34 characters, as in
+	// "SK8209000000000011424060".
+	//
+	// @see Table 15 field #13
+	// @see Table 8
 	IBAN string `json:"iban"`
-	BIC  string `json:"bic,omitempty"`
+
+	// BIC is the bank's ISO 9362 (SWIFT) code, 8 or 11 characters, as in
+	// "TATRSKBX".
+	//
+	// @see Table 15 field #14
+	// @see Table 8
+	BIC string `json:"bic,omitempty"`
 }
 
 // DirectDebitScheme is the direct debit scheme.
@@ -106,23 +119,86 @@ const (
 
 // Beneficiary is who receives the payment.
 type Beneficiary struct {
-	Name   string `json:"name"`
+	// Name is the beneficiary's name, up to 70 characters. Added in 1.1.0,
+	// required since 1.2.0.
+	//
+	// @see Table 15 field #31
+	Name string `json:"name"`
+
+	// Street is the beneficiary's street address, up to 70 characters.
+	//
+	// @see Table 15 field #32
 	Street string `json:"street,omitempty"`
-	City   string `json:"city,omitempty"`
+
+	// City is the beneficiary's city, up to 70 characters.
+	//
+	// @see Table 15 field #33
+	City string `json:"city,omitempty"`
 }
 
 // SimplePayment holds the fields every payment has.
 type SimplePayment struct {
-	Amount                          float64       `json:"amount"`
-	CurrencyCode                    CurrencyCode  `json:"currencyCode"`
-	PaymentDueDate                  string        `json:"paymentDueDate,omitempty"`
-	VariableSymbol                  string        `json:"variableSymbol,omitempty"`
-	ConstantSymbol                  string        `json:"constantSymbol,omitempty"`
-	SpecificSymbol                  string        `json:"specificSymbol,omitempty"`
-	OriginatorsReferenceInformation string        `json:"originatorsReferenceInformation,omitempty"`
-	PaymentNote                     string        `json:"paymentNote,omitempty"`
-	BankAccounts                    []BankAccount `json:"bankAccounts"`
-	Beneficiary                     Beneficiary   `json:"beneficiary"`
+	// Amount is the payment amount, not negative, up to 15 characters
+	// written out.
+	//
+	// @see Table 15 field #4
+	// @see Table 8
+	Amount float64 `json:"amount"`
+
+	// CurrencyCode is the three-letter ISO 4217 code, as in "EUR".
+	//
+	// @see Table 15 field #5
+	// @see Table 8
+	CurrencyCode CurrencyCode `json:"currencyCode"`
+
+	// PaymentDueDate is the due date as YYYYMMDD, as in "20241231". For a
+	// standing order it is the first payment date.
+	//
+	// @see Table 15 field #6
+	// @see 3.7.
+	PaymentDueDate string `json:"paymentDueDate,omitempty"`
+
+	// VariableSymbol is the variable symbol, up to 10 digits.
+	//
+	// @see Table 15 field #7
+	VariableSymbol string `json:"variableSymbol,omitempty"`
+
+	// ConstantSymbol is the constant symbol, a payment identifier of up to 4
+	// digits defined by the National Bank of Slovakia.
+	//
+	// @see Table 15 field #8
+	ConstantSymbol string `json:"constantSymbol,omitempty"`
+
+	// SpecificSymbol is the specific symbol, up to 10 digits.
+	//
+	// @see Table 15 field #9
+	SpecificSymbol string `json:"specificSymbol,omitempty"`
+
+	// OriginatorsReferenceInformation is the SEPA originator's reference, up
+	// to 35 characters.
+	//
+	// @see Table 15 field #10
+	OriginatorsReferenceInformation string `json:"originatorsReferenceInformation,omitempty"`
+
+	// PaymentNote is the note for the recipient that helps them identify the
+	// payment, up to 140 characters.
+	//
+	// @see Table 15 field #11
+	// @see Table 14
+	PaymentNote string `json:"paymentNote,omitempty"`
+
+	// BankAccounts are the recipient's accounts, at least one.
+	//
+	// @see Table 15 fields #12-14
+	// @see 2.2.
+	BankAccounts []BankAccount `json:"bankAccounts"`
+
+	// Beneficiary is who receives the payment. Added in 1.1.0, its name
+	// required since 1.2.0.
+	//
+	// @see Table 15 fields #31-33
+	// @see Appendix E
+	Beneficiary Beneficiary `json:"beneficiary"`
 }
 
 // Payment is one payment of any type: the [SimplePayment] fields, the
@@ -131,33 +207,117 @@ type SimplePayment struct {
 // implementation spells this as the union PaymentOrder | StandingOrder |
 // DirectDebit; the JSON is the same.
 type Payment struct {
+	// Type is the kind of payment, one of the PaymentOptions values.
+	//
+	// @see Table 15 field #3
 	Type PaymentOptions `json:"type"`
 
 	SimplePayment
 
 	// Standing order.
-	Day         Day         `json:"day,omitempty"`
-	Month       Month       `json:"month,omitempty"`
+
+	// Day is the day the standing order pays in the chosen months.
+	//
+	// @see Table 15 field #16
+	Day Day `json:"day,omitempty"`
+
+	// Month is the months the standing order pays in, several combined with
+	// bitwise OR, as in MonthJanuary | MonthJuly | MonthOctober.
+	//
+	// @see Table 15 field #17
+	// @see Appendix A, Table 10
+	Month Month `json:"month,omitempty"`
+
+	// Periodicity is how often the standing order pays.
+	//
+	// @see Table 15 field #18
+	// @see Appendix A, Table 9
 	Periodicity Periodicity `json:"periodicity,omitempty"`
-	LastDate    string      `json:"lastDate,omitempty"`
+
+	// LastDate is the last payment date as YYYYMMDD; the standing order ends
+	// after it.
+	//
+	// @see Table 15 field #19
+	LastDate string `json:"lastDate,omitempty"`
 
 	// Direct debit.
-	DirectDebitScheme                 DirectDebitScheme `json:"directDebitScheme,omitempty"`
-	DirectDebitType                   DirectDebitType   `json:"directDebitType,omitempty"`
-	DdVariableSymbol                  string            `json:"ddVariableSymbol,omitempty"`
-	DdSpecificSymbol                  string            `json:"ddSpecificSymbol,omitempty"`
-	DdOriginatorsReferenceInformation string            `json:"ddOriginatorsReferenceInformation,omitempty"`
-	MandateID                         string            `json:"mandateId,omitempty"`
-	CreditorID                        string            `json:"creditorId,omitempty"`
-	ContractID                        string            `json:"contractId,omitempty"`
-	MaxAmount                         float64           `json:"maxAmount,omitempty"`
-	ValidTillDate                     string            `json:"validTillDate,omitempty"`
+
+	// DirectDebitScheme is the direct debit scheme.
+	//
+	// @see Table 15 field #21
+	// @see Appendix A, Table 13
+	DirectDebitScheme DirectDebitScheme `json:"directDebitScheme,omitempty"`
+
+	// DirectDebitType is the direct debit type.
+	//
+	// @see Table 15 field #22
+	// @see Appendix A, Table 12
+	DirectDebitType DirectDebitType `json:"directDebitType,omitempty"`
+
+	// DdVariableSymbol is the direct debit's own variable symbol, up to 10
+	// digits, separate from the payment's.
+	//
+	// @see Table 15 field #23
+	DdVariableSymbol string `json:"ddVariableSymbol,omitempty"`
+
+	// DdSpecificSymbol is the direct debit's own specific symbol, up to 10
+	// digits, separate from the payment's.
+	//
+	// @see Table 15 field #24
+	DdSpecificSymbol string `json:"ddSpecificSymbol,omitempty"`
+
+	// DdOriginatorsReferenceInformation is the direct debit's own SEPA
+	// originator's reference, up to 35 characters, separate from the
+	// payment's.
+	//
+	// @see Table 15 field #25
+	DdOriginatorsReferenceInformation string `json:"ddOriginatorsReferenceInformation,omitempty"`
+
+	// MandateID is the SEPA mandate between creditor and debtor, up to 35
+	// characters.
+	//
+	// @see Table 15 field #26
+	MandateID string `json:"mandateId,omitempty"`
+
+	// CreditorID is the SEPA creditor identifier, up to 35 characters.
+	//
+	// @see Table 15 field #27
+	CreditorID string `json:"creditorId,omitempty"`
+
+	// ContractID is the SEPA contract between creditor and debtor, up to 35
+	// characters.
+	//
+	// @see Table 15 field #28
+	ContractID string `json:"contractId,omitempty"`
+
+	// MaxAmount is the largest amount the direct debit may take, not
+	// negative, up to 15 characters written out.
+	//
+	// @see Table 15 field #29
+	MaxAmount float64 `json:"maxAmount,omitempty"`
+
+	// ValidTillDate is the date the direct debit expires, as YYYYMMDD.
+	//
+	// @see Table 15 field #30
+	ValidTillDate string `json:"validTillDate,omitempty"`
 }
 
 // DataModel is the whole PAY by square document.
+//
+// @see 4.
+// @see Table 15
 type DataModel struct {
-	InvoiceID string    `json:"invoiceId,omitempty"`
-	Payments  []Payment `json:"payments"`
+	// InvoiceID is the invoice number when the payment belongs to an
+	// invoice, or an identifier for the issuer's own use, up to 10
+	// characters.
+	//
+	// @see Table 15 field #1
+	InvoiceID string `json:"invoiceId,omitempty"`
+
+	// Payments are one or more payments, the preferred one first.
+	//
+	// @see Table 15 field #2
+	Payments []Payment `json:"payments"`
 }
 
 // EncodeOptions steer [Encode]: Deburr strips diacritics from the free-text

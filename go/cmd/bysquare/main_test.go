@@ -312,6 +312,16 @@ func TestPayDecodeInvalidQR(t *testing.T) {
 	}
 }
 
+func TestPayDecodeInvoiceQR(t *testing.T) {
+	invoiceQR := "2008S0000E4LKHQ2Q9GQ0DNPQMAV4I7T91RJQ2VG54K9T4EEJ24LN3N0B5QID4GU73MIBGC0RJ5IG06RVJVI4QN8INSRF0AP329INGSSGE1HRMQ3DNG4F18LFT24MNRHU2EGUR1JTIIMVLP1SEEC8PDBG5V5PSSHRC5AR41CMMRMO58TNR0CNP1SL15USQUOQF00"
+
+	err := cmdPayDecode([]string{invoiceQR}, discard())
+
+	if err == nil || !strings.Contains(err.Error(), "Expected bysquareType 0") {
+		t.Errorf("got %v, want the bysquareType error", err)
+	}
+}
+
 func TestPayProcessFileJSONL(t *testing.T) {
 	tmpfile, err := os.CreateTemp(t.TempDir(), "test*.jsonl")
 	if err != nil {

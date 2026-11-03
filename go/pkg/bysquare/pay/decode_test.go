@@ -1,7 +1,10 @@
 package pay
 
 import (
+	"errors"
 	"testing"
+
+	"github.com/xseman/bysquare/go/pkg/bysquare"
 )
 
 func TestDecodeSimplePayment(t *testing.T) {
@@ -56,6 +59,17 @@ func TestDecodeInvalidInput(t *testing.T) {
 				t.Errorf("expected error for input %q", tt.input)
 			}
 		})
+	}
+}
+
+func TestDecodeRejectsInvoice(t *testing.T) {
+	invoiceQR := "2008S0000E4LKHQ2Q9GQ0DNPQMAV4I7T91RJQ2VG54K9T4EEJ24LN3N0B5QID4GU73MIBGC0RJ5IG06RVJVI4QN8INSRF0AP329INGSSGE1HRMQ3DNG4F18LFT24MNRHU2EGUR1JTIIMVLP1SEEC8PDBG5V5PSSHRC5AR41CMMRMO58TNR0CNP1SL15USQUOQF00"
+
+	_, err := Decode(invoiceQR)
+
+	var decodeErr *bysquare.DecodeError
+	if !errors.As(err, &decodeErr) || decodeErr.Message != "Expected bysquareType 0 (PAY), got 1" {
+		t.Errorf("got %v, want DecodeError for bysquareType 1", err)
 	}
 }
 

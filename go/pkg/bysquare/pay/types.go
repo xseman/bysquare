@@ -3,6 +3,10 @@
 // This package handles bysquareType=0x00 (PAY by square) data according
 // to the Slovak Banking Association specification. [Encode] turns a
 // [DataModel] into the QR string and [Decode] reads it back.
+//
+// The field comments give the specification's limits. [ValidateDataModel]
+// checks the IBAN, BIC, currency code, dates and, from 1.2.0, the
+// beneficiary name; it does not check lengths, digits or counts.
 package pay
 
 import "github.com/xseman/bysquare/go/pkg/bysquare"
@@ -68,11 +72,11 @@ const (
 	PaymentOptionsPaymentOrder PaymentOptions = 0b00000001
 
 	// PaymentOptionsStandingOrder is a recurring payment, its details in the
-	// standing order fields of [Payment].
+	// standing order fields of Payment.
 	PaymentOptionsStandingOrder PaymentOptions = 0b00000010
 
 	// PaymentOptionsDirectDebit is a direct debit, its details in the direct
-	// debit fields of [Payment].
+	// debit fields of Payment.
 	PaymentOptionsDirectDebit PaymentOptions = 0b00000100
 )
 
@@ -203,9 +207,9 @@ type SimplePayment struct {
 
 // Payment is one payment of any type: the [SimplePayment] fields, the
 // standing order fields read when Type is [PaymentOptionsStandingOrder], and
-// the direct debit fields read when Type is [PaymentOptionsDirectDebit]. The TypeScript
-// implementation spells this as the union PaymentOrder | StandingOrder |
-// DirectDebit; the JSON is the same.
+// the direct debit fields read when Type is [PaymentOptionsDirectDebit]. The
+// TypeScript implementation spells this as the union PaymentOrder |
+// StandingOrder | DirectDebit; the JSON is the same.
 type Payment struct {
 	// Type is the kind of payment, one of the PaymentOptions values.
 	//

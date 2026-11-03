@@ -80,7 +80,9 @@ type SingleInvoiceLine struct {
 	ItemName           string `json:"itemName,omitempty"`
 	ItemEanCode        string `json:"itemEanCode,omitempty"`
 
-	// PeriodFromDate is the start of the invoiced period, as YYYYMMDD.
+	// PeriodFromDate is the start of the invoiced period, as YYYYMMDD. It and
+	// PeriodToDate are set together or not at all, the start not after the
+	// end.
 	PeriodFromDate string `json:"periodFromDate,omitempty"`
 
 	// PeriodToDate is the end of the invoiced period, as YYYYMMDD.

@@ -159,8 +159,9 @@ func defaultEncodeOptions() EncodeOptions {
 // base32hex. It validates unless [EncodeOptions] say otherwise.
 //
 // A model that fails validation is a [*bysquare.ValidationError]; a header
-// value out of range or a payload too long for the header is a
-// [*bysquare.EncodeError].
+// value above 15 or a payload too long for the header is a
+// [*bysquare.EncodeError]. A Version from 3 to 15 encodes, but [Decode]
+// rejects it.
 //
 // @see 3.16.
 func Encode(model DataModel, opts ...EncodeOptions) (string, error) {

@@ -100,8 +100,9 @@ func removeDiacritics(model *DataModel) {
 // length, then base32hex without padding.
 //
 // A model that fails validation is a [*bysquare.ValidationError]; a header
-// version out of range or a payload too long for the header is a
-// [*bysquare.EncodeError].
+// value above 15 or a payload too long for the header is a
+// [*bysquare.EncodeError]. A Version from 3 to 15 encodes, but [Decode]
+// rejects it.
 //
 // Complete BySquare QR binary structure:
 //

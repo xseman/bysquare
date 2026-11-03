@@ -4,9 +4,9 @@
 // The packages [github.com/xseman/bysquare/go/pkg/bysquare/pay] and
 // [github.com/xseman/bysquare/go/pkg/bysquare/invoice] hold the
 // domain-specific types, encoding, decoding, and validation for each
-// bysquare type. Their errors are the types defined here: a
-// [*ValidationError], an [*EncodeError] or a [*DecodeError], matched with
-// [errors.As].
+// bysquare type. Their errors are defined here: a [*ValidationError], an
+// [*EncodeError] or a [*DecodeError], matched with [errors.As], and
+// [ErrInvalidBase32Hex], matched with [errors.Is].
 package bysquare
 
 // Version represents the BySquare format version.

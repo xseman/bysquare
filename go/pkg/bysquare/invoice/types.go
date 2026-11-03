@@ -148,7 +148,6 @@ type DataModel struct {
 	TaxCategorySummaries []TaxCategorySummary `json:"taxCategorySummaries"`
 	MonetarySummary      MonetarySummary      `json:"monetarySummary"`
 
-	// PaymentMeans is the accepted payment means, PaymentMean values
-	// combined with bitwise OR.
-	PaymentMeans uint8 `json:"paymentMeans,omitempty"`
+	// PaymentMeans is the accepted payment means, combined with bitwise OR.
+	PaymentMeans PaymentMean `json:"paymentMeans,omitempty"`
 }

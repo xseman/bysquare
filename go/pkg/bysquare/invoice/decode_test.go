@@ -94,7 +94,7 @@ func TestRoundTrip(t *testing.T) {
 			PayableRoundingAmount: 0.01,
 			PaidDepositsAmount:    50,
 		},
-		PaymentMeans: uint8(PaymentMeanMoneyTransfer | PaymentMeanCreditCard),
+		PaymentMeans: PaymentMeanMoneyTransfer | PaymentMeanCreditCard,
 	}
 
 	encoded, err := Encode(model)

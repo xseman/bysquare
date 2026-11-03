@@ -142,7 +142,7 @@ func deserialize(tabString string, documentType InvoiceDocumentType) DataModel {
 	// Payment means bitmask
 	pm := nextInt()
 
-	model.PaymentMeans = uint8(pm)
+	model.PaymentMeans = PaymentMean(pm)
 
 	return model
 }

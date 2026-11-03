@@ -1,8 +1,12 @@
 // Package bysquare provides shared utilities for PAY by square and
 // Invoice by square encoding and decoding.
 //
-// The sub-packages pay/ and invoice/ contain the domain-specific
-// types, encoding, decoding, and validation for each bysquare type.
+// The packages [github.com/xseman/bysquare/go/pkg/bysquare/pay] and
+// [github.com/xseman/bysquare/go/pkg/bysquare/invoice] hold the
+// domain-specific types, encoding, decoding, and validation for each
+// bysquare type. Their errors are defined here: a [*ValidationError], an
+// [*EncodeError] or a [*DecodeError], matched with [errors.As], and
+// [ErrInvalidBase32Hex], matched with [errors.Is].
 package bysquare
 
 // Version represents the BySquare format version.

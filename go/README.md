@@ -6,13 +6,15 @@
 	invoices, reminders and other payment regulations.
 </p>
 
-<p align="center">
-	<a href="#features">Features</a> •
-	<a href="#installation">Installation</a> •
-	<a href="#usage">Usage</a> •
-	<a href="#cli">CLI</a> •
-	<a href="#ffi-usage">FFI</a>
-</p>
+<div align="center">
+
+[Features](#features) •
+[Installation](#installation) •
+[Usage](#usage) •
+[CLI](#cli) •
+[FFI](#ffi-usage)
+
+</div>
 
 ## Features
 
@@ -25,9 +27,8 @@
 - Compatible with Slovak banking apps
 - C-compatible FFI for Java, PHP, Python and other languages
 
-> [!NOTE]
-> Implementation are based on TypeScript version which since v3 is considered
-> stable and specification-complete.\
+> **Note:** The implementation is based on the TypeScript version, which since
+> v3 is considered stable and specification-complete.\
 > The Go version is still pre-v1, so limited breaking changes may occur as the
 > API stabilizes. Only necessary adjustments and bug fixes will be introduced.
 
@@ -47,15 +48,17 @@ go install github.com/xseman/bysquare/go/cmd/bysquare@latest
 
 Or download pre-built binaries from [GitHub Releases](https://github.com/xseman/bysquare/releases).
 
-> [!NOTE]
-> Go and TypeScript are released independently from this repository, so
-> `releases/latest` may point at a TypeScript release with no Go assets.
-> Set `VERSION` to the Go release you want and use the tagged URL below.
+> **Note:** Go and TypeScript are released independently from this repository,
+> so `releases/latest` may point at a TypeScript release with no Go assets.
+> Use the tagged URL below, with the Go release you want in place of the
+> version.
+
+<!-- x-release-please-start-version -->
 
 #### Standalone Binaries
 
 ```bash
-BASE=https://github.com/xseman/bysquare/releases/download/go/v0.4.0
+BASE=https://github.com/xseman/bysquare/releases/download/go/v0.5.0
 
 # Linux AMD64
 curl -LO ${BASE}/bysquare-linux-amd64
@@ -79,7 +82,7 @@ Download platform-specific shared libraries from [GitHub Releases](https://githu
 Each library ships with a matching C header (`libbysquare-<os>-<arch>.h`).
 
 ```bash
-BASE=https://github.com/xseman/bysquare/releases/download/go/v0.4.0
+BASE=https://github.com/xseman/bysquare/releases/download/go/v0.5.0
 
 # Linux
 curl -LO ${BASE}/libbysquare-linux-amd64.so
@@ -92,12 +95,16 @@ curl -LO ${BASE}/libbysquare-darwin-arm64.h
 
 ```powershell
 # Windows
-$base = "https://github.com/xseman/bysquare/releases/download/go/v0.4.0"
+$base = "https://github.com/xseman/bysquare/releases/download/go/v0.5.0"
 Invoke-WebRequest -Uri "$base/libbysquare-windows-amd64.dll" -OutFile "libbysquare.dll"
 ```
 
+<!-- x-release-please-end -->
+
 ## Usage
 
+The API reference, with runnable examples, is on
+[pkg.go.dev](https://pkg.go.dev/github.com/xseman/bysquare/go/pkg/bysquare/pay).
 See [`pkg/bysquare/pay/types.go`](pkg/bysquare/pay/types.go) and
 [`pkg/bysquare/invoice/types.go`](pkg/bysquare/invoice/types.go) for complete
 type definitions.

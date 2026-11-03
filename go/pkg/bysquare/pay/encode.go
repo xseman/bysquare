@@ -94,10 +94,15 @@ func removeDiacritics(model *DataModel) {
 	}
 }
 
-// Encode turns the model into the QR string: deburred and validated by
-// default, serialized, checksummed, LZMA-compressed without the stream
-// header, framed by the bysquare header and the payload length, then
-// base32hex without padding.
+// Encode turns the model into the QR string: deburred and validated unless
+// [EncodeOptions] say otherwise, serialized, checksummed, LZMA-compressed
+// without the stream header, framed by the bysquare header and the payload
+// length, then base32hex without padding.
+//
+// A model that fails validation is a [*bysquare.ValidationError]; a header
+// value above 15 or a payload too long for the header is a
+// [*bysquare.EncodeError]. A Version from 3 to 15 encodes, but [Decode]
+// rejects it.
 //
 // Complete BySquare QR binary structure:
 //

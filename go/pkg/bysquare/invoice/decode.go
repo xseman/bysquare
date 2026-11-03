@@ -142,13 +142,17 @@ func deserialize(tabString string, documentType InvoiceDocumentType) DataModel {
 	// Payment means bitmask
 	pm := nextInt()
 
-	model.PaymentMeans = uint8(pm)
+	model.PaymentMeans = PaymentMean(pm)
 
 	return model
 }
 
 // Decode parses the QR string back into the model. The header must carry
 // bysquareType 1; its documentType nibble picks the invoice subtype.
+//
+// Input that is not base32hex is [bysquare.ErrInvalidBase32Hex]; anything
+// else that does not decode, a PAY by square string included, is a
+// [*bysquare.DecodeError].
 //
 // @see 3.16.
 func Decode(qr string) (DataModel, error) {

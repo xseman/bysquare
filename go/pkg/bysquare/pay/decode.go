@@ -125,6 +125,13 @@ func deserialize(tabString string) (DataModel, error) {
 // header and the two-byte payload length, LZMA body, then the CRC32 the
 // payload was checksummed with.
 //
+// Input that is not base32hex is [bysquare.ErrInvalidBase32Hex]; anything
+// else that does not decode is a [*bysquare.DecodeError]. The bysquareType
+// is not checked, as in the TypeScript implementation: an Invoice by square
+// string is read as PAY, usually without an error, into a meaningless model.
+// Tell the two apart first with [bysquare.DecodeHeader] on the output of
+// [bysquare.DecodeBase32Hex].
+//
 // Input binary structure (after base32hex decoding):
 //
 //	+------------------+------------------+-----------------------------+

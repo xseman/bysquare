@@ -70,7 +70,9 @@ func ValidateSimplePayment(simplePayment Payment, path string, version bysquare.
 	return nil
 }
 
-// ValidateDataModel checks every payment; the version defaults to 1.2.0.
+// ValidateDataModel checks every payment; the version defaults to
+// [bysquare.Version120]. The first field that fails is a
+// [*bysquare.ValidationError] whose Path leads to it.
 func ValidateDataModel(dataModel DataModel, version ...bysquare.Version) error {
 	v := bysquare.Version120
 	if len(version) > 0 {

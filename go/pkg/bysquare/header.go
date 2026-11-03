@@ -15,7 +15,7 @@ type Header struct {
 }
 
 // BuildBysquareHeader returns the 2-byte header of the bysquare
-// specification; a nibble outside 0-15 is an EncodeError.
+// specification; a nibble outside 0-15 is an [EncodeError].
 //
 //	Byte 0                  Byte 1
 //	+----------+----------+----------+----------+
@@ -76,7 +76,7 @@ func DecodeHeader(header []byte) Header {
 
 // BuildPayloadLength is the 2-byte little-endian length of the decompressed
 // data, the CRC32 checksum together with the payload; a length of
-// MaxCompressedSize or more is an EncodeError.
+// [MaxCompressedSize] or more is an [EncodeError].
 //
 //	+---------------+---------------+
 //	|    Byte 0     |    Byte 1     |

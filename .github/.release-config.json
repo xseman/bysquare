@@ -24,7 +24,8 @@
 			"pull-request-header": "🚢 Go package release",
 			"pull-request-footer": "",
 			"changelog-path": "CHANGELOG.md",
-			"bump-minor-pre-major": true
+			"bump-minor-pre-major": true,
+			"extra-files": ["README.md"]
 		}
 	},
 	"changelog-sections": [

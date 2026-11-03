@@ -22,6 +22,7 @@ import {
 	DecodeError,
 	DecodeErrorMessage,
 } from "../header.js";
+import { FORSYS_INVOICE_ENCODED } from "../invoice/testdata/invoices.js";
 import {
 	decode,
 	deserialize,
@@ -117,6 +118,10 @@ describe("decode error cases", () => {
 
 	test("throws for invalid input", () => {
 		expect(() => decode("aaaa")).toThrow("Invalid base32hex string");
+	});
+
+	test("throws DecodeError for an Invoice by square string", () => {
+		expect(() => decode(FORSYS_INVOICE_ENCODED)).toThrow("Expected bysquareType 0 (PAY), got 1");
 	});
 
 	test("throws UnsupportedVersion for version > 1.1.0", () => {

@@ -208,6 +208,9 @@ export function deserialize(tabString: string): DataModel {
 /**
  * Decoding client data from QR Code 2005 symbol
  *
+ * Expects bysquareType=0 in the header; an Invoice by square string throws a
+ * DecodeError.
+ *
  * Input binary structure (after base32hex decoding):
  * ```
  * +------------------+------------------+-----------------------------+
@@ -235,6 +238,12 @@ export function decode(qr: string): DataModel {
 	const bytes = base32hex.decode(qr);
 	const headerBytes = bytes.slice(0, 2);
 	const headerData = decodeHeader(headerBytes);
+
+	if (headerData.bysquareType !== 0x00) {
+		throw new DecodeError("Expected bysquareType 0 (PAY), got " + headerData.bysquareType, {
+			bysquareType: headerData.bysquareType,
+		});
+	}
 
 	if ((headerData.version > Version["1.2.0"])) {
 		throw new DecodeError(DecodeErrorMessage.UnsupportedVersion, {

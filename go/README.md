@@ -311,5 +311,5 @@ make fmt                # gofumpt
 make cover              # coverage report
 ```
 
-`CLAUDE.md` maps the packages and states the conventions, for people and
+`AGENTS.md` maps the packages and states the conventions, for people and
 agents alike.

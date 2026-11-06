@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.2](https://github.com/xseman/bysquare/compare/typescript/v4.1.1...typescript/v4.1.2) (2026-11-06)
+
+
+### Documentation
+
+* rename CLAUDE.md to AGENTS.md ([6dc3cdb](https://github.com/xseman/bysquare/commit/6dc3cdbeeaef4efce0940c3c12d50c826870e082))
+
 ## [4.1.1](https://github.com/xseman/bysquare/compare/typescript/v4.1.0...typescript/v4.1.1) (2026-11-03)
 
 

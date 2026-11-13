@@ -243,6 +243,7 @@ func TestEncodeKeepsInputDiacritics(t *testing.T) {
 	if got := model.Payments[0].PaymentNote; got != "Platba za služby" {
 		t.Errorf("PaymentNote = %q, want the diacritics kept", got)
 	}
+
 	if got := model.Payments[0].Beneficiary.Name; got != "Ján Nováček" {
 		t.Errorf("Beneficiary.Name = %q, want the diacritics kept", got)
 	}

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.1](https://github.com/xseman/bysquare/compare/go/v0.6.0...go/v0.6.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* keep the diacritics of the model passed to encode ([#153](https://github.com/xseman/bysquare/issues/153)) ([8547c06](https://github.com/xseman/bysquare/commit/8547c06c11efe7209eea96840c7e4c5d670f7f31))
+
+
+### Documentation
+
+* rename CLAUDE.md to AGENTS.md ([6dc3cdb](https://github.com/xseman/bysquare/commit/6dc3cdbeeaef4efce0940c3c12d50c826870e082))
+
 ## [0.6.0](https://github.com/xseman/bysquare/compare/go/v0.5.0...go/v0.6.0) (2026-11-03)
 
 

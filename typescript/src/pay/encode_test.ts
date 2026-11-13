@@ -217,6 +217,20 @@ describe("encode diacritic removal", () => {
 
 		expect(input).toEqual(PAYMENT_ORDER_WITHOUT_DIACRITICS_EXPECTED);
 	});
+
+	test("preserves the diacritics of the model passed to encode", () => {
+		const input = JSON.parse(JSON.stringify(PAYMENT_ORDER_WITH_DIACRITICS_FIXTURE));
+
+		const encoded = encode(input);
+
+		expect(input.payments[0].paymentNote).toBe("Príspevok na kávu");
+		expect(input.payments[0].beneficiary).toEqual({
+			name: "Ján Kováč",
+			city: "Košice",
+			street: "Štúrova 27",
+		});
+		expect(decode(encoded)).toEqual(PAYMENT_ORDER_WITHOUT_DIACRITICS_EXPECTED);
+	});
 });
 
 describe("date conversion", () => {

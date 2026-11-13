@@ -161,11 +161,14 @@ export type EncodeOptions = {
  */
 export function encode(
 	model: DataModel,
-	options: EncodeOptions = { validate: true },
+	options: EncodeOptions = {},
 ): string {
+	// Each option falls back on its own, so passing only the version keeps
+	// validation on.
+	const shouldValidate = options.validate ?? true;
 	const version = options.version ?? Version["1.0.0"];
 
-	if (options.validate) {
+	if (shouldValidate) {
 		validateDataModel(model);
 	}
 

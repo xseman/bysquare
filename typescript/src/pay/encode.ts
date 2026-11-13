@@ -234,6 +234,14 @@ export function encode(
 	const version = options.version ?? Version["1.2.0"];
 
 	if (shouldDeburr) {
+		// Deburr a copy, the caller's model keeps its diacritics.
+		model = {
+			...model,
+			payments: model.payments.map((payment) => ({
+				...payment,
+				beneficiary: payment.beneficiary && { ...payment.beneficiary },
+			})),
+		};
 		removeDiacritics(model);
 	}
 

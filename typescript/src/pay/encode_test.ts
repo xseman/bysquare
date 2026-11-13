@@ -217,6 +217,15 @@ describe("encode diacritic removal", () => {
 
 		expect(input).toEqual(PAYMENT_ORDER_WITHOUT_DIACRITICS_EXPECTED);
 	});
+
+	test("preserves the diacritics of the model passed to encode", () => {
+		const input = JSON.parse(JSON.stringify(PAYMENT_ORDER_WITH_DIACRITICS_FIXTURE));
+
+		const encoded = encode(input);
+
+		expect(input).toEqual(PAYMENT_ORDER_WITH_DIACRITICS_FIXTURE);
+		expect(decode(encoded)).toEqual(PAYMENT_ORDER_WITHOUT_DIACRITICS_EXPECTED);
+	});
 });
 
 describe("date conversion", () => {

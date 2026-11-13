@@ -275,7 +275,7 @@ describe("decode property based", () => {
 
 describe("round trip verification", () => {
 	test.each(ROUND_TRIP_TEST_CASES as unknown as any[])("$name", ({ data }) => {
-		const encoded = encode(data);
+		const encoded = encode(data, { deburr: false, validate: true });
 		const decoded = decode(encoded);
 		expect(decoded).toEqual(data);
 	});

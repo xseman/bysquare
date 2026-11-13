@@ -1,6 +1,7 @@
 package pay
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 
@@ -134,6 +135,8 @@ func Encode(model DataModel, opts ...EncodeOptions) (string, error) {
 	}
 
 	if options.Deburr {
+		// Deburr a copy, the caller's payments keep their diacritics.
+		model.Payments = slices.Clone(model.Payments)
 		removeDiacritics(&model)
 	}
 

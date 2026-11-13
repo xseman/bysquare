@@ -220,6 +220,34 @@ func TestEncodeDeburr(t *testing.T) {
 	}
 }
 
+func TestEncodeKeepsInputDiacritics(t *testing.T) {
+	model := DataModel{
+		Payments: []Payment{{
+			Type: PaymentOptionsPaymentOrder,
+			SimplePayment: SimplePayment{
+				Amount:       100,
+				CurrencyCode: CurrencyEUR,
+				PaymentNote:  "Platba za služby",
+				BankAccounts: []BankAccount{
+					{IBAN: "SK9611000000002918599669"},
+				},
+				Beneficiary: Beneficiary{Name: "Ján Nováček"},
+			},
+		}},
+	}
+
+	if _, err := Encode(model); err != nil {
+		t.Fatalf("Encode failed: %v", err)
+	}
+
+	if got := model.Payments[0].PaymentNote; got != "Platba za služby" {
+		t.Errorf("PaymentNote = %q, want the diacritics kept", got)
+	}
+	if got := model.Payments[0].Beneficiary.Name; got != "Ján Nováček" {
+		t.Errorf("Beneficiary.Name = %q, want the diacritics kept", got)
+	}
+}
+
 func TestEncodeValidationError(t *testing.T) {
 	model := DataModel{
 		Payments: []Payment{{

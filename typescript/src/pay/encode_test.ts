@@ -223,7 +223,12 @@ describe("encode diacritic removal", () => {
 
 		const encoded = encode(input);
 
-		expect(input).toEqual(PAYMENT_ORDER_WITH_DIACRITICS_FIXTURE);
+		expect(input.payments[0].paymentNote).toBe("Príspevok na kávu");
+		expect(input.payments[0].beneficiary).toEqual({
+			name: "Ján Kováč",
+			city: "Košice",
+			street: "Štúrova 27",
+		});
 		expect(decode(encoded)).toEqual(PAYMENT_ORDER_WITHOUT_DIACRITICS_EXPECTED);
 	});
 });

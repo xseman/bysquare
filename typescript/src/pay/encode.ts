@@ -225,15 +225,19 @@ export type EncodeOptions = {
  */
 export function encode(
 	model: DataModel,
-	options: EncodeOptions = { deburr: true, validate: true },
+	options: EncodeOptions = {},
 ): string {
-	if (options.deburr) {
+	// Each option falls back on its own, so passing only one of them keeps
+	// the defaults of the others.
+	const shouldDeburr = options.deburr ?? true;
+	const shouldValidate = options.validate ?? true;
+	const version = options.version ?? Version["1.2.0"];
+
+	if (shouldDeburr) {
 		removeDiacritics(model);
 	}
 
-	const version = options.version ?? Version["1.2.0"];
-
-	if (options.validate) {
+	if (shouldValidate) {
 		validateDataModel(model, version);
 	}
 

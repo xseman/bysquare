@@ -4,6 +4,7 @@ import {
 	test,
 } from "bun:test";
 
+import { Version } from "../types.js";
 import { decode } from "./decode.js";
 import {
 	encode,
@@ -88,6 +89,18 @@ describe("encode", () => {
 	test("skips validation when validate option is false", () => {
 		const invalid = buildInvoiceDataModel({ invoiceId: "" });
 		expect(() => encode(invalid, { validate: false })).not.toThrow();
+	});
+
+	test("validates when only the version is passed", () => {
+		const invalid = buildInvoiceDataModel({ invoiceId: "" });
+
+		expect(() => encode(invalid, { version: Version["1.0.0"] })).toThrow();
+	});
+
+	test("validates when empty options are passed", () => {
+		const invalid = buildInvoiceDataModel({ invoiceId: "" });
+
+		expect(() => encode(invalid, {})).toThrow();
 	});
 
 	test("encodes Forsys sample invoice with matching header", () => {

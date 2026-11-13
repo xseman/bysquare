@@ -107,6 +107,60 @@ describe("encode error cases", () => {
 	});
 });
 
+describe("encode partial options", () => {
+	const invalidIban = () =>
+		buildDataModel({
+			payments: [buildPaymentOrder({
+				bankAccounts: [{ iban: "INVALID" }],
+			})],
+		});
+
+	test.each([
+		["version", { version: Version["1.1.0"] }],
+		["deburr", { deburr: false }],
+		["empty options", {}],
+	])("validates when only %s is passed", (_name, options) => {
+		const data = invalidIban();
+
+		expect(() => encode(data, options)).toThrow();
+	});
+
+	test("skips validation only when validate is false", () => {
+		const data = invalidIban();
+
+		const result = encode(data, { validate: false });
+
+		expect(result.length).toBeGreaterThan(0);
+	});
+
+	test.each([
+		["version", { version: Version["1.1.0"] }],
+		["validate", { validate: true }],
+	])("removes diacritics when only %s is passed", (_name, options) => {
+		const data = buildDataModel({
+			payments: [buildPaymentOrder({
+				beneficiary: { name: "Ján Kováč" },
+			})],
+		});
+
+		const decoded = decode(encode(data, options));
+
+		expect(decoded.payments[0].beneficiary?.name).toBe("Jan Kovac");
+	});
+
+	test("preserves diacritics only when deburr is false", () => {
+		const data = buildDataModel({
+			payments: [buildPaymentOrder({
+				beneficiary: { name: "Ján Kováč" },
+			})],
+		});
+
+		const decoded = decode(encode(data, { deburr: false }));
+
+		expect(decoded.payments[0].beneficiary?.name).toBe("Ján Kováč");
+	});
+});
+
 describe("encode property based", () => {
 	test("encode always returns valid base32hex string", () => {
 		const validIbans = [

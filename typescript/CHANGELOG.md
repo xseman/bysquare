@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.1.2](https://github.com/xseman/bysquare/compare/typescript/v4.1.1...typescript/v4.1.2) (2026-11-13)
+
+
+### Bug Fixes
+
+* keep the diacritics of the model passed to encode ([#153](https://github.com/xseman/bysquare/issues/153)) ([8547c06](https://github.com/xseman/bysquare/commit/8547c06c11efe7209eea96840c7e4c5d670f7f31))
+* **typescript:** keep encode defaults when options are partial ([#152](https://github.com/xseman/bysquare/issues/152)) ([7079847](https://github.com/xseman/bysquare/commit/7079847a24e25600aa2c5c32d6b09136f8df4c84))
+
+
+### Documentation
+
+* rename CLAUDE.md to AGENTS.md ([6dc3cdb](https://github.com/xseman/bysquare/commit/6dc3cdbeeaef4efce0940c3c12d50c826870e082))
+
 ## [4.1.1](https://github.com/xseman/bysquare/compare/typescript/v4.1.0...typescript/v4.1.1) (2026-11-03)
 
 

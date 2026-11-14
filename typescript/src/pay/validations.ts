@@ -1,7 +1,10 @@
 import validator from "validator";
 
 import { ValidationError } from "../errors.js";
-import { isValidDate } from "../field.js";
+import {
+	isValidAmount,
+	isValidDate,
+} from "../field.js";
 import { Version } from "../types.js";
 import {
 	BankAccount,
@@ -15,6 +18,7 @@ const ErrorMessages = {
 	BIC: "Invalid BIC. Make sure ISO 9362 format is used.",
 	CurrencyCode: "Invalid currency code. Make sure ISO 4217 format is used.",
 	Date: "Invalid date. Make sure YYYYMMDD format is used.",
+	Amount: "Invalid amount. Make sure it is not negative and has at most 15 characters.",
 	BeneficiaryName: "Beneficiary name is required.",
 } as const;
 
@@ -38,6 +42,7 @@ export function validateBankAccount(
 
 /**
  * validate simple payment fields:
+ * - amount and maxAmount (finite, not negative, at most 15 characters)
  * - currencyCode (ISO 4217)
  * - paymentDueDate (YYYYMMDD format per v1.2 specification)
  * - bankAccounts
@@ -51,6 +56,18 @@ export function validateSimplePayment(
 ): void {
 	for (const [index, bankAccount] of simplePayment.bankAccounts.entries()) {
 		validateBankAccount(bankAccount, `${path}.bankAccounts[${index}]`);
+	}
+
+	if (simplePayment.amount !== undefined && !isValidAmount(simplePayment.amount)) {
+		throw new ValidationError(ErrorMessages.Amount, `${path}.amount`);
+	}
+
+	if (
+		simplePayment.type === PaymentOptions.DirectDebit
+		&& simplePayment.maxAmount !== undefined
+		&& !isValidAmount(simplePayment.maxAmount)
+	) {
+		throw new ValidationError(ErrorMessages.Amount, `${path}.maxAmount`);
 	}
 
 	if (simplePayment.currencyCode && !validator.isISO4217(simplePayment.currencyCode)) {

@@ -155,6 +155,39 @@ describe("validateSimplePayment", () => {
 	});
 });
 
+describe("validateSimplePayment amount", () => {
+	test.each([
+		["negative", -100],
+		["NaN", NaN],
+		["infinite", Infinity],
+		["longer than 15 characters", 9_999_999_999_999_999],
+	])("throws for a %s amount", (_name, amount) => {
+		const payment = buildPaymentOrder({ amount });
+
+		expect(() => validateSimplePayment(payment, "payments[0]")).toThrow(
+			new ValidationError(
+				"Invalid amount. Make sure it is not negative and has at most 15 characters.",
+				"payments[0].amount",
+			),
+		);
+	});
+
+	test("throws for a negative maxAmount of a direct debit", () => {
+		const payment = {
+			...buildPaymentOrder(),
+			type: PaymentOptions.DirectDebit,
+			maxAmount: -1,
+		};
+
+		expect(() => validateSimplePayment(payment, "payments[0]")).toThrow(
+			new ValidationError(
+				"Invalid amount. Make sure it is not negative and has at most 15 characters.",
+				"payments[0].maxAmount",
+			),
+		);
+	});
+});
+
 describe("validateDataModel", () => {
 	test("validates valid payment order", () => {
 		expect(() => validateDataModel(VALID_PAYMENT_ORDER)).not.toThrow();
@@ -246,7 +279,6 @@ describe("ValidationError", () => {
  *
  * Fields NOT VALIDATED (permissive by design):
  * - variableSymbol, constantSymbol, specificSymbol (no pattern check)
- * - amount (no range check)
  * - field lengths (no maxLength check)
  */
 describe("permissive validation behavior", () => {
@@ -272,12 +304,12 @@ describe("permissive validation behavior", () => {
 		expect(() => validateSimplePayment(payment, "test")).not.toThrow();
 	});
 
-	test("does not validate amount range", () => {
-		const negativeAmount = buildPaymentOrder({ amount: -100 });
-		const hugeAmount = buildPaymentOrder({ amount: 9999999999999999 });
+	test("accepts a zero amount and a missing amount", () => {
+		const zeroAmount = buildPaymentOrder({ amount: 0 });
+		const missingAmount = buildPaymentOrder({ amount: undefined });
 
-		expect(() => validateSimplePayment(negativeAmount, "test")).not.toThrow();
-		expect(() => validateSimplePayment(hugeAmount, "test")).not.toThrow();
+		expect(() => validateSimplePayment(zeroAmount, "test")).not.toThrow();
+		expect(() => validateSimplePayment(missingAmount, "test")).not.toThrow();
 	});
 
 	test("does not validate field lengths", () => {

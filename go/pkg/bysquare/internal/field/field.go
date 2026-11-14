@@ -6,6 +6,7 @@ package field
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -50,6 +51,23 @@ func FormatFloatRequired(f float64) string {
 	s = strings.TrimRight(s, "0")
 
 	return strings.TrimSuffix(s, ".")
+}
+
+// maxAmountLength is the characters a number field may take written out.
+//
+// @see Table 15 field #4
+const maxAmountLength = 15
+
+// IsValidAmount checks that the amount is a finite number, not negative, and
+// at most maxAmountLength characters written out. Zero is accepted.
+//
+// @see Table 15 field #4
+func IsValidAmount(f float64) bool {
+	if math.IsNaN(f) || math.IsInf(f, 0) || f < 0 {
+		return false
+	}
+
+	return len(FormatFloatRequired(f)) <= maxAmountLength
 }
 
 // ParseNumber reads an int field: 0 for an empty or unreadable one, the way

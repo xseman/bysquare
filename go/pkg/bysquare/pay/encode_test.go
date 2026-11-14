@@ -187,6 +187,27 @@ func TestEncode(t *testing.T) {
 	}
 }
 
+func TestSerializeZeroAmountIsBlank(t *testing.T) {
+	model := DataModel{
+		Payments: []Payment{{
+			Type: PaymentOptionsPaymentOrder,
+			SimplePayment: SimplePayment{
+				CurrencyCode: CurrencyEUR,
+				BankAccounts: []BankAccount{
+					{IBAN: "SK9611000000002918599669"},
+				},
+				Beneficiary: Beneficiary{Name: "John Doe"},
+			},
+		}},
+	}
+
+	got := serialize(model)
+
+	if want := "\t1\t1\t\tEUR\t"; !strings.HasPrefix(got, want) {
+		t.Errorf("serialize() = %q, want the prefix %q", got, want)
+	}
+}
+
 func TestEncodeDeburr(t *testing.T) {
 	makeModel := func() DataModel {
 		return DataModel{

@@ -511,7 +511,7 @@ all XSD schema restrictions.
 | Date             | Validated (ISO 8601 format)                                     |
 | Beneficiary name | Required (per spec v1.2.0)                                      |
 | Symbols          | Permissive (accepts letters, spaces - XSD pattern not enforced) |
-| Amounts          | Permissive (accepts negative values)                            |
+| Amounts          | Validated (finite, not negative, at most 15 characters)         |
 | Field lengths    | Not enforced                                                    |
 
 ### XSD Field Constraints Reference

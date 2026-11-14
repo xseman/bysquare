@@ -273,6 +273,28 @@ describe("decode property based", () => {
 	});
 });
 
+describe("decode amount", () => {
+	test("decodes a missing amount as undefined", () => {
+		const data = buildDataModel({
+			payments: [buildPaymentOrder({ amount: undefined })],
+		});
+
+		const decoded = decode(encode(data));
+
+		expect(decoded.payments[0].amount).toBeUndefined();
+	});
+
+	test("decodes a zero amount as zero", () => {
+		const data = buildDataModel({
+			payments: [buildPaymentOrder({ amount: 0 })],
+		});
+
+		const decoded = decode(encode(data));
+
+		expect(decoded.payments[0].amount).toBe(0);
+	});
+});
+
 describe("round trip verification", () => {
 	test.each(ROUND_TRIP_TEST_CASES as unknown as any[])("$name", ({ data }) => {
 		const encoded = encode(data, { deburr: false });

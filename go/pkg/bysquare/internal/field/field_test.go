@@ -1,6 +1,9 @@
 package field
 
-import "testing"
+import (
+	"math"
+	"testing"
+)
 
 func TestFormatFloatRequired(t *testing.T) {
 	tests := []struct {
@@ -366,6 +369,33 @@ func TestIsValidDate(t *testing.T) {
 			result := IsValidDate(tc.date)
 			if result != tc.valid {
 				t.Errorf("expected %v, got %v for date: %q", tc.valid, result, tc.date)
+			}
+		})
+	}
+}
+
+func TestIsValidAmount(t *testing.T) {
+	tests := []struct {
+		name  string
+		input float64
+		want  bool
+	}{
+		{"zero", 0, true},
+		{"two decimals", 123.45, true},
+		{"fifteen digits", 999_999_999_999_999, true},
+		{"fifteen characters with decimals", 123456.12345678, true},
+		{"negative", -0.01, false},
+		{"NaN", math.NaN(), false},
+		{"positive infinity", math.Inf(1), false},
+		{"negative infinity", math.Inf(-1), false},
+		{"sixteen digits", 9_999_999_999_999_999, false},
+		{"sixteen characters with decimals", 1234567.12345678, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsValidAmount(tt.input); got != tt.want {
+				t.Errorf("IsValidAmount(%v) = %v, want %v", tt.input, got, tt.want)
 			}
 		})
 	}

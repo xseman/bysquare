@@ -27,7 +27,7 @@ func serialize(data DataModel) string {
 	for _, p := range data.Payments {
 		s = append(s,
 			strconv.Itoa(int(p.Type)),
-			field.FormatFloatRequired(p.Amount), // TypeScript decodes a missing amount as 0 and prints it back
+			field.FormatFloat(p.Amount), // a float64 cannot be missing, so 0 is the amount left blank
 			field.Sanitize(string(p.CurrencyCode)),
 			field.Sanitize(p.PaymentDueDate),
 			field.Sanitize(p.VariableSymbol),

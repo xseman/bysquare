@@ -61,7 +61,6 @@ export const VALID_PAYMENT_ORDER: DataModel = {
 export const MINIMAL_PAYMENT: DataModel = {
 	payments: [{
 		type: PaymentOptions.PaymentOrder,
-		amount: 0, // Add explicit amount to match encode/decode behavior
 		currencyCode: CurrencyCode.EUR,
 		bankAccounts: [{ iban: TEST_IBANS.SK_VALID }],
 		beneficiary: { name: "John Doe" },

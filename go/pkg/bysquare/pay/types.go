@@ -143,7 +143,8 @@ type Beneficiary struct {
 // SimplePayment holds the fields every payment has.
 type SimplePayment struct {
 	// Amount is the payment amount, not negative, up to 15 characters
-	// written out.
+	// written out. Zero leaves the field blank, which the specification
+	// uses for an amount the payer fills in, such as a donation.
 	//
 	// @see Table 15 field #4
 	// @see Table 8

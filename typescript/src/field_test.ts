@@ -3,7 +3,10 @@ import {
 	test,
 } from "bun:test";
 
-import { formatDecimal } from "./field.js";
+import {
+	formatDecimal,
+	isValidAmount,
+} from "./field.js";
 
 test("formatDecimal prints zero", () => {
 	expect(formatDecimal(0)).toBe("0");
@@ -39,4 +42,35 @@ test("formatDecimal keeps a negative number", () => {
 
 test("formatDecimal leaves a missing value out", () => {
 	expect(formatDecimal(undefined)).toBeUndefined();
+});
+
+test("formatDecimal prints a small value without an exponent", () => {
+	expect(formatDecimal(0.0000001)).toBe("0.0000001");
+});
+
+test("formatDecimal keeps the zeros of a whole number", () => {
+	expect(formatDecimal(1_000)).toBe("1000");
+});
+
+test.each([
+	0,
+	0.01,
+	123.45,
+	999_999_999_999_999,
+	123456.12345678,
+])("isValidAmount accepts %p", (amount) => {
+	expect(isValidAmount(amount)).toBe(true);
+});
+
+test.each([
+	-0.01,
+	-100,
+	NaN,
+	Infinity,
+	-Infinity,
+	9_999_999_999_999_999,
+	1234567.12345678,
+	1e21,
+])("isValidAmount rejects %p", (amount) => {
+	expect(isValidAmount(amount)).toBe(false);
 });

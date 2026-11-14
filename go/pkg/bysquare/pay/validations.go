@@ -12,12 +12,14 @@ var errorMessages = struct {
 	BIC             string
 	CurrencyCode    string
 	Date            string
+	Amount          string
 	BeneficiaryName string
 }{
 	IBAN:            "Invalid IBAN. Make sure ISO 13616 format is used.",
 	BIC:             "Invalid BIC. Make sure ISO 9362 format is used.",
 	CurrencyCode:    "Invalid currency code. Make sure ISO 4217 format is used.",
 	Date:            "Invalid date. Make sure YYYYMMDD format is used.",
+	Amount:          "Invalid amount. Make sure it is not negative and has at most 15 characters.",
 	BeneficiaryName: "Beneficiary name is required.",
 }
 
@@ -34,13 +36,21 @@ func ValidateBankAccount(bankAccount BankAccount, path string) error {
 	return nil
 }
 
-// ValidateSimplePayment checks one payment: its bank accounts, currency,
+// ValidateSimplePayment checks one payment: its bank accounts, amounts, currency,
 // dates, and from version 1.2.0 on the beneficiary name.
 func ValidateSimplePayment(simplePayment Payment, path string, version bysquare.Version) error {
 	for index, bankAccount := range simplePayment.BankAccounts {
 		if err := ValidateBankAccount(bankAccount, path+".bankAccounts["+strconv.Itoa(index)+"]"); err != nil {
 			return err
 		}
+	}
+
+	if !field.IsValidAmount(simplePayment.Amount) {
+		return &bysquare.ValidationError{Message: errorMessages.Amount, Path: path + ".amount"}
+	}
+
+	if simplePayment.Type == PaymentOptionsDirectDebit && !field.IsValidAmount(simplePayment.MaxAmount) {
+		return &bysquare.ValidationError{Message: errorMessages.Amount, Path: path + ".maxAmount"}
 	}
 
 	if simplePayment.CurrencyCode != "" && !field.IsValidCurrencyCode(string(simplePayment.CurrencyCode)) {

@@ -181,6 +181,7 @@ func TestValidateSimplePaymentAmount(t *testing.T) {
 			if !errors.As(err, &validationErr) {
 				t.Fatalf("ValidateSimplePayment() error = %v, want a ValidationError", err)
 			}
+
 			if validationErr.Path != tt.wantPath {
 				t.Errorf("Path = %q, want %q", validationErr.Path, tt.wantPath)
 			}

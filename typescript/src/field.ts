@@ -36,10 +36,14 @@ export function formatDecimal(value: number | undefined): string | undefined {
 	}
 
 	const fixed = value.toFixed(MAX_DECIMALS);
+	if (!fixed.includes(".") || fixed.includes("e")) {
+		return fixed;
+	}
 
-	return fixed.includes(".") && !fixed.includes("e")
-		? fixed.replace(/\.?0+$/, "")
-		: fixed;
+	// A negative value that rounds to zero keeps its sign in toFixed.
+	const trimmed = fixed.replace(/\.?0+$/, "");
+
+	return trimmed === "-0" ? "0" : trimmed;
 }
 
 /**

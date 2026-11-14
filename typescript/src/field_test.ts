@@ -48,6 +48,10 @@ test("formatDecimal prints a small value without an exponent", () => {
 	expect(formatDecimal(0.0000001)).toBe("0.0000001");
 });
 
+test("formatDecimal prints a negative value that rounds to zero without the sign", () => {
+	expect(formatDecimal(0.3 - 0.1 - 0.2)).toBe("0");
+});
+
 test("formatDecimal keeps the zeros of a whole number", () => {
 	expect(formatDecimal(1_000)).toBe("1000");
 });

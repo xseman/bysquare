@@ -19,6 +19,8 @@ func TestFormatFloatRequired(t *testing.T) {
 		{"nine decimals round to eight", 1.123456789, "1.12345679"},
 		{"below eight decimals is zero", 0.000000001, "0"},
 		{"negative", -12.34, "-12.34"},
+		{"twelve digits with decimals", 123456789012.34, "123456789012.34"},
+		{"small value without an exponent", 0.0000001, "0.0000001"},
 	}
 
 	for _, tt := range tests {
@@ -384,6 +386,7 @@ func TestIsValidAmount(t *testing.T) {
 		{"two decimals", 123.45, true},
 		{"fifteen digits", 999_999_999_999_999, true},
 		{"fifteen characters with decimals", 123456.12345678, true},
+		{"fifteen characters above 1e8", 123456789012.34, true},
 		{"negative", -0.01, false},
 		{"NaN", math.NaN(), false},
 		{"positive infinity", math.Inf(1), false},

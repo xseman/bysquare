@@ -36,14 +36,16 @@ export function formatDecimal(value: number | undefined): string | undefined {
 	}
 
 	const fixed = value.toFixed(MAX_DECIMALS);
-	if (!fixed.includes(".") || fixed.includes("e")) {
-		return fixed;
+
+	// The shortest form of the rounded value: toFixed alone prints the noise
+	// of a double from about 1e8 on, 123456789012.34 as 123456789012.33999634.
+	const shortest = Number(fixed).toString();
+	if (!shortest.includes("e")) {
+		return shortest;
 	}
 
-	// A negative value that rounds to zero keeps its sign in toFixed.
-	const trimmed = fixed.replace(/\.?0+$/, "");
-
-	return trimmed === "-0" ? "0" : trimmed;
+	// toString switches to an exponent below 1e-6, toFixed from 1e21 on.
+	return fixed.includes("e") ? fixed : fixed.replace(/\.?0+$/, "");
 }
 
 /**

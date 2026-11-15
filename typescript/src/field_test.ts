@@ -52,6 +52,10 @@ test("formatDecimal prints a negative value that rounds to zero without the sign
 	expect(formatDecimal(0.3 - 0.1 - 0.2)).toBe("0");
 });
 
+test("formatDecimal prints a large value with decimals without float noise", () => {
+	expect(formatDecimal(123456789012.34)).toBe("123456789012.34");
+});
+
 test("formatDecimal keeps the zeros of a whole number", () => {
 	expect(formatDecimal(1_000)).toBe("1000");
 });
@@ -62,6 +66,8 @@ test.each([
 	123.45,
 	999_999_999_999_999,
 	123456.12345678,
+	123456789012.34,
+	100000000.1,
 ])("isValidAmount accepts %p", (amount) => {
 	expect(isValidAmount(amount)).toBe(true);
 });

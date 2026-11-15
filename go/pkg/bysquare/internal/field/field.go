@@ -45,12 +45,13 @@ func FormatFloat(f float64) string {
 const maxDecimals = 8
 
 // FormatFloatRequired prints a number that is always present, zero included,
-// rounded to maxDecimals and without the trailing zeros.
+// rounded to maxDecimals and in its shortest form: printing the rounded
+// string as it is would carry the noise of a float64 from about 1e8 on,
+// 123456789012.34 as 123456789012.33999634.
 func FormatFloatRequired(f float64) string {
-	s := strconv.FormatFloat(f, 'f', maxDecimals, 64)
-	s = strings.TrimRight(s, "0")
+	rounded, _ := strconv.ParseFloat(strconv.FormatFloat(f, 'f', maxDecimals, 64), 64)
 
-	return strings.TrimSuffix(s, ".")
+	return strconv.FormatFloat(rounded, 'f', -1, 64)
 }
 
 // maxAmountLength is the characters a number field may take written out.

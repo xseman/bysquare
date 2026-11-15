@@ -92,6 +92,9 @@ test.each([
 	["sk9611000000002918599669", "SK9611000000002918599669"],
 	["tatrskbx", "TATRSKBX"],
 	["SK96\t1100 0000 0029 1859 9669", "SK9611000000002918599669"],
+	["SK96\u00a01100\u00a00000\u00a00029\u00a01859\u00a09669", "SK9611000000002918599669"],
+	["\ufeffSK9611000000002918599669", "SK9611000000002918599669"],
+	["straße", "STRAßE"],
 ])("formatAccountCode prints %p in its electronic form", (input, expected) => {
 	expect(formatAccountCode(input)).toBe(expected);
 });

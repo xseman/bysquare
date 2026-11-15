@@ -503,16 +503,16 @@ all XSD schema restrictions.
 
 ### Validation Behavior
 
-| Aspect           | Behavior                                                        |
-| ---------------- | --------------------------------------------------------------- |
-| IBAN             | Validated (format + checksum via ISO 13616)                     |
-| BIC              | Validated (format via ISO 9362)                                 |
-| Currency         | Validated (ISO 4217, case-insensitive, includes XXX)            |
-| Date             | Validated (ISO 8601 format)                                     |
-| Beneficiary name | Required (per spec v1.2.0)                                      |
-| Symbols          | Permissive (accepts letters, spaces - XSD pattern not enforced) |
-| Amounts          | Validated (finite, not negative, at most 15 characters)         |
-| Field lengths    | Not enforced                                                    |
+| Aspect           | Behavior                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------ |
+| IBAN             | Validated (format + checksum via ISO 13616), encoded without spaces or hyphens and in upper case |
+| BIC              | Validated (format via ISO 9362), encoded in upper case                                           |
+| Currency         | Validated (ISO 4217, case-insensitive, includes XXX)                                             |
+| Date             | Validated (ISO 8601 format)                                                                      |
+| Beneficiary name | Required (per spec v1.2.0)                                                                       |
+| Symbols          | Permissive (accepts letters, spaces - XSD pattern not enforced)                                  |
+| Amounts          | Validated (finite, not negative, at most 15 characters)                                          |
+| Field lengths    | Not enforced                                                                                     |
 
 ### XSD Field Constraints Reference
 

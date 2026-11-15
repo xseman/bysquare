@@ -96,7 +96,10 @@ export function validateDataModel(model: DataModel): void {
 		throw new ValidationError(ErrorMessages.InvoiceLineChoice, "numberOfInvoiceLines");
 	}
 
-	if (hasLineCount && model.numberOfInvoiceLines! <= 0) {
+	if (
+		hasLineCount
+		&& (!Number.isInteger(model.numberOfInvoiceLines) || model.numberOfInvoiceLines! <= 0)
+	) {
 		throw new ValidationError(
 			ErrorMessages.NumberOfInvoiceLinesPositive,
 			"numberOfInvoiceLines",
@@ -142,11 +145,8 @@ export function validateDataModel(model: DataModel): void {
 
 	for (const [index, summary] of model.taxCategorySummaries.entries()) {
 		const path = `taxCategorySummaries[${index}]`;
-		if (
-			summary.classifiedTaxCategory === undefined
-			|| summary.classifiedTaxCategory < 0
-			|| summary.classifiedTaxCategory > 1
-		) {
+		// Written as a range the value must be in, so NaN fails it too.
+		if (!(summary.classifiedTaxCategory >= 0 && summary.classifiedTaxCategory <= 1)) {
 			throw new ValidationError(
 				ErrorMessages.ClassifiedTaxCategory,
 				`${path}.classifiedTaxCategory`,

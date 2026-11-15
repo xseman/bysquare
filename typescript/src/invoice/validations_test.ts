@@ -183,6 +183,14 @@ describe("validateDataModel", () => {
 			});
 			expect(() => validateDataModel(model)).toThrow(ValidationError);
 		});
+
+		test.each([1.5, NaN, Infinity])("rejects numberOfInvoiceLines %p", (value) => {
+			const model = buildInvoiceDataModel({
+				numberOfInvoiceLines: value,
+			});
+
+			expect(() => validateDataModel(model)).toThrow(ValidationError);
+		});
 	});
 
 	describe("single invoice line", () => {
@@ -247,6 +255,18 @@ describe("validateDataModel", () => {
 					taxAmount: 15,
 				}],
 			});
+			expect(() => validateDataModel(model)).toThrow(ValidationError);
+		});
+
+		test("rejects classifiedTaxCategory NaN", () => {
+			const model = buildInvoiceDataModel({
+				taxCategorySummaries: [{
+					classifiedTaxCategory: NaN,
+					taxExclusiveAmount: 100,
+					taxAmount: 10,
+				}],
+			});
+
 			expect(() => validateDataModel(model)).toThrow(ValidationError);
 		});
 

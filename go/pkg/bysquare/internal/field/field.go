@@ -51,6 +51,11 @@ const maxDecimals = 8
 func FormatFloatRequired(f float64) string {
 	rounded, _ := strconv.ParseFloat(strconv.FormatFloat(f, 'f', maxDecimals, 64), 64)
 
+	// A negative value that rounds to zero would keep its sign.
+	if rounded == 0 {
+		return "0"
+	}
+
 	return strconv.FormatFloat(rounded, 'f', -1, 64)
 }
 

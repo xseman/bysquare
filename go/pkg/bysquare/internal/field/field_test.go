@@ -21,6 +21,7 @@ func TestFormatFloatRequired(t *testing.T) {
 		{"negative", -12.34, "-12.34"},
 		{"twelve digits with decimals", 123456789012.34, "123456789012.34"},
 		{"small value without an exponent", 0.0000001, "0.0000001"},
+		{"negative value that rounds to zero", -0.000000001, "0"},
 	}
 
 	for _, tt := range tests {

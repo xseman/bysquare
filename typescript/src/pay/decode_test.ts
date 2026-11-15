@@ -117,7 +117,24 @@ describe("decode error cases", () => {
 	});
 
 	test("throws for invalid input", () => {
-		expect(() => decode("aaaa")).toThrow("Invalid base32hex string");
+		expect(() => decode("0804!")).toThrow("Invalid base32hex string");
+	});
+
+	test("decodes a lowercase QR string", () => {
+		const encoded = encode(VALID_PAYMENT_ORDER, { deburr: false });
+
+		const result = decode(encoded.toLowerCase());
+
+		expect(result).toEqual(VALID_PAYMENT_ORDER);
+	});
+
+	test("decodes a padded QR string", () => {
+		const encoded = encode(VALID_PAYMENT_ORDER, { deburr: false });
+		const padded = encoded.padEnd(Math.ceil(encoded.length / 8) * 8, "=");
+
+		const result = decode(padded);
+
+		expect(result).toEqual(VALID_PAYMENT_ORDER);
 	});
 
 	test("throws DecodeError for an Invoice by square string", () => {

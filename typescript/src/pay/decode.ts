@@ -94,7 +94,7 @@ export function deserialize(tabString: string): DataModel {
 	for (let p = 0; p < paymentsCount; p++) {
 		// Payment fields
 		const type = Number(next()) as PaymentOptions;
-		const amount = Number(next());
+		const amount = decodeNumber(next());
 		const currencyCode = next() ?? CurrencyCode.EUR;
 		const paymentDueDate = decodeString(next());
 		const variableSymbol = decodeString(next());

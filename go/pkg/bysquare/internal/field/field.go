@@ -6,6 +6,7 @@ package field
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -44,12 +45,35 @@ func FormatFloat(f float64) string {
 const maxDecimals = 8
 
 // FormatFloatRequired prints a number that is always present, zero included,
-// rounded to maxDecimals and without the trailing zeros.
+// rounded to maxDecimals and in its shortest form: printing the rounded
+// string as it is would carry the noise of a float64 from about 1e8 on,
+// 123456789012.34 as 123456789012.33999634.
 func FormatFloatRequired(f float64) string {
-	s := strconv.FormatFloat(f, 'f', maxDecimals, 64)
-	s = strings.TrimRight(s, "0")
+	rounded, _ := strconv.ParseFloat(strconv.FormatFloat(f, 'f', maxDecimals, 64), 64)
 
-	return strings.TrimSuffix(s, ".")
+	// A negative value that rounds to zero would keep its sign.
+	if rounded == 0 {
+		return "0"
+	}
+
+	return strconv.FormatFloat(rounded, 'f', -1, 64)
+}
+
+// maxAmountLength is the characters a number field may take written out.
+//
+// @see Table 15 field #4
+const maxAmountLength = 15
+
+// IsValidAmount checks that the amount is a finite number, not negative, and
+// at most maxAmountLength characters written out. Zero is accepted.
+//
+// @see Table 15 field #4
+func IsValidAmount(f float64) bool {
+	if math.IsNaN(f) || math.IsInf(f, 0) || f < 0 {
+		return false
+	}
+
+	return len(FormatFloatRequired(f)) <= maxAmountLength
 }
 
 // ParseNumber reads an int field: 0 for an empty or unreadable one, the way

@@ -18,11 +18,51 @@ export function sanitize(value: string | undefined): string | undefined {
 const MAX_DECIMALS = 8;
 
 /**
+ * The characters a number field may take written out.
+ *
+ * @see Table 15 field #4
+ */
+const MAX_AMOUNT_LENGTH = 15;
+
+/**
  * Print a number field rounded to MAX_DECIMALS and without the trailing
  * zeros, so a float artifact such as 0.1 + 0.2 does not reach the payload.
+ * The field is an xs:decimal, so a small value such as 0.0000001 is written
+ * out in full and never as 1e-7.
  */
 export function formatDecimal(value: number | undefined): string | undefined {
-	return value === undefined ? undefined : Number(value.toFixed(MAX_DECIMALS)).toString();
+	if (value === undefined) {
+		return undefined;
+	}
+
+	const fixed = value.toFixed(MAX_DECIMALS);
+
+	// The shortest form of the rounded value: toFixed alone prints the noise
+	// of a double from about 1e8 on, 123456789012.34 as 123456789012.33999634.
+	const shortest = Number(fixed).toString();
+	if (!shortest.includes("e")) {
+		return shortest;
+	}
+
+	// toString switches to an exponent below 1e-6, toFixed from 1e21 on.
+	return fixed.includes("e") ? fixed : fixed.replace(/\.?0+$/, "");
+}
+
+/**
+ * Checks that the amount is a finite number, not negative, and at most
+ * MAX_AMOUNT_LENGTH characters written out. Zero is accepted.
+ *
+ * @see Table 15 field #4
+ */
+export function isValidAmount(amount: number): boolean {
+	if (!Number.isFinite(amount) || amount < 0) {
+		return false;
+	}
+
+	// toFixed switches to an exponent from 1e21 on, which xs:decimal has not.
+	const printed = formatDecimal(amount)!;
+
+	return !printed.includes("e") && printed.length <= MAX_AMOUNT_LENGTH;
 }
 
 export function decodeNumber(value: string | undefined): number | undefined {

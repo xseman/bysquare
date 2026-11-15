@@ -39,7 +39,7 @@ func serialize(data DataModel) string {
 		)
 
 		for _, ba := range p.BankAccounts {
-			s = append(s, field.Sanitize(ba.IBAN), field.Sanitize(ba.BIC))
+			s = append(s, field.FormatAccountCode(ba.IBAN), field.FormatAccountCode(ba.BIC))
 		}
 
 		if p.Type == PaymentOptionsStandingOrder {

@@ -10,6 +10,17 @@ export function sanitize(value: string | undefined): string | undefined {
 }
 
 /**
+ * Print an IBAN or a BIC in its electronic form, without spaces or hyphens
+ * and in upper case. The validation accepts the printed form
+ * ("SK96 1100 ..."), which banking apps do not read from a QR.
+ *
+ * @see Table 15 fields #13, #14
+ */
+export function formatAccountCode(value: string | undefined): string | undefined {
+	return value?.replace(/[\s-]/g, "").toUpperCase();
+}
+
+/**
  * The decimal places a number field may carry: the specification writes the
  * format as #.########.
  *

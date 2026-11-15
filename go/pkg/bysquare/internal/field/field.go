@@ -20,6 +20,18 @@ func Sanitize(s string) string {
 	return strings.ReplaceAll(s, "\t", " ")
 }
 
+// accountCodeReplacer drops what the printed form of an IBAN adds.
+var accountCodeReplacer = strings.NewReplacer(" ", "", "-", "", "\t", "", "\n", "", "\r", "")
+
+// FormatAccountCode prints an IBAN or a BIC in its electronic form, without
+// spaces or hyphens and in upper case. The validation accepts the printed
+// form ("SK96 1100 ..."), which banking apps do not read from a QR.
+//
+// @see Table 15 fields #13, #14
+func FormatAccountCode(s string) string {
+	return strings.ToUpper(accountCodeReplacer.Replace(s))
+}
+
 // FormatInt prints an optional integer, "" for zero.
 func FormatInt(n int) string {
 	if n == 0 {

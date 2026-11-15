@@ -4,6 +4,7 @@ import {
 } from "bun:test";
 
 import {
+	formatAccountCode,
 	formatDecimal,
 	isValidAmount,
 } from "./field.js";
@@ -83,4 +84,18 @@ test.each([
 	1e21,
 ])("isValidAmount rejects %p", (amount) => {
 	expect(isValidAmount(amount)).toBe(false);
+});
+
+test.each([
+	["SK96 1100 0000 0029 1859 9669", "SK9611000000002918599669"],
+	["SK96-1100-0000-0029-1859-9669", "SK9611000000002918599669"],
+	["sk9611000000002918599669", "SK9611000000002918599669"],
+	["tatrskbx", "TATRSKBX"],
+	["SK96\t1100 0000 0029 1859 9669", "SK9611000000002918599669"],
+])("formatAccountCode prints %p in its electronic form", (input, expected) => {
+	expect(formatAccountCode(input)).toBe(expected);
+});
+
+test("formatAccountCode leaves a missing value out", () => {
+	expect(formatAccountCode(undefined)).toBeUndefined();
 });

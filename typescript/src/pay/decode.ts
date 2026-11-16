@@ -235,7 +235,9 @@ export function deserialize(tabString: string): DataModel {
  * @param qr base32hex encoded bysquare binary data
  */
 export function decode(qr: string): DataModel {
-	const bytes = base32hex.decode(qr);
+	// Loose, as in the Go implementation: a scanner or a user may hand the
+	// string over in lower case.
+	const bytes = base32hex.decode(qr, true);
 	const headerBytes = bytes.slice(0, 2);
 	const headerData = decodeHeader(headerBytes);
 

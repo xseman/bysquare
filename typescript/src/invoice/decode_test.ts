@@ -221,6 +221,12 @@ describe("decode", () => {
 		expect(() => decode(payQr)).toThrow("Expected bysquareType 1");
 	});
 
+	test("decodes a lowercase QR string", () => {
+		const result = decode(FORSYS_INVOICE_ENCODED.toLowerCase());
+
+		expect(result).toEqual(decode(FORSYS_INVOICE_ENCODED));
+	});
+
 	test("decodes Forsys sample invoice from known QR string", () => {
 		const decoded = decode(FORSYS_INVOICE_ENCODED);
 

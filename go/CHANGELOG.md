@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.1](https://github.com/xseman/bysquare/compare/go/v0.6.0...go/v0.6.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* encode the IBAN and BIC in their electronic form ([#156](https://github.com/xseman/bysquare/issues/156)) ([f77f51b](https://github.com/xseman/bysquare/commit/f77f51bbf2cf3ed1c2a96acc124484251074f857))
+* keep the diacritics of the model passed to encode ([#153](https://github.com/xseman/bysquare/issues/153)) ([8547c06](https://github.com/xseman/bysquare/commit/8547c06c11efe7209eea96840c7e4c5d670f7f31))
+* reject a NaN tax category and a fractional invoice line count ([#158](https://github.com/xseman/bysquare/issues/158)) ([54451bb](https://github.com/xseman/bysquare/commit/54451bb36c5c9b800ba018514228d11c8c1364b7))
+* validate pay amounts and decode a blank amount as missing ([#155](https://github.com/xseman/bysquare/issues/155)) ([051238a](https://github.com/xseman/bysquare/commit/051238af9a47c87182dbf6a63ec99f304d03a5de))
+
+
+### Documentation
+
+* rename CLAUDE.md to AGENTS.md ([6dc3cdb](https://github.com/xseman/bysquare/commit/6dc3cdbeeaef4efce0940c3c12d50c826870e082))
+
 ## [0.6.0](https://github.com/xseman/bysquare/compare/go/v0.5.0...go/v0.6.0) (2026-11-03)
 
 

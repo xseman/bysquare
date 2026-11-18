@@ -95,6 +95,22 @@ describe("encode basic functionality", () => {
 	});
 });
 
+describe("encode bank account form", () => {
+	test("encodes a printed IBAN and a lowercase BIC in their electronic form", () => {
+		const data = buildDataModel({
+			payments: [buildPaymentOrder({
+				bankAccounts: [{ iban: "sk96 1100 0000 0029 1859 9669", bic: "tatrskbx" }],
+			})],
+		});
+
+		const decoded = decode(encode(data));
+
+		expect(decoded.payments[0].bankAccounts).toEqual([
+			{ iban: "SK9611000000002918599669", bic: "TATRSKBX" },
+		]);
+	});
+});
+
 describe("encode error cases", () => {
 	test("invalid IBAN in bank account", () => {
 		const data = buildDataModel({

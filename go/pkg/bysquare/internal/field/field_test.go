@@ -33,6 +33,32 @@ func TestFormatFloatRequired(t *testing.T) {
 	}
 }
 
+func TestFormatAccountCode(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"IBAN with spaces", "SK96 1100 0000 0029 1859 9669", "SK9611000000002918599669"},
+		{"IBAN with hyphens", "SK96-1100-0000-0029-1859-9669", "SK9611000000002918599669"},
+		{"IBAN lowercase", "sk9611000000002918599669", "SK9611000000002918599669"},
+		{"BIC lowercase", "tatrskbx", "TATRSKBX"},
+		{"IBAN with a tab", "SK96\t1100 0000 0029 1859 9669", "SK9611000000002918599669"},
+		{"IBAN with no-break spaces", "SK96\u00a01100\u00a00000\u00a00029\u00a01859\u00a09669", "SK9611000000002918599669"},
+		{"IBAN after a byte order mark", "\ufeffSK9611000000002918599669", "SK9611000000002918599669"},
+		{"letter outside a to z", "straße", "STRAßE"},
+		{"empty", "", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := FormatAccountCode(tt.input); got != tt.want {
+				t.Errorf("FormatAccountCode(%q) = %q, want %q", tt.input, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestIsValidIBAN(t *testing.T) {
 	testCases := []struct {
 		name  string

@@ -1,6 +1,7 @@
 import * as base32hex from "../base32hex.js";
 import { deburr } from "../deburr.js";
 import {
+	formatAccountCode,
 	formatDecimal,
 	sanitize,
 } from "../field.js";
@@ -92,8 +93,8 @@ export function serialize(data: DataModel): string {
 		// Bank accounts
 		s.push(p.bankAccounts.length.toString());
 		for (const ba of p.bankAccounts) {
-			s.push(sanitize(ba.iban));
-			s.push(sanitize(ba.bic));
+			s.push(formatAccountCode(ba.iban));
+			s.push(formatAccountCode(ba.bic));
 		}
 
 		// Standing order extension

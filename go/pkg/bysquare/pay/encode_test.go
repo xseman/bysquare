@@ -208,6 +208,37 @@ func TestSerializeZeroAmountIsBlank(t *testing.T) {
 	}
 }
 
+func TestEncodeBankAccountForm(t *testing.T) {
+	model := DataModel{
+		Payments: []Payment{{
+			Type: PaymentOptionsPaymentOrder,
+			SimplePayment: SimplePayment{
+				Amount:       100,
+				CurrencyCode: CurrencyEUR,
+				BankAccounts: []BankAccount{
+					{IBAN: "sk96 1100 0000 0029 1859 9669", BIC: "tatrskbx"},
+				},
+				Beneficiary: Beneficiary{Name: "John Doe"},
+			},
+		}},
+	}
+
+	qr, err := Encode(model)
+	if err != nil {
+		t.Fatalf("Encode failed: %v", err)
+	}
+
+	decoded, err := Decode(qr)
+	if err != nil {
+		t.Fatalf("Decode failed: %v", err)
+	}
+
+	got := decoded.Payments[0].BankAccounts[0]
+	if got.IBAN != "SK9611000000002918599669" || got.BIC != "TATRSKBX" {
+		t.Errorf("bank account = %+v, want the electronic form", got)
+	}
+}
+
 func TestEncodeDeburr(t *testing.T) {
 	makeModel := func() DataModel {
 		return DataModel{

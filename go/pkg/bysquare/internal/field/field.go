@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 // Sanitize replaces the field separator inside a value with a space.
@@ -18,6 +19,45 @@ import (
 // @see 3.8.
 func Sanitize(s string) string {
 	return strings.ReplaceAll(s, "\t", " ")
+}
+
+// isAccountCodeSeparator reports whether r is a hyphen or a character the
+// \s of JavaScript matches, so that both implementations drop the same
+// ones. unicode.IsSpace differs from \s in two: it has U+0085 and lacks
+// U+FEFF.
+func isAccountCodeSeparator(r rune) bool {
+	switch r {
+	case '-', '\uFEFF':
+		return true
+	case '\u0085':
+		return false
+	}
+
+	return unicode.IsSpace(r)
+}
+
+// FormatAccountCode prints an IBAN or a BIC in its electronic form, without
+// whitespace or hyphens and with the letters a to z in upper case. The
+// validation accepts the printed form ("SK96 1100 ..."), which banking apps
+// do not read from a QR.
+//
+// Only a to z are upper-cased: on other letters strings.ToUpper and the
+// toUpperCase of JavaScript disagree (ß stays in one and becomes SS in the
+// other), and the payload would differ between the implementations.
+//
+// @see Table 15 fields #13, #14
+func FormatAccountCode(s string) string {
+	return strings.Map(func(r rune) rune {
+		if isAccountCodeSeparator(r) {
+			return -1
+		}
+
+		if 'a' <= r && r <= 'z' {
+			return r - 'a' + 'A'
+		}
+
+		return r
+	}, s)
 }
 
 // FormatInt prints an optional integer, "" for zero.

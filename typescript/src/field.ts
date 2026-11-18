@@ -10,6 +10,24 @@ export function sanitize(value: string | undefined): string | undefined {
 }
 
 /**
+ * Print an IBAN or a BIC in its electronic form, without whitespace or
+ * hyphens and with the letters a to z in upper case. The validation accepts
+ * the printed form ("SK96 1100 ..."), which banking apps do not read from a
+ * QR.
+ *
+ * Only a to z are upper-cased: on other letters toUpperCase and the
+ * strings.ToUpper of Go disagree (ß becomes SS in one and stays in the
+ * other), and the payload would differ between the implementations.
+ *
+ * @see Table 15 fields #13, #14
+ */
+export function formatAccountCode(value: string | undefined): string | undefined {
+	const joined = value?.replace(/[\s-]/g, "");
+
+	return joined?.replace(/[a-z]/g, (letter) => letter.toUpperCase());
+}
+
+/**
  * The decimal places a number field may carry: the specification writes the
  * format as #.########.
  *

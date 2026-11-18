@@ -1,6 +1,7 @@
 package invoice
 
 import (
+	"math"
 	"regexp"
 	"strconv"
 
@@ -171,7 +172,7 @@ func ValidateDataModel(model DataModel) error {
 	}
 
 	for idx, summary := range model.TaxCategorySummaries {
-		if summary.ClassifiedTaxCategory < 0 || summary.ClassifiedTaxCategory > 1 {
+		if math.IsNaN(summary.ClassifiedTaxCategory) || summary.ClassifiedTaxCategory < 0 || summary.ClassifiedTaxCategory > 1 {
 			return &bysquare.ValidationError{
 				Message: errorMessages.ClassifiedTaxCategory,
 				Path:    "taxCategorySummaries[" + strconv.Itoa(idx) + "].classifiedTaxCategory",

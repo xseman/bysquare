@@ -1,6 +1,7 @@
 package invoice
 
 import (
+	"math"
 	"testing"
 )
 
@@ -72,6 +73,16 @@ func TestValidateDataModel(t *testing.T) {
 			model: func() DataModel {
 				m := minimalInvoice()
 				m.TaxCategorySummaries = []TaxCategorySummary{}
+
+				return m
+			}(),
+			wantErr: true,
+		},
+		{
+			name: "tax category NaN",
+			model: func() DataModel {
+				m := minimalInvoice()
+				m.TaxCategorySummaries[0].ClassifiedTaxCategory = math.NaN()
 
 				return m
 			}(),

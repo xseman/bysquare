@@ -98,7 +98,7 @@ export function validateDataModel(model: DataModel): void {
 
 	if (
 		hasLineCount
-		&& (!Number.isInteger(model.numberOfInvoiceLines) || model.numberOfInvoiceLines! <= 0)
+		&& (!Number.isSafeInteger(model.numberOfInvoiceLines) || model.numberOfInvoiceLines! <= 0)
 	) {
 		throw new ValidationError(
 			ErrorMessages.NumberOfInvoiceLinesPositive,

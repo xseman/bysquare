@@ -188,12 +188,12 @@ jobs:
               run: |
                   sha256sum * > CHECKSUMS.txt
 
-            - name: Upload artifacts to release
+            # release-please leaves the release a draft, an immutable release takes no uploads once published.
+            - name: Upload and publish release
               env:
                   GH_TOKEN: ${{ github.token }}
                   GH_REPO: ${{ github.repository }}
+                  TAG: ${{ github.event_name == 'push' && needs.release-please.outputs.go_tag_name || inputs.go_tag }}
               run: |
-                  gh release upload \
-                      ${{ github.event_name == 'push' && needs.release-please.outputs.go_tag_name || inputs.go_tag }} \
-                      artifacts/* \
-                      --clobber
+                  gh release upload "$TAG" artifacts/* --clobber
+                  gh release edit "$TAG" --draft=false

@@ -16,6 +16,8 @@
 		},
 		"go": {
 			"release-type": "go",
+			"draft": true,
+			"force-tag-creation": true,
 			"component": "go",
 			"tag-separator": "/",
 			"include-v-in-tag": true,

@@ -17,7 +17,7 @@ var errorMessages = struct {
 }{
 	IBAN:            "Invalid IBAN. Make sure ISO 13616 format is used.",
 	BIC:             "Invalid BIC. Make sure ISO 9362 format is used.",
-	CurrencyCode:    "Invalid currency code. Make sure ISO 4217 format is used.",
+	CurrencyCode:    "Invalid currency code. Must be 3 uppercase letters (ISO 4217).",
 	Date:            "Invalid date. Make sure YYYYMMDD format is used.",
 	Amount:          "Invalid amount. Make sure it is not negative and has at most 15 characters.",
 	BeneficiaryName: "Beneficiary name is required.",

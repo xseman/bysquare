@@ -16,11 +16,13 @@ import {
 const ErrorMessages = {
 	IBAN: "Invalid IBAN. Make sure ISO 13616 format is used.",
 	BIC: "Invalid BIC. Make sure ISO 9362 format is used.",
-	CurrencyCode: "Invalid currency code. Make sure ISO 4217 format is used.",
+	CurrencyCode: "Invalid currency code. Must be 3 uppercase letters (ISO 4217).",
 	Date: "Invalid date. Make sure YYYYMMDD format is used.",
 	Amount: "Invalid amount. Make sure it is not negative and has at most 15 characters.",
 	BeneficiaryName: "Beneficiary name is required.",
 } as const;
+
+const CURRENCY_CODE_REGEX = /^[A-Z]{3}$/;
 
 /**
  * validates bankAccount fields:
@@ -43,7 +45,7 @@ export function validateBankAccount(
 /**
  * validate simple payment fields:
  * - amount and maxAmount (finite, not negative, at most 15 characters)
- * - currencyCode (ISO 4217)
+ * - currencyCode (3 uppercase letters, ISO 4217)
  * - paymentDueDate (YYYYMMDD format per v1.2 specification)
  * - bankAccounts
  *
@@ -70,7 +72,7 @@ export function validateSimplePayment(
 		throw new ValidationError(ErrorMessages.Amount, `${path}.maxAmount`);
 	}
 
-	if (simplePayment.currencyCode && !validator.isISO4217(simplePayment.currencyCode)) {
+	if (simplePayment.currencyCode && !CURRENCY_CODE_REGEX.test(simplePayment.currencyCode)) {
 		throw new ValidationError(
 			ErrorMessages.CurrencyCode,
 			`${path}.currencyCode`,

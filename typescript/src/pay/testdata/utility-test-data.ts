@@ -24,12 +24,12 @@ export const IBAN_TEST_CASES = [
 
 /**
  * Currency code validation test cases.
- * Note: validator.isISO4217() is case-insensitive and accepts "XXX" (no currency).
+ * Any 3 uppercase letters pass, the ISO 4217 list is not checked.
  */
 export const CURRENCY_TEST_CASES = [
 	{ name: "EUR currency", currency: CurrencyCode.EUR, shouldPass: true },
 	{ name: "USD currency", currency: CurrencyCode.USD, shouldPass: true },
 	{ name: "CZK currency", currency: CurrencyCode.CZK, shouldPass: true },
 	{ name: "invalid currency", currency: "NOTACURRENCY" as CurrencyCode, shouldPass: false },
-	{ name: "lowercase currency", currency: "eur" as CurrencyCode, shouldPass: true }, // validator is case-insensitive
+	{ name: "lowercase currency", currency: "eur" as CurrencyCode, shouldPass: false },
 ];

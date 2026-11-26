@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.3](https://github.com/xseman/bysquare/compare/typescript/v4.1.2...typescript/v4.1.3) (2026-11-26)
+
+
+### Bug Fixes
+
+* validate the pay currency code as 3 uppercase letters ([#160](https://github.com/xseman/bysquare/issues/160)) ([3d96c3f](https://github.com/xseman/bysquare/commit/3d96c3f9066421c1f69d70943e89691422700bdc)), closes [#159](https://github.com/xseman/bysquare/issues/159)
+
 ## [4.1.2](https://github.com/xseman/bysquare/compare/typescript/v4.1.1...typescript/v4.1.2) (2026-11-18)
 
 

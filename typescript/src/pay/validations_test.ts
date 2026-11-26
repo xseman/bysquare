@@ -7,9 +7,6 @@
  * - Currency code validation
  * - Payment and DataModel validation
  * - ValidationError handling and path verification
- *
- * NOTE: Validation uses the `validator` library, which is case-insensitive
- * for currency codes and accepts ISO 4217 codes like "XXX" (no currency).
  */
 
 import {
@@ -271,10 +268,10 @@ describe("ValidationError", () => {
 });
 
 /**
- * Tests documenting the permissive behavior of the validator library.
+ * Tests documenting the permissive validation behavior.
  *
- * These tests serve as regression guards - the validator library accepts:
- * - Case-insensitive currency codes (eur, EUR, Eur are all valid)
+ * These tests serve as regression guards - validation accepts:
+ * - any 3 uppercase letters as a currency code, the ISO 4217 list is not checked
  * - ISO 4217 "no currency" code XXX
  *
  * Fields NOT VALIDATED (permissive by design):
@@ -282,8 +279,8 @@ describe("ValidationError", () => {
  * - field lengths (no maxLength check)
  */
 describe("permissive validation behavior", () => {
-	test("accepts lowercase currency codes (validator is case-insensitive)", () => {
-		const payment = buildPaymentOrder({ currencyCode: "eur" as CurrencyCode });
+	test("accepts a currency code outside the ISO 4217 list", () => {
+		const payment = buildPaymentOrder({ currencyCode: "ABC" as CurrencyCode });
 
 		expect(() => validateSimplePayment(payment, "test")).not.toThrow();
 	});

@@ -507,7 +507,7 @@ all XSD schema restrictions.
 | ---------------- | ------------------------------------------------------------------------------------------------ |
 | IBAN             | Validated (format + checksum via ISO 13616), encoded without spaces or hyphens and in upper case |
 | BIC              | Validated (format via ISO 9362), encoded in upper case                                           |
-| Currency         | Validated (ISO 4217, case-insensitive, includes XXX)                                             |
+| Currency         | Validated (3 uppercase letters, ISO 4217 list not checked)                                       |
 | Date             | Validated (ISO 8601 format)                                                                      |
 | Beneficiary name | Required (per spec v1.2.0)                                                                       |
 | Symbols          | Permissive (accepts letters, spaces - XSD pattern not enforced)                                  |
